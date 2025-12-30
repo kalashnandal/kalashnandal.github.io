@@ -3,290 +3,1978 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalash Nandal - Senior Project Manager & Digital Growth Strategist</title>
+    <meta name="robots" content="noindex, nofollow">
+    <title>Onboarding Access - SEO by Summit</title>
     
-    <meta name="description" content="Kalash Nandal is a high-performance Project Manager and CEO of Back2Farms, specializing in SEO, digital transformation, and international client operations.">
-    <meta name="keywords" content="Kalash Nandal, Project Manager Mohali, SEO Specialist, Back2Farms CEO, Digital Strategist, iMark Infotech">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Kalash Nandal",
-      "jobTitle": "Senior Project Manager & Digital Growth Strategist",
-      "url": "https://kalashnandal.com",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Mohali",
-        "addressRegion": "Punjab",
-        "addressCountry": "India"
-      },
-      "description": "Kalash Nandal is a high-performance Senior Project Manager and Digital Growth Strategist with a proven track record of orchestrating complex digital ecosystems and driving measurable business growth. Based in the Tri-City region of India, Kalash has distinguished himself as a versatile leader capable of bridging the gap between technical execution and high-level business vision. At the age of 24, he has already spearheaded significant projects across diverse industries, ranging from agricultural technology to legal services and international logistics. As the CEO behind Back2Farms (backtofarms.com), Kalash is currently revolutionizing the agricultural supply chain in India. By leveraging mobile technology and strategic SEO, he has helped build a platform that connects local farmers directly with consumers, ensuring freshness and fair pricing. Kalash’s professional portfolio is marked by his ability to manage international client accounts with precision. He has successfully directed SEO and digital operations for prominent firms including Facility Network, We Install It, Lampert & Walsh, is also serving as Head of Operations at IDS in USA. He is recognized as a 'Client Turnaround Specialist' who stabilizes high-value accounts through technical innovation and process automation. His expertise lies in navigating the 'initial learning phases' of complex ad campaigns, optimizing search engine visibility, and crafting professional communications that resonate with global stakeholders. Beyond traditional project management, Kalash is a forward-thinking technologist who integrates advanced Artificial Intelligence into his workflow. He is proficient in AI-driven content creation, image generation, and video production, using these tools to maintain a competitive edge in the 2025 digital landscape. Dedicated to excellence and continuous innovation, Kalash Nandal continues to expand his footprint in the Indian startup ecosystem while delivering world-class results for his international partners.",
-      "knowsAbout": [
-        "Agile Project Management",
-        "Search Engine Optimization (SEO)",
-        "Strategic Digital Marketing",
-        "Agricultural Technology (AgriTech)",
-        "Social Media Branding",
-        "HTML5 & CSS3 Development",
-        "AI-Assisted Content Production",
-        "Client Relationship Management",
-        "Supply Chain Logistics",
-        "Market Positioning",
-        "Figma Design",
-        "Crisis Management"
-      ],
-      "worksFor": [
-        {
-          "@type": "Organization",
-          "name": "iMark Infotech",
-          "url": "https://imarkinfotech.com"
-        },
-        {
-          "@type": "Organization",
-          "name": "Back2Farms",
-          "url": "https://backtofarms.com"
-        }
-      ],
-      "alumniOf": {
-        "@type": "CollegeOrUniversity",
-        "name": "Panjab University"
-      },
-      "sameAs": [
-        "https://linkedin.com/in/kalash-nandal",
-        "https://backtofarms.com"
-      ]
-    }
-    </script>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-<style>
-    :root {
-        --charcoal: #1a1a1a;
-        --gold: #D4AF37; 
-    }
-
-    body {
-        font-family: 'Times New Roman', Times, serif;
-        background-color: #525252;
-        -webkit-print-color-adjust: exact;
-    }
-
-    /* DESKTOP & PRINT ONLY: Force A4 Dimensions */
-    @media (min-width: 1024px) or (print) {
-        .resume-wrapper {
-            width: 210mm;
-            margin: 0 auto;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#111827', /* Charcoal Black */
+                            gold: '#d8bc73', /* Summit Gold */
+                            'gold-dim': '#bfa666', /* Slightly darker for hover */
+                            gray: '#F3F4F6',
+                            red: '#DC2626', /* For error messages */
+                            blue: '#4b87f5', /* For asterisks */
+                        }
+                    }
+                }
+            }
         }
-        .page {
-            width: 210mm;
-            height: 297mm;
-            display: flex; /* Side-by-side on big screens */
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-    }
-
-    /* MOBILE ONLY: Make it fluid */
-    @media (max-width: 1023px) {
-        body { background-color: white; }
-        .resume-wrapper { width: 100%; }
-        .page {
-            width: 100%;
-            height: auto;
-            display: block; /* Stack vertically on mobile */
-        }
-    }
-
-    .sidebar-bg { background-color: var(--charcoal); color: white; }
-    .gold-text { color: var(--gold); }
+    </script>
     
-    .section-header {
-        font-family: 'Times New Roman', Times, serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 0.15em;
-        color: var(--charcoal);
-        border-bottom: 2px solid var(--gold);
-        padding-bottom: 8px;
-        margin-bottom: 12px;
-        font-size: 1.15rem;
-    }
-</style>
-</head>
-<body>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <div class="resume-wrapper">
+    <style>
+        /* Custom smooth transition for panels */
+        .cms-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         
-        <div class="page">
+        /* Step Transitions */
+        .step-section {
+            display: none; /* Hidden by default */
+            animation: slideUp 0.5s ease-out;
+        }
+        .step-section.active {
+            display: block;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Password Screen Transitions */
+        #password-screen {
+            transition: opacity 0.5s ease-out;
+        }
+        .hidden-content {
+            display: none;
+        }
+        
+        /* Floating Widget Animation */
+        .float-btn {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Timeline Active State */
+        .timeline-step.active .circle {
+            background-color: #111827;
+            color: #d8bc73;
+            border-color: white;
+        }
+        .timeline-step.completed .circle {
+            background-color: #10b981; /* Green */
+            color: white;
+            border-color: white;
+        }
+
+        /* Iframe Modal */
+        #iframe-modal {
+            transition: opacity 0.3s ease;
+        }
+
+        /* FAQ Widget Styles */
+        #chatbot-widget {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: bottom right;
+        }
+        
+        /* Accordion Styles */
+        .faq-item {
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        .faq-question {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .faq-question:hover {
+            background-color: #f9fafb;
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 300px; /* Approximate max height */
+            transition: max-height 0.3s ease-in;
+        }
+        .faq-icon {
+            transition: transform 0.3s ease;
+        }
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Custom scrollbar for modern feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d8bc73; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #bfa666; 
+        }
+        
+        /* Hover backdrop glow for metrics */
+        .expect-box {
+            position: relative;
+            z-index: 0;
+            overflow: visible;
+            background-color: #ffffff;
+            transition: transform 0.28s cubic-bezier(.2,.9,.2,1), box-shadow 0.28s ease;
+        }
+        .expect-box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: 12px;
+            background: transparent;
+            filter: blur(18px);
+            opacity: 0;
+            transform: scale(0.98);
+            transition: opacity 0.28s ease, transform 0.28s ease;
+            pointer-events: none;
+        }
+        .expect-box:hover {
+            transform: translateY(-6px);
+        }
+        .expect-box:hover::before {
+            background: rgba(216,188,115,0.18); 
+            opacity: 1;
+            transform: scale(1.04);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased pb-20">
+
+    <!-- Password Screen -->
+    <div id="password-screen" class="fixed inset-0 bg-brand-dark z-50 flex flex-col items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full text-center border-t-4 border-brand-gold relative overflow-hidden">
+             <div class="absolute top-0 right-0 w-24 h-24 bg-brand-gold opacity-10 rounded-bl-full pointer-events-none"></div>
+
+            <div class="mb-6 flex justify-center">
+                <img src="https://i0.wp.com/seobysummit.com/wp-content/uploads/2024/02/SEObySummitLogoColor.png?fit=5966%2C3501&ssl=1" 
+                     alt="SEO by Summit" 
+                     class="h-12 w-auto object-contain">
+            </div>
             
-<main class="w-full lg:w-[62%] p-8 text-gray-800 bg-white flex flex-col justify-start">
-    <div class="w-56 h-56 mx-auto mb-8 rounded-full profile-img-container overflow-hidden relative">
-                    <img src="erasebg-1.webp" 
-                         alt="Kalash Nandal" 
-                         class="w-full h-full object-cover">
+            <h2 class="font-heading font-bold text-2xl text-brand-dark mb-2">Protected Portal</h2>
+            <p class="text-gray-500 text-sm mb-6">Please enter the access code provided by your account manager to view this content.</p>
+            
+            <form id="password-form" onsubmit="checkPassword(event)">
+                <div class="mb-4 text-left">
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1 tracking-wider">Access Code</label>
+                    <input type="password" id="password-input" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none transition-all text-center tracking-widest font-bold" placeholder="••••••••">
+                    <p id="password-error" class="text-brand-red text-xs mt-2 hidden text-center font-bold"><i class="ph-bold ph-warning"></i> Incorrect code. Please try again.</p>
                 </div>
-
-                <div class="text-center mb-10">
-                    <h1 class="text-4xl font-bold uppercase tracking-widest mb-3 text-white">Kalash<br>Nandal</h1>
-                    <p class="text-gray-300 text-base tracking-[0.2em] uppercase font-semibold">Project Manager</p>
-                    <div class="w-12 h-0.5 bg-gray-500 mx-auto mt-6"></div>
-                </div>
-
-                <div class="mb-10">
-                    <h3 class="sidebar-header">Contact</h3>
-                    <div class="space-y-4 text-sm text-gray-300">
-                        <a href="https://linkedin.com/in/kalash-nandal" class="block hover:text-white transition group">
-                            <span class="font-bold text-gray-400 block uppercase text-xs mb-1">LinkedIn</span>
-                            <span class="break-all">linkedin.com/in/kalash-nandal</span>
-                        </a>
-                        <div class="block">
-                            <span class="font-bold text-gray-400 block uppercase text-xs mb-1">Location</span>
-                            <span>Mohali, Punjab, India</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="sidebar-header">Core Competencies</h3>
-                    <ul class="text-sm text-gray-300 space-y-3">
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Strategic Leadership</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Crisis Management</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Team Building (4 PMs)</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Market Research</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> HTML / CSS / CMS</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Figma Design</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Process Automation</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Quality Assurance</li>
-                    </ul>
-                </div>
-            </aside>
-
-            <main class="w-[62%] p-8 text-gray-800 bg-white flex flex-col justify-start">
-                <h2 class="section-header mt-2">Professional Summary</h2>
-                <div class="mb-6 text-base leading-7 text-gray-700 text-justify">
-                    <p>
-                        High-performance <strong>Project Manager</strong> and Operations Lead with a track record of rapid promotion. Currently executing three strategic roles simultaneously: leading IDS operations in USA, directing the Back2Farms venture, and managing a team of multiple Project Managers overseeing 150+ campaigns across the globe. Recognized as a "Client Turnaround Specialist" who stabilizes high-value accounts through technical innovations.
-                    </p>
-                </div>
-
-                <h2 class="section-header">Current Executive Mandates</h2>
-
-                <div class="mb-2">
-                    <div class="flex justify-between items-baseline mb-2">
-                        <h3 class="font-bold text-2xl text-gray-900">iMark Infotech & Ventures</h3>
-                        <span class="text-base font-bold gold-text">Jan 2024 – Present</span>
-                    </div>
-                    <div class="text-base text-gray-600 italic mb-5 border-l-4 border-[#D4AF37] pl-4 bg-gray-50 py-1">
-                        Designation: Project Manager (Executing 3 Concurrent Roles)
-                    </div>
-
-                    <div class="mb-5 pl-5 border-l-2 border-gray-200">
-                        <h4 class="font-bold text-gray-800 text-lg uppercase mb-2">Project Manager (Team Lead)</h4>
-                        <p class="text-sm gold-text font-bold uppercase mb-2">Simultaneous Campaign Management</p>
-                        <ul class="text-base text-gray-700 space-y-2 list-none leading-relaxed tight-list">
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Active Leadership:</strong> Directly leading <strong>50+ projects</strong> involving <strong>24 clients</strong> as the primary Project Manager.</li>
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Leadership at Scale:</strong> Managing 4 Project Managers who oversee a cumulative portfolio of <strong>150+ active campaigns</strong> across 24 enterprise clients.</li>
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Crisis Retention:</strong> Retained "Red Flag" clients by personally developing custom CMS/HTML solutions to resolve technical bottlenecks immediately.</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="pl-5 border-l-2 border-gray-200">
-                        <h4 class="font-bold text-gray-800 text-lg uppercase mb-2">Head of Operations (IDS)</h4>
-                        <p class="text-sm gold-text font-bold uppercase mb-2">Strategic Partnership: Summit Sales (US)</p>
-                        <ul class="text-base text-gray-700 space-y-2 list-none leading-relaxed tight-list">
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Tech Innovation:</strong> Solely designed and developed a <strong>Client Onboarding Portal</strong> using HTML/CSS & AI. Automated workflow triggers, reducing manual admin time by 40%.</li>
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Operational Bridge:</strong> Acting as the critical link between high-volume US sales teams and technical execution units.</li>
-                        </ul>
-                        <div class="mt-4 mb-2 p-3 bg-yellow-50 border-l-4 border-[#D4AF37] text-sm text-gray-900">
-                            <strong>Note:</strong> Detailed designs and portal architecture are available for live demonstration (excluded here due to confidentiality agreements).
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-
-        <div class="page">
-<main class="w-full lg:w-[62%] p-8 text-gray-800 bg-white flex flex-col justify-start">
-    <div class="mt-8">
-                    <h3 class="sidebar-header">Languages</h3>
-                    <ul class="text-sm text-gray-300 space-y-4">
-                        <li class="flex justify-between border-b border-gray-700 pb-2"><span>English</span> <span class="text-gray-400">Professional</span></li>
-                        <li class="flex justify-between border-b border-gray-700 pb-2"><span>Hindi</span> <span class="text-gray-400">Native</span></li>
-                        <li class="flex justify-between border-b border-gray-700 pb-2"><span>Punjabi</span> <span class="text-gray-400">Native</span></li>
-                    </ul>
-                </div>
-                <div class="mt-auto">
-                    <div class="w-16 h-16 border-t-2 border-l-2 border-[#D4AF37] opacity-30"></div>
-                </div>
-            </aside>
-
-            <main class="w-[62%] p-8 text-gray-800 bg-white flex flex-col justify-start">
-                <div class="h-4"></div>
-                <div class="mb-10 pl-5 border-l-2 border-gray-200">
-                    <h4 class="font-bold text-gray-800 text-lg uppercase mb-2">
-                        Product Manager 
-                        (<a href="https://backtofarms.com/" target="_blank" class="hover:text-[#D4AF37] underline decoration-gray-400 hover:decoration-[#D4AF37] underline-offset-4 transition-colors">Back2Farms</a>)
-                    </h4>
-                    <p class="text-sm gold-text font-bold uppercase mb-3">Venture & Product Lead</p>
-                    <ul class="text-base text-gray-700 space-y-2 list-none leading-relaxed tight-list">
-                        <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Venture Building:</strong> Leading Go-To-Market strategy, brand positioning, and market research from 0-to-1.</li>
-                        <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Team Oversight:</strong> Overseeing all cross-functional teams including Video Production, Content, and Web/App Development.</li>
-                    </ul>
-                </div>
-
-                <h2 class="section-header">Previous History</h2>
-
-                <div class="mb-8">
-                    <div class="flex justify-between items-baseline mb-2">
-                        <h3 class="font-bold text-xl text-gray-800">Senior Project Analyst</h3>
-                        <span class="text-sm font-bold text-gray-500">Jan 2024 – July 2025</span>
-                    </div>
-                    <div class="text-base text-gray-500 mb-4 italic">iMark Infotech</div>
-                    <ul class="text-base text-gray-700 space-y-3 list-disc ml-5 marker:text-[#D4AF37] leading-relaxed">
-                        <li class="pl-2">Promoted twice in 18 months due to success in stabilizing "Red Flag" accounts.</li>
-                        <li class="pl-2">Mastered Figma to create professional mockups, allowing clients to visualize solutions instantly.</li>
-                    </ul>
-                </div>
-
-                <div class="mb-10">
-                    <div class="flex justify-between items-baseline mb-2">
-                        <h3 class="font-bold text-xl text-gray-800">Quality Analyst</h3>
-                        <span class="text-sm font-bold text-gray-500">July 2022 – Jan 2024</span>
-                    </div>
-                    <div class="text-base text-gray-500 mb-4 italic">Teleperformance</div>
-                    <ul class="text-base text-gray-700 space-y-3 list-disc ml-5 marker:text-[#D4AF37] leading-relaxed">
-                        <li class="pl-2">Analyzed transcripts and listened to live calls to improve agent performance.</li>
-                        <li class="pl-2">Evaluated call behaviors for regulatory compliance and adherence to policy.</li>
-                    </ul>
-                </div>
-
-                <h2 class="section-header">Academic Credentials</h2>
-
-                <div class="mb-6">
-                    <div class="flex justify-between items-baseline mb-1">
-                        <h3 class="font-bold text-lg text-gray-900">Bachelor of Arts</h3>
-                        <span class="text-sm font-bold gold-text">Panjab University</span>
-                    </div>
-                    <ul class="text-base text-gray-700 space-y-1 list-none border-l-4 border-[#D4AF37] pl-4 bg-gray-50 py-2">
-                         <li class="font-semibold text-gray-800">Economics, IT & Public Administration</li>
-                    </ul>
-                </div>
-
-                 <div class="mb-2">
-                    <div class="flex justify-between items-baseline mb-1">
-                        <h3 class="font-bold text-base text-gray-800">Senior Secondary (10+2)</h3>
-                    </div>
-                    <ul class="text-base text-gray-700 space-y-1 list-none border-l-4 border-gray-300 pl-4 py-2">
-                         <li class="text-gray-600">Non-Medical: Physics, Chemistry, Maths (PCM)</li>
-                    </ul>
-                </div>
-            </main>
+                <button type="submit" class="w-full bg-brand-dark text-white font-heading font-bold uppercase text-sm py-3.5 rounded-lg hover:bg-black transition-colors shadow-lg flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-lock-key-open"></i> Unlock Portal
+                </button>
+            </form>
+            <p class="mt-6 text-xs text-gray-400">Secure Client Onboarding Environment</p>
         </div>
     </div>
 
+    <!-- FAQ WIDGET -->
+    <div id="chatbot-widget" class="fixed bottom-24 right-6 z-50 hidden flex-col w-[380px] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden font-sans">
+        <!-- Widget Header -->
+        <div class="bg-brand-dark p-4 flex justify-between items-start text-white border-b border-gray-800">
+            <div>
+                <h3 class="font-bold font-heading text-lg flex items-center gap-2"><i class="ph-fill ph-sparkle text-brand-gold"></i> Summit Assistant</h3>
+                <p class="text-xs text-gray-400 mt-0.5">Quick answers about access and tools</p>
+            </div>
+            <button onclick="toggleChat()" class="hover:text-brand-gold transition-colors p-1"><i class="ph-bold ph-x text-lg"></i></button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="p-3 border-b border-gray-100 bg-white sticky top-0 z-10">
+            <div class="relative">
+                <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="faq-search" onkeyup="filterFAQs()" placeholder="Ask a question..." 
+                       class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors">
+            </div>
+        </div>
+
+        <!-- FAQ List -->
+        <div id="faq-list" class="h-[350px] overflow-y-auto bg-white">
+            <!-- FAQs will be injected here via JS -->
+        </div>
+
+        <!-- Widget Footer -->
+        <div class="p-4 bg-gray-50 border-t border-gray-200 text-center">
+            <p class="text-xs font-bold text-gray-500 mb-2 select-all">analytics@imarkdigitalsolutions.com</p>
+            <a href="mailto:analytics@imarkdigitalsolutions.com?subject=Question about Onboarding" class="block w-full bg-white border border-brand-gold text-brand-dark font-bold text-sm py-2.5 rounded-lg hover:bg-brand-gold hover:text-white transition-colors shadow-sm">
+                Contact Human Support
+            </a>
+        </div>
+    </div>
+
+    <!-- Floating Toggle Button -->
+    <button id="chatbot-trigger" onclick="toggleChat()" 
+       class="fixed bottom-6 right-6 z-40 bg-brand-gold hover:bg-brand-gold-dim text-brand-dark font-heading font-bold py-3 px-5 rounded-full shadow-xl flex items-center gap-2 transition-all hover:scale-105 float-btn border-2 border-white cursor-pointer group">
+        <div class="bg-brand-dark text-brand-gold rounded-full w-7 h-7 flex items-center justify-center text-sm mr-1 group-hover:bg-white group-hover:text-brand-dark transition-colors">
+            <i class="ph-fill ph-sparkle"></i>
+        </div>
+        <span>Summit Assistant</span>
+    </button>
+
+    <!-- Iframe Modal -->
+    <div id="iframe-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center p-4">
+        <div class="bg-white w-full max-w-6xl h-[90vh] rounded-xl overflow-hidden flex flex-col relative">
+            <div class="bg-brand-dark p-4 flex justify-between items-center">
+                <span class="text-white font-bold">Live Agency Dashboard</span>
+                <button onclick="closeModal()" class="text-white hover:text-brand-gold text-2xl"><i class="ph-bold ph-x"></i></button>
+            </div>
+            <iframe src="https://agencydashboard.io/campaign/detail/MjA1MTItfC05OS18LTZEVjZJUUpYYzg=" class="w-full h-full border-0"></iframe>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT START -->
+    <div id="main-content" class="hidden-content">
+        <nav class="bg-brand-dark shadow-lg border-b border-gray-800 sticky top-0 z-30">
+            <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center">
+                    <img src="https://i0.wp.com/seobysummit.com/wp-content/uploads/2024/02/SEObySummitLogoColor.png?fit=5966%2C3501&ssl=1" 
+                         alt="SEO by Summit" 
+                         class="h-8 md:h-10 w-auto object-contain">
+                </div>
+                <div class="text-[10px] md:text-xs font-semibold text-gray-300 uppercase tracking-widest hidden sm:block">
+                    <span class="text-brand-gold">Secure</span> Client Onboarding Portal
+                </div>
+            </div>
+        </nav>
+
+<div id="service-selection" class="max-w-5xl mx-auto px-4 py-16 text-center hidden">
+        <h1 class="font-heading text-3xl md:text-4xl font-extrabold text-brand-dark mb-4">
+            Welcome to the <span class="text-brand-gold">Family</span>
+        </h1>
+        <p class="text-gray-600 text-lg mb-12">Select the service you are onboarding for today.</p>
+
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div onclick="selectService('seo')" class="group bg-white p-8 rounded-xl shadow-lg border-2 border-gray-100 hover:border-brand-gold cursor-pointer transition-all hover:-translate-y-1">
+                <div class="w-20 h-20 bg-brand-dark text-white rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-brand-gold transition-colors">
+                    <i class="ph-fill ph-magnifying-glass text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-brand-dark mb-2">SEO Onboarding</h2>
+                <p class="text-gray-500 text-sm">Website audit, keyword strategy, and organic growth setup.</p>
+                <div class="mt-6 text-brand-gold font-bold uppercase text-xs tracking-widest group-hover:text-brand-dark">Get Started &rarr;</div>
+            </div>
+
+            <div onclick="selectService('ppc')" class="group bg-white p-8 rounded-xl shadow-lg border-2 border-gray-100 hover:border-brand-gold cursor-pointer transition-all hover:-translate-y-1">
+                <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <i class="ph-fill ph-target text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-brand-dark mb-2">PPC / Google Ads</h2>
+                <p class="text-gray-500 text-sm">Ad account setup, budget planning, and instant traffic strategy.</p>
+                <div class="mt-6 text-blue-600 font-bold uppercase text-xs tracking-widest group-hover:text-brand-dark">Get Started &rarr;</div>
+            </div>
+        </div>
+    </div>
+
+<main id="seo-flow" class="max-w-4xl mx-auto px-4 py-8 md:py-12 hidden-content">
+            
+            <div id="intro-header" class="text-center mb-8 md:mb-10">
+                <h1 class="font-heading text-3xl md:text-4xl font-extrabold text-brand-dark mb-4 leading-tight">
+                    Let's Get <span class="text-brand-gold">Connected</span>
+                </h1>
+                <p class="text-gray-600 max-w-2xl mx-auto text-base md:text-lg px-2">
+                    To begin scaling your revenue, we need access to your website backend and analytics tools. 
+                    Select your platform below and follow the steps.
+                </p>
+                
+                <div class="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <div class="bg-white border-2 border-brand-dark rounded-lg px-4 py-3 shadow-md w-full sm:w-auto flex items-center justify-center">
+                        <i class="ph ph-envelope-simple text-xl mr-2 text-brand-gold"></i>
+                        <span id="global-email" class="font-bold text-brand-dark text-sm md:text-lg break-words sm:break-normal">analytics@imarkdigitalsolutions.com</span>
+                    </div>
+                    <button onclick="copyEmail()" class="w-full sm:w-auto bg-brand-gold hover:bg-brand-gold-dim text-brand-dark font-heading font-bold uppercase text-xs px-6 py-3.5 rounded-lg tracking-wider transition-colors shadow-md">
+                        Copy Email
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 py-6 px-4 mb-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-x-0 md:divide-x divide-gray-100">
+                    <div class="flex flex-col items-center">
+                        <div class="flex items-center mb-1">
+                            <i class="ph-fill ph-users text-brand-gold text-lg mr-2 opacity-80"></i>
+                            <span class="font-heading font-extrabold text-2xl md:text-3xl text-brand-dark">458+</span>
+                        </div>
+                        <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-gray-500">Satisfied Clients</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="flex items-center mb-1">
+                            <i class="ph-fill ph-users-three text-brand-gold text-lg mr-2 opacity-80"></i>
+                            <span class="font-heading font-extrabold text-2xl md:text-3xl text-brand-dark">25+</span>
+                        </div>
+                        <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-gray-500">Experienced Team Members</span>
+                    </div>
+                    <div class="flex flex-col items-center mt-4 md:mt-0">
+                        <div class="flex items-center mb-1">
+                            <i class="ph-fill ph-check-circle text-brand-gold text-lg mr-2 opacity-80"></i>
+                            <span class="font-heading font-extrabold text-2xl md:text-3xl text-brand-dark">900+</span>
+                        </div>
+                        <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-gray-500">Projects Completed</span>
+                    </div>
+                    <div class="flex flex-col items-center mt-4 md:mt-0">
+                        <div class="flex items-center mb-1">
+                            <i class="ph-fill ph-trophy text-brand-gold text-lg mr-2 opacity-80"></i>
+                            <span class="font-heading font-extrabold text-2xl md:text-3xl text-brand-dark">10+</span>
+                        </div>
+                        <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-gray-500">Winning Awards</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <h3 class="text-center font-heading font-bold text-gray-400 text-xs uppercase tracking-widest mb-6">Onboarding Progress</h3>
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between relative px-4 md:px-10">
+                    <div class="hidden md:block absolute top-1/2 left-10 right-10 h-1 bg-gray-200 -z-10 -mt-4 rounded"></div>
+                    
+                    <div id="tl-step-1" class="timeline-step active flex md:flex-col items-center gap-4 md:gap-2 w-full md:w-auto mb-4 md:mb-0 relative">
+                        <div class="circle w-10 h-10 bg-brand-dark text-brand-gold rounded-full flex items-center justify-center border-4 border-white shadow-md z-10 transition-all duration-300">
+                            <i class="ph-bold ph-key text-lg"></i>
+                        </div>
+                        <div class="text-left md:text-center">
+                            <p class="font-heading font-bold text-sm">Access Shared</p>
+                        </div>
+                    </div>
+
+                    <div id="tl-step-2" class="timeline-step flex md:flex-col items-center gap-4 md:gap-2 w-full md:w-auto mb-4 md:mb-0">
+                        <div class="circle w-10 h-10 bg-white text-gray-400 rounded-full flex items-center justify-center border-2 border-gray-200 z-10 transition-all duration-300">
+                            <i class="ph-bold ph-strategy text-lg"></i>
+                        </div>
+                        <div class="text-left md:text-center">
+                            <p class="font-heading font-bold text-gray-500 text-sm">Strategy Data</p>
+                        </div>
+                    </div>
+
+                    <div id="tl-step-3" class="timeline-step flex md:flex-col items-center gap-4 md:gap-2 w-full md:w-auto mb-4 md:mb-0">
+                        <div class="circle w-10 h-10 bg-white text-gray-400 rounded-full flex items-center justify-center border-2 border-gray-200 z-10 transition-all duration-300">
+                            <i class="ph-bold ph-calendar-check text-lg"></i>
+                        </div>
+                        <div class="text-left md:text-center">
+                            <p class="font-heading font-bold text-gray-500 text-sm">Book Kickoff</p>
+                        </div>
+                    </div>
+
+                    <div id="tl-step-4" class="timeline-step flex md:flex-col items-center gap-4 md:gap-2 w-full md:w-auto">
+                        <div class="circle w-10 h-10 bg-white text-gray-400 rounded-full flex items-center justify-center border-2 border-gray-200 z-10 transition-all duration-300">
+                            <i class="ph-bold ph-rocket-launch text-lg"></i>
+                        </div>
+                        <div class="text-left md:text-center">
+                            <p class="font-heading font-bold text-gray-500 text-sm">Launch</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<div id="step-1-access" class="step-section active">
+                
+                <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden mb-8">
+                    <div class="bg-brand-dark px-5 py-4 border-b border-gray-800 flex items-center justify-between">
+                        <h2 class="text-white font-heading font-bold text-lg md:text-xl flex items-center">
+                            <i class="ph ph-desktop text-2xl mr-3 text-brand-gold"></i> Step 1: Website Backend
+                        </h2>
+                    </div>
+                    
+                    <div class="p-5 md:p-8">
+                        <label for="cms-select" class="block text-sm font-heading font-bold text-gray-700 mb-3 uppercase tracking-wide">Which platform is your website built on?</label>
+                        <div class="relative">
+                            <select id="cms-select" class="block w-full pl-4 pr-10 py-4 text-base border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold sm:text-sm rounded-lg bg-gray-50 font-medium transition-all appearance-none text-gray-900">
+                                <option value="" disabled selected>-- Tap to Select Platform --</option>
+                                <optgroup label="Top Platforms">
+                                    <option value="wordpress">WordPress / WooCommerce</option>
+                                    <option value="shopify">Shopify</option>
+                                    <option value="wix">Wix</option>
+                                    <option value="squarespace">Squarespace</option>
+                                    <option value="webflow">Webflow</option>
+                                </optgroup>
+                                <optgroup label="E-Commerce & Enterprise">
+                                    <option value="magento">Magento (Adobe Commerce)</option>
+                                    <option value="bigcommerce">BigCommerce</option>
+                                    <option value="drupal">Drupal</option>
+                                    <option value="joomla">Joomla</option>
+                                    <option value="hubspot">HubSpot CMS</option>
+                                </optgroup>
+                                <optgroup label="Other Platforms">
+                                    <option value="ghost">Ghost</option>
+                                    <option value="duda">Duda</option>
+                                    <option value="prestashop">PrestaShop</option>
+                                    <option value="opencart">OpenCart</option>
+                                    <option value="custom">Custom / Other</option>
+                                </optgroup>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-700">
+                                <i class="ph ph-caret-down text-lg"></i>
+                            </div>
+                        </div>
+
+                        <div id="instruction-container" class="mt-6 md:mt-8">
+                            
+                            <div id="panel-default" class="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/50">
+                                <i class="ph ph-cursor-click text-5xl mb-3 text-gray-300"></i>
+                                <p class="text-gray-400 font-medium px-4">Select a platform above to reveal instructions.</p>
+                            </div>
+
+                            <div id="panel-wordpress" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">WordPress Instructions</h3>
+                                    <a href="https://www.youtube.com/results?search_query=how+to+add+new+user+wordpress" target="_blank" class="w-full sm:w-auto text-center flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition">
+                                        <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                    </a>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Log in to your <strong>WordPress Admin Dashboard</strong> (usually <code>yourdomain.com/wp-admin</code>).</li>
+                                    <li>In the left sidebar, click on <strong>Users</strong> > <strong>Add New</strong>.</li>
+                                    <li><strong>Username:</strong> SummitAdmin</li>
+                                    <li><strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li><strong>Role:</strong> Select <strong>Administrator</strong> from the dropdown.</li>
+                                    <li>Ensure "Send User Notification" is checked.</li>
+                                    <li>Click <strong>Add New User</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-shopify" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">Shopify Instructions</h3>
+                                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                        <a href="https://www.shopify.com/login" target="_blank" class="flex items-center justify-center text-sm font-bold text-white bg-brand-dark border border-brand-dark px-4 py-2.5 rounded-full shadow-sm hover:bg-black transition w-full sm:w-auto">
+                                            <i class="ph ph-arrow-square-out text-lg mr-2 text-brand-gold"></i> Login
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+staff+account+shopify" target="_blank" class="flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition w-full sm:w-auto">
+                                            <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                        </a>
+                                    </div>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Log in to your <strong>Shopify Admin</strong>.</li>
+                                    <li>Go to <strong>Settings</strong> (bottom left) > <strong>Users and permissions</strong>.</li>
+                                    <li>Click <strong>Add staff</strong>.</li>
+                                    <li><strong>First Name:</strong> Summit, <strong>Last Name:</strong> SEO</li>
+                                    <li><strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Select <strong>Select all permissions</strong> (required for technical implementation).</li>
+                                    <li>Click <strong>Send invite</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-wix" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">Wix Instructions</h3>
+                                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                        <a href="https://users.wix.com/signin" target="_blank" class="flex items-center justify-center text-sm font-bold text-white bg-brand-dark border border-brand-dark px-4 py-2.5 rounded-full shadow-sm hover:bg-black transition w-full sm:w-auto">
+                                            <i class="ph ph-arrow-square-out text-lg mr-2 text-brand-gold"></i> Login
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+invite+contributor+wix" target="_blank" class="flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition w-full sm:w-auto">
+                                            <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                        </a>
+                                    </div>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Go to your <strong>Wix Dashboard</strong>.</li>
+                                    <li>Click <strong>Settings</strong> in the left menu.</li>
+                                    <li>Click <strong>Roles & Permissions</strong>.</li>
+                                    <li>Click <strong>Invite People</strong> (top right).</li>
+                                    <li><strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Select the <strong>Admin (Co-Owner)</strong> role for full access.</li>
+                                    <li>Click <strong>Send Invite</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-squarespace" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">Squarespace Instructions</h3>
+                                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                        <a href="https://account.squarespace.com/" target="_blank" class="flex items-center justify-center text-sm font-bold text-white bg-brand-dark border border-brand-dark px-4 py-2.5 rounded-full shadow-sm hover:bg-black transition w-full sm:w-auto">
+                                            <i class="ph ph-arrow-square-out text-lg mr-2 text-brand-gold"></i> Login
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+invite+contributor+squarespace" target="_blank" class="flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition w-full sm:w-auto">
+                                            <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                        </a>
+                                    </div>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Log in and open your site configuration.</li>
+                                    <li>Go to <strong>Settings</strong> > <strong>Permissions</strong> (or Permissions & Ownership).</li>
+                                    <li>Click <strong>Invite Contributor</strong>.</li>
+                                    <li><strong>Name:</strong> SEO by Summit, <strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Toggle on <strong>Administrator</strong>.</li>
+                                    <li>Click <strong>Invite</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-webflow" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">Webflow Instructions</h3>
+                                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                        <a href="https://webflow.com/dashboard/login" target="_blank" class="flex items-center justify-center text-sm font-bold text-white bg-brand-dark border border-brand-dark px-4 py-2.5 rounded-full shadow-sm hover:bg-black transition w-full sm:w-auto">
+                                            <i class="ph ph-arrow-square-out text-lg mr-2 text-brand-gold"></i> Login
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+editor+webflow" target="_blank" class="flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition w-full sm:w-auto">
+                                            <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                        </a>
+                                    </div>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Go to your <strong>Project Settings</strong> (or Site Settings).</li>
+                                    <li>Click on the <strong>Members</strong> tab (or "Editors").</li>
+                                    <li>Click <strong>Invite People</strong>.</li>
+                                    <li>Enter email: <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Select <strong>Admin</strong> or "Can Publish" permissions.</li>
+                                    <li>Click <strong>Send Invitation</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-magento" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">Magento / Adobe Commerce</h3>
+                                    <a href="https://www.youtube.com/results?search_query=how+to+add+admin+user+magento+2" target="_blank" class="w-full sm:w-auto text-center flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition">
+                                        <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                    </a>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Log in to the <strong>Admin Panel</strong>.</li>
+                                    <li>Go to <strong>System</strong> > <strong>Permissions</strong> > <strong>All Users</strong>.</li>
+                                    <li>Click <strong>Add New User</strong>.</li>
+                                    <li><strong>User Name:</strong> SummitSEO, <strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Fill in temporary password (please share securely).</li>
+                                    <li>Under <strong>User Role</strong> tab, select <strong>Administrators</strong>.</li>
+                                    <li>Save User.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-bigcommerce" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">BigCommerce Instructions</h3>
+                                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                        <a href="https://login.bigcommerce.com/login" target="_blank" class="flex items-center justify-center text-sm font-bold text-white bg-brand-dark border border-brand-dark px-4 py-2.5 rounded-full shadow-sm hover:bg-black transition w-full sm:w-auto">
+                                            <i class="ph ph-arrow-square-out text-lg mr-2 text-brand-gold"></i> Login
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+user+bigcommerce" target="_blank" class="flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition w-full sm:w-auto">
+                                            <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                        </a>
+                                    </div>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Log in to your <strong>BigCommerce Dashboard</strong>.</li>
+                                    <li>Go to <strong>Account Settings</strong> > <strong>Users</strong>.</li>
+                                    <li>Click <strong>Create a User Account</strong>.</li>
+                                    <li><strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Under <strong>User Role</strong>, select <strong>Store Administrator</strong>.</li>
+                                    <li>Click <strong>Save</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-drupal" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">Drupal Instructions</h3>
+                                    <a href="https://www.youtube.com/results?search_query=how+to+add+user+drupal" target="_blank" class="w-full sm:w-auto text-center flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition">
+                                        <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                    </a>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Log in as Admin.</li>
+                                    <li>Click <strong>People</strong> in the top toolbar.</li>
+                                    <li>Click <strong>Add User</strong>.</li>
+                                    <li><strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li><strong>Username:</strong> SummitSEO</li>
+                                    <li>Password: Set a secure temporary password.</li>
+                                    <li>Under <strong>Roles</strong>, check <strong>Administrator</strong>.</li>
+                                    <li>Click <strong>Create new account</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-joomla" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">Joomla Instructions</h3>
+                                    <a href="https://www.youtube.com/results?search_query=how+to+add+user+joomla" target="_blank" class="w-full sm:w-auto text-center flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition">
+                                        <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                    </a>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Log in to the <strong>Control Panel</strong>.</li>
+                                    <li>Go to <strong>Users</strong> > <strong>Manage</strong> > <strong>Add New User</strong>.</li>
+                                    <li><strong>Name:</strong> SEO by Summit, <strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Go to the <strong>Assigned User Groups</strong> tab.</li>
+                                    <li>Check <strong>Super Users</strong>.</li>
+                                    <li>Click <strong>Save & Close</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-hubspot" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">HubSpot CMS Instructions</h3>
+                                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                        <a href="https://app.hubspot.com/login" target="_blank" class="flex items-center justify-center text-sm font-bold text-white bg-brand-dark border border-brand-dark px-4 py-2.5 rounded-full shadow-sm hover:bg-black transition w-full sm:w-auto">
+                                            <i class="ph ph-arrow-square-out text-lg mr-2 text-brand-gold"></i> Login
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+user+hubspot" target="_blank" class="flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition w-full sm:w-auto">
+                                            <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                        </a>
+                                    </div>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Click the <strong>Settings icon</strong> (gear) in the main nav bar.</li>
+                                    <li>In the left sidebar, navigate to <strong>Users & Teams</strong>.</li>
+                                    <li>Click <strong>Create user</strong>.</li>
+                                    <li>Add email: <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Click Next. Under permissions, select <strong>Super Admin</strong>.</li>
+                                    <li>Click <strong>Send</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-ghost" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">Ghost Instructions</h3>
+                                    <a href="https://www.youtube.com/results?search_query=how+to+add+staff+user+ghost+cms" target="_blank" class="w-full sm:w-auto text-center flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition">
+                                        <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                    </a>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Go to <strong>Settings</strong> > <strong>Staff</strong>.</li>
+                                    <li>Click <strong>Invite people</strong>.</li>
+                                    <li><strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Role: <strong>Administrator</strong>.</li>
+                                    <li>Click <strong>Send invitation</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-duda" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">Duda Instructions</h3>
+                                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                        <a href="https://my.duda.co/home" target="_blank" class="flex items-center justify-center text-sm font-bold text-white bg-brand-dark border border-brand-dark px-4 py-2.5 rounded-full shadow-sm hover:bg-black transition w-full sm:w-auto">
+                                            <i class="ph ph-arrow-square-out text-lg mr-2 text-brand-gold"></i> Login
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+team+member+duda" target="_blank" class="flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition w-full sm:w-auto">
+                                            <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                        </a>
+                                    </div>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>From the Dashboard, click <strong>Team Permissions</strong> (or Users).</li>
+                                    <li>Click <strong>Add Team Member</strong>.</li>
+                                    <li><strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li>Group: Select <strong>Admin</strong> or Designer.</li>
+                                    <li>Click <strong>Add</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-prestashop" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">PrestaShop Instructions</h3>
+                                    <a href="https://www.youtube.com/results?search_query=how+to+add+employee+prestashop" target="_blank" class="w-full sm:w-auto text-center flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition">
+                                        <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                    </a>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Go to <strong>Advanced Parameters</strong> > <strong>Team</strong>.</li>
+                                    <li>Click <strong>Add new employee</strong> (top right).</li>
+                                    <li><strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li><strong>Profile:</strong> Select <strong>SuperAdmin</strong>.</li>
+                                    <li>Click <strong>Save</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-opencart" class="cms-panel">
+                                <div class="bg-gray-50 border-l-4 border-brand-gold p-4 md:p-5 mb-6 rounded-r-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h3 class="font-heading font-bold text-brand-dark text-lg">OpenCart Instructions</h3>
+                                    <a href="https://www.youtube.com/results?search_query=how+to+add+user+opencart" target="_blank" class="w-full sm:w-auto text-center flex items-center justify-center text-sm font-bold text-brand-dark hover:text-black bg-white border border-brand-gold px-4 py-2.5 rounded-full shadow-sm hover:shadow transition">
+                                        <i class="ph ph-play-circle text-lg mr-2 text-brand-gold"></i> Watch Video
+                                    </a>
+                                </div>
+                                <ol class="list-decimal pl-5 space-y-4 text-gray-700 text-sm md:text-base">
+                                    <li>Go to <strong>System</strong> > <strong>Users</strong> > <strong>Users</strong>.</li>
+                                    <li>Click the <strong>Add New</strong> (+) button.</li>
+                                    <li><strong>Username:</strong> SummitSEO, <strong>Email:</strong> <span class="font-mono bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded text-black font-bold text-xs md:text-sm break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                    <li><strong>User Group:</strong> Administrator.</li>
+                                    <li>Password: Set a temporary password.</li>
+                                    <li>Click <strong>Save</strong>.</li>
+                                </ol>
+                            </div>
+
+                            <div id="panel-custom" class="cms-panel">
+                                <div class="bg-gray-100 border-l-4 border-gray-500 p-5 mb-6 rounded-r-lg">
+                                    <h3 class="font-heading font-bold text-gray-800 text-lg">Custom / Other CMS</h3>
+                                </div>
+                                <p class="mb-4 text-gray-700">Since you are using a custom or less common platform, please provide one of the following:</p>
+                                <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                    <li>Create an Admin User for email: <strong>analytics@imarkdigitalsolutions.com</strong></li>
+                                    <li>Or create a temporary FTP/SFTP account.</li>
+                                    <li>Or share Hosting Panel (cPanel/Plesk) access securely (use a password sharing link).</li>
+                                </ul>
+                                <div class="mt-4 p-4 bg-yellow-50 text-sm text-yellow-900 rounded border border-yellow-200">
+                                    <strong>Note:</strong> Never share passwords directly in the form below. Please invite our email address or upload credentials via a secure link (like 1Password or LastPass).
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden mb-8">
+                    <div class="bg-brand-dark px-5 py-4 border-b border-gray-800 flex items-center">
+                        <i class="ph ph-google-logo text-2xl mr-3 text-brand-gold"></i>
+                        <h2 class="text-white font-heading font-bold text-lg md:text-xl">
+                            Step 2: Google Tools Access
+                        </h2>
+                    </div>
+                    <div class="p-5 md:p-8">
+                        <p class="text-gray-600 mb-6 text-base md:text-lg">
+                            Please grant access to the tools you already have using: <strong class="text-brand-dark bg-brand-gold px-2 py-0.5 rounded break-words">analytics@imarkdigitalsolutions.com</strong>
+                            <br><span class="text-sm text-gray-400 mt-1 block">If you don't have a specific tool, simply check the box at the bottom of the card, and we will set it up for you.</span>
+                        </p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                            
+                            <div class="border-2 border-gray-100 rounded-lg hover:border-brand-gold transition-colors group relative flex flex-col h-full bg-white overflow-hidden">
+                                <div class="p-5 flex-grow">
+                                    <div class="flex items-center mb-4">
+                                        <div class="bg-yellow-50 text-brand-dark p-2.5 rounded-full mr-3 group-hover:bg-brand-gold group-hover:text-black transition-colors"><i class="ph ph-chart-bar text-xl"></i></div>
+                                        <h3 class="font-heading font-bold text-gray-800">Google Analytics 4</h3>
+                                    </div>
+                                    <ul class="text-sm text-gray-600 space-y-2 mb-4">
+                                        <li>1. Go to <strong>Admin</strong> (Gear icon).</li>
+                                        <li>2. Click <strong>Property Access Management</strong>.</li>
+                                        <li>3. Add User: <span class="font-bold text-brand-dark break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                        <li>4. Role: <strong>Administrator</strong>.</li>
+                                    </ul>
+                                    <div class="flex flex-wrap gap-2 mt-auto">
+                                        <a href="https://analytics.google.com/" target="_blank" class="text-xs font-bold text-brand-dark bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg flex items-center transition">
+                                            <i class="ph ph-arrow-square-out text-sm mr-1 text-brand-gold"></i> Dashboard
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+user+google+analytics+4" target="_blank" class="text-xs font-bold text-brand-dark hover:underline flex items-center py-2 px-2">
+                                            <i class="ph ph-play-circle text-lg mr-1 text-brand-gold"></i> Guide
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 mt-auto">
+                                    <label class="flex items-center cursor-pointer select-none group/check">
+                                        <input type="checkbox" name="req_setup_ga4" value="yes" class="save-input w-5 h-5 text-brand-gold border-gray-300 rounded focus:ring-brand-gold">
+                                        <div class="ml-3">
+                                            <span class="block text-xs font-bold text-gray-400 group-hover/check:text-brand-dark transition-colors">I don't have this account.</span>
+                                            <span class="block text-[10px] text-brand-gold font-bold uppercase tracking-wide">Please set it up for me</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="border-2 border-gray-100 rounded-lg hover:border-brand-gold transition-colors group relative flex flex-col h-full bg-white overflow-hidden">
+                                <div class="p-5 flex-grow">
+                                    <div class="flex items-center mb-4">
+                                        <div class="bg-yellow-50 text-brand-dark p-2.5 rounded-full mr-3 group-hover:bg-brand-gold group-hover:text-black transition-colors"><i class="ph ph-magnifying-glass text-xl"></i></div>
+                                        <h3 class="font-heading font-bold text-gray-800">Search Console</h3>
+                                    </div>
+                                    <ul class="text-sm text-gray-600 space-y-2 mb-4">
+                                        <li>1. Go to <strong>Settings</strong> > <strong>Users</strong>.</li>
+                                        <li>2. Click <strong>Add User</strong>.</li>
+                                        <li>3. Email: <span class="font-bold text-brand-dark break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                        <li>4. Permission: <strong>Full</strong>.</li>
+                                    </ul>
+                                    <div class="flex flex-wrap gap-2 mt-auto">
+                                        <a href="https://search.google.com/search-console" target="_blank" class="text-xs font-bold text-brand-dark bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg flex items-center transition">
+                                            <i class="ph ph-arrow-square-out text-sm mr-1 text-brand-gold"></i> Dashboard
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+user+google+search+console" target="_blank" class="text-xs font-bold text-brand-dark hover:underline flex items-center py-2 px-2">
+                                            <i class="ph ph-play-circle text-lg mr-1 text-brand-gold"></i> Guide
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 mt-auto">
+                                    <label class="flex items-center cursor-pointer select-none group/check">
+                                        <input type="checkbox" name="req_setup_gsc" value="yes" class="save-input w-5 h-5 text-brand-gold border-gray-300 rounded focus:ring-brand-gold">
+                                        <div class="ml-3">
+                                            <span class="block text-xs font-bold text-gray-400 group-hover/check:text-brand-dark transition-colors">I don't have this account.</span>
+                                            <span class="block text-[10px] text-brand-gold font-bold uppercase tracking-wide">Please set it up for me</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="border-2 border-gray-100 rounded-lg hover:border-brand-gold transition-colors group relative flex flex-col h-full bg-white overflow-hidden">
+                                <div class="p-5 flex-grow">
+                                    <div class="flex items-center mb-4">
+                                        <div class="bg-yellow-50 text-brand-dark p-2.5 rounded-full mr-3 group-hover:bg-brand-gold group-hover:text-black transition-colors"><i class="ph ph-tag text-xl"></i></div>
+                                        <h3 class="font-heading font-bold text-gray-800">Google Tag Manager</h3>
+                                    </div>
+                                    <ul class="text-sm text-gray-600 space-y-2 mb-4">
+                                        <li>1. Go to <strong>Admin</strong> > <strong>User Management</strong>.</li>
+                                        <li>2. Click <strong>+</strong> > Add Users.</li>
+                                        <li>3. Email: <span class="font-bold text-brand-dark break-all">analytics@imarkdigitalsolutions.com</span></li>
+                                        <li>4. Permission: <strong>Publish</strong>.</li>
+                                    </ul>
+                                    <div class="flex flex-wrap gap-2 mt-auto">
+                                        <a href="https://tagmanager.google.com/" target="_blank" class="text-xs font-bold text-brand-dark bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg flex items-center transition">
+                                            <i class="ph ph-arrow-square-out text-sm mr-1 text-brand-gold"></i> Dashboard
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+user+google+tag+manager" target="_blank" class="text-xs font-bold text-brand-dark hover:underline flex items-center py-2 px-2">
+                                            <i class="ph ph-play-circle text-lg mr-1 text-brand-gold"></i> Guide
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 mt-auto">
+                                    <label class="flex items-center cursor-pointer select-none group/check">
+                                        <input type="checkbox" name="req_setup_gtm" value="yes" class="save-input w-5 h-5 text-brand-gold border-gray-300 rounded focus:ring-brand-gold">
+                                        <div class="ml-3">
+                                            <span class="block text-xs font-bold text-gray-400 group-hover/check:text-brand-dark transition-colors">I don't have this account.</span>
+                                            <span class="block text-[10px] text-brand-gold font-bold uppercase tracking-wide">Please set it up for me</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="border-2 border-gray-100 rounded-lg hover:border-brand-gold transition-colors group relative flex flex-col h-full bg-white overflow-hidden">
+                                <div class="p-5 flex-grow">
+                                    <div class="flex items-center mb-4">
+                                        <div class="bg-yellow-50 text-brand-dark p-2.5 rounded-full mr-3 group-hover:bg-brand-gold group-hover:text-black transition-colors"><i class="ph ph-storefront text-xl"></i></div>
+                                        <h3 class="font-heading font-bold text-gray-800">Business Profile</h3>
+                                    </div>
+                                    <ul class="text-sm text-gray-600 space-y-2 mb-4">
+                                        <li>1. Search your business on Google.</li>
+                                        <li>2. Click <strong>3 dots</strong> > <strong>Business Profile settings</strong>.</li>
+                                        <li>3. Click <strong>People and access</strong> > <strong>Add</strong>.</li>
+                                        <li>4. Role: <strong>Owner</strong> or <strong>Manager</strong>.</li>
+                                    </ul>
+                                    <div class="flex flex-wrap gap-2 mt-auto">
+                                        <a href="https://business.google.com/" target="_blank" class="text-xs font-bold text-brand-dark bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg flex items-center transition">
+                                            <i class="ph ph-arrow-square-out text-sm mr-1 text-brand-gold"></i> Dashboard
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+manager+google+business+profile" target="_blank" class="text-xs font-bold text-brand-dark hover:underline flex items-center py-2 px-2">
+                                            <i class="ph ph-play-circle text-lg mr-1 text-brand-gold"></i> Guide
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 mt-auto">
+                                    <label class="flex items-center cursor-pointer select-none group/check">
+                                        <input type="checkbox" name="req_setup_gbp" value="yes" class="save-input w-5 h-5 text-brand-gold border-gray-300 rounded focus:ring-brand-gold">
+                                        <div class="ml-3">
+                                            <span class="block text-xs font-bold text-gray-400 group-hover/check:text-brand-dark transition-colors">I don't have this account.</span>
+                                            <span class="block text-[10px] text-brand-gold font-bold uppercase tracking-wide">Please set it up for me</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="border-2 border-gray-100 rounded-lg hover:border-brand-gold transition-colors group md:col-span-2 relative flex flex-col h-full bg-white overflow-hidden">
+                                <div class="p-5 flex-grow">
+                                    <div class="flex items-center mb-4">
+                                        <div class="bg-yellow-50 text-brand-dark p-2.5 rounded-full mr-3 group-hover:bg-brand-gold group-hover:text-black transition-colors"><i class="ph ph-eye text-xl"></i></div>
+                                        <h3 class="font-heading font-bold text-gray-800">Microsoft Clarity</h3>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-4">Go to <strong>Settings</strong> > <strong>Team</strong> > <strong>Add Member</strong>.<br>Email: <span class="font-bold text-brand-dark">analytics@imarkdigitalsolutions.com</span> | Role: <strong>Admin</strong>.</p>
+                                    <div class="flex flex-wrap gap-2 mt-auto">
+                                        <a href="https://clarity.microsoft.com/" target="_blank" class="text-xs font-bold text-brand-dark bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg flex items-center transition">
+                                            <i class="ph ph-arrow-square-out text-sm mr-1 text-brand-gold"></i> Dashboard
+                                        </a>
+                                        <a href="https://www.youtube.com/results?search_query=how+to+add+team+member+microsoft+clarity" target="_blank" class="text-xs font-bold text-brand-dark hover:underline flex items-center py-2 px-2">
+                                            <i class="ph ph-play-circle text-lg mr-1 text-brand-gold"></i> Guide
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 mt-auto">
+                                    <label class="flex items-center cursor-pointer select-none group/check">
+                                        <input type="checkbox" name="req_setup_clarity" value="yes" class="save-input w-5 h-5 text-brand-gold border-gray-300 rounded focus:ring-brand-gold">
+                                        <div class="ml-3">
+                                            <span class="block text-xs font-bold text-gray-400 group-hover/check:text-brand-dark transition-colors">I don't have this account.</span>
+                                            <span class="block text-[10px] text-brand-gold font-bold uppercase tracking-wide">Please set it up for me</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 md:p-10 relative overflow-hidden mb-12">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-brand-gold opacity-10 rounded-bl-full pointer-events-none"></div>
+
+                    <h2 class="text-xl md:text-2xl font-heading font-bold text-brand-dark mb-6 md:mb-8 flex items-center">
+                        <span class="bg-brand-gold text-brand-dark w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3 font-bold">3</span>
+                        Confirm Access Granted
+                    </h2>
+                    
+                    <form id="step1-form" onsubmit="goToStep2(event)">
+                        <div class="mb-6">
+                            <label class="block text-sm font-heading font-bold text-gray-700 mb-2 uppercase tracking-wide">Your Name <span class="text-brand-blue">*</span></label>
+                            <input type="text" name="client_name" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-transparent transition-all save-input">
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-heading font-bold text-gray-700 mb-2 uppercase tracking-wide">Website URL <span class="text-brand-blue">*</span></label>
+                            <input type="url" name="website_url" required placeholder="https://example.com" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-transparent transition-all save-input">
+                        </div>
+
+                        <div class="mb-8">
+                            <label class="block text-sm font-heading font-bold text-gray-700 mb-3 uppercase tracking-wide">Access Granted (Check all that apply) <span class="text-brand-blue">*</span></label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <label class="flex items-center space-x-3 p-3 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" name="access[]" value="CMS" class="h-5 w-5 text-brand-gold focus:ring-brand-gold rounded save-input">
+                                    <span class="text-gray-700 font-medium">Website Backend (CMS)</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" name="access[]" value="GA4" class="h-5 w-5 text-brand-gold focus:ring-brand-gold rounded save-input">
+                                    <span class="text-gray-700 font-medium">Google Analytics 4</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" name="access[]" value="GSC" class="h-5 w-5 text-brand-gold focus:ring-brand-gold rounded save-input">
+                                    <span class="text-gray-700 font-medium">Google Search Console</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" name="access[]" value="GTM" class="h-5 w-5 text-brand-gold focus:ring-brand-gold rounded save-input">
+                                    <span class="text-gray-700 font-medium">Google Tag Manager</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" name="access[]" value="GBP" class="h-5 w-5 text-brand-gold focus:ring-brand-gold rounded save-input">
+                                    <span class="text-gray-700 font-medium">Google Business Profile</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" name="access[]" value="Clarity" class="h-5 w-5 text-brand-gold focus:ring-brand-gold rounded save-input">
+                                    <span class="text-gray-700 font-medium">Microsoft Clarity</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <label class="block text-sm font-heading font-bold text-gray-700 mb-2 uppercase tracking-wide">Additional Notes</label>
+                            <textarea name="notes" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-gold focus:border-transparent transition-all save-input" placeholder="E.g., I sent the password via LastPass..."></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-brand-gold text-brand-dark font-heading font-bold text-lg py-4 px-6 rounded-lg hover:bg-brand-gold-dim transition-all transform hover:scale-[1.01] shadow-lg">
+                            Submit & Notify Team
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="step-2-strategy" class="step-section">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-brand-dark px-6 py-5 border-b border-gray-800">
+                        <h2 class="text-white font-heading font-bold text-xl flex items-center">
+                            <i class="ph ph-strategy text-2xl mr-3 text-brand-gold"></i> Strategy & Competitive Analysis
+                        </h2>
+                        <p class="text-gray-400 text-sm mt-1">We conduct deep keyword research. These details ensure we target the right market.</p>
+                    </div>
+                    
+                    <div class="p-6 md:p-10">
+                        <form id="step2-form" onsubmit="goToStep3(event)" class="space-y-8">
+                            
+                            <div>
+                                <h3 class="font-heading font-bold text-brand-dark text-lg mb-4 border-b border-gray-100 pb-2">1. Main Contact</h3>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">Name <span class="text-brand-blue">*</span></label><input name="strategy_name" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></div>
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">Email Address <span class="text-brand-blue">*</span></label><input type="email" name="strategy_email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></div>
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">Phone Number <span class="text-brand-blue">*</span></label><input type="tel" name="strategy_phone" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Business Address</label>
+                                        <div class="relative">
+                                            <input name="strategy_address" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg pl-10 save-input" placeholder="Search via Google Maps...">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="ph-bold ph-map-pin text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="font-heading font-bold text-brand-dark text-lg mb-4 border-b border-gray-100 pb-2">2. Business Overview</h3>
+                                <div class="space-y-6">
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">Briefly describe your business <span class="text-brand-blue">*</span></label><textarea name="strategy_desc" required rows="2" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input" placeholder="What do you do? Who do you serve?"></textarea></div>
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        <div><label class="block text-sm font-bold text-gray-700 mb-2">How long in business?</label><input name="strategy_years" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></div>
+                                        <div><label class="block text-sm font-bold text-gray-700 mb-2">Average Lead Value ($)</label><input name="strategy_leadval" placeholder="Estimate is fine" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></div>
+                                    </div>
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">Have you done SEO before? (Share results)</label><textarea name="strategy_history" rows="2" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></textarea></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="font-heading font-bold text-brand-dark text-lg mb-4 border-b border-gray-100 pb-2">3. Goals & Target Market</h3>
+                                <div class="space-y-6">
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">What is your main SEO goal? <span class="text-brand-blue">*</span></label><select name="strategy_goal" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"><option>Traffic Growth</option><option>Lead Generation</option><option>Brand Awareness</option><option>Local Visibility</option></select></div>
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">What does success look like in 6-12 months?</label><textarea name="strategy_success" rows="2" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></textarea></div>
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        <div><label class="block text-sm font-bold text-gray-700 mb-2">Targeted Market Location</label><input name="strategy_location" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></div>
+                                        <div><label class="block text-sm font-bold text-gray-700 mb-2">Ideal Customer Demographics</label><input name="strategy_demo" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="font-heading font-bold text-brand-dark text-lg mb-4 border-b border-gray-100 pb-2">4. Competitors & Keywords</h3>
+                                <div class="space-y-6">
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">List 3 Competitors (Websites) <span class="text-brand-blue">*</span></label><textarea name="strategy_competitors" required rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></textarea></div>
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">List 10 Target Keywords (Ideas) <span class="text-brand-blue">*</span></label><textarea name="strategy_keywords" required rows="4" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input" placeholder="We will refine these, but what would you like to target?"></textarea></div>
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">What makes you different? (Secret Sauce)</label><textarea name="strategy_unique" rows="2" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"></textarea></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="font-heading font-bold text-brand-dark text-lg mb-4 border-b border-gray-100 pb-2">5. Logistics</h3>
+                                <div class="space-y-6">
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">Can we make updates directly to your site?</label><select name="strategy_updates" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"><option>Yes, direct updates</option><option>No, send to my developer</option></select></div>
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-2">Do you have a content writer?</label><select name="strategy_writer" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input"><option>No</option><option>Yes</option></select></div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Plans to redesign website soon?</label>
+                                        <select name="strategy_redesign" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg save-input">
+                                            <option value="">-- Select --</option>
+                                            <option value="no">No current plans</option>
+                                            <option value="considering">Considering it later</option>
+                                            <option value="yes_soon">Yes, in the next 1-3 months</option>
+                                            <option value="in_progress">Yes, currently in progress</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-4 mt-8">
+                                <button type="button" onclick="goToStep1()" class="w-full md:w-1/3 bg-white border-2 border-gray-300 text-gray-600 font-heading font-bold text-lg py-4 px-6 rounded-lg hover:bg-gray-50 transition-all shadow-sm">
+                                    <i class="ph-bold ph-arrow-left mr-2"></i> Back
+                                </button>
+                                <button type="submit" class="w-full md:w-2/3 bg-brand-gold text-brand-dark font-heading font-bold text-lg py-4 px-6 rounded-lg hover:bg-brand-gold-dim transition-all shadow-lg">
+                                    Submit Strategy Details <i class="ph-bold ph-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-3-expectations" class="step-section">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 md:p-12 text-center max-w-5xl mx-auto">
+                    
+                    <div class="w-16 h-16 bg-blue-50 text-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="ph-fill ph-info text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-heading font-bold text-brand-dark mb-6">What to Expect Next</h2>
+                    
+                    <div class="text-left bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 space-y-4 text-gray-700 max-w-3xl mx-auto">
+                        <p><strong><i class="ph-bold ph-check text-brand-gold mr-2"></i> Month 1 Foundation:</strong> We will be working on setting a strong foundation for your campaign. Tasks are detailed in Onsite & Offsite todos.</p>
+                        <p><strong><i class="ph-bold ph-chart-line-down text-brand-gold mr-2"></i> Initial Rankings:</strong> Because this is the first month, you may not see immediate improvement in keyword rankings.</p>
+                        <p><strong><i class="ph-bold ph-calendar text-brand-gold mr-2"></i> Timeline:</strong> Tangible results typically start from Month 2 onward. Major onsite changes are completed by Month 2. By Month 3, you will see movement, with Month 6 being the best time to judge performance.</p>
+                        <p><strong><i class="ph-bold ph-handshake text-brand-gold mr-2"></i> Partnership:</strong> We do not promise specific keyword improvements in Month 1, but we promise a long-lasting relationship built on a solid technical foundation.</p>
+                    </div>
+
+                    <div class="mt-12 text-left">
+                        <div class="flex items-center justify-between mb-4 px-2">
+                            <div>
+                                <h3 class="font-heading font-bold text-2xl text-brand-dark flex items-center">
+                                    <i class="ph-fill ph-presentation-chart text-brand-gold mr-3"></i>
+                                    Campaign Performance: Tree of Life
+                                </h3>
+                                <p class="text-sm text-gray-500 mt-1">Snapshot of recent SEO growth and keyword performance.</p>
+                            </div>
+                            <button onclick="openModal()" class="hidden md:flex items-center gap-2 bg-brand-gold/10 hover:bg-brand-gold/20 text-brand-dark font-bold px-4 py-2 rounded-lg transition-colors border border-brand-gold">
+                                <i class="ph-bold ph-desktop"></i> Open Live Dashboard
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm expect-box">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-bold text-gray-400 uppercase">Organic Keywords</span>
+                                    <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-bold">▲ 39.24%</span>
+                                </div>
+                                <div class="text-3xl font-heading font-extrabold text-brand-dark">860</div>
+                                <div class="h-1 w-full bg-gray-100 mt-3 rounded-full overflow-hidden">
+                                    <div class="h-full bg-brand-gold w-[70%]"></div>
+                                </div>
+                            </div>
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm expect-box">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-bold text-gray-400 uppercase">Organic Users</span>
+                                    <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-bold">▲ 5,362%</span>
+                                </div>
+                                <div class="text-3xl font-heading font-extrabold text-brand-dark">1.44K</div>
+                                <div class="h-1 w-full bg-gray-100 mt-3 rounded-full overflow-hidden">
+                                    <div class="h-full bg-brand-gold w-[85%]"></div>
+                                </div>
+                            </div>
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm expect-box">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-bold text-gray-400 uppercase">Conversions</span>
+                                    <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-bold">▲ High Growth</span>
+                                </div>
+                                <div class="text-3xl font-heading font-extrabold text-brand-dark">874</div>
+                                <div class="h-1 w-full bg-gray-100 mt-3 rounded-full overflow-hidden">
+                                    <div class="h-full bg-brand-gold w-[60%]"></div>
+                                </div>
+                            </div>
+<div class="bg-[#111827] border border-gray-800 rounded-xl p-5 shadow-sm expect-box">
+    <div class="flex justify-between items-start mb-2">
+        
+        <!-- NOW GOLD HEADLINE COMES FIRST -->
+        <div class="text-xl font-heading font-extrabold text-brand-gold">#1 Market Leader</div>
+
+        <!-- REMOVED 'High Growth' BADGE COMPLETELY -->
+    </div>
+
+    <!-- PAGE-1 KEYWORDS MOVED BELOW AS SUBTEXT -->
+    <span class="text-3xL font-bold text-gray-300 uppercase">Page-1 Keywords</span>
+
+    <div class="h-1 w-full bg-gray-700 mt-3 rounded-full overflow-hidden">
+        <div class="h-full bg-brand-gold w-[40%]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                                <h4 class="font-bold text-brand-dark mb-4 flex items-center"><i class="ph-fill ph-google-logo text-brand-gold mr-2"></i> Keyword Visibility (GSC)</h4>
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <span class="block text-xs text-gray-500">Total Clicks</span>
+                                        <span class="block text-xl font-bold text-brand-dark">1.33K</span>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <span class="block text-xs text-gray-500">Impressions</span>
+                                        <span class="block text-xl font-bold text-brand-dark">90.11K</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-end h-24 gap-2 mt-4 px-2 border-b border-gray-100 pb-1">
+                                    <div class="w-full bg-blue-100 h-[30%] rounded-t"></div>
+                                    <div class="w-full bg-blue-200 h-[50%] rounded-t"></div>
+                                    <div class="w-full bg-blue-300 h-[40%] rounded-t"></div>
+                                    <div class="w-full bg-blue-400 h-[70%] rounded-t"></div>
+                                    <div class="w-full bg-blue-500 h-[60%] rounded-t"></div>
+                                    <div class="w-full bg-blue-600 h-[90%] rounded-t relative group">
+                                        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-1 rounded hidden group-hover:block">Peak</div>
+                                    </div>
+                                    <div class="w-full bg-blue-500 h-[80%] rounded-t"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm overflow-hidden">
+                                <h4 class="font-bold text-brand-dark mb-4 flex items-center"><i class="ph-fill ph-list-magnifying-glass text-brand-gold mr-2"></i> Top Ranking Keywords</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-left">
+                                        <thead class="text-xs text-gray-400 uppercase border-b border-gray-100">
+                                            <tr>
+                                                <th class="pb-2">Keyword</th>
+                                                <th class="pb-2 text-right">Pos</th>
+                                                <th class="pb-2 text-right">Vol</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-50">
+                                            <tr class="group hover:bg-gray-50 transition-colors">
+                                                <td class="py-2 font-medium text-gray-700">tree of life counseling</td>
+                                                <td class="py-2 text-right font-bold text-green-600">#1</td>
+                                                <td class="py-2 text-right text-gray-500">1.8K</td>
+                                            </tr>
+                                            <tr class="group hover:bg-gray-50 transition-colors">
+                                                <td class="py-2 font-medium text-gray-700">therapy lafayette la</td>
+                                                <td class="py-2 text-right font-bold text-green-600">#2</td>
+                                                <td class="py-2 text-right text-gray-500">880</td>
+                                            </tr>
+                                            <tr class="group hover:bg-gray-50 transition-colors">
+                                                <td class="py-2 font-medium text-gray-700">marriage counseling near me</td>
+                                                <td class="py-2 text-right font-bold text-green-600">#1</td>
+                                                <td class="py-2 text-right text-gray-500">1.3K</td>
+                                            </tr>
+                                            <tr class="group hover:bg-gray-50 transition-colors">
+                                                <td class="py-2 font-medium text-gray-700">emdr therapy near me</td>
+                                                <td class="py-2 text-right font-bold text-green-600">#2</td>
+                                                <td class="py-2 text-right text-gray-500">390</td>
+                                            </tr>
+                                            <tr class="group hover:bg-gray-50 transition-colors">
+                                                <td class="py-2 font-medium text-gray-700">lafayette la therapists</td>
+                                                <td class="py-2 text-right font-bold text-green-600">#5</td>
+                                                <td class="py-2 text-right text-gray-500">880</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="md:hidden text-center mb-8">
+                            <a href="https://agencydashboard.io/campaign/detail/MjA1MTItfC05OS18LTZEVjZJUUpYYzg=" target="_blank" class="inline-flex items-center gap-2 text-brand-gold font-bold underline">
+                                Open Live Dashboard Report <i class="ph-bold ph-arrow-square-out"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row gap-4 justify-center max-w-md mx-auto w-full mt-8">
+                        <button onclick="goToStep2()" class="w-full md:w-1/3 bg-white border-2 border-gray-300 text-gray-600 font-heading font-bold text-lg py-4 px-6 rounded-lg hover:bg-gray-50 transition-all shadow-sm">
+                            <i class="ph-bold ph-arrow-left mr-2"></i> Back
+                        </button>
+                        <button onclick="goToStep4()" class="w-full md:w-2/3 bg-brand-dark text-white font-heading font-bold text-lg py-4 px-6 rounded-lg hover:bg-black transition-all shadow-lg block">
+                            I Understand - Book Kickoff Call
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+<div id="step-4-booking" class="step-section">
+                <div class="bg-white rounded-xl shadow-lg border-2 border-brand-gold p-8 md:p-12 text-center max-w-3xl mx-auto">
+                    
+                    <div class="w-20 h-20 bg-brand-dark text-brand-gold rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <i class="ph-fill ph-calendar-star text-4xl"></i>
+                    </div>
+
+                    <h2 class="text-2xl md:text-3xl font-heading font-bold text-brand-dark mb-4">Let's Launch This! 🚀</h2>
+                    <p class="text-gray-600 text-lg mb-8 max-w-xl mx-auto">
+                        We need to sync up to finalize your strategy. <br>
+                        Click the button below to choose a time that works for you.
+                    </p>
+                    
+                    <button 
+                        data-cal-link="seo-by-summit/onboarding-call" 
+                        data-cal-namespace="default" 
+                        data-cal-config='{"layout":"month_view"}'
+                        class="w-full sm:w-auto bg-brand-gold hover:bg-brand-gold-dim text-brand-dark font-heading font-bold text-xl py-5 px-10 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 mb-10 flex items-center justify-center gap-3 mx-auto">
+                        <i class="ph-bold ph-calendar-plus"></i>
+                        Schedule Kickoff Call
+                    </button>
+
+                    <script type="text/javascript">
+                      (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://cal.id/embed-link/embed.js", "init");
+                      Cal("init", "default", {origin:"https://cal.id"});
+
+                      // I updated the brand color here to match your site (#d8bc73)
+                      Cal.ns["default"]("ui", {
+                          "cssVarsPerTheme":{
+                              "light":{"cal-brand":"#d8bc73"},
+                              "dark":{"cal-brand":"#d8bc73"}
+                          },
+                          "hideEventTypeDetails":false,
+                          "layout":"month_view"
+                      });
+                    </script>
+
+                    <div class="border-t border-gray-100 pt-8 mt-4">
+                        <p class="text-sm text-gray-400 mb-6 font-bold uppercase tracking-wide">Done scheduling?</p>
+                        <div class="flex flex-col md:flex-row gap-4 justify-center w-full">
+                            <button onclick="goToStep3()" class="w-full md:w-auto bg-white border-2 border-gray-300 text-gray-600 font-heading font-bold text-lg py-3 px-8 rounded-lg hover:bg-gray-50 transition-all shadow-sm">
+                                <i class="ph-bold ph-arrow-left mr-2"></i> Back
+                            </button>
+                            <button onclick="goToStep5()" class="w-full md:w-auto bg-green-600 text-white font-heading font-bold text-lg py-3 px-8 rounded-lg hover:bg-green-700 transition-all shadow-lg flex items-center justify-center gap-2">
+                                I have booked my slot! <i class="ph-bold ph-check-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="step-5-success" class="step-section">
+                <div class="bg-white rounded-xl shadow-xl p-10 text-center max-w-2xl mx-auto border-t-8 border-brand-gold">
+                    <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                        <i class="ph-fill ph-confetti text-5xl text-green-600"></i>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold text-brand-dark mb-4">You Are All Set!</h2>
+                    <p class="text-gray-600 text-lg mb-8">
+                        We have received your access details and strategy inputs.<br>
+                        Your Account Manager has been notified.
+                    </p>
+                    <div class="bg-gray-50 p-6 rounded-lg inline-block text-left">
+                        <p class="font-bold text-brand-dark mb-2">Next Steps:</p>
+                        <ul class="text-gray-600 space-y-2">
+                            <li><i class="ph-bold ph-check text-green-500 mr-2"></i> Check your email for confirmation.</li>
+                            <li><i class="ph-bold ph-check text-green-500 mr-2"></i> Our team begins the audit immediately.</li>
+                            <li><i class="ph-bold ph-check text-green-500 mr-2"></i> Show up to the Kickoff Call ready to grow!</li>
+                        </ul>
+                    </div>
+                    <div class="mt-10">
+                        <p class="text-sm text-gray-400 font-bold uppercase tracking-widest">SEO BY SUMMIT</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+<main id="ppc-flow" class="max-w-4xl mx-auto px-4 py-8 md:py-12 hidden-content">
+        
+        <div class="text-center mb-8 md:mb-10">
+            <h1 class="font-heading text-3xl md:text-4xl font-extrabold text-brand-dark mb-4 leading-tight">
+                Google Ads <span class="text-blue-600">Launchpad</span>
+            </h1>
+            <p class="text-gray-600 max-w-2xl mx-auto text-base md:text-lg">
+                Let's get your ad account connected and your budget strategy approved.
+            </p>
+        </div>
+
+        <div class="mb-10">
+            <div class="flex items-center justify-center space-x-4 text-sm font-bold text-gray-400">
+                <span class="text-brand-dark">1. Access</span>
+                <span>&rarr;</span>
+                <span>2. Strategy</span>
+                <span>&rarr;</span>
+                <span>3. Expectations</span>
+                <span>&rarr;</span>
+                <span>4. Kickoff</span>
+            </div>
+        </div>
+
+        <div id="ppc-step-1" class="step-section active">
+            <div class="bg-white rounded-xl shadow-md border-l-4 border-blue-600 overflow-hidden mb-8">
+                <div class="bg-brand-dark px-5 py-4 flex items-center justify-between">
+                    <h2 class="text-white font-heading font-bold text-lg flex items-center">
+                        <i class="ph-fill ph-target text-2xl mr-3 text-blue-400"></i> Part A: Google Ads Account
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <label class="block text-sm font-heading font-bold text-gray-700 mb-2 uppercase tracking-wide">Enter 10-Digit Customer ID</label>
+                    <div class="relative">
+                        <input type="text" placeholder="e.g. 123-456-7890" class="w-full pl-10 px-4 py-3 border-2 border-gray-300 rounded-lg font-mono text-lg font-bold">
+                        <i class="ph-bold ph-hash absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl"></i>
+                    </div>
+                    <div class="mt-4 bg-blue-50 p-3 rounded border border-blue-100 text-xs text-blue-800 flex gap-2">
+                        <i class="ph-bold ph-info text-lg"></i>
+                        <p>We will request access via our Agency Account (MCC). You will receive an email from Google to approve "iMark Infotech" or "Summit".</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md border-l-4 border-brand-gold overflow-hidden mb-8">
+                <div class="bg-gray-50 px-5 py-4 border-b border-gray-200">
+                    <h2 class="text-brand-dark font-heading font-bold text-lg flex items-center">
+                        <i class="ph-fill ph-code text-2xl mr-3 text-gray-500"></i> Part B: Tracking Installation
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="bg-yellow-50 p-4 rounded mb-6 text-sm text-yellow-800 border border-yellow-200">
+                        <strong>Why?</strong> We need backend access to install conversion pixels (Google Tag/GTM) so we don't waste budget.
+                    </div>
+                    <p class="text-gray-700 mb-4">Please grant <strong>Admin</strong> access to:</p>
+                    <div class="bg-gray-100 p-3 rounded text-center font-bold text-brand-dark select-all cursor-pointer border border-gray-300">
+                        analytics@imarkdigitalsolutions.com
+                    </div>
+                    <p class="text-gray-500 text-sm mt-4">
+                        *If you need specific instructions for your CMS (WordPress/Shopify), please ask your account manager or refer to the SEO guides.
+                    </p>
+                </div>
+            </div>
+
+            <div class="text-right">
+                <button onclick="goToPpcStep(2)" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 shadow-lg">
+                    Access Granted - Next Step &rarr;
+                </button>
+            </div>
+        </div>
+
+        <div id="ppc-step-2" class="step-section hidden">
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden p-8">
+                <h2 class="text-2xl font-bold text-brand-dark mb-6 border-b pb-4">Campaign Strategy</h2>
+                
+                <form class="space-y-8" onsubmit="event.preventDefault(); goToPpcStep(3);">
+                    <div>
+                        <h3 class="font-bold text-blue-600 uppercase text-xs tracking-widest mb-4">1. Financials & Timing</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Monthly Ad Spend ($)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                                    <input type="number" placeholder="e.g. 2000" class="w-full pl-8 px-4 py-3 bg-gray-50 border rounded-lg">
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">*Separate from management fee</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Best Business Hours</label>
+                                <input type="text" placeholder="e.g. 9am - 5pm, Weekdays" class="w-full px-4 py-3 bg-gray-50 border rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-blue-600 uppercase text-xs tracking-widest mb-4">2. Targeting & Market</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Target Region</label>
+                                <input type="text" placeholder="USA, UK, Specific Cities..." class="w-full px-4 py-3 bg-gray-50 border rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Target Audience Description</label>
+                                <textarea rows="2" placeholder="Age, gender, interests, behavior..." class="w-full px-4 py-3 bg-gray-50 border rounded-lg"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Biggest Competitor (Link)</label>
+                                <input type="url" placeholder="https://competitor.com" class="w-full px-4 py-3 bg-gray-50 border rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-blue-600 uppercase text-xs tracking-widest mb-4">3. The Offer & History</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Most Profitable Product/Service</label>
+                                <input type="text" class="w-full px-4 py-3 bg-gray-50 border rounded-lg" placeholder="What makes you the most money?">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Have you run PPC before?</label>
+                                <select class="w-full px-4 py-3 bg-gray-50 border rounded-lg">
+                                    <option>No, this is new.</option>
+                                    <option>Yes, hired a guy previously.</option>
+                                    <option>Yes, did it myself.</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Any Legal/Trademark Issues?</label>
+                                <textarea rows="1" placeholder="e.g. None" class="w-full px-4 py-3 bg-gray-50 border rounded-lg"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-6">
+                        <button type="button" onclick="goToPpcStep(1)" class="text-gray-500 font-bold hover:text-brand-dark">Back</button>
+                        <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 shadow-lg">Save Strategy &rarr;</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="ppc-step-3" class="step-section hidden">
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 text-center max-w-3xl mx-auto">
+                <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="ph-fill ph-traffic-signal text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-brand-dark mb-6">The "Learning Phase"</h2>
+                
+                <div class="text-left bg-gray-50 p-6 rounded-lg mb-8 space-y-4 text-sm text-gray-700 leading-relaxed border-l-4 border-yellow-400">
+                    <p><strong>1. First 14 Days:</strong> Google's AI is learning. Performance (CPA/CPC) will fluctuate significantly. This is normal. Do not panic.</p>
+                    <p><strong>2. No Changes:</strong> Please do not touch budget or pause campaigns in the first month. It resets the learning algorithm.</p>
+                    <p><strong>3. Communication:</strong> We will report weekly. Tangible optimization results usually stabilize by Month 2.</p>
+                </div>
+
+                <div class="flex justify-center gap-4">
+                     <button type="button" onclick="goToPpcStep(2)" class="text-gray-500 font-bold hover:text-brand-dark px-4">Back</button>
+                    <button onclick="goToPpcStep(4)" class="bg-brand-dark text-white font-bold py-3 px-8 rounded-lg hover:bg-black shadow-lg">
+                        I Understand - Book Kickoff
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="ppc-step-4" class="step-section hidden">
+            <div class="bg-white rounded-xl shadow-lg border-2 border-blue-600 p-8 text-center">
+                <h2 class="text-2xl font-bold text-brand-dark mb-4">Book Your PPC Kickoff</h2>
+                <p class="text-gray-500 mb-6">We need to sync on your budget and offer.</p>
+                <div class="h-[600px] w-full bg-gray-100 rounded mb-6 overflow-hidden">
+                    <iframe src="https://cal.id/seo-by-summit/onboarding-call" width="100%" height="100%" frameborder="0"></iframe>
+                </div>
+                <button onclick="location.reload()" class="text-gray-400 font-bold text-sm hover:text-brand-dark">Return to Home</button>
+            </div>
+        </div>
+
+    </main>
+
+    </div>
+
+    <script>
+        // PASSWORD PROTECTION LOGIC
+        const correctPassword = "SummitGrowth"; 
+        
+        if (sessionStorage.getItem('portalUnlocked') === 'true') {
+            document.getElementById('password-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            loadProgress(); // Load saved data
+        }
+
+// --- UPDATED PASSWORD LOGIC ---
+        function checkPassword(event) {
+            event.preventDefault();
+            const input = document.getElementById('password-input').value;
+            const errorMsg = document.getElementById('password-error');
+            
+            if (input === correctPassword) {
+                const screen = document.getElementById('password-screen');
+                screen.style.opacity = '0';
+                
+                setTimeout(() => {
+                    screen.style.display = 'none';
+                    
+                    // 1. Reveal the Main Content Area
+                    document.getElementById('main-content').style.display = 'block';
+                    
+                    // 2. UNHIDE the Selection Screen
+                    const selection = document.getElementById('service-selection');
+                    selection.classList.remove('hidden'); 
+                    selection.style.display = 'block';
+
+                    // 3. FORCE HIDE the specific flows initially
+                    document.getElementById('seo-flow').style.display = 'none';
+                    document.getElementById('ppc-flow').style.display = 'none';
+                    
+                    window.scrollTo(0, 0);
+                }, 500);
+                
+                sessionStorage.setItem('portalUnlocked', 'true');
+                loadProgress(); 
+            } else {
+                errorMsg.classList.remove('hidden');
+                document.getElementById('password-input').classList.add('border-brand-red');
+            }
+        }
+
+        // --- NEW FUNCTIONS FOR BUTTONS ---
+        function selectService(type) {
+            document.getElementById('service-selection').style.display = 'none';
+
+            if (type === 'seo') {
+                document.getElementById('seo-flow').style.display = 'block';
+                if(typeof goToStep1 === 'function') goToStep1();
+            } else if (type === 'ppc') {
+                document.getElementById('ppc-flow').style.display = 'block';
+                if(typeof goToPpcStep === 'function') goToPpcStep(1);
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function goToPpcStep(stepNum) {
+            const steps = document.querySelectorAll('#ppc-flow .step-section');
+            steps.forEach(el => {
+                el.style.display = 'none';
+                el.classList.remove('active');
+            });
+            
+            const target = document.getElementById('ppc-step-' + stepNum);
+            if(target) {
+                target.style.display = 'block';
+                target.classList.add('active');
+            }
+            window.scrollTo(0, 0);
+        }
+
+        // Iframe Modal Logic
+        function openModal() {
+            document.getElementById('iframe-modal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('iframe-modal').style.display = 'none';
+        }
+
+        // AUTO-SAVE LOGIC
+        function saveProgress() {
+            const inputs = document.querySelectorAll('.save-input');
+            const data = {};
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    if (!data[input.name]) data[input.name] = [];
+                    if (input.checked) data[input.name].push(input.value);
+                } else {
+                    data[input.name] = input.value;
+                }
+            });
+            localStorage.setItem('onboarding_data', JSON.stringify(data));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('onboarding_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                const inputs = document.querySelectorAll('.save-input');
+                inputs.forEach(input => {
+                    if (input.type === 'checkbox') {
+                        if (data[input.name] && data[input.name].includes(input.value)) {
+                            input.checked = true;
+                        }
+                    } else {
+                        if (data[input.name]) input.value = data[input.name];
+                    }
+                });
+            }
+        }
+
+        // Attach Autosave Listener
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('save-input')) {
+                saveProgress();
+            }
+        });
+
+        // NAVIGATION LOGIC
+        let activeStep = 1; // Tracks current step for the Chatbot
+
+        function updateTimeline(stepNumber) {
+            // Reset all
+            document.querySelectorAll('.timeline-step').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Set current active
+            const current = document.getElementById('tl-step-' + stepNumber);
+            if(current) current.classList.add('active');
+
+            // Mark previous as completed (green)
+            for(let i=1; i < stepNumber; i++) {
+                const prev = document.getElementById('tl-step-' + i);
+                if(prev) {
+                    const circle = prev.querySelector('.circle');
+                    circle.style.backgroundColor = '#10b981'; // Green
+                    circle.style.color = 'white';
+                    circle.style.borderColor = 'white';
+                }
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideAllSteps() {
+            document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+        }
+
+        // Generic Back Navigation (Used by top back buttons)
+        window.goBackTo = function(stepId, timelineStep) {
+            hideAllSteps();
+            const el = document.getElementById(stepId);
+            if (el) el.classList.add('active');
+
+            // Update timeline AND render FAQs for the new step
+            if (timelineStep) {
+                updateTimeline(timelineStep);
+                activeStep = timelineStep; 
+                renderFAQs(activeStep); 
+            }
+
+            scrollToTop();
+        }
+
+        // Back to Step 1 (Used by bottom form button)
+        function goToStep1() {
+            closeChat();
+            activeStep = 1;
+            renderFAQs(activeStep);
+
+            hideAllSteps();
+            document.getElementById('step-1-access').classList.add('active');
+            updateTimeline(1);
+            scrollToTop();
+        }
+
+        // Step 1 -> Step 2
+        function goToStep2(e) {
+            if(e) e.preventDefault();
+            
+            closeChat();            // Close bot so it doesn't block view
+            activeStep = 2;         // Set active step to 2
+            renderFAQs(activeStep); // Load Step 2 questions
+
+            hideAllSteps();
+            document.getElementById('step-2-strategy').classList.add('active');
+            updateTimeline(2);
+            scrollToTop();
+        }
+
+        // Step 2 -> Step 3
+        function goToStep3(e) {
+            if(e) e.preventDefault();
+
+            closeChat();
+            activeStep = 3;
+            renderFAQs(activeStep);
+
+            hideAllSteps();
+            document.getElementById('step-3-expectations').classList.add('active');
+            updateTimeline(2); 
+            scrollToTop();
+        }
+
+        // Step 3 -> Step 4
+        function goToStep4() {
+            closeChat();
+            activeStep = 4;
+            renderFAQs(activeStep);
+
+            hideAllSteps();
+            document.getElementById('step-4-booking').classList.add('active');
+            updateTimeline(3);
+            scrollToTop();
+        }
+
+        // Step 4 -> Step 5
+        function goToStep5() {
+            closeChat();
+            activeStep = 5;
+            renderFAQs(activeStep);
+
+            hideAllSteps();
+            document.getElementById('step-5-success').classList.add('active');
+            updateTimeline(4);
+            scrollToTop();
+        }
+
+        // CMS Logic
+        const cmsSelect = document.getElementById('cms-select');
+        const panels = document.querySelectorAll('.cms-panel');
+        
+        cmsSelect.addEventListener('change', function(e) {
+            // 1. Hide default panel
+            document.getElementById('panel-default').style.display = 'none';
+            
+            // 2. Hide ALL panels first
+            panels.forEach(p => p.style.display = 'none');
+            
+            // 3. Show specific panel
+            const val = e.target.value;
+            const panel = document.getElementById('panel-' + val);
+            if (panel) panel.style.display = 'block';
+        });
+
+        // Copy Email
+        function copyEmail() {
+            navigator.clipboard.writeText("analytics@imarkdigitalsolutions.com");
+            alert("Email copied!");
+        }
+
+        /* -------------------------------------- */
+        /* FAQ WIDGET LOGIC                      */
+        /* -------------------------------------- */
+        const chatbot = document.getElementById('chatbot-widget');
+        const faqList = document.getElementById('faq-list');
+        const searchInput = document.getElementById('faq-search');
+        const chatbotTrigger = document.getElementById('chatbot-trigger');
+
+        // COMPLETE FAQ LIST
+        const faqs = [
+            // STEP 1: ACCESS QUESTIONS
+            {
+                id: 'backend',
+                step: [1],
+                question: "Why do you need access to the website backend (CMS)?",
+                answer: "We need CMS access to implement onsite SEO changes: meta tags, structured data, redirects, and content updates. Direct access speeds fixes and reduces delays from third-party developers."
+            },
+            {
+                id: 'ga4',
+                step: [1],
+                question: "Why grant Google Analytics 4 (GA4) access?",
+                answer: "GA4 allows us to track website traffic, user behavior, and conversions. Accessing your historical data helps us establish benchmarks and measure the ROI of our SEO efforts."
+            },
+            {
+                id: 'gsc',
+                step: [1],
+                question: "Why grant Google Search Console access?",
+                answer: "Search Console is essential for monitoring site health, indexing status, and organic keyword performance. It alerts us to technical issues that might be hurting your rankings."
+            },
+            {
+                id: 'gtm',
+                step: [1],
+                question: "Why grant Google Tag Manager (GTM) access?",
+                answer: "GTM allows us to implement tracking codes (like conversion pixels) efficiently without risking site breakage by editing the hard code repeatedly."
+            },
+            {
+                id: 'gbp',
+                step: [1],
+                question: "Why grant Google Business Profile access?",
+                answer: "For local businesses, GBP is the key to showing up in Google Maps and the 'Local Pack'. We optimize this profile to drive local calls and visits."
+            },
+            {
+                id: 'clarity',
+                step: [1],
+                question: "What is Microsoft Clarity and why is it useful?",
+                answer: "Clarity provides heatmaps and session recordings. It helps us understand user experience (UX) issues—like why visitors might leave a page—so we can fix them to improve conversions."
+            },
+            
+            // STEP 2: STRATEGY QUESTIONS
+            {
+                id: 'strat_comp',
+                step: [2],
+                question: "Why do you need competitor information?",
+                answer: "Analyzing your competitors helps us identify gaps in their strategy that we can exploit to help you outrank them."
+            },
+            {
+                id: 'strat_lead',
+                step: [2],
+                question: "Why ask for Average Lead Value?",
+                answer: "This helps us estimate the potential revenue impact of our SEO efforts and prioritize keywords that drive valuable traffic, not just vanity traffic."
+            },
+            {
+                id: 'strat_unique',
+                step: [2],
+                question: "What is the 'Secret Sauce'?",
+                answer: "This is your unique value proposition. Knowing what makes you better than the competition allows us to highlight those strengths in your content and meta descriptions."
+            },
+
+            // STEP 3 & 4: EXPECTATIONS & KICKOFF
+            {
+                id: 'kickoff',
+                step: [3, 4],
+                question: "What happens on the Kickoff Call?",
+                answer: "We review the audit findings, confirm the strategy, set timelines, and introduce you to your dedicated account manager."
+            },
+            {
+                id: 'results',
+                step: [3, 4],
+                question: "When will I see results?",
+                answer: "SEO is a long-term strategy. Technical fixes often show impact in months 1-3, while significant keyword ranking improvements typically accelerate around months 3-6."
+            },
+            {
+                id: 'updates',
+                step: [3, 4],
+                question: "How often will I get updates?",
+                answer: "You will receive a live dashboard link immediately. We also provide monthly comprehensive reports and hold regular check-in calls to discuss progress."
+            },
+
+            // GLOBAL QUESTIONS (Show on all steps)
+            {
+                id: 'secure',
+                step: [1, 2, 3, 4, 5],
+                question: "How secure is sharing access?",
+                answer: "Very secure. We ask you to add us as a 'User' or 'Admin' rather than sharing your personal password. This means you retain ownership and can revoke our access at any time."
+            },
+            {
+                id: 'contact',
+                step: [1, 2, 3, 4, 5],
+                question: "Who can I contact for immediate help?",
+                answer: "You can email our support team directly at <strong>analytics@imarkdigitalsolutions.com</strong> or use the button below."
+            }
+        ];
+
+        function toggleChat() {
+            if (chatbot.classList.contains('hidden')) {
+                chatbot.classList.remove('hidden');
+                chatbot.classList.add('flex');
+                chatbot.style.opacity = '0';
+                chatbot.style.transform = 'scale(0.9)';
+                
+                // Render FAQs relevant to the current step when opening
+                renderFAQs(activeStep);
+
+                setTimeout(() => {
+                    chatbot.style.opacity = '1';
+                    chatbot.style.transform = 'scale(1)';
+                }, 10);
+            } else {
+                chatbot.style.opacity = '0';
+                chatbot.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    chatbot.classList.add('hidden');
+                    chatbot.classList.remove('flex');
+                }, 300);
+            }
+        }
+
+        // Force Close Helper
+        function closeChat() {
+            if (!chatbot.classList.contains('hidden')) {
+                toggleChat();
+            }
+        }
+
+        // Close on Click Outside
+        document.addEventListener('click', function(e) {
+            if (!chatbot.classList.contains('hidden') && 
+                !chatbot.contains(e.target) && 
+                !chatbotTrigger.contains(e.target)) {
+                toggleChat();
+            }
+        });
+
+        function renderFAQs(currentStep) {
+            // Filter FAQs: Include those that match current step OR generic ones (step undefined/null)
+            const filtered = faqs.filter(f => !f.step || f.step.includes(currentStep));
+            
+            // Clear current list
+            faqList.innerHTML = '';
+
+            if(filtered.length === 0) {
+                faqList.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm">No specific FAQs for this step. Search above!</div>';
+            }
+
+            filtered.forEach(item => {
+                const faqItem = document.createElement('div');
+                faqItem.className = 'faq-item';
+                faqItem.setAttribute('data-keywords', (item.question + ' ' + item.answer).toLowerCase());
+                
+                faqItem.innerHTML = `
+                    <div class="faq-question p-4 flex justify-between items-center text-sm font-bold text-gray-700" onclick="toggleAnswer(this)">
+                        <span>${item.question}</span>
+                        <i class="ph-bold ph-caret-down text-brand-gold faq-icon"></i>
+                    </div>
+                    <div class="faq-answer px-4 bg-gray-50 text-xs text-gray-600 leading-relaxed">
+                        <div class="pb-4">${item.answer}</div>
+                    </div>
+                `;
+                faqList.appendChild(faqItem);
+            });
+        }
+
+        function toggleAnswer(element) {
+            const parent = element.parentElement;
+            const isActive = parent.classList.contains('active');
+            
+            // Close all others
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Toggle current
+            if (!isActive) {
+                parent.classList.add('active');
+            } else {
+                parent.classList.remove('active');
+            }
+        }
+
+        function filterFAQs() {
+            const query = searchInput.value.toLowerCase();
+            
+            if (!query) {
+                renderFAQs(activeStep); // Reset to context-aware if empty
+                return;
+            }
+            
+            if(query.length > 0) {
+                faqList.innerHTML = '';
+                // Search across ALL FAQs when typing
+                const results = faqs.filter(f => (f.question + ' ' + f.answer).toLowerCase().includes(query));
+                
+                if(results.length === 0) {
+                    faqList.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm">No answers found. Try a different term or ask our team.</div>';
+                    return;
+                }
+
+                results.forEach(item => {
+                    const faqItem = document.createElement('div');
+                    faqItem.className = 'faq-item';
+                    faqItem.innerHTML = `
+                        <div class="faq-question p-4 flex justify-between items-center text-sm font-bold text-gray-700" onclick="toggleAnswer(this)">
+                            <span>${item.question}</span>
+                            <i class="ph-bold ph-caret-down text-brand-gold faq-icon"></i>
+                        </div>
+                        <div class="faq-answer px-4 bg-gray-50 text-xs text-gray-600 leading-relaxed">
+                            <div class="pb-4">${item.answer}</div>
+                        </div>
+                    `;
+                    faqList.appendChild(faqItem);
+                });
+            }
+        }
+        /* FAQ LOGIC END */
+
+    </script>
 </body>
-
 </html>
-
-
