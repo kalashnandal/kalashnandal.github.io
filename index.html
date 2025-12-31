@@ -34,14 +34,7 @@
           "Consistent Performer Award 2025"
         ],
         "knowsAbout": [
-          "Strategic Leadership",
-          "Crisis Management",
-          "SEO Strategy",
-          "Process Automation",
-          "Figma Design",
-          "Agri-Tech SMM",
-          "Account Stabilization",
-          "Team Management"
+          "Strategic Leadership", "Crisis Management", "SEO Strategy", "Process Automation", "Figma Design", "Agri-Tech SMM", "Account Stabilization", "Team Management"
         ],
         "worksFor": [
           { "@type": "Organization", "name": "Back2Farms", "url": "https://backtofarms.com" },
@@ -81,12 +74,24 @@
             touch-action: manipulation;
         }
 
+        /* Cinematic Grain Texture */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
         .heading-serif { font-family: 'Playfair Display', serif; }
         .text-gold { color: var(--gold); }
         .bg-gold { background-color: var(--gold); }
         .border-gold { border-color: var(--gold); }
         
-        .section-padding { padding-top: 4rem; padding-bottom: 4rem; }
+        .section-padding { padding-top: 3rem; padding-bottom: 3rem; }
+        @media (min-width: 768px) { .section-padding { padding-top: 5rem; padding-bottom: 5rem; } }
 
         .glass-card {
             background: rgba(255, 255, 255, 0.02);
@@ -123,9 +128,7 @@
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
-        .menu-hidden {
-            transform: translateX(100%);
-        }
+        .menu-hidden { transform: translateX(100%); }
 
         .history-item {
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
@@ -135,19 +138,14 @@
             position: relative;
         }
         
-        .history-item.current-job {
-            opacity: 0.7;
-            border-left-color: rgba(212, 175, 55, 0.3);
-        }
+        .history-item.current-job { opacity: 0.7; border-left-color: rgba(212, 175, 55, 0.3); }
 
         .history-item:hover, .history-item.active {
             opacity: 1 !important;
             border-left-color: var(--gold) !important;
         }
 
-        .history-item.active {
-            transform: translateX(10px);
-        }
+        .history-item.active { transform: translateX(10px); }
         
         .timeline-node {
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
@@ -162,14 +160,11 @@
             transform: scale(1.5);
         }
 
-        .history-item.active .timeline-node {
-            transform: scale(2.2);
-            box-shadow: 0 0 30px var(--gold);
-        }
+        .history-item.active .timeline-node { transform: scale(2.2); box-shadow: 0 0 30px var(--gold); }
 
         @media (max-width: 640px) {
             .history-item.active { transform: translateX(5px); }
-            .history-item { padding-left: 1rem !important; }
+            .history-item { padding-left: 1.5rem !important; }
         }
 
         .account-btn.active {
@@ -183,9 +178,7 @@
             animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
 
-        .account-feed.active {
-            display: block;
-        }
+        .account-feed.active { display: block; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -200,25 +193,23 @@
             position: relative;
             width: 100%;
             margin: 0 auto;
-            border-radius: 2rem;
-            padding: 0.5rem;
-            background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            border-radius: 1.5rem;
+            background: #fff;
             border: 1px solid rgba(255, 255, 255, 0.05);
             overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         .iframe-container {
             width: 100%;
-            height: 650px;
-            border-radius: 1.5rem;
+            height: 600px;
             overflow: hidden;
-            background: #fff;
         }
 
         .google-chat-btn {
             position: fixed;
             bottom: 2rem;
-            right: 2rem;
+            right: 1.5rem;
             z-index: 100;
             display: flex;
             align-items: center;
@@ -236,6 +227,14 @@
             border: 1px solid rgba(0,0,0,0.1);
         }
 
+        @media (max-width: 768px) {
+            .google-chat-btn {
+                right: 1rem;
+                bottom: 1.5rem;
+                padding: 10px 18px;
+            }
+        }
+
         .google-chat-btn:hover {
             transform: scale(1.05) translateY(-5px);
             box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3);
@@ -244,10 +243,9 @@
 
         @media (max-width: 768px) {
             .iframe-container { height: 500px; }
-            .google-chat-btn { bottom: 1.5rem; right: 1.5rem; padding: 10px 18px; }
         }
 
-        /* Testimonial Carousel Styles */
+        /* Testimonial & Logo Carousel Styles */
         @keyframes infiniteScroll {
             from { transform: translateX(0); }
             to { transform: translateX(-50%); }
@@ -259,16 +257,14 @@
             animation: infiniteScroll 50s linear infinite;
         }
 
-        .scroll-track:hover {
-            animation-play-state: paused;
-        }
+        .scroll-track:hover { animation-play-state: paused; }
 
         .testimonial-img-card {
-            width: 260px;
+            width: 240px;
             height: 140px;
             flex-shrink: 0;
             cursor: pointer;
-            margin: 0 10px;
+            margin: 0 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -278,18 +274,10 @@
         }
 
         @media (min-width: 768px) {
-            .testimonial-img-card {
-                width: 320px;
-                height: 180px;
-                margin: 0 15px;
-            }
+            .testimonial-img-card { width: 320px; height: 180px; margin: 0 15px; }
         }
 
-        .testimonial-img-card img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-        }
+        .testimonial-img-card img { max-width: 90%; max-height: 90%; object-fit: contain; }
 
         #modal-overlay {
             backdrop-filter: blur(15px);
@@ -303,17 +291,96 @@
             50% { transform: translateY(-10px); }
         }
         
-        .animate-pop-up-down {
-            animation: popUpDown 2.5s ease-in-out infinite;
-        }
+        .animate-pop-up-down { animation: popUpDown 2.5s ease-in-out infinite; }
 
         /* Smart Header Sticky Transition */
-        header {
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        header { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .header-hidden { transform: translateY(-100%); }
+
+        /* Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
         }
-        
-        .header-hidden {
-            transform: translateY(-100%);
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Typing cursor */
+        .typing-text::after {
+            content: '|';
+            animation: blink 0.7s infinite;
+            margin-left: 2px;
+            color: var(--gold);
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .skill-bar {
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .skill-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--gold);
+            width: 0;
+            transition: width 1.5s ease-in-out;
+        }
+
+        /* Infinite Quote Scroll - Edge to Edge */
+        @keyframes quoteScroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .quote-track {
+            display: flex;
+            width: max-content;
+            animation: quoteScroll 100s linear infinite;
+        }
+        .quote-track:hover { animation-play-state: paused; }
+
+        /* Premium Footer Distinction */
+        .footer-terminal {
+            background-color: #000000;
+            border-top: 3px solid var(--gold);
+            box-shadow: 0 -15px 50px rgba(212, 175, 55, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 15% Transparency Background Image Overlay */
+        .footer-terminal::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .footer-terminal > * {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Logo/Text Marquee */
+        @keyframes logoMarquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .logo-track {
+            display: flex;
+            width: max-content;
+            animation: logoMarquee 30s linear infinite;
         }
     </style>
 </head>
@@ -322,24 +389,23 @@
     <!-- Horizontal Scroll Progress Bar -->
     <div id="scroll-depth-bar" class="fixed top-0 left-0 h-1 bg-gold z-[210] transition-all duration-150 ease-out" style="width: 0%"></div>
 
-    <!-- Find me on Google (Popping up and down) -->
+    <!-- Find me on Google -->
     <a href="https://www.google.com/search?q=kalash+nandal" target="_blank" class="google-chat-btn animate-pop-up-down">
         <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         <span>Find me on Google</span>
     </a>
 
-    <!-- Scroll to Top Button (Sticky appearance after threshold) -->
-    <button id="scroll-to-top" class="fixed bottom-32 right-6 md:right-8 z-[100] w-12 h-12 bg-gold text-black rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 opacity-0 invisible scale-50 hover:bg-white hover:scale-110 active:scale-95" aria-label="Scroll to top">
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="fixed bottom-32 right-4 md:right-8 z-[100] w-12 h-12 bg-gold text-black rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 opacity-0 invisible scale-50 hover:bg-white hover:scale-110 active:scale-95" aria-label="Scroll to top">
         <i data-lucide="chevron-up" class="w-6 h-6"></i>
     </button>
 
-    <!-- Header (Smart Sticky: Shows on scroll up, hides on scroll down) -->
+    <!-- Header -->
     <header id="main-header" class="fixed top-0 w-full z-[190] bg-black/70 backdrop-blur-2xl border-b border-white/5">
-        <nav class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+        <nav class="max-w-7xl mx-auto px-4 md:px-6 py-3 flex justify-between items-center">
             <div class="text-xl font-black tracking-tighter text-white">
                 KALASH<span class="text-gold">NANDAL</span>
             </div>
-            
             <div class="hidden md:flex space-x-6 text-[10px] font-black uppercase tracking-[0.2em] items-center">
                 <a href="#home" class="nav-link">Home</a>
                 <a href="#mandates" class="nav-link">Mandates</a>
@@ -351,7 +417,6 @@
                 <a href="#discipline" class="nav-link">Discipline</a>
                 <a href="onboarding.html" class="px-5 py-2 bg-gold text-black rounded-full hover:bg-white transition-all shadow-lg shadow-gold/20">Portal</a>
             </div>
-
             <button class="md:hidden text-white p-2" id="menu-btn" aria-label="Toggle Menu">
                 <i data-lucide="menu"></i>
             </button>
@@ -366,8 +431,7 @@
         <div class="flex flex-col space-y-8 text-center">
             <a href="#home" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Home</a>
             <a href="#mandates" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Mandates</a>
-            <a href="#history" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">History</a>
-            <a href="#accolades" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Accolades</a>
+            <a href="#history" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">History</a>            <a href="#accolades" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Accolades</a>
             <a href="#testimonials" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Testimonials</a>
             <a href="#creative" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Creative</a>
             <a href="#insights" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Insights</a>
@@ -377,20 +441,30 @@
     </div>
 
     <!-- Hero Section -->
-    <section id="home" class="min-h-[80vh] flex items-center pt-24 relative overflow-hidden">
+    <section id="home" class="min-h-screen flex items-center pt-24 relative overflow-hidden">
         <div class="absolute top-0 right-0 w-1/3 h-full bg-gold/5 -skew-x-12 transform translate-x-32 z-0"></div>
         <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center z-10">
-            <div>
+            <div class="reveal">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="h-[1px] w-10 bg-gold"></div>
                     <span class="text-gold text-[10px] font-black uppercase tracking-[0.4em]">Operations & Strategy</span>
                 </div>
-                <h1 class="heading-serif text-5xl md:text-7xl text-white mb-6 leading-[1] tracking-tight">
-                    Scaling <br><span class="text-gold italic font-bold">Growth.</span>
+                <h1 class="heading-serif text-5xl md:text-8xl text-white mb-6 leading-[0.95] tracking-tight">
+                    Scaling <br><span class="typing-text text-gold italic font-bold" data-words='["Growth.", "Performance.", "Ventures.", "SEO."]'></span>
                 </h1>
                 <p class="text-gray-400 text-base mb-10 leading-relaxed font-medium max-w-md">
-                    High-performance strategist and Operations Lead. Currently executing four strategic mandates simultaneously, overseeing 150+ global campaigns with a focus on account stabilization.
+                    High-performance strategist and Operations Lead. Currently executing four strategic mandates simultaneously, overseeing 150+ global campaigns.
                 </p>
+                
+                <!-- Live Status -->
+                <div class="flex items-center gap-4 mb-10 bg-white/5 border border-white/10 w-max px-4 py-2 rounded-full">
+                    <span class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-white/60">Local Time: <span id="local-time" class="text-white"></span> • Mohali, India</span>
+                </div>
+
                 <div class="flex flex-wrap gap-6 items-center">
                     <a href="#mandates" class="px-8 py-4 bg-gold text-black font-black uppercase text-[10px] tracking-widest rounded-full hover:bg-white transition-all transform hover:-translate-y-1 shadow-xl shadow-gold/10">
                         View Strategic Scope
@@ -398,9 +472,9 @@
                     <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="hover:text-[#0077b5] text-white/40 transition-colors flex items-center gap-2 font-bold text-[10px] tracking-widest uppercase"><i data-lucide="linkedin" class="w-4 h-4"></i> LinkedIn</a>
                 </div>
             </div>
-            <div class="relative">
+            <div class="relative reveal mt-12 md:mt-0">
                 <div class="absolute -inset-4 bg-gold/10 rounded-[2rem] blur-3xl opacity-50"></div>
-                <div class="relative aspect-square max-w-[400px] mx-auto overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
+                <div class="relative aspect-square max-w-[450px] mx-auto overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
                     <img src="https://kalashnandal.co.in/erasebg-1.webp" alt="Kalash Nandal" class="w-full h-full object-cover grayscale transition-all duration-700 hover:grayscale-0" onerror="this.src='https://ui-avatars.com/api/?name=Kalash+Nandal&background=D4AF37&color=fff&size=512'">
                 </div>
             </div>
@@ -408,15 +482,15 @@
     </section>
 
     <!-- Mandates Grid -->
-    <section id="mandates" class="section-padding pt-10">
+    <section id="mandates" class="section-padding">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4 reveal text-center md:text-left">
                 <div>
                     <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Executive Roles</h2>
-                    <h3 class="text-4xl text-white font-bold heading-serif italic">Current Strategic Scope</h3>
+                    <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif italic">Current Strategic Scope</h3>
                 </div>
             </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 reveal mb-16">
                 <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
                     <div class="mb-6 h-10 flex items-center justify-center">
                         <img src="https://backtofarms.com/assets/images/logo-dark.svg" alt="Back2Farms" class="h-8 w-auto invert brightness-0">
@@ -454,17 +528,96 @@
                     <a href="https://www.imarkinfotech.com/" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
                 </div>
             </div>
+
+            <!-- Trusted Ecosystem Marquee (Edge to Edge Infinite Scroll) -->
+            <div class="w-screen relative left-1/2 -translate-x-1/2 overflow-hidden py-10 border-y border-white/5 bg-white/[0.01]">
+                <div class="logo-track">
+                    <div class="flex items-center space-x-12 md:space-x-20 px-10">
+                        <span class="text-base md:text-xl font-black uppercase tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap text-white/30">Global Portfolio Excellence</span>
+                        <span class="text-base md:text-xl font-black uppercase tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap text-white/30">150+ International Campaigns</span>
+                        <span class="text-base md:text-xl font-black uppercase tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap text-white/30">USA • EUROPE • INDIA</span>
+                        <span class="text-base md:text-xl font-black uppercase tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap text-white/30">Scale Driven Execution</span>
+                    </div>
+                    <div class="flex items-center space-x-12 md:space-x-20 px-10">
+                        <span class="text-base md:text-xl font-black uppercase tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap text-white/30">Global Portfolio Excellence</span>
+                        <span class="text-base md:text-xl font-black uppercase tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap text-white/30">150+ International Campaigns</span>
+                        <span class="text-base md:text-xl font-black uppercase tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap text-white/30">USA • EUROPE • INDIA</span>
+                        <span class="text-base md:text-xl font-black uppercase tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap text-white/30">Scale Driven Execution</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section class="section-padding bg-black/20">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-12 text-center reveal">Core Competencies</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10 reveal mb-16 md:mb-20">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                        <span class="text-white">Strategic Ops</span>
+                        <span class="text-gold">95%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-progress" data-width="95%"></div></div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                        <span class="text-white">SEO Architecture</span>
+                        <span class="text-gold">100%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-progress" data-width="100%"></div></div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                        <span class="text-white">Figma Design</span>
+                        <span class="text-gold">85%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-progress" data-width="85%"></div></div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                        <span class="text-white">Process Automation</span>
+                        <span class="text-gold">90%</span>
+                    </div>
+                    <div class="skill-bar"><div class="skill-progress" data-width="90%"></div></div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 reveal">
+                <div class="glass-card p-8 md:p-10 rounded-[2.5rem] border-gold/10 text-center md:text-left">
+                    <div class="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center mb-6 border border-gold/20 mx-auto md:mx-0">
+                        <i data-lucide="eye" class="text-gold w-6 h-6"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-4">Radical Transparency</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">No black boxes. Every growth pivot is backed by real-time data visualization and stakeholder alignment.</p>
+                </div>
+                <div class="glass-card p-8 md:p-10 rounded-[2.5rem] border-gold/10 text-center md:text-left">
+                    <div class="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center mb-6 border border-gold/20 mx-auto md:mx-0">
+                        <i data-lucide="layers" class="text-gold w-6 h-6"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-4">Process Integrity</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">Scaling is a science of repeatability. I build systems that perform even when the builder isn't in the room.</p>
+                </div>
+                <div class="glass-card p-8 md:p-10 rounded-[2.5rem] border-gold/10 text-center md:text-left">
+                    <div class="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center mb-6 border border-gold/20 mx-auto md:mx-0">
+                        <i data-lucide="trending-up" class="text-gold w-6 h-6"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-4">Compound Growth</h4>
+                    <p class="text-gray-500 text-sm leading-relaxed">We don't chase spikes; we build foundations. Consistent 1% gains outpace shortcuts every single time.</p>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- Trajectory Section -->
     <section id="history" class="section-padding bg-black/40 border-y border-white/5">
         <div class="max-w-4xl mx-auto px-6">
-            <h2 class="text-center text-gold font-black uppercase tracking-[0.5em] mb-12 text-[10px] italic">Trajectory</h2>
-            <div class="relative space-y-6">
-                <div class="history-item current-job relative pl-10 sm:pl-12 pb-8 border-gold active" data-role="pm-ops">
+            <h2 class="text-center text-gold font-black uppercase tracking-[0.5em] mb-12 text-[10px] italic reveal">Trajectory</h2>
+            <div class="relative space-y-6 reveal">
+                <div class="history-item current-job relative pl-8 md:pl-12 pb-8 border-gold active" data-role="pm-ops">
                     <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
-                    <div class="mb-4">
+                    <div class="mb-4 text-left">
                         <div class="flex flex-wrap items-center gap-2 mb-1">
                             <span class="text-[10px] font-black text-gold uppercase tracking-widest">Jan 2024 - Present</span>
                             <span class="bg-gold text-black text-[7px] font-black uppercase px-2 py-0.5 rounded-full">Current Role</span>
@@ -482,7 +635,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="history-item relative pl-10 sm:pl-12 pb-8" data-role="denver-seo">
+                <div class="history-item relative pl-8 md:pl-12 pb-8 text-left" data-role="denver-seo">
                     <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div>
                         <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">March - May 2024</span>
@@ -490,7 +643,7 @@
                         <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Handled US specialized team and communication workflows for domestic US client scaling.</p>
                     </div>
                 </div>
-                <div class="history-item relative pl-10 sm:pl-12 pb-8" data-role="senior-analyst">
+                <div class="history-item relative pl-8 md:pl-12 pb-8 text-left" data-role="senior-analyst">
                     <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div>
                         <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">Jan 2024 - July 2025</span>
@@ -498,7 +651,7 @@
                         <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Promoted twice in 18 months for account stabilization. Leveraged Figma for solution visualization.</p>
                     </div>
                 </div>
-                <div class="history-item relative pl-10 sm:pl-12" data-role="qa">
+                <div class="history-item relative pl-8 md:pl-12 text-left" data-role="qa">
                     <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div>
                         <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">July 2022 - Jan 2024</span>
@@ -513,22 +666,22 @@
     <!-- Awards Section -->
     <section id="accolades" class="section-padding">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16">
+            <div class="text-center mb-16 reveal">
                 <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Recognition of Excellence</h2>
-                <h3 class="text-4xl text-white font-bold heading-serif italic">Accolades & Milestones</h3>
+                <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif italic">Accolades & Milestones</h3>
             </div>
-            <div class="grid md:grid-cols-2 gap-10">
+            <div class="grid md:grid-cols-2 gap-10 reveal">
                 <div class="glass-card rounded-[2.5rem] overflow-hidden group">
                     <div class="aspect-video relative overflow-hidden">
                         <img src="https://kalashnandal.co.in/Consistent%20Performer%20-%202025.webp" alt="Rising Star Award" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110">
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60"></div>
                     </div>
-                    <div class="p-10 relative">
-                        <div class="flex items-center gap-4 mb-4">
+                    <div class="p-8 md:p-10 relative text-center md:text-left">
+                        <div class="flex flex-col md:flex-row items-center gap-4 mb-4">
                             <div class="p-3 bg-gold/10 rounded-2xl border border-gold/20">
                                 <i data-lucide="star" class="text-gold w-6 h-6"></i>
                             </div>
-                            <div>
+                            <div class="text-center md:text-left">
                                 <h4 class="text-2xl font-black text-white uppercase tracking-tight leading-none">Rising Star</h4>
                                 <p class="text-gold font-black uppercase text-[10px] tracking-[0.3em] mt-2">Awarded 2024</p>
                             </div>
@@ -541,12 +694,12 @@
                         <img src="https://kalashnandal.co.in/Rising%20Star-2024.webp" alt="Consistent Performer Award" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110">
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60"></div>
                     </div>
-                    <div class="p-10 relative">
-                        <div class="flex items-center gap-4 mb-4">
+                    <div class="p-8 md:p-10 relative text-center md:text-left">
+                        <div class="flex flex-col md:flex-row items-center gap-4 mb-4">
                             <div class="p-3 bg-gold/10 rounded-2xl border border-gold/20">
                                 <i data-lucide="award" class="text-gold w-6 h-6"></i>
                             </div>
-                            <div>
+                            <div class="text-center md:text-left">
                                 <h4 class="text-2xl font-black text-white uppercase tracking-tight leading-none">Consistent Performer</h4>
                                 <p class="text-gold font-black uppercase text-[10px] tracking-[0.3em] mt-2">Awarded 2025</p>
                             </div>
@@ -560,20 +713,19 @@
 
     <!-- Testimonials Section -->
     <section id="testimonials" class="section-padding bg-black/20 border-t border-white/5 overflow-hidden">
-        <div class="max-w-7xl mx-auto px-6 mb-12">
-            <div class="flex flex-col md:flex-row justify-between items-end gap-4">
+        <div class="max-w-7xl mx-auto px-6 mb-12 reveal text-center md:text-left">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-4 text-center md:text-left">
                 <div>
                     <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Proof of Impact</h2>
-                    <h3 class="text-4xl text-white font-bold heading-serif italic">Global Client Feedback</h3>
+                    <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif italic">Global Client Feedback</h3>
                 </div>
-                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest max-w-xs md:text-right">
-                    Verified testimonials from international stakeholders and US-based business owners.
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest max-w-xs md:text-right mx-auto md:mx-0">
+                    Verified testimonials from stakeholders and business owners.
                 </p>
             </div>
         </div>
 
-        <div class="scroll-track">
-            <!-- Set 1 -->
+        <div class="scroll-track reveal">
             <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review1.png')">
                 <img src="https://kalashnandal.co.in/Review1.png" alt="Testimonial 1" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
@@ -586,7 +738,6 @@
             <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review4.png')">
                 <img src="https://kalashnandal.co.in/Review4.png" alt="Testimonial 4" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
-            <!-- Set 2 -->
             <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review1.png')">
                 <img src="https://kalashnandal.co.in/Review1.png" alt="Testimonial 1" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
@@ -615,12 +766,12 @@
     <!-- Creative Direction -->
     <section id="creative" class="section-padding overflow-hidden">
         <div class="max-w-7xl mx-auto px-6 text-center md:text-left">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-                <div class="max-w-2xl">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 reveal">
+                <div class="max-w-2xl text-center md:text-left">
                     <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Social Media Management</h2>
-                    <h3 class="text-4xl text-white font-bold heading-serif mb-4 italic leading-tight">Creative Direction & SMM.</h3>
+                    <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif mb-4 italic leading-tight">Creative Direction & SMM.</h3>
                     <p class="text-gray-400 text-sm leading-relaxed">
-                        End-to-end management of high-engagement digital profiles. Use the controls below to switch between mandates.
+                        End-to-end management of high-engagement digital profiles.
                     </p>
                 </div>
                 <div class="flex bg-white/5 rounded-full p-1 border border-white/10 w-full md:w-auto">
@@ -628,10 +779,10 @@
                     <button id="btn-btf" class="account-btn flex-1 md:flex-none px-6 sm:px-8 py-3 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all">Back2Farms (Business)</button>
                 </div>
             </div>
-            <div class="flex flex-col">
+            <div class="flex flex-col reveal">
                 <div id="feed-soul" class="account-feed active space-y-6">
                     <div class="flex items-center justify-between px-2">
-                        <div>
+                        <div class="text-left">
                             <h4 class="text-xl sm:text-2xl font-bold text-white uppercase italic">Meet Soul</h4>
                             <p class="text-gold text-[10px] font-black uppercase tracking-widest mt-1">Siberian Husky Brand Management</p>
                         </div>
@@ -644,7 +795,7 @@
                 </div>
                 <div id="feed-btf" class="account-feed space-y-6">
                     <div class="flex items-center justify-between px-2">
-                        <div>
+                        <div class="text-left">
                             <h4 class="text-xl sm:text-2xl font-bold text-white uppercase italic">Back2Farms Official</h4>
                             <p class="text-gold text-[10px] font-black uppercase tracking-widest mt-1">Agri-Tech SMM & Branding</p>
                         </div>
@@ -661,16 +812,31 @@
 
     <!-- LinkedIn Insights -->
     <section id="insights" class="section-padding bg-black/20 border-t border-white/5">
-        <div class="max-w-7xl mx-auto px-6 text-center">
+        <div class="max-w-7xl mx-auto px-6 text-center reveal">
             <h2 class="text-[#0077b5] font-black uppercase tracking-[0.4em] text-[10px] mb-2">Professional Network</h2>
-            <h3 class="text-4xl text-white font-bold heading-serif italic mb-12">LinkedIn Insights</h3>
-            <div class="feed-wrapper" style="border-color: rgba(0, 119, 181, 0.3);">
-                <div class="iframe-container">
+            <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif italic mb-4">Strategic Networking & Industry Insights</h3>
+            <p class="text-gray-500 text-xs md:text-sm max-w-2xl mx-auto mb-12 uppercase tracking-widest font-medium opacity-80 leading-relaxed px-4 md:px-0">
+                Decoding global digital shifts and sharing operational frameworks. This stream captures my ongoing dialogue with the architects of the digital economy.
+            </p>
+            
+            <!-- LinkedIn Shell -->
+            <div class="max-w-5xl mx-auto bg-[#0a0a0a] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
+                <div class="bg-white/[0.03] border-b border-white/5 px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
+                        <span class="ml-4 text-[9px] font-black text-white/40 uppercase tracking-widest italic truncate max-w-[200px] md:max-w-none">REAL-TIME INSIGHTS STREAM // KALASH_NANDAL</span>
+                    </div>
+                </div>
+                
+                <div class="iframe-container bg-white">
                     <iframe src="https://widgets.sociablekit.com/linkedin-profile-posts/iframe/25638319" frameborder="0" width="100%" height="100%"></iframe>
                 </div>
             </div>
-            <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="mt-8 inline-flex items-center gap-3 px-8 py-3 bg-[#0077b5] text-white rounded-full font-black text-[9px] uppercase tracking-[0.2em] transition-all hover:bg-white hover:text-[#0077b5] shadow-lg shadow-[#0077b5]/20">
-                Network with Kalash <i data-lucide="linkedin" class="w-3"></i>
+            
+            <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="mt-12 inline-flex items-center gap-4 px-10 py-5 bg-[#0077b5] text-white rounded-full font-black text-[11px] uppercase tracking-[0.3em] transition-all hover:bg-white hover:text-[#0077b5] shadow-2xl">
+                Connect Directly on LinkedIn <i data-lucide="external-link" class="w-4"></i>
             </a>
         </div>
     </section>
@@ -678,7 +844,7 @@
     <!-- Fitness Section -->
     <section id="discipline" class="section-padding bg-black/40">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="grid lg:grid-cols-2 gap-12 items-center reveal text-center md:text-left">
                 <div class="relative">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="pt-12">
@@ -688,8 +854,8 @@
                         </div>
                         <div>
                             <div class="bg-gold p-6 rounded-3xl text-black text-center mb-4">
-                                <div class="text-4xl font-black mb-1">86<span class="text-lg">kg</span></div>
-                                <div class="text-[7px] font-black uppercase tracking-widest opacity-80">Built Form</div>
+                                <div class="text-4xl font-black mb-1 text-black">86<span class="text-lg">kg</span></div>
+                                <div class="text-[7px] font-black uppercase tracking-widest opacity-80 text-black">Built Form</div>
                             </div>
                             <div class="glass-card aspect-[3/4] rounded-3xl flex items-center justify-center p-6 text-center border-gold/10">
                                 <p class="text-[8px] font-black text-white uppercase tracking-[0.2em] leading-loose">Consistency <br> Over Intensity</p>
@@ -698,11 +864,12 @@
                     </div>
                 </div>
                 <div>
-                    <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-4">Personal symbol of mastery</h2>                    <h3 class="text-4xl text-white font-bold heading-serif mb-6 italic leading-tight">Discipline Beyond <br>The Gym.</h3>
+                    <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-4">Personal symbol of mastery</h2>
+                    <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif mb-6 italic leading-tight">Discipline Beyond <br>The Gym.</h3>
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">
-                        From 42kg to 86kg. A testament to resilience and long-term vision. Progress was gradual and intentional, built on daily habits rather than shortcuts. This mirrors my professional ethos of process-driven growth.
+                        From 42kg to 86kg. Progress built on daily habits rather than shortcuts. This mirrors my professional ethos of process-driven growth.
                     </p>
-                    <div class="flex gap-8 border-t border-white/5 pt-6">
+                    <div class="flex justify-center md:justify-start gap-8 border-t border-white/5 pt-6">
                         <div>
                             <div class="text-xl font-bold text-white uppercase">4 Years</div>
                             <div class="text-[8px] text-gray-500 font-black uppercase tracking-widest">Consistency</div>
@@ -717,47 +884,145 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-black pt-20 pb-8 border-t border-white/5">
-        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
-            <div class="md:col-span-2 text-center md:text-left">
-                <img src="https://kalashnandal.co.in/favicon.webp" alt="Kalash Nandal initials" class="h-14 w-auto mb-6 mx-auto md:mx-0 object-contain" onerror="this.src='https://ui-avatars.com/api/?name=K+N&background=D4AF37&color=fff'">
-                <p class="text-gray-500 max-w-xs text-xs italic border-l border-gold/30 pl-6 py-1 mx-auto md:mx-0">
-                    High-performance strategist building future-proof ventures.
-                </p>
-            </div>
+    <!-- Academics -->
+    <section class="section-padding bg-black/40 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-start reveal">
             <div>
-                <h5 class="text-white font-black mb-6 uppercase tracking-[0.3em] text-[8px]">Ecosystem</h5>
-                <ul class="space-y-3 text-gray-500 font-black uppercase text-[8px] tracking-[0.2em]">
-                    <li><a href="#home" class="hover:text-gold transition">Home</a></li>
-                    <li><a href="#mandates" class="hover:text-gold transition">Mandates</a></li>
-                    <li><a href="#history" class="hover:text-gold transition">History</a></li>
-                    <li><a href="#testimonials" class="hover:text-gold transition">Testimonials</a></li>
-                    <li><a href="#creative" class="hover:text-gold transition">Creative</a></li>
-                    <li><a href="onboarding.html" class="text-gold">Portal Access</a></li>
-                </ul>
+                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-6">Academic Foundation</h2>
+                <div class="glass-card p-8 rounded-3xl space-y-8 border-gold/10">
+                    <div class="relative pl-8 border-l border-gold text-left">
+                        <div class="absolute -left-1 w-2 h-2 rounded-full bg-gold shadow-[0_0_10px_#D4AF37]"></div>
+                        <p class="text-xl font-bold text-white mb-1">Bachelor of Arts</p>
+                        <p class="text-gold text-[9px] font-black uppercase tracking-widest mb-2">Panjab University</p>
+                        <p class="text-gray-400 text-xs font-medium uppercase tracking-tighter opacity-70">Economics, IT & Public Administration</p>
+                    </div>
+                    <div class="relative pl-8 border-l border-white/10 text-left">
+                        <div class="absolute -left-1 w-2 h-2 rounded-full bg-gray-700"></div>
+                        <p class="text-xl font-bold text-white/60 mb-1">Senior Secondary (10+2)</p>
+                        <p class="text-gray-500 text-[9px] font-black uppercase tracking-widest">Non-Medical (PCM)</p>
+                    </div>
+                </div>
             </div>
-            <div>
-                <h5 class="text-white font-black mb-6 uppercase tracking-[0.3em] text-[8px]">Contact</h5>
-                <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="px-6 py-3 bg-[#0077b5] text-white font-black uppercase text-[8px] tracking-widest rounded-full hover:bg-white hover:text-[#0077b5] transition-all block text-center shadow-lg shadow-[#0077b5]/20">LinkedIn Profile</a>
+            <div class="lg:pl-8">
+                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-6">Languages</h2>
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <span class="text-xl font-bold text-white italic">English</span>
+                        <span class="text-gold font-black uppercase text-[9px] tracking-widest border border-gold/20 px-3 py-1 rounded-full">Professional</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <span class="text-xl font-bold text-white italic">Hindi</span>
+                        <span class="text-gold font-black uppercase text-[9px] tracking-widest">Native</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <span class="text-xl font-bold text-white italic">Punjabi</span>
+                        <span class="text-gold font-black uppercase text-[9px] tracking-widest">Native</span>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-6 text-[7px] text-gray-700 font-black uppercase tracking-[0.5em]">
-            <div>© 2025 KALASH NANDAL. BUILT FOR GLOBAL PERFORMANCE.</div>
-            <div class="mt-4 md:mt-0 flex gap-8">
-                <a href="#home" class="hover:text-white transition">Back to Top</a>
+    </section>
+
+    <!-- Unified Footer Area -->
+    <div class="footer-terminal">
+        <!-- Message & Infinite Quotes Marquee (Full Width) -->
+        <section class="py-28 text-center overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 mb-20 reveal text-center">
+                <h2 class="heading-serif text-5xl md:text-8xl text-white leading-none">
+                    Engineering <br><span class="text-gold italic font-bold">Excellence at Scale.</span>
+                </h2>
             </div>
-        </div>
-    </footer>
+            
+            <!-- Infinite Quotes Edge-to-Edge -->
+            <div class="w-full relative py-12 bg-white/[0.02] border-y border-white/5">
+                <div class="quote-track">
+                    <!-- Cards with responsive min-width -->
+                    <div class="flex items-center space-x-6 md:space-x-12 px-4 md:px-6">
+                        <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
+                            <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
+                            <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70">"Management is doing things right; leadership is doing the right things." <span class="text-gold ml-2">— Peter Drucker</span></p>
+                        </div>
+                        <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
+                            <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
+                            <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70">"Strategy is about making choices; it's about deliberately choosing to be different." <span class="text-gold ml-2">— Michael Porter</span></p>
+                        </div>
+                        <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
+                            <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
+                            <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70">"Price is what you pay. Value is what you get." <span class="text-gold ml-2">— Warren Buffett</span></p>
+                        </div>
+                        <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
+                            <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
+                            <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70">"Quality is doing it right when no one is looking." <span class="text-gold ml-2">— Henry Ford</span></p>
+                        </div>
+                    </div>
+                    <!-- Duplicate for infinite loop -->
+                    <div class="flex items-center space-x-6 md:space-x-12 px-4 md:px-6">
+                        <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
+                            <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
+                            <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70">"Management is doing things right; leadership is doing the right things." <span class="text-gold ml-2">— Peter Drucker</span></p>
+                        </div>
+                        <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
+                            <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
+                            <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70">"Strategy is about making choices; it's about deliberately choosing to be different." <span class="text-gold ml-2">— Michael Porter</span></p>
+                        </div>
+                        <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
+                            <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
+                            <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70">"Price is what you pay. Value is what you get." <span class="text-gold ml-2">— Warren Buffett</span></p>
+                        </div>
+                        <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
+                            <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
+                            <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70">"Quality is doing it right when no one is looking." <span class="text-gold ml-2">— Henry Ford</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Link Footer -->
+        <footer class="pt-24 pb-12 border-t border-white/10 relative text-center md:text-left">
+            <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12 md:gap-16 mb-24">
+                <div class="md:col-span-2">
+                    <img src="https://kalashnandal.co.in/favicon.webp" alt="K N" class="h-14 md:h-16 w-auto mb-8 md:mb-10 mx-auto md:mx-0 object-contain brightness-125" onerror="this.src='https://ui-avatars.com/api/?name=K+N&background=D4AF37&color=fff'">
+                    <p class="text-gray-400 max-w-sm text-xs leading-[2.4] italic border-l-2 border-gold/40 pl-6 md:pl-10 py-2 mx-auto md:mx-0">
+                        Strategic growth architect bridging technical precision with operational scale. Overseeing high-performance portfolios for global markets.
+                    </p>
+                </div>
+                <div>
+                    <h5 class="text-white font-black mb-8 md:mb-12 uppercase tracking-[0.4em] text-[10px] text-gold">Navigation</h5>
+                    <ul class="space-y-4 md:space-y-6 text-gray-500 font-black uppercase text-[10px] tracking-[0.2em]">
+                        <li><a href="#home" class="hover:text-gold transition-all">Home Base</a></li>
+                        <li><a href="#mandates" class="hover:text-gold transition-all">Strategic Mandates</a></li>
+                        <li><a href="#testimonials" class="hover:text-gold transition-all">Social Proof</a></li>
+                        <li><a href="#history" class="hover:text-gold transition-all">Professional Path</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-white font-black mb-8 md:mb-12 uppercase tracking-[0.4em] text-[10px] text-gold">Direct Access</h5>
+                    <div class="space-y-8 md:space-y-10">
+                        <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="flex items-center justify-center md:justify-start gap-4 md:gap-6 px-8 md:px-10 py-5 md:py-6 bg-[#0077b5] text-white rounded-3xl hover:bg-white hover:text-[#0077b5] transition-all group shadow-2xl">
+                            <i data-lucide="linkedin" class="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-12 transition-transform"></i>
+                            <span class="font-black uppercase text-[10px] md:text-[11px] tracking-widest">Connect Directly</span>
+                        </a>
+                        <p class="text-gray-600 text-[9px] font-bold uppercase tracking-widest leading-relaxed">Built for Global Performance. <br>Based in Mohali, Punjab.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="max-w-7xl mx-auto px-6 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
+                <p class="text-[9px] text-white font-black uppercase tracking-[0.6em]">© 2026 KALASH NANDAL. BUILT FOR SCALE.</p>
+                <div class="flex gap-16">
+                    <a href="#home" class="text-[9px] text-gray-600 font-black uppercase tracking-widest hover:text-gold transition-all">Back to Peak</a>
+                </div>
+            </div>
+        </footer>
+    </div>
 
     <script>
         lucide.createIcons();
 
-        // Scroll Depth, Back to Top, and Smart Sticky Header Logic
+        // 1. Scroll Logic: Depth, Back to Top, and Smart Header
         const scrollBar = document.getElementById('scroll-depth-bar');
         const scrollToTopBtn = document.getElementById('scroll-to-top');
         const header = document.getElementById('main-header');
-        
         let lastScrollY = window.scrollY;
 
         window.addEventListener('scroll', () => {
@@ -765,11 +1030,9 @@
             const windowHeight = window.innerHeight;
             const fullHeight = document.documentElement.scrollHeight;
             
-            // 1. Scroll Depth Progress
             const scrollPercent = (currentScrollY / (fullHeight - windowHeight)) * 100;
-            scrollBar.style.width = scrollPercent + "%";
+            if (scrollBar) scrollBar.style.width = scrollPercent + "%";
 
-            // 2. Toggle Back to Top Button visibility
             if (currentScrollY > 300) {
                 scrollToTopBtn.classList.remove('opacity-0', 'invisible', 'scale-50');
                 scrollToTopBtn.classList.add('opacity-100', 'visible', 'scale-100');
@@ -778,7 +1041,6 @@
                 scrollToTopBtn.classList.remove('opacity-100', 'visible', 'scale-100');
             }
 
-            // 3. Smart Header Logic (Sticky on scroll up, hide on scroll down)
             if (currentScrollY < 100) {
                 header.classList.remove('header-hidden');
             } else if (currentScrollY > lastScrollY) {
@@ -786,116 +1048,120 @@
             } else {
                 header.classList.remove('header-hidden');
             }
-            
             lastScrollY = currentScrollY;
         }, { passive: true });
 
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        scrollToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-        // Modal Logic for Testimonials
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalContent = document.getElementById('modal-content');
-        const modalClose = document.getElementById('modal-close');
+        // 2. Section Reveal Observer
+        const revealCallback = (entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    const bars = entry.target.querySelectorAll('.skill-progress');
+                    bars.forEach(bar => bar.style.width = bar.dataset.width);
+                }
+            });
+        };
+        const revealObserver = new IntersectionObserver(revealCallback, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-        function openModal(imgSrc) {
-            modalContent.src = imgSrc;
+        // 3. Typewriter Effect
+        const typingEl = document.querySelector('.typing-text');
+        if (typingEl) {
+            const words = JSON.parse(typingEl.getAttribute('data-words'));
+            let wordIndex = 0, charIndex = 0, isDeleting = false;
+            const type = () => {
+                const currentWord = words[wordIndex];
+                if (isDeleting) {
+                    typingEl.textContent = currentWord.substring(0, charIndex - 1);
+                    charIndex--;
+                } else {
+                    typingEl.textContent = currentWord.substring(0, charIndex + 1);
+                    charIndex++;
+                }
+                let typeSpeed = isDeleting ? 50 : 150;
+                if (!isDeleting && charIndex === currentWord.length) {
+                    typeSpeed = 2000;
+                    isDeleting = true;
+                } else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    wordIndex = (wordIndex + 1) % words.length;
+                    typeSpeed = 500;
+                }
+                setTimeout(type, typeSpeed);
+            };
+            type();
+        }
+
+        // 4. Local Time
+        const updateTime = () => {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' };
+            const timeEl = document.getElementById('local-time');
+            if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-US', options);
+        };
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 5. Testimonial Modal
+        const modalOverlay = document.getElementById('modal-overlay'), modalContent = document.getElementById('modal-content');
+        const openModal = (src) => {
+            modalContent.src = src;
             modalOverlay.classList.remove('hidden');
-            setTimeout(() => {
-                modalOverlay.classList.add('opacity-100');
-            }, 10);
+            setTimeout(() => modalOverlay.classList.add('opacity-100'), 10);
             document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal() {
+        };
+        const closeModal = () => {
             modalOverlay.classList.remove('opacity-100');
-            setTimeout(() => {
-                modalOverlay.classList.add('hidden');
-                modalContent.src = "";
-            }, 300);
+            setTimeout(() => { modalOverlay.classList.add('hidden'); modalContent.src = ""; }, 300);
             document.body.style.overflow = '';
-        }
+        };
+        const modalCloseBtn = document.getElementById('modal-close');
+        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+        if (modalOverlay) modalOverlay.addEventListener('click', (e) => e.target === modalOverlay && closeModal());
+        document.addEventListener('keydown', (e) => (e.key === "Escape") && closeModal());
 
-        modalClose.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) closeModal();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") closeModal();
-        });
-
-        // Navigation & Mobile Menu Logic
-        const menuBtn = document.getElementById('menu-btn');
-        const closeBtn = document.getElementById('close-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileLinks = document.querySelectorAll('.mobile-nav-link');
-
-        function toggleMenu(forceClose = false) {
-            const isOpening = mobileMenu.classList.contains('menu-hidden') && !forceClose;
-            if (isOpening) {
+        // 6. Navigation Logic
+        const menuBtn = document.getElementById('menu-btn'), mobileMenu = document.getElementById('mobile-menu');
+        const toggleMenu = (close = false) => {
+            if (mobileMenu.classList.contains('menu-hidden') && !close) {
                 mobileMenu.classList.remove('menu-hidden');
                 document.body.style.overflow = 'hidden';
             } else {
                 mobileMenu.classList.add('menu-hidden');
                 document.body.style.overflow = '';
             }
-        }
+        };
+        if (menuBtn) menuBtn.addEventListener('click', () => toggleMenu());
+        const closeMenuBtn = document.getElementById('close-btn');
+        if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => toggleMenu(true));
+        document.querySelectorAll('.mobile-nav-link').forEach(link => link.addEventListener('click', () => toggleMenu(true)));
 
-        menuBtn.addEventListener('click', () => toggleMenu());
-        closeBtn.addEventListener('click', () => toggleMenu(true));
-        mobileLinks.forEach(link => link.addEventListener('click', () => toggleMenu(true)));
-
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                const target = document.querySelector(targetId);
-                if (target) {
-                    e.preventDefault();
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        });
-
-        // Trajectory Trajectory Observer
+        // 7. Trajectory logic
         const historyItems = document.querySelectorAll('.history-item');
-        function setActiveHistoryItem(item) {
+        const setActiveHistoryItem = (item) => {
             historyItems.forEach(el => el.classList.remove('active'));
             item.classList.add('active');
-        }
-
+        };
         historyItems.forEach(item => {
             item.addEventListener('mouseenter', () => setActiveHistoryItem(item));
-            item.addEventListener('click', () => {
-                setActiveHistoryItem(item);
-                item.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
+            item.addEventListener('click', () => { setActiveHistoryItem(item); item.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
         });
 
-        // SMM mandates toggle
-        const btnSoul = document.getElementById('btn-soul');
-        const btnBtf = document.getElementById('btn-btf');
-        const feedSoul = document.getElementById('feed-soul');
-        const feedBtf = document.getElementById('feed-btf');
-
-        function switchSMM(target) {
-            if (target === 'soul') {
-                btnSoul.classList.add('active');
-                btnBtf.classList.remove('active');
-                feedSoul.classList.add('active');
-                feedBtf.classList.remove('active');
-            } else {
-                btnBtf.classList.add('active');
-                btnSoul.classList.remove('active');
-                feedBtf.classList.add('active');
-                feedSoul.classList.remove('active');
+        // 8. SMM Toggle
+        const btnSoul = document.getElementById('btn-soul'), btnBtf = document.getElementById('btn-btf');
+        const feedSoul = document.getElementById('feed-soul'), feedBtf = document.getElementById('feed-btf');
+        const switchSMM = (target) => {
+            if (btnSoul && btnBtf && feedSoul && feedBtf) {
+                btnSoul.classList.toggle('active', target === 'soul');
+                btnBtf.classList.toggle('active', target === 'btf');
+                feedSoul.classList.toggle('active', target === 'soul');
+                feedBtf.classList.toggle('active', target === 'btf');
             }
-        }
-
-        btnSoul.addEventListener('click', () => switchSMM('soul'));
-        btnBtf.addEventListener('click', () => switchSMM('btf'));
+        };
+        if (btnSoul) btnSoul.addEventListener('click', () => switchSMM('soul'));
+        if (btnBtf) btnBtf.addEventListener('click', () => switchSMM('btf'));
     </script>
 </body>
 </html>
