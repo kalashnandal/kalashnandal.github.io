@@ -1,8 +1,7 @@
-
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" href="https://kalashnandal.co.in/favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalash Nandal | CEO & Digital Growth Architect</title>
@@ -45,6 +44,7 @@
             --gold: #D4AF37;
             --charcoal: #080808;
             --charcoal-light: #121212;
+            --linkedin: #0077b5;
         }
 
         body {
@@ -52,6 +52,8 @@
             background-color: var(--charcoal);
             color: #f3f4f6;
             overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .heading-serif { font-family: 'Playfair Display', serif; }
@@ -59,7 +61,6 @@
         .bg-gold { background-color: var(--gold); }
         .border-gold { border-color: var(--gold); }
         
-        /* Optimized Padding for minimal blank space */
         .section-padding { padding-top: 4rem; padding-bottom: 4rem; }
 
         .glass-card {
@@ -93,49 +94,151 @@
 
         .nav-link:hover::after { width: 100%; }
 
-        /* Interactive Timeline Styling */
-        .history-item {
-            transition: all 0.3s ease;
-            opacity: 0.6;
+        /* Mobile Menu Transitions */
+        #mobile-menu {
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .history-item:hover {
-            opacity: 1;
-            transform: translateX(10px);
-        }
-        .history-item:hover .timeline-node {
-            background-color: var(--gold);
-            box-shadow: 0 0 20px var(--gold);
-            scale: 1.5;
+        
+        .menu-hidden {
+            transform: translateX(100%);
         }
 
-        .reel-card {
-            aspect-ratio: 9 / 16;
-            overflow: hidden;
-            border-radius: 1.5rem;
-            border: 1px solid rgba(255,255,255,0.05);
+        .history-item {
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            opacity: 0.25;
+            cursor: pointer;
+            border-left: 2px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+        
+        .history-item.current-job {
+            opacity: 0.7;
+            border-left-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .history-item:hover, .history-item.active {
+            opacity: 1 !important;
+            border-left-color: var(--gold) !important;
+        }
+
+        .history-item.active {
+            transform: translateX(10px);
+        }
+        
+        .timeline-node {
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            background-color: #222;
+        }
+
+        .history-item:hover .timeline-node,
+        .history-item.active .timeline-node, 
+        .history-item.current-job .timeline-node {
+            background-color: var(--gold);
+            box-shadow: 0 0 15px var(--gold);
+            transform: scale(1.5);
+        }
+
+        .history-item.active .timeline-node {
+            transform: scale(2.2);
+            box-shadow: 0 0 30px var(--gold);
+        }
+
+        @media (max-width: 640px) {
+            .history-item.active { transform: translateX(5px); }
+            .history-item { padding-left: 1.5rem !important; }
+        }
+
+        /* SMM Account Toggle */
+        .account-btn.active {
+            background-color: var(--gold);
+            color: black;
+            border-color: var(--gold);
+        }
+
+        .account-feed {
+            display: none;
+            animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        .account-feed.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--charcoal); }
         ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
-/* Fix Instagram Embed Theme Mismatch */
-iframe.instagram-media {
-    background: transparent !important;
-    border: none !important;
-    border-radius: 2.5rem !important;
-    margin: 0 auto !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
-}
+        .feed-wrapper {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            border-radius: 2rem;
+            padding: 0.5rem;
+            background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+        }
 
-/* Ensure the staggered layout doesn't overlap the next section */
-#soul {
-    z-index: 10;
-}
+        .iframe-container {
+            width: 100%;
+            height: 650px;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            background: #fff;
+        }
 
+        /* Floating Google Button */
+        .google-chat-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            color: black;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .google-chat-btn:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3);
+            background: var(--gold);
+        }
+
+        @media (max-width: 768px) {
+            .iframe-container {
+                height: 500px;
+            }
+            .google-chat-btn {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                padding: 10px 18px;
+            }
+        }
     </style>
 </head>
 <body class="selection:bg-gold selection:text-black">
+
+    <!-- Floating Google CTA -->
+    <a href="https://www.google.com/search?q=Kalash+Nandal" target="_blank" class="google-chat-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        <span>Find me on Google</span>
+    </a>
 
     <!-- Header -->
     <header class="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-xl border-b border-white/5">
@@ -148,14 +251,35 @@ iframe.instagram-media {
                 <a href="#home" class="nav-link">Home</a>
                 <a href="#mandates" class="nav-link">Mandates</a>
                 <a href="#history" class="nav-link">History</a>
+                <a href="#accolades" class="nav-link">Accolades</a>
+                <a href="#creative" class="nav-link">Creative</a>
+                <a href="#insights" class="nav-link">Insights</a>
                 <a href="#discipline" class="nav-link">Discipline</a>
-                <a href="#soul" class="nav-link">Soul</a>
                 <a href="onboarding.html" class="px-5 py-2 bg-gold text-black rounded-full hover:bg-white transition-all shadow-lg shadow-gold/20">Portal</a>
             </div>
 
-            <button class="md:hidden text-white" id="menu-btn"><i data-lucide="menu"></i></button>
+            <button class="md:hidden text-white p-2" id="menu-btn" aria-label="Toggle Menu">
+                <i data-lucide="menu"></i>
+            </button>
         </nav>
     </header>
+
+    <!-- Mobile Menu Overlay (Mega Menu) -->
+    <div id="mobile-menu" class="fixed inset-0 z-[60] bg-black menu-hidden md:hidden flex flex-col justify-center items-center">
+        <button id="close-btn" class="absolute top-6 right-6 text-white p-2" aria-label="Close Menu">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <div class="flex flex-col space-y-8 text-center">
+            <a href="#home" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Home</a>
+            <a href="#mandates" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Mandates</a>
+            <a href="#history" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">History</a>
+            <a href="#accolades" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Accolades</a>
+            <a href="#creative" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Creative</a>
+            <a href="#insights" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Insights</a>
+            <a href="#discipline" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Discipline</a>
+            <a href="onboarding.html" class="mobile-nav-link px-10 py-4 bg-gold text-black font-black rounded-full shadow-xl shadow-gold/20">Portal Access</a>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section id="home" class="min-h-[80vh] flex items-center pt-24 relative overflow-hidden">
@@ -177,7 +301,7 @@ iframe.instagram-media {
                     <a href="#mandates" class="px-8 py-4 bg-gold text-black font-black uppercase text-[10px] tracking-widest rounded-full hover:bg-white transition-all transform hover:-translate-y-1 shadow-xl shadow-gold/10">
                         View Strategic Scope
                     </a>
-                    <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="hover:text-gold text-white/40 transition-colors flex items-center gap-2 font-bold text-[10px] tracking-widest uppercase"><i data-lucide="linkedin" class="w-4 h-4"></i> LinkedIn</a>
+                    <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="hover:text-[#0077b5] text-white/40 transition-colors flex items-center gap-2 font-bold text-[10px] tracking-widest uppercase"><i data-lucide="linkedin" class="w-4 h-4"></i> LinkedIn</a>
                 </div>
             </div>
             
@@ -201,7 +325,6 @@ iframe.instagram-media {
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Back2Farms -->
                 <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
                     <div class="mb-6 h-10 flex items-center justify-center">
                         <img src="https://backtofarms.com/assets/images/logo-dark.svg" alt="Back2Farms" class="h-8 w-auto invert brightness-0">
@@ -212,10 +335,9 @@ iframe.instagram-media {
                     <a href="https://backtofarms.com" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
                 </div>
 
-                <!-- IDS USA -->
                 <div class="glass-card p-6 rounded-3xl flex flex-col text-center border-gold/30 bg-gold/[0.02]">
-<div class="mb-6 h-10 flex items-center justify-center">
-                        <img src="https://kalashnandal.co.in/IDS-logo-removebg-preview.png" alt="Back2Farms" class="h-8 w-auto invert brightness-0">
+                    <div class="mb-6 h-10 flex items-center justify-center">
+                        <img src="https://kalashnandal.co.in/IDS-logo-removebg-preview.png" alt="IDS USA" class="h-8 w-auto invert brightness-0">
                     </div>
                     <h4 class="text-lg font-bold text-white mb-1">IDS USA</h4>
                     <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Head of Operations</p>
@@ -223,7 +345,6 @@ iframe.instagram-media {
                     <a href="onboarding.html" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2"> PORTAL <i data-lucide="external-link" class="w-3"></i></a>
                 </div>
 
-                <!-- Denver SEO -->
                 <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
                     <div class="mb-6 h-10 flex items-center justify-center">
                         <img src="https://www.seodenver.us/images/logo_new_02.svg" alt="Denver SEO" class="h-5 w-auto brightness-0 invert">
@@ -234,7 +355,6 @@ iframe.instagram-media {
                     <a href="https://www.seodenver.us/" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
                 </div>
 
-                <!-- iMark -->
                 <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
                     <div class="mb-6 h-10 flex items-center justify-center">
                         <img src="https://www.imarkinfotech.com/wp-content/themes/idigital/idigital/images/new/logo.png?v.345.0" alt="iMark" class="h-5 w-auto brightness-0 invert">
@@ -243,63 +363,65 @@ iframe.instagram-media {
                     <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Project Manager (Team Lead)</p>
                     <p class="text-gray-400 text-[11px] leading-relaxed mb-6 flex-grow">Directing 50+ international projects and managing 4 PMs.</p>
                     <a href="https://www.imarkinfotech.com/" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
-
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Interactive History -->
+    <!-- Interactive History (Trajectory) -->
     <section id="history" class="section-padding bg-black/40 border-y border-white/5">
         <div class="max-w-4xl mx-auto px-6">
             <h2 class="text-center text-gold font-black uppercase tracking-[0.5em] mb-12 text-[10px] italic">Trajectory</h2>
             
-            <div class="relative space-y-4">
+            <div class="relative space-y-6">
                 <!-- Current Block -->
-                <div class="history-item relative pl-12 border-l-2 border-gold/30 pb-8">
-                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full bg-gold transition-all duration-300"></div>
+                <div class="history-item current-job relative pl-10 sm:pl-12 pb-8 border-gold active" data-role="pm-ops">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div class="mb-4">
-                        <span class="text-[10px] font-black text-gold/60 uppercase tracking-widest block mb-1">Jan 2024 - Present</span>
-                        <h4 class="text-xl font-bold text-white uppercase">Project Manager & Operations Lead</h4>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="bg-white/5 p-4 rounded-xl border border-white/5">
-                            <h5 class="text-gold font-bold text-[10px] uppercase tracking-widest mb-2">iMark Infotech</h5>
-                            <p class="text-gray-400 text-[11px] leading-relaxed">Leading 50+ projects for 24 international clients and managing 4 PMs.</p>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span class="text-[10px] font-black text-gold uppercase tracking-widest">Jan 2024 - Present</span>
+                            <span class="bg-gold text-black text-[7px] font-black uppercase px-2 py-0.5 rounded-full">Current Role</span>
                         </div>
-                        <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <h4 class="text-xl font-bold text-white uppercase leading-tight">Project Manager & Operations Lead</h4>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="bg-white/5 p-4 rounded-xl border border-gold/30">
+                            <h5 class="text-gold font-bold text-[10px] uppercase tracking-widest mb-2">iMark Infotech</h5>
+                            <p class="text-white text-[11px] leading-relaxed">Leading 50+ projects for 24 international clients and managing 4 PMs.</p>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-xl border border-gold/30">
                             <h5 class="text-gold font-bold text-[10px] uppercase tracking-widest mb-2">IDS & Back2Farms</h5>
-                            <p class="text-gray-400 text-[11px] leading-relaxed">Executing Head of Operations (IDS) and CEO (Back2Farms) mandates.</p>
+                            <p class="text-white text-[11px] leading-relaxed">Executing Head of Operations (IDS) and CEO (Back2Farms) mandates.</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Denver SEO Block -->
-                <div class="history-item relative pl-12 border-l-2 border-white/5 pb-8">
-                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full bg-gray-800 transition-all duration-300"></div>
+                <div class="history-item relative pl-10 sm:pl-12 pb-8" data-role="denver-seo">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div>
                         <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">March - May 2024</span>
-                        <h4 class="text-lg font-bold text-white/80 uppercase">Head of Denver SEO</h4>
+                        <h4 class="text-lg font-bold text-white/60 uppercase">Head of Denver SEO</h4>
                         <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Handled US specialized team and communication workflows for domestic US client scaling.</p>
                     </div>
                 </div>
 
                 <!-- Senior Analyst Block -->
-                <div class="history-item relative pl-12 border-l-2 border-white/5 pb-8">
-                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full bg-gray-800 transition-all duration-300"></div>
+                <div class="history-item relative pl-10 sm:pl-12 pb-8" data-role="senior-analyst">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div>
                         <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">Jan 2024 - July 2025</span>
-                        <h4 class="text-lg font-bold text-white/80 uppercase">Senior Project Analyst</h4>
+                        <h4 class="text-lg font-bold text-white/60 uppercase">Senior Project Analyst</h4>
                         <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Promoted twice in 18 months for account stabilization. Leveraged Figma for solution visualization.</p>
                     </div>
                 </div>
 
                 <!-- Quality Analyst Block -->
-                <div class="history-item relative pl-12 border-l-2 border-white/5">
-                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full bg-gray-800 transition-all duration-300"></div>
+                <div class="history-item relative pl-10 sm:pl-12" data-role="qa">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div>
                         <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">July 2022 - Jan 2024</span>
-                        <h4 class="text-lg font-bold text-white/80 uppercase">Quality Analyst</h4>
+                        <h4 class="text-lg font-bold text-white/60 uppercase">Quality Analyst</h4>
                         <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Global interaction auditing. Analyzed transcripts/calls to improve compliance and conversions.</p>
                     </div>
                 </div>
@@ -307,8 +429,128 @@ iframe.instagram-media {
         </div>
     </section>
 
+    <!-- Awards & Accolades Section -->
+    <section id="accolades" class="section-padding">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Recognition of Excellence</h2>
+                <h3 class="text-4xl text-white font-bold heading-serif italic">Accolades & Milestones</h3>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="glass-card rounded-[2.5rem] overflow-hidden group">
+                    <div class="aspect-video relative overflow-hidden">
+                        <img src="https://kalashnandal.co.in/Consistent%20Performer%20-%202025.webp" alt="Rising Star 2024 Award" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60"></div>
+                    </div>
+                    <div class="p-10 relative">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="p-3 bg-gold/10 rounded-2xl border border-gold/20">
+                                <i data-lucide="star" class="text-gold w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-2xl font-black text-white uppercase tracking-tight leading-none">Rising Star</h4>
+                                <p class="text-gold font-black uppercase text-[10px] tracking-[0.3em] mt-2">Awarded 2024</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed font-medium">Recognized for rapid leadership growth, exceptional strategic execution, and the successful stabilization of high-priority international accounts within the first quarter.</p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-[2.5rem] overflow-hidden group">
+                    <div class="aspect-video relative overflow-hidden">
+                        <img src="https://kalashnandal.co.in/Rising%20Star-2024.webp" alt="Consistent Performer 2025 Award" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60"></div>
+                    </div>
+                    <div class="p-10 relative">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="p-3 bg-gold/10 rounded-2xl border border-gold/20">
+                                <i data-lucide="award" class="text-gold w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-2xl font-black text-white uppercase tracking-tight leading-none">Consistent Performer</h4>
+                                <p class="text-gold font-black uppercase text-[10px] tracking-[0.3em] mt-2">Awarded 2025</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed font-medium">Honored for maintaining peak operational efficiency across multiple mandates and delivering year-over-year growth for a portfolio of over 150 global campaigns.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Creative Direction & SMM Section -->
+    <section id="creative" class="section-padding overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 text-center md:text-left">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+                <div class="max-w-2xl">
+                    <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Social Media Management</h2>
+                    <h3 class="text-4xl text-white font-bold heading-serif mb-4 italic leading-tight">Creative Direction & SMM.</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        End-to-end management of high-engagement digital profiles. Use the controls below to switch between mandates.
+                    </p>
+                </div>
+                <!-- SMM TABS -->
+                <div class="flex bg-white/5 rounded-full p-1 border border-white/10 w-full md:w-auto">
+                    <button id="btn-soul" class="account-btn active flex-1 md:flex-none px-6 sm:px-8 py-3 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all">Soul (Lifestyle)</button>
+                    <button id="btn-btf" class="account-btn flex-1 md:flex-none px-6 sm:px-8 py-3 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all">Back2Farms (Business)</button>
+                </div>
+            </div>
+
+            <div class="flex flex-col">
+                <!-- Soul Feed -->
+                <div id="feed-soul" class="account-feed active space-y-6">
+                    <div class="flex items-center justify-between px-2">
+                        <div>
+                            <h4 class="text-xl sm:text-2xl font-bold text-white uppercase italic">Meet Soul</h4>
+                            <p class="text-gold text-[10px] font-black uppercase tracking-widest mt-1">Siberian Husky Brand Management</p>
+                        </div>
+                        <a href="https://www.instagram.com/soul_thesiberianhusky/?hl=en" target="_blank" class="text-white hover:text-gold transition-colors flex items-center gap-2 font-bold text-[10px] tracking-widest uppercase">Visit <i data-lucide="instagram" class="w-4"></i></a>
+                    </div>
+                    <div class="glass-card rounded-[2.5rem] p-3 sm:p-4 border-gold/10">
+                        <script src="https://elfsightcdn.com/platform.js" async></script>
+                        <div class="elfsight-app-36658727-660d-4f18-bcb7-fe91a5af5298" data-elfsight-app-lazy></div>
+                    </div>
+                </div>
+
+                <!-- Back2Farms Feed -->
+                <div id="feed-btf" class="account-feed space-y-6">
+                    <div class="flex items-center justify-between px-2">
+                        <div>
+                            <h4 class="text-xl sm:text-2xl font-bold text-white uppercase italic">Back2Farms Official</h4>
+                            <p class="text-gold text-[10px] font-black uppercase tracking-widest mt-1">Agri-Tech SMM & Branding</p>
+                        </div>
+                        <a href="https://www.instagram.com/backtofarms/" target="_blank" class="text-white hover:text-gold transition-colors flex items-center gap-2 font-bold text-[10px] tracking-widest uppercase">Visit <i data-lucide="instagram" class="w-4"></i></a>
+                    </div>
+                    <div class="glass-card rounded-[2.5rem] p-3 sm:p-4 border-white/5 overflow-hidden">
+                        <script src="https://cdn.commoninja.com/sdk/latest/commonninja.js" defer></script>
+                        <div class="commonninja_component pid-8db56e3c-a168-41ee-8f17-0c9c2b80e54f"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LinkedIn Insights Section -->
+    <section id="insights" class="section-padding bg-black/20 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-[#0077b5] font-black uppercase tracking-[0.4em] text-[10px] mb-2">Professional Network</h2>
+            <h3 class="text-4xl text-white font-bold heading-serif italic mb-12">LinkedIn Insights</h3>
+            
+            <div class="feed-wrapper" style="border-color: rgba(0, 119, 181, 0.3);">
+                <div class="iframe-container">
+                    <iframe src="https://widgets.sociablekit.com/linkedin-profile-posts/iframe/25638319" frameborder="0" width="100%" height="100%"></iframe>
+                </div>
+            </div>
+            
+            <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="mt-8 inline-flex items-center gap-3 px-8 py-3 bg-[#0077b5] text-white rounded-full font-black text-[9px] uppercase tracking-[0.2em] transition-all hover:bg-white hover:text-[#0077b5] shadow-lg shadow-[#0077b5]/20">
+                Network with Kalash <i data-lucide="linkedin" class="w-3"></i>
+            </a>
+        </div>
+    </section>
+
     <!-- Fitness Transformation -->
-    <section id="discipline" class="section-padding">
+    <section id="discipline" class="section-padding bg-black/40">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div class="relative">
@@ -351,64 +593,8 @@ iframe.instagram-media {
         </div>
     </section>
 
-<section id="soul" class="section-padding bg-black/60 relative pb-24 md:pb-56">
-    <div class="max-w-7xl mx-auto px-6">
-        
-        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 text-center md:text-left">
-            <div class="max-w-xl">
-                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">More Than a Pet</h2>
-                <h3 class="text-4xl text-white font-bold heading-serif mb-4 italic">Meet Soul.</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    A Siberian Husky representing values of loyalty, energy, and mindfulness. Caring for her routine extends directly into my professional leadership style.
-                </p>
-            </div>
-            <a href="https://www.instagram.com/soul_thesiberianhusky/?hl=en" target="_blank" class="inline-flex items-center gap-3 px-6 py-3 bg-white text-black font-black uppercase text-[9px] tracking-widest rounded-full hover:bg-gold transition-all group shadow-xl">
-                <i data-lucide="instagram" class="w-4 h-4"></i> Meet Soul <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-2 transition-transform"></i>
-            </a>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-10">
-            <div class="flex justify-center">
-                <div class="reel-frame w-full max-w-[330px]">
-                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/C29DLD9PZdh/" data-instgrm-version="14" style="background:#000; border:0; margin:0; padding:0; width:100%;">
-                        <a href="https://www.instagram.com/reel/C29DLD9PZdh/"></a>
-                    </blockquote>
-                </div>
-            </div>
-
-            <div class="flex justify-center md:translate-y-16">
-                <div class="reel-frame w-full max-w-[330px]">
-                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/C2wLytEP-Mj/" data-instgrm-version="14" style="background:#000; border:0; margin:0; padding:0; width:100%;">
-                        <a href="https://www.instagram.com/reel/C2wLytEP-Mj/"></a>
-                    </blockquote>
-                </div>
-            </div>
-
-            <div class="flex justify-center">
-                <div class="reel-frame w-full max-w-[330px]">
-                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/C3cFB7cLAi3/" data-instgrm-version="14" style="background:#000; border:0; margin:0; padding:0; width:100%;">
-                        <a href="https://www.instagram.com/reel/C3cFB7cLAi3/"></a>
-                    </blockquote>
-                </div>
-            </div>
-
-            <div class="flex justify-center md:translate-y-16">
-                <div class="reel-frame w-full max-w-[330px]">
-                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/C3jw-ITrAlv/" data-instgrm-version="14" style="background:#000; border:0; margin:0; padding:0; width:100%;">
-                        <a href="https://www.instagram.com/reel/C3jw-ITrAlv/"></a>
-                    </blockquote>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<script async src="https://www.instagram.com/embed.js"></script>
-
-<script async src="https://www.instagram.com/embed.js"></script>
-
     <!-- Academics & Languages -->
-    <section class="section-padding bg-black/40">
+    <section class="section-padding bg-black/40 border-t border-white/5">
         <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-start">
             <div>
                 <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-6">Academic Foundation</h2>
@@ -451,28 +637,28 @@ iframe.instagram-media {
     <footer class="bg-black pt-20 pb-8 border-t border-white/5">
         <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
             <div class="md:col-span-2 text-center md:text-left">
-                <div class="text-2xl font-black tracking-tighter text-white mb-6 uppercase">KALASH<span class="text-gold">NANDAL</span></div>
+                <!-- Footer Favicon Logo (Absolute URL) -->
+                <img src="https://kalashnandal.co.in/favicon.png" alt="Kalash Nandal" class="h-14 w-auto mb-6 mx-auto md:mx-0 object-contain" onerror="this.src='https://ui-avatars.com/api/?name=K+N&background=D4AF37&color=fff'">
                 <p class="text-gray-500 max-w-xs text-xs italic border-l border-gold/30 pl-6 py-1 mx-auto md:mx-0">
                     High-performance strategist building future-proof ventures.
                 </p>
             </div>
-            
             <div>
                 <h5 class="text-white font-black mb-6 uppercase tracking-[0.3em] text-[8px]">Ecosystem</h5>
                 <ul class="space-y-3 text-gray-500 font-black uppercase text-[8px] tracking-[0.2em]">
                     <li><a href="#home" class="hover:text-gold transition">Home</a></li>
                     <li><a href="#mandates" class="hover:text-gold transition">Mandates</a></li>
                     <li><a href="#history" class="hover:text-gold transition">History</a></li>
+                    <li><a href="#creative" class="hover:text-gold transition">Creative Direction</a></li>
+                    <li><a href="#insights" class="hover:text-gold transition">Insights</a></li>
                     <li><a href="onboarding.html" class="text-gold">Portal Access</a></li>
                 </ul>
             </div>
-            
             <div>
                 <h5 class="text-white font-black mb-6 uppercase tracking-[0.3em] text-[8px]">Contact</h5>
-                <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="px-6 py-3 bg-white text-black font-black uppercase text-[8px] tracking-widest rounded-full hover:bg-gold transition-all block text-center">LinkedIn Profile</a>
+                <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="px-6 py-3 bg-[#0077b5] text-white font-black uppercase text-[8px] tracking-widest rounded-full hover:bg-white hover:text-[#0077b5] transition-all block text-center shadow-lg shadow-[#0077b5]/10">LinkedIn Profile</a>
             </div>
         </div>
-        
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-6 text-[7px] text-gray-700 font-black uppercase tracking-[0.5em]">
             <div>© 2025 KALASH NANDAL. BUILT FOR GLOBAL PERFORMANCE.</div>
             <div class="mt-4 md:mt-0 flex gap-8">
@@ -484,10 +670,37 @@ iframe.instagram-media {
     <script>
         lucide.createIcons();
 
-        // Smooth Scroll
+        // Improved Mobile Menu Logic (Mega Menu QA)
+        const menuBtn = document.getElementById('menu-btn');
+        const closeBtn = document.getElementById('close-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+
+        function toggleMenu(forceClose = false) {
+            const isOpening = mobileMenu.classList.contains('menu-hidden') && !forceClose;
+            
+            if (isOpening) {
+                mobileMenu.classList.remove('menu-hidden');
+                document.body.style.overflow = 'hidden'; // Lock background
+            } else {
+                mobileMenu.classList.add('menu-hidden');
+                document.body.style.overflow = ''; // Unlock background
+            }
+        }
+
+        menuBtn.addEventListener('click', () => toggleMenu());
+        closeBtn.addEventListener('click', () => toggleMenu(true));
+
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => toggleMenu(true));
+        });
+
+        // Smooth Scroll Logic
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
-                const target = document.querySelector(this.getAttribute('href'));
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                const target = document.querySelector(targetId);
                 if (target) {
                     e.preventDefault();
                     target.scrollIntoView({ behavior: 'smooth' });
@@ -495,11 +708,59 @@ iframe.instagram-media {
             });
         });
 
-const menuBtn = document.getElementById('menu-btn');
-// Logic to toggle a hidden mobile menu div would go here.
-// Currently, your 'hidden md:flex' div needs a mobile counterpart.
+        // Trajectory Logic
+        const historyItems = document.querySelectorAll('.history-item');
+        
+        function setActiveHistoryItem(item) {
+            historyItems.forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+        }
+
+        historyItems.forEach(item => {
+            item.addEventListener('mouseenter', () => setActiveHistoryItem(item));
+            item.addEventListener('click', () => {
+                setActiveHistoryItem(item);
+                item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+
+        // Trajectory Scroll Observer
+        const trajectoryObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+                    setActiveHistoryItem(entry.target);
+                }
+            });
+        }, { 
+            threshold: [0.6],
+            rootMargin: "-10% 0% -10% 0%" 
+        });
+
+        historyItems.forEach(item => trajectoryObserver.observe(item));
+
+        // SMM TAB TOGGLE LOGIC
+        const btnSoul = document.getElementById('btn-soul');
+        const btnBtf = document.getElementById('btn-btf');
+        const feedSoul = document.getElementById('feed-soul');
+        const feedBtf = document.getElementById('feed-btf');
+
+        function switchSMM(target) {
+            if (target === 'soul') {
+                btnSoul.classList.add('active');
+                btnBtf.classList.remove('active');
+                feedSoul.classList.add('active');
+                feedBtf.classList.remove('active');
+            } else {
+                btnBtf.classList.add('active');
+                btnSoul.classList.remove('active');
+                feedBtf.classList.add('active');
+                feedSoul.classList.remove('active');
+            }
+        }
+
+        btnSoul.addEventListener('click', () => switchSMM('soul'));
+        btnBtf.addEventListener('click', () => switchSMM('btf'));
 
     </script>
 </body>
 </html>
-
