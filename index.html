@@ -1,329 +1,504 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-    <link rel="icon" type="image/png" href="favicon.png">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalash Nandal - Senior Project Manager & Digital Growth Strategist</title>
+    <title>Kalash Nandal | CEO & Digital Growth Architect</title>
     
-    <meta name="description" content="Kalash Nandal is a high-performance Project Manager and CEO of Back2Farms, specializing in SEO, digital transformation, and international client operations.">
-    <meta name="keywords" content="Kalash Nandal, Project Manager Mohali, SEO Specialist, Back2Farms CEO, Digital Strategist, iMark Infotech">
-
+    <meta name="description" content="Kalash Nandal: Senior Project Manager, CEO of Back2Farms, and Head of Ops at IDS USA. Expert in SEO turnaround and US-based team leadership at Denver SEO.">
+    
+    <!-- SEO Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Person",
       "name": "Kalash Nandal",
       "jobTitle": "Senior Project Manager & Digital Growth Strategist",
-      "url": "https://kalashnandal.com",
+      "url": "https://kalashnandal.co.in",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Mohali",
         "addressRegion": "Punjab",
         "addressCountry": "India"
       },
-      "description": "Kalash Nandal is a high-performance Senior Project Manager and Digital Growth Strategist with a proven track record of orchestrating complex digital ecosystems and driving measurable business growth. Based in the Tri-City region of India, Kalash has distinguished himself as a versatile leader capable of bridging the gap between technical execution and high-level business vision. At the age of 24, he has already spearheaded significant projects across diverse industries, ranging from agricultural technology to legal services and international logistics. As the CEO behind Back2Farms (backtofarms.com), Kalash is currently revolutionizing the agricultural supply chain in India. By leveraging mobile technology and strategic SEO, he has helped build a platform that connects local farmers directly with consumers, ensuring freshness and fair pricing. Kalash’s professional portfolio is marked by his ability to manage international client accounts with precision. He has successfully directed SEO and digital operations for prominent firms including Facility Network, We Install It, Lampert & Walsh, is also serving as Head of Operations at IDS in USA. He is recognized as a 'Client Turnaround Specialist' who stabilizes high-value accounts through technical innovation and process automation. His expertise lies in navigating the 'initial learning phases' of complex ad campaigns, optimizing search engine visibility, and crafting professional communications that resonate with global stakeholders. Beyond traditional project management, Kalash is a forward-thinking technologist who integrates advanced Artificial Intelligence into his workflow. He is proficient in AI-driven content creation, image generation, and video production, using these tools to maintain a competitive edge in the 2025 digital landscape. Dedicated to excellence and continuous innovation, Kalash Nandal continues to expand his footprint in the Indian startup ecosystem while delivering world-class results for his international partners.",
-      "knowsAbout": [
-        "Agile Project Management",
-        "Search Engine Optimization (SEO)",
-        "Strategic Digital Marketing",
-        "Agricultural Technology (AgriTech)",
-        "Social Media Branding",
-        "HTML5 & CSS3 Development",
-        "AI-Assisted Content Production",
-        "Client Relationship Management",
-        "Supply Chain Logistics",
-        "Market Positioning",
-        "Figma Design",
-        "Crisis Management"
-      ],
+      "description": "High-performance Project Manager and Operations Lead. CEO of Back2Farms, Head of Ops at IDS USA, and former Head of Denver SEO.",
+      "knowsAbout": ["Strategic Leadership", "Crisis Management", "Team Building (4 PMs)", "SEO", "Process Automation", "Figma Design", "HTML/CSS/CMS"],
       "worksFor": [
-        {
-          "@type": "Organization",
-          "name": "iMark Infotech",
-          "url": "https://imarkinfotech.com"
-        },
-        {
-          "@type": "Organization",
-          "name": "Back2Farms",
-          "url": "https://backtofarms.com"
-        }
-      ],
-      "alumniOf": {
-        "@type": "CollegeOrUniversity",
-        "name": "Panjab University"
-      },
-      "sameAs": [
-        "https://linkedin.com/in/kalash-nandal",
-        "https://backtofarms.com"
+        { "@type": "Organization", "name": "iMark Infotech" },
+        { "@type": "Organization", "name": "Back2Farms" },
+        { "@type": "Organization", "name": "IDS USA" },
+        { "@type": "Organization", "name": "Denver SEO", "url": "https://www.seodenver.us/" }
       ]
     }
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
         :root {
-            --charcoal: #1a1a1a;
-            --charcoal-light: #2d2d2d;
-            --gold: #D4AF37; 
-            --gold-light: #f3e5ab;
-            --text-gray: #4b5563;
+            --gold: #D4AF37;
+            --charcoal: #080808;
+            --charcoal-light: #121212;
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
-            background-color: #525252;
-            -webkit-print-color-adjust: exact;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--charcoal);
+            color: #f3f4f6;
+            overflow-x: hidden;
         }
+
+        .heading-serif { font-family: 'Playfair Display', serif; }
+        .text-gold { color: var(--gold); }
+        .bg-gold { background-color: var(--gold); }
+        .border-gold { border-color: var(--gold); }
         
-        @page {
-            size: A4;
-            margin: 0;
+        /* Optimized Padding for minimal blank space */
+        .section-padding { padding-top: 4rem; padding-bottom: 4rem; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .resume-wrapper {
-            width: 210mm;
-            margin: 0 auto;
+        .glass-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px -10px rgba(212, 175, 55, 0.15);
         }
 
-        .page {
-            width: 210mm;
-            height: 297mm;
-            background: white;
-            display: flex;
-            overflow: hidden;
+        .nav-link {
             position: relative;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            transition: color 0.3s;
         }
 
-        @media print {
-            body { background: white; }
-            .resume-wrapper { margin: 0; }
-            .page {
-                margin: 0;
-                box-shadow: none;
-                page-break-after: always;
-            }
-            .page:last-child {
-                page-break-after: auto;
-            }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: var(--gold);
+            transition: width 0.3s;
         }
 
-        .sidebar-bg { 
-            background-color: var(--charcoal); 
-            color: white;
+        .nav-link:hover::after { width: 100%; }
+
+        /* Interactive Timeline Styling */
+        .history-item {
+            transition: all 0.3s ease;
+            opacity: 0.6;
         }
-        
-        .gold-text { color: var(--gold); }
-        
-        .section-header {
-            font-family: 'Times New Roman', Times, serif;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--charcoal);
-            border-bottom: 2px solid var(--gold);
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            font-size: 1.15rem;
+        .history-item:hover {
+            opacity: 1;
+            transform: translateX(10px);
+        }
+        .history-item:hover .timeline-node {
+            background-color: var(--gold);
+            box-shadow: 0 0 20px var(--gold);
+            scale: 1.5;
         }
 
-        .sidebar-header {
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: white;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #4b5563;
-            padding-bottom: 5px;
+        .reel-card {
+            aspect-ratio: 9 / 16;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        
-        .profile-img-container {
-            border: 4px solid var(--gold); 
-            box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
-        }
-        
-        .tight-list li {
-            margin-bottom: 0.3rem;
-        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--charcoal); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+/* Fix Instagram Embed Theme Mismatch */
+iframe.instagram-media {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 2.5rem !important;
+    margin: 0 auto !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+
+/* Ensure the staggered layout doesn't overlap the next section */
+#soul {
+    z-index: 10;
+}
+
     </style>
 </head>
-<body>
+<body class="selection:bg-gold selection:text-black">
 
-    <div class="resume-wrapper">
-        
-        <div class="page">
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-xl border-b border-white/5">
+        <nav class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-xl font-black tracking-tighter text-white">
+                KALASH<span class="text-gold">NANDAL</span>
+            </div>
             
-            <aside class="sidebar-bg w-[38%] p-8 flex flex-col shrink-0 relative">
-                <div class="w-56 h-56 mx-auto mb-8 rounded-full profile-img-container overflow-hidden relative">
-                    <img src="erasebg-1.webp" 
-                         alt="Kalash Nandal" 
-                         class="w-full h-full object-cover">
+            <div class="hidden md:flex space-x-6 text-[10px] font-black uppercase tracking-[0.2em] items-center">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#mandates" class="nav-link">Mandates</a>
+                <a href="#history" class="nav-link">History</a>
+                <a href="#discipline" class="nav-link">Discipline</a>
+                <a href="#soul" class="nav-link">Soul</a>
+                <a href="onboarding.html" class="px-5 py-2 bg-gold text-black rounded-full hover:bg-white transition-all shadow-lg shadow-gold/20">Portal</a>
+            </div>
+
+            <button class="md:hidden text-white" id="menu-btn"><i data-lucide="menu"></i></button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-[80vh] flex items-center pt-24 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-1/3 h-full bg-gold/5 -skew-x-12 transform translate-x-32 z-0"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center z-10">
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="h-[1px] w-10 bg-gold"></div>
+                    <span class="text-gold text-[10px] font-black uppercase tracking-[0.4em]">Operations & Strategy</span>
                 </div>
-
-                <div class="text-center mb-10">
-                    <h1 class="text-4xl font-bold uppercase tracking-widest mb-3 text-white">Kalash<br>Nandal</h1>
-                    <p class="text-gray-300 text-base tracking-[0.2em] uppercase font-semibold">Project Manager</p>
-                    <div class="w-12 h-0.5 bg-gray-500 mx-auto mt-6"></div>
+                <h1 class="heading-serif text-5xl md:text-7xl text-white mb-6 leading-[1] tracking-tight">
+                    Scaling <br><span class="text-gold italic font-bold">Growth.</span>
+                </h1>
+                <p class="text-gray-400 text-base mb-10 leading-relaxed font-medium max-w-md">
+                    High-performance strategist and Operations Lead. Currently executing four strategic mandates simultaneously, overseeing 150+ global campaigns with a focus on account stabilization.
+                </p>
+                <div class="flex flex-wrap gap-6 items-center">
+                    <a href="#mandates" class="px-8 py-4 bg-gold text-black font-black uppercase text-[10px] tracking-widest rounded-full hover:bg-white transition-all transform hover:-translate-y-1 shadow-xl shadow-gold/10">
+                        View Strategic Scope
+                    </a>
+                    <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="hover:text-gold text-white/40 transition-colors flex items-center gap-2 font-bold text-[10px] tracking-widest uppercase"><i data-lucide="linkedin" class="w-4 h-4"></i> LinkedIn</a>
                 </div>
-
-                <div class="mb-10">
-                    <h3 class="sidebar-header">Contact</h3>
-                    <div class="space-y-4 text-sm text-gray-300">
-                        <a href="https://linkedin.com/in/kalash-nandal" class="block hover:text-white transition group">
-                            <span class="font-bold text-gray-400 block uppercase text-xs mb-1">LinkedIn</span>
-                            <span class="break-all">linkedin.com/in/kalash-nandal</span>
-                        </a>
-                        <div class="block">
-                            <span class="font-bold text-gray-400 block uppercase text-xs mb-1">Location</span>
-                            <span>Mohali, Punjab, India</span>
-                        </div>
-                    </div>
+            </div>
+            
+            <div class="relative">
+                <div class="absolute -inset-4 bg-gold/10 rounded-[2rem] blur-3xl opacity-50"></div>
+                <div class="relative aspect-square max-w-[400px] mx-auto overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
+                    <img src="erasebg-1.webp" alt="Kalash Nandal" class="w-full h-full object-cover grayscale transition-all duration-700 hover:grayscale-0" onerror="this.src='https://ui-avatars.com/api/?name=Kalash+Nandal&background=D4AF37&color=fff&size=512'">
                 </div>
-
-                <div>
-                    <h3 class="sidebar-header">Core Competencies</h3>
-                    <ul class="text-sm text-gray-300 space-y-3">
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Strategic Leadership</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Crisis Management</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Team Building (4 PMs)</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Market Research</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> HTML / CSS / CMS</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Figma Design</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Process Automation</li>
-                        <li class="flex items-center gap-3"><span class="text-gray-400">▸</span> Quality Assurance</li>
-                    </ul>
-                </div>
-            </aside>
-
-            <main class="w-[62%] p-8 text-gray-800 bg-white flex flex-col justify-start">
-                <h2 class="section-header mt-2">Professional Summary</h2>
-                <div class="mb-6 text-base leading-7 text-gray-700 text-justify">
-                    <p>
-                        High-performance <strong>Project Manager</strong> and Operations Lead with a track record of rapid promotion. Currently executing three strategic roles simultaneously: leading IDS operations in USA, directing the Back2Farms venture, and managing a team of multiple Project Managers overseeing 150+ campaigns across the globe. Recognized as a "Client Turnaround Specialist" who stabilizes high-value accounts through technical innovations.
-                    </p>
-                </div>
-
-                <h2 class="section-header">Current Executive Mandates</h2>
-
-                <div class="mb-2">
-                    <div class="flex justify-between items-baseline mb-2">
-                        <h3 class="font-bold text-2xl text-gray-900">iMark Infotech & Ventures</h3>
-                        <span class="text-base font-bold gold-text">Jan 2024 – Present</span>
-                    </div>
-                    <div class="text-base text-gray-600 italic mb-5 border-l-4 border-[#D4AF37] pl-4 bg-gray-50 py-1">
-                        Designation: Project Manager (Executing 3 Concurrent Roles)
-                    </div>
-
-                    <div class="mb-5 pl-5 border-l-2 border-gray-200">
-                        <h4 class="font-bold text-gray-800 text-lg uppercase mb-2">Project Manager (Team Lead)</h4>
-                        <p class="text-sm gold-text font-bold uppercase mb-2">Simultaneous Campaign Management</p>
-                        <ul class="text-base text-gray-700 space-y-2 list-none leading-relaxed tight-list">
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Active Leadership:</strong> Directly leading <strong>50+ projects</strong> involving <strong>24 clients</strong> as the primary Project Manager.</li>
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Leadership at Scale:</strong> Managing 4 Project Managers who oversee a cumulative portfolio of <strong>150+ active campaigns</strong> across 24 enterprise clients.</li>
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Crisis Retention:</strong> Retained "Red Flag" clients by personally developing custom CMS/HTML solutions to resolve technical bottlenecks immediately.</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="pl-5 border-l-2 border-gray-200">
-                        <h4 class="font-bold text-gray-800 text-lg uppercase mb-2">Head of Operations (IDS)</h4>
-                        <p class="text-sm gold-text font-bold uppercase mb-2">Strategic Partnership: Summit Sales (US)</p>
-                        <ul class="text-base text-gray-700 space-y-2 list-none leading-relaxed tight-list">
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Tech Innovation:</strong> Solely designed and developed a <strong>Client Onboarding Portal</strong> using HTML/CSS & AI. Automated workflow triggers, reducing manual admin time by 40%.</li>
-                            <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Operational Bridge:</strong> Acting as the critical link between high-volume US sales teams and technical execution units.</li>
-                        </ul>
-                        <div class="mt-4 mb-2 p-3 bg-yellow-50 border-l-4 border-[#D4AF37] text-sm text-gray-900">
-                            <strong>Note:</strong> Detailed designs and portal architecture are available for live demonstration (excluded here due to confidentiality agreements).
-                        </div>
-                    </div>
-                </div>
-            </main>
+            </div>
         </div>
+    </section>
 
-        <div class="page">
-            <aside class="sidebar-bg w-[38%] p-8 flex flex-col shrink-0 relative">
-                <div class="mt-8">
-                    <h3 class="sidebar-header">Languages</h3>
-                    <ul class="text-sm text-gray-300 space-y-4">
-                        <li class="flex justify-between border-b border-gray-700 pb-2"><span>English</span> <span class="text-gray-400">Professional</span></li>
-                        <li class="flex justify-between border-b border-gray-700 pb-2"><span>Hindi</span> <span class="text-gray-400">Native</span></li>
-                        <li class="flex justify-between border-b border-gray-700 pb-2"><span>Punjabi</span> <span class="text-gray-400">Native</span></li>
-                    </ul>
+    <!-- Mandates Grid -->
+    <section id="mandates" class="section-padding pt-10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+                <div>
+                    <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Executive Roles</h2>
+                    <h3 class="text-4xl text-white font-bold heading-serif italic">Current Strategic Scope</h3>
                 </div>
-                <div class="mt-auto">
-                    <div class="w-16 h-16 border-t-2 border-l-2 border-[#D4AF37] opacity-30"></div>
-                </div>
-            </aside>
+            </div>
 
-            <main class="w-[62%] p-8 text-gray-800 bg-white flex flex-col justify-start">
-                <div class="h-4"></div>
-                <div class="mb-10 pl-5 border-l-2 border-gray-200">
-                    <h4 class="font-bold text-gray-800 text-lg uppercase mb-2">
-                        Product Manager 
-                        (<a href="https://backtofarms.com/" target="_blank" class="hover:text-[#D4AF37] underline decoration-gray-400 hover:decoration-[#D4AF37] underline-offset-4 transition-colors">Back2Farms</a>)
-                    </h4>
-                    <p class="text-sm gold-text font-bold uppercase mb-3">Venture & Product Lead</p>
-                    <ul class="text-base text-gray-700 space-y-2 list-none leading-relaxed tight-list">
-                        <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Venture Building:</strong> Leading Go-To-Market strategy, brand positioning, and market research from 0-to-1.</li>
-                        <li class="relative pl-5"><span class="absolute left-0 top-1 gold-text">▪</span> <strong>Team Oversight:</strong> Overseeing all cross-functional teams including Video Production, Content, and Web/App Development.</li>
-                    </ul>
-                </div>
-
-                <h2 class="section-header">Previous History</h2>
-
-                <div class="mb-8">
-                    <div class="flex justify-between items-baseline mb-2">
-                        <h3 class="font-bold text-xl text-gray-800">Senior Project Analyst</h3>
-                        <span class="text-sm font-bold text-gray-500">Jan 2024 – July 2025</span>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Back2Farms -->
+                <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
+                    <div class="mb-6 h-10 flex items-center justify-center">
+                        <img src="https://backtofarms.com/assets/images/logo-dark.svg" alt="Back2Farms" class="h-8 w-auto invert brightness-0">
                     </div>
-                    <div class="text-base text-gray-500 mb-4 italic">iMark Infotech</div>
-                    <ul class="text-base text-gray-700 space-y-3 list-disc ml-5 marker:text-[#D4AF37] leading-relaxed">
-                        <li class="pl-2">Promoted twice in 18 months due to success in stabilizing "Red Flag" accounts.</li>
-                        <li class="pl-2">Mastered Figma to create professional mockups, allowing clients to visualize solutions instantly.</li>
-                    </ul>
+                    <h4 class="text-lg font-bold text-white mb-1">Back2Farms</h4>
+                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">CEO & Product Lead</p>
+                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 flex-grow">Revolutionizing India's agricultural supply chain from 0-to-1.</p>
+                    <a href="https://backtofarms.com" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
                 </div>
 
-                <div class="mb-10">
-                    <div class="flex justify-between items-baseline mb-2">
-                        <h3 class="font-bold text-xl text-gray-800">Quality Analyst</h3>
-                        <span class="text-sm font-bold text-gray-500">July 2022 – Jan 2024</span>
+                <!-- IDS USA -->
+                <div class="glass-card p-6 rounded-3xl flex flex-col text-center border-gold/30 bg-gold/[0.02]">
+<div class="mb-6 h-10 flex items-center justify-center">
+                        <img src="https://kalashnandal.co.in/IDS-logo-removebg-preview.png" alt="Back2Farms" class="h-8 w-auto invert brightness-0">
                     </div>
-                    <div class="text-base text-gray-500 mb-4 italic">Teleperformance</div>
-                    <ul class="text-base text-gray-700 space-y-3 list-disc ml-5 marker:text-[#D4AF37] leading-relaxed">
-                        <li class="pl-2">Analyzed transcripts and listened to live calls to improve agent performance.</li>
-                        <li class="pl-2">Evaluated call behaviors for regulatory compliance and adherence to policy.</li>
-                    </ul>
+                    <h4 class="text-lg font-bold text-white mb-1">IDS USA</h4>
+                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Head of Operations</p>
+                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 flex-grow">High-volume US operations and AI-integrated portal architecture.</p>
+                    <a href="onboarding.html" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2"> PORTAL <i data-lucide="external-link" class="w-3"></i></a>
                 </div>
 
-                <h2 class="section-header">Academic Credentials</h2>
-
-                <div class="mb-6">
-                    <div class="flex justify-between items-baseline mb-1">
-                        <h3 class="font-bold text-lg text-gray-900">Bachelor of Arts</h3>
-                        <span class="text-sm font-bold gold-text">Panjab University</span>
+                <!-- Denver SEO -->
+                <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
+                    <div class="mb-6 h-10 flex items-center justify-center">
+                        <img src="https://www.seodenver.us/images/logo_new_02.svg" alt="Denver SEO" class="h-5 w-auto brightness-0 invert">
                     </div>
-                    <ul class="text-base text-gray-700 space-y-1 list-none border-l-4 border-[#D4AF37] pl-4 bg-gray-50 py-2">
-                         <li class="font-semibold text-gray-800">Economics, IT & Public Administration</li>
-                    </ul>
+                    <h4 class="text-lg font-bold text-white mb-1">Denver SEO</h4>
+                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Head of Agency</p>
+                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 flex-grow">Managing specialized US domestic teams and account scaling.</p>
+                    <a href="https://www.seodenver.us/" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
                 </div>
 
-                 <div class="mb-2">
-                    <div class="flex justify-between items-baseline mb-1">
-                        <h3 class="font-bold text-base text-gray-800">Senior Secondary (10+2)</h3>
+                <!-- iMark -->
+                <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
+                    <div class="mb-6 h-10 flex items-center justify-center">
+                        <img src="https://www.imarkinfotech.com/wp-content/themes/idigital/idigital/images/new/logo.png?v.345.0" alt="iMark" class="h-5 w-auto brightness-0 invert">
                     </div>
-                    <ul class="text-base text-gray-700 space-y-1 list-none border-l-4 border-gray-300 pl-4 py-2">
-                         <li class="text-gray-600">Non-Medical: Physics, Chemistry, Maths (PCM)</li>
-                    </ul>
+                    <h4 class="text-lg font-bold text-white mb-1">iMark Infotech</h4>
+                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Project Manager (Team Lead)</p>
+                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 flex-grow">Directing 50+ international projects and managing 4 PMs.</p>
+                    <a href="https://www.imarkinfotech.com/" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
+
                 </div>
-            </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive History -->
+    <section id="history" class="section-padding bg-black/40 border-y border-white/5">
+        <div class="max-w-4xl mx-auto px-6">
+            <h2 class="text-center text-gold font-black uppercase tracking-[0.5em] mb-12 text-[10px] italic">Trajectory</h2>
+            
+            <div class="relative space-y-4">
+                <!-- Current Block -->
+                <div class="history-item relative pl-12 border-l-2 border-gold/30 pb-8">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full bg-gold transition-all duration-300"></div>
+                    <div class="mb-4">
+                        <span class="text-[10px] font-black text-gold/60 uppercase tracking-widest block mb-1">Jan 2024 - Present</span>
+                        <h4 class="text-xl font-bold text-white uppercase">Project Manager & Operations Lead</h4>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                            <h5 class="text-gold font-bold text-[10px] uppercase tracking-widest mb-2">iMark Infotech</h5>
+                            <p class="text-gray-400 text-[11px] leading-relaxed">Leading 50+ projects for 24 international clients and managing 4 PMs.</p>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                            <h5 class="text-gold font-bold text-[10px] uppercase tracking-widest mb-2">IDS & Back2Farms</h5>
+                            <p class="text-gray-400 text-[11px] leading-relaxed">Executing Head of Operations (IDS) and CEO (Back2Farms) mandates.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Denver SEO Block -->
+                <div class="history-item relative pl-12 border-l-2 border-white/5 pb-8">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full bg-gray-800 transition-all duration-300"></div>
+                    <div>
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">March - May 2024</span>
+                        <h4 class="text-lg font-bold text-white/80 uppercase">Head of Denver SEO</h4>
+                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Handled US specialized team and communication workflows for domestic US client scaling.</p>
+                    </div>
+                </div>
+
+                <!-- Senior Analyst Block -->
+                <div class="history-item relative pl-12 border-l-2 border-white/5 pb-8">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full bg-gray-800 transition-all duration-300"></div>
+                    <div>
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">Jan 2024 - July 2025</span>
+                        <h4 class="text-lg font-bold text-white/80 uppercase">Senior Project Analyst</h4>
+                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Promoted twice in 18 months for account stabilization. Leveraged Figma for solution visualization.</p>
+                    </div>
+                </div>
+
+                <!-- Quality Analyst Block -->
+                <div class="history-item relative pl-12 border-l-2 border-white/5">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full bg-gray-800 transition-all duration-300"></div>
+                    <div>
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">July 2022 - Jan 2024</span>
+                        <h4 class="text-lg font-bold text-white/80 uppercase">Quality Analyst</h4>
+                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Global interaction auditing. Analyzed transcripts/calls to improve compliance and conversions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fitness Transformation -->
+    <section id="discipline" class="section-padding">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="relative">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="pt-12">
+                            <div class="glass-card aspect-[3/4] rounded-3xl overflow-hidden grayscale hover:grayscale-0 transition-all duration-1000 border-gold/10">
+                                <img src="https://kalashnandal.co.in/Image%20(1).jpeg" alt="42kg transformation" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-gold p-6 rounded-3xl text-black text-center mb-4">
+                                <div class="text-4xl font-black mb-1">86<span class="text-lg">kg</span></div>
+                                <div class="text-[7px] font-black uppercase tracking-widest opacity-80">Built Form</div>
+                            </div>
+                            <div class="glass-card aspect-[3/4] rounded-3xl flex items-center justify-center p-6 text-center border-gold/10">
+                                <p class="text-[8px] font-black text-white uppercase tracking-[0.2em] leading-loose">Consistency <br> Over Intensity</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-4">Personal symbol of mastery</h2>
+                    <h3 class="text-4xl text-white font-bold heading-serif mb-6 italic leading-tight">Discipline Beyond <br>The Gym.</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        From 42kg to 86kg. A testament to resilience and long-term vision. Progress was gradual and intentional, built on daily habits rather than shortcuts. This mirrors my professional ethos of process-driven growth.
+                    </p>
+                    <div class="flex gap-8 border-t border-white/5 pt-6">
+                        <div>
+                            <div class="text-xl font-bold text-white uppercase">4 Years</div>
+                            <div class="text-[8px] text-gray-500 font-black uppercase tracking-widest">Consistency</div>
+                        </div>
+                        <div>
+                            <div class="text-xl font-bold text-white uppercase">86 KG</div>
+                            <div class="text-[8px] text-gray-500 font-black uppercase tracking-widest">Goal Form</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<section id="soul" class="section-padding bg-black/60 relative pb-24 md:pb-56">
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 text-center md:text-left">
+            <div class="max-w-xl">
+                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">More Than a Pet</h2>
+                <h3 class="text-4xl text-white font-bold heading-serif mb-4 italic">Meet Soul.</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    A Siberian Husky representing values of loyalty, energy, and mindfulness. Caring for her routine extends directly into my professional leadership style.
+                </p>
+            </div>
+            <a href="https://www.instagram.com/soul_thesiberianhusky/?hl=en" target="_blank" class="inline-flex items-center gap-3 px-6 py-3 bg-white text-black font-black uppercase text-[9px] tracking-widest rounded-full hover:bg-gold transition-all group shadow-xl">
+                <i data-lucide="instagram" class="w-4 h-4"></i> Meet Soul <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-2 transition-transform"></i>
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-10">
+            <div class="flex justify-center">
+                <div class="reel-frame w-full max-w-[330px]">
+                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/C29DLD9PZdh/" data-instgrm-version="14" style="background:#000; border:0; margin:0; padding:0; width:100%;">
+                        <a href="https://www.instagram.com/reel/C29DLD9PZdh/"></a>
+                    </blockquote>
+                </div>
+            </div>
+
+            <div class="flex justify-center md:translate-y-16">
+                <div class="reel-frame w-full max-w-[330px]">
+                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/C2wLytEP-Mj/" data-instgrm-version="14" style="background:#000; border:0; margin:0; padding:0; width:100%;">
+                        <a href="https://www.instagram.com/reel/C2wLytEP-Mj/"></a>
+                    </blockquote>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <div class="reel-frame w-full max-w-[330px]">
+                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/C3cFB7cLAi3/" data-instgrm-version="14" style="background:#000; border:0; margin:0; padding:0; width:100%;">
+                        <a href="https://www.instagram.com/reel/C3cFB7cLAi3/"></a>
+                    </blockquote>
+                </div>
+            </div>
+
+            <div class="flex justify-center md:translate-y-16">
+                <div class="reel-frame w-full max-w-[330px]">
+                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/C3jw-ITrAlv/" data-instgrm-version="14" style="background:#000; border:0; margin:0; padding:0; width:100%;">
+                        <a href="https://www.instagram.com/reel/C3jw-ITrAlv/"></a>
+                    </blockquote>
+                </div>
+            </div>
         </div>
     </div>
+</section>
 
+<script async src="https://www.instagram.com/embed.js"></script>
+
+<script async src="https://www.instagram.com/embed.js"></script>
+
+    <!-- Academics & Languages -->
+    <section class="section-padding bg-black/40">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-start">
+            <div>
+                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-6">Academic Foundation</h2>
+                <div class="glass-card p-8 rounded-3xl space-y-8 border-gold/10">
+                    <div class="relative pl-8 border-l border-gold">
+                        <div class="absolute -left-1 w-2 h-2 rounded-full bg-gold shadow-[0_0_10px_#D4AF37]"></div>
+                        <p class="text-xl font-bold text-white mb-1">Bachelor of Arts</p>
+                        <p class="text-gold text-[9px] font-black uppercase tracking-widest mb-2">Panjab University</p>
+                        <p class="text-gray-400 text-xs font-medium uppercase tracking-tighter opacity-70">Economics, IT & Public Administration</p>
+                    </div>
+                    <div class="relative pl-8 border-l border-white/10">
+                        <div class="absolute -left-1 w-2 h-2 rounded-full bg-gray-700"></div>
+                        <p class="text-xl font-bold text-white/60 mb-1">Senior Secondary (10+2)</p>
+                        <p class="text-gray-500 text-[9px] font-black uppercase tracking-widest">Non-Medical (PCM)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lg:pl-8">
+                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-6">Languages</h2>
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <span class="text-xl font-bold text-white italic">English</span>
+                        <span class="text-gold font-black uppercase text-[9px] tracking-widest border border-gold/20 px-3 py-1 rounded-full">Professional</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <span class="text-xl font-bold text-white italic">Hindi</span>
+                        <span class="text-gold font-black uppercase text-[9px] tracking-widest">Native</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <span class="text-xl font-bold text-white italic">Punjabi</span>
+                        <span class="text-gold font-black uppercase text-[9px] tracking-widest">Native</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black pt-20 pb-8 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
+            <div class="md:col-span-2 text-center md:text-left">
+                <div class="text-2xl font-black tracking-tighter text-white mb-6 uppercase">KALASH<span class="text-gold">NANDAL</span></div>
+                <p class="text-gray-500 max-w-xs text-xs italic border-l border-gold/30 pl-6 py-1 mx-auto md:mx-0">
+                    High-performance strategist building future-proof ventures.
+                </p>
+            </div>
+            
+            <div>
+                <h5 class="text-white font-black mb-6 uppercase tracking-[0.3em] text-[8px]">Ecosystem</h5>
+                <ul class="space-y-3 text-gray-500 font-black uppercase text-[8px] tracking-[0.2em]">
+                    <li><a href="#home" class="hover:text-gold transition">Home</a></li>
+                    <li><a href="#mandates" class="hover:text-gold transition">Mandates</a></li>
+                    <li><a href="#history" class="hover:text-gold transition">History</a></li>
+                    <li><a href="onboarding.html" class="text-gold">Portal Access</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h5 class="text-white font-black mb-6 uppercase tracking-[0.3em] text-[8px]">Contact</h5>
+                <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="px-6 py-3 bg-white text-black font-black uppercase text-[8px] tracking-widest rounded-full hover:bg-gold transition-all block text-center">LinkedIn Profile</a>
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-6 text-[7px] text-gray-700 font-black uppercase tracking-[0.5em]">
+            <div>© 2025 KALASH NANDAL. BUILT FOR GLOBAL PERFORMANCE.</div>
+            <div class="mt-4 md:mt-0 flex gap-8">
+                <a href="#home" class="hover:text-white transition">Back to Top</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+const menuBtn = document.getElementById('menu-btn');
+// Logic to toggle a hidden mobile menu div would go here.
+// Currently, your 'hidden md:flex' div needs a mobile counterpart.
+
+    </script>
 </body>
-
 </html>
-
-
