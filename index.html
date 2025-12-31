@@ -169,7 +169,7 @@
 
         @media (max-width: 640px) {
             .history-item.active { transform: translateX(5px); }
-            .history-item { padding-left: 1.5rem !important; }
+            .history-item { padding-left: 1rem !important; }
         }
 
         .account-btn.active {
@@ -264,22 +264,31 @@
         }
 
         .testimonial-img-card {
-            width: 320px;
-            height: 180px; /* Fixed height for uniformity */
+            width: 260px;
+            height: 140px;
             flex-shrink: 0;
             cursor: pointer;
-            margin: 0 15px;
+            margin: 0 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .testimonial-img-card {
+                width: 320px;
+                height: 180px;
+                margin: 0 15px;
+            }
         }
 
         .testimonial-img-card img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* Shows full screenshot within the card */
-            background: rgba(255,255,255,0.02);
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
         }
 
         #modal-overlay {
@@ -287,17 +296,45 @@
             background: rgba(0,0,0,0.9);
             transition: opacity 0.3s ease;
         }
+
+        /* Popping Animation */
+        @keyframes popUpDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .animate-pop-up-down {
+            animation: popUpDown 2.5s ease-in-out infinite;
+        }
+
+        /* Smart Header Sticky Transition */
+        header {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .header-hidden {
+            transform: translateY(-100%);
+        }
     </style>
 </head>
 <body class="selection:bg-gold selection:text-black">
 
-    <a href="https://www.google.com/search?q=kalash+nandal" target="_blank" class="google-chat-btn">
+    <!-- Horizontal Scroll Progress Bar -->
+    <div id="scroll-depth-bar" class="fixed top-0 left-0 h-1 bg-gold z-[210] transition-all duration-150 ease-out" style="width: 0%"></div>
+
+    <!-- Find me on Google (Popping up and down) -->
+    <a href="https://www.google.com/search?q=kalash+nandal" target="_blank" class="google-chat-btn animate-pop-up-down">
         <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         <span>Find me on Google</span>
     </a>
 
-    <!-- Header -->
-    <header class="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-xl border-b border-white/5">
+    <!-- Scroll to Top Button (Sticky appearance after threshold) -->
+    <button id="scroll-to-top" class="fixed bottom-32 right-6 md:right-8 z-[100] w-12 h-12 bg-gold text-black rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 opacity-0 invisible scale-50 hover:bg-white hover:scale-110 active:scale-95" aria-label="Scroll to top">
+        <i data-lucide="chevron-up" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Header (Smart Sticky: Shows on scroll up, hides on scroll down) -->
+    <header id="main-header" class="fixed top-0 w-full z-[190] bg-black/70 backdrop-blur-2xl border-b border-white/5">
         <nav class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
             <div class="text-xl font-black tracking-tighter text-white">
                 KALASH<span class="text-gold">NANDAL</span>
@@ -322,7 +359,7 @@
     </header>
 
     <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="fixed inset-0 z-[60] bg-black menu-hidden md:hidden flex flex-col justify-center items-center">
+    <div id="mobile-menu" class="fixed inset-0 z-[220] bg-black menu-hidden md:hidden flex flex-col justify-center items-center">
         <button id="close-btn" class="absolute top-6 right-6 text-white p-2" aria-label="Close Menu">
             <i data-lucide="x" class="w-8 h-8"></i>
         </button>
@@ -535,41 +572,40 @@
             </div>
         </div>
 
-        <!-- Automatic Infinite Carousel -->
         <div class="scroll-track">
             <!-- Set 1 -->
-            <div class="testimonial-img-card glass-card p-4 rounded-2xl group" onclick="openModal('https://kalashnandal.co.in/Review1.png')">
+            <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review1.png')">
                 <img src="https://kalashnandal.co.in/Review1.png" alt="Testimonial 1" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
-            <div class="testimonial-img-card glass-card p-4 rounded-2xl group" onclick="openModal('https://kalashnandal.co.in/Review2.png')">
+            <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review2.png')">
                 <img src="https://kalashnandal.co.in/Review2.png" alt="Testimonial 2" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
-            <div class="testimonial-img-card glass-card p-4 rounded-2xl group" onclick="openModal('https://kalashnandal.co.in/Review3.png')">
+            <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review3.png')">
                 <img src="https://kalashnandal.co.in/Review3.png" alt="Testimonial 3" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
-            <div class="testimonial-img-card glass-card p-4 rounded-2xl group" onclick="openModal('https://kalashnandal.co.in/Review4.png')">
+            <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review4.png')">
                 <img src="https://kalashnandal.co.in/Review4.png" alt="Testimonial 4" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
-            <!-- Set 2 (Duplicate for loop) -->
-            <div class="testimonial-img-card glass-card p-4 rounded-2xl group" onclick="openModal('https://kalashnandal.co.in/Review1.png')">
+            <!-- Set 2 -->
+            <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review1.png')">
                 <img src="https://kalashnandal.co.in/Review1.png" alt="Testimonial 1" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
-            <div class="testimonial-img-card glass-card p-4 rounded-2xl group" onclick="openModal('https://kalashnandal.co.in/Review2.png')">
+            <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review2.png')">
                 <img src="https://kalashnandal.co.in/Review2.png" alt="Testimonial 2" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
-            <div class="testimonial-img-card glass-card p-4 rounded-2xl group" onclick="openModal('https://kalashnandal.co.in/Review3.png')">
+            <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review3.png')">
                 <img src="https://kalashnandal.co.in/Review3.png" alt="Testimonial 3" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
-            <div class="testimonial-img-card glass-card p-4 rounded-2xl group" onclick="openModal('https://kalashnandal.co.in/Review4.png')">
+            <div class="testimonial-img-card glass-card p-4 group" onclick="openModal('https://kalashnandal.co.in/Review4.png')">
                 <img src="https://kalashnandal.co.in/Review4.png" alt="Testimonial 4" class="grayscale group-hover:grayscale-0 transition-all duration-300">
             </div>
         </div>
     </section>
 
     <!-- Modal for Popup View -->
-    <div id="modal-overlay" class="fixed inset-0 z-[100] hidden opacity-0 flex items-center justify-center p-4 bg-black/95">
-        <button id="modal-close" class="absolute top-6 right-6 text-white hover:text-gold transition-colors p-2 z-[110]" aria-label="Close">
-            <i data-lucide="x" class="w-10 h-10"></i>
+    <div id="modal-overlay" class="fixed inset-0 z-[300] hidden opacity-0 flex items-center justify-center p-4 bg-black/95">
+        <button id="modal-close" class="absolute top-6 right-6 text-white hover:text-gold transition-colors p-2 z-[310]" aria-label="Close">
+            <i data-lucide="x" class="w-8 h-8 md:w-10 md:h-10"></i>
         </button>
         <div class="max-w-5xl w-full max-h-[90vh] flex items-center justify-center relative bg-white/5 rounded-3xl overflow-hidden p-2">
             <img id="modal-content" src="" alt="Full resolution testimonial" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl">
@@ -662,8 +698,7 @@
                     </div>
                 </div>
                 <div>
-                    <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-4">Personal symbol of mastery</h2>
-                    <h3 class="text-4xl text-white font-bold heading-serif mb-6 italic leading-tight">Discipline Beyond <br>The Gym.</h3>
+                    <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-4">Personal symbol of mastery</h2>                    <h3 class="text-4xl text-white font-bold heading-serif mb-6 italic leading-tight">Discipline Beyond <br>The Gym.</h3>
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">
                         From 42kg to 86kg. A testament to resilience and long-term vision. Progress was gradual and intentional, built on daily habits rather than shortcuts. This mirrors my professional ethos of process-driven growth.
                     </p>
@@ -718,6 +753,47 @@
     <script>
         lucide.createIcons();
 
+        // Scroll Depth, Back to Top, and Smart Sticky Header Logic
+        const scrollBar = document.getElementById('scroll-depth-bar');
+        const scrollToTopBtn = document.getElementById('scroll-to-top');
+        const header = document.getElementById('main-header');
+        
+        let lastScrollY = window.scrollY;
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const fullHeight = document.documentElement.scrollHeight;
+            
+            // 1. Scroll Depth Progress
+            const scrollPercent = (currentScrollY / (fullHeight - windowHeight)) * 100;
+            scrollBar.style.width = scrollPercent + "%";
+
+            // 2. Toggle Back to Top Button visibility
+            if (currentScrollY > 300) {
+                scrollToTopBtn.classList.remove('opacity-0', 'invisible', 'scale-50');
+                scrollToTopBtn.classList.add('opacity-100', 'visible', 'scale-100');
+            } else {
+                scrollToTopBtn.classList.add('opacity-0', 'invisible', 'scale-50');
+                scrollToTopBtn.classList.remove('opacity-100', 'visible', 'scale-100');
+            }
+
+            // 3. Smart Header Logic (Sticky on scroll up, hide on scroll down)
+            if (currentScrollY < 100) {
+                header.classList.remove('header-hidden');
+            } else if (currentScrollY > lastScrollY) {
+                header.classList.add('header-hidden');
+            } else {
+                header.classList.remove('header-hidden');
+            }
+            
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
         // Modal Logic for Testimonials
         const modalOverlay = document.getElementById('modal-overlay');
         const modalContent = document.getElementById('modal-content');
@@ -750,7 +826,7 @@
             if (e.key === "Escape") closeModal();
         });
 
-        // Navigation & Menu Logic
+        // Navigation & Mobile Menu Logic
         const menuBtn = document.getElementById('menu-btn');
         const closeBtn = document.getElementById('close-btn');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -783,7 +859,7 @@
             });
         });
 
-        // Trajectory Observer
+        // Trajectory Trajectory Observer
         const historyItems = document.querySelectorAll('.history-item');
         function setActiveHistoryItem(item) {
             historyItems.forEach(el => el.classList.remove('active'));
