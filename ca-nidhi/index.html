@@ -23,8 +23,8 @@
             theme: {
                 extend: {
                     colors: {
-                        'firm-blue': '#061757',   /* Primary: Deep Navy Blue (Trust, Corporate) */
-                        'firm-teal': '#00897B',   /* Accent: Teal/Green (Derived from CA Logo) */
+                        'firm-blue': '#061757',   /* Primary: Deep Navy Blue */
+                        'firm-teal': '#00897B',   /* Accent: Teal/Green */
                         'firm-gray': '#F2F2F2',   /* Secondary: Clean Background */
                     },
                     fontFamily: {
@@ -39,7 +39,7 @@
     <style>
         /* Disclaimer Modal Backdrop */
         #disclaimer-modal {
-            background-color: rgba(6, 23, 87, 0.95); /* Deep blue tint */
+            background-color: rgba(6, 23, 87, 0.95);
             backdrop-filter: blur(8px);
         }
 
@@ -49,26 +49,35 @@
         .service-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(6, 23, 87, 0.15);
-            border-bottom: 4px solid #00897B; /* Updated to Teal */
+            border-bottom: 4px solid #00897B;
         }
         
-        /* Gradient Text for Highlight */
         .text-gradient {
             background: linear-gradient(135deg, #061757 0%, #00897B 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        /* CA Logo Simulation */
-        .ca-logo-box {
+        
+        /* Map Container Optimization */
+        .map-container {
             position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
         }
-        .ca-logo-tick {
+        .map-container iframe {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.1;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        @media (min-width: 768px) {
+            .map-container {
+                padding-bottom: 0;
+                height: 400px; /* Fixed height for desktop */
+            }
         }
     </style>
 </head>
@@ -116,11 +125,11 @@
                 <!-- Logo -->
                 <div class="flex items-center space-x-3">
                     <div class="flex items-center">
-                        <!-- CA Logo Image -->
-                        <img src="https://canidhigupta.com/wp-content/uploads/2025/07/CA-India-Logo.pdf.png" alt="CA India Logo" class="h-12 w-auto mr-3 object-contain">
+                        <!-- UPDATED: Using local logo.png -->
+                        <img src="logo.png" alt="CA India Logo" class="h-12 w-auto mr-3 object-contain">
                         <div>
-                            <h1 class="text-firm-blue font-serif font-bold text-2xl tracking-wide leading-none">Nidhi Gupta</h1>
-                            <p class="text-xs text-firm-teal uppercase tracking-widest font-semibold">Chartered Accountant</p>
+                            <h1 class="text-firm-blue font-serif font-bold text-2xl tracking-wide leading-none">Nidhi G and Company</h1>
+                            <p class="text-xs text-firm-teal uppercase tracking-widest font-semibold">Chartered Accountants</p>
                         </div>
                     </div>
                 </div>
@@ -233,6 +242,60 @@
         </div>
     </section>
 
+    <!-- Professional Credentials & Milestones -->
+    <section id="credentials" class="py-20 bg-gray-50 border-b border-gray-200">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-firm-teal font-bold text-xs tracking-widest uppercase mb-2 block">Our Qualifications</span>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-firm-blue mt-2">Professional Milestones</h2>
+                <div class="w-16 h-1 bg-firm-teal mx-auto mt-4 rounded"></div>
+                <p class="text-gray-600 mt-4 text-sm font-light">Backed by rigorous training and certifications from globally recognized accounting bodies.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Credential 1: CA -->
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:border-firm-teal transition duration-300 group text-center">
+                    <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <span class="text-firm-blue font-bold font-serif text-2xl">CA</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-firm-blue mb-2">Chartered Accountant</h3>
+                    <p class="text-xs text-gray-500 mb-4 uppercase tracking-wider">ICAI Member</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">Comprehensive expertise in Indian taxation, auditing standards, and corporate law.</p>
+                </div>
+
+                <!-- Credential 2: CPA -->
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:border-firm-teal transition duration-300 group text-center">
+                    <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <i class="fas fa-globe-americas text-firm-blue text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-firm-blue mb-2">US CPA Exam Qualified</h3>
+                    <p class="text-xs text-gray-500 mb-4 uppercase tracking-wider">AICPA (USA)</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">Proficiency in US GAAP, regulation (REG), and global financial reporting frameworks.</p>
+                </div>
+
+                <!-- Credential 3: Concurrent Audit -->
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:border-firm-teal transition duration-300 group text-center">
+                    <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <i class="fas fa-university text-firm-blue text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-firm-blue mb-2">Concurrent Audit</h3>
+                    <p class="text-xs text-gray-500 mb-4 uppercase tracking-wider">ICAI Certified</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">Specialized certification for core banking operations and risk assessment.</p>
+                </div>
+
+                <!-- Credential 4: Big 4 Experience -->
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:border-firm-teal transition duration-300 group text-center">
+                    <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <i class="fas fa-briefcase text-firm-blue text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-firm-blue mb-2">Ex-Big 4 Experience</h3>
+                    <p class="text-xs text-gray-500 mb-4 uppercase tracking-wider">Deloitte & PwC</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">Former Senior Associate with extensive exposure to global audit processes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- About / Why Choose Us -->
     <section id="about" class="py-24 bg-white">
         <div class="container mx-auto px-6">
@@ -280,64 +343,6 @@
                             <p class="text-sm text-blue-200">Specializing in Accounting, Bookkeeping, and US GAAP compliance for global businesses.</p>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- NEW SECTION: Professional Credentials & Milestones -->
-    <section id="credentials" class="py-20 bg-firm-blue text-white relative overflow-hidden border-t border-blue-900">
-        <!-- Background Pattern -->
-        <div class="absolute top-0 right-0 w-64 h-64 bg-firm-teal rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
-        <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-400 rounded-full mix-blend-overlay filter blur-3xl opacity-10"></div>
-
-        <div class="container mx-auto px-6 relative z-10">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="text-firm-teal font-bold text-xs tracking-widest uppercase mb-2 block">Our Qualifications</span>
-                <h2 class="text-3xl md:text-4xl font-serif font-bold text-white mt-2">Professional Milestones</h2>
-                <div class="w-16 h-1 bg-firm-teal mx-auto mt-4 rounded"></div>
-                <p class="text-blue-200 mt-4 text-sm font-light">Backed by rigorous training and certifications from globally recognized accounting bodies.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Credential 1: CA -->
-                <div class="bg-white/5 backdrop-blur-sm p-8 rounded-xl border border-white/10 hover:border-firm-teal transition duration-300 group text-center">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                        <span class="text-firm-blue font-bold font-serif text-2xl">CA</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Chartered Accountant</h3>
-                    <p class="text-xs text-blue-200 mb-4 uppercase tracking-wider">Institute of Chartered Accountants of India</p>
-                    <p class="text-sm text-gray-300 leading-relaxed">Member of ICAI with comprehensive expertise in Indian taxation, auditing standards, and corporate law.</p>
-                </div>
-
-                <!-- Credential 2: CPA -->
-                <div class="bg-white/5 backdrop-blur-sm p-8 rounded-xl border border-white/10 hover:border-firm-teal transition duration-300 group text-center">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                        <i class="fas fa-globe-americas text-firm-blue text-2xl"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-2">US CPA Exam Qualified</h3>
-                    <p class="text-xs text-blue-200 mb-4 uppercase tracking-wider">AICPA (USA)</p>
-                    <p class="text-sm text-gray-300 leading-relaxed">Demonstrated proficiency in US GAAP, regulation (REG), and financial reporting frameworks.</p>
-                </div>
-
-                <!-- Credential 3: Concurrent Audit -->
-                <div class="bg-white/5 backdrop-blur-sm p-8 rounded-xl border border-white/10 hover:border-firm-teal transition duration-300 group text-center">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                        <i class="fas fa-university text-firm-blue text-2xl"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Concurrent Audit of Banks</h3>
-                    <p class="text-xs text-blue-200 mb-4 uppercase tracking-wider">ICAI Certified Course</p>
-                    <p class="text-sm text-gray-300 leading-relaxed">Completed specialized certification for core banking operations, risk assessment, and internal controls.</p>
-                </div>
-
-                <!-- Credential 4: Big 4 Experience -->
-                <div class="bg-white/5 backdrop-blur-sm p-8 rounded-xl border border-white/10 hover:border-firm-teal transition duration-300 group text-center">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                        <i class="fas fa-briefcase text-firm-blue text-2xl"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Ex-Big 4 Experience</h3>
-                    <p class="text-xs text-blue-200 mb-4 uppercase tracking-wider">Deloitte & PwC</p>
-                    <p class="text-sm text-gray-300 leading-relaxed">Former Senior Associate with extensive exposure to global audit processes and working capital management.</p>
                 </div>
             </div>
         </div>
@@ -503,19 +508,14 @@
     </section>
 
     <!-- Map Section (Full Width) -->
-    <section class="w-full h-96 bg-gray-200">
+    <div class="map-container w-full bg-gray-200">
         <iframe 
-            class="w-full h-full grayscale hover:grayscale-0 transition duration-500"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3430.776634739294!2d76.75997237553194!3d30.69635997465017!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390fee9345097f5b%3A0x7733470d0320700d!2sCA%20Nidhi%20Gupta!5e0!3m2!1sen!2sin!4v1709663738000!5m2!1sen!2sin" 
-            title="CA Nidhi Gupta Office Map"
-            aria-label="Map showing location of CA Nidhi Gupta"
-            loading="lazy"
-            frameborder="0" 
-            scrolling="no" 
-            marginheight="0" 
-            marginwidth="0">
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3430.7765089333275!2d76.7573974762356!3d30.69636458737295!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390fee9345097f5b%3A0x7733470d0320700d!2sCA%20Nidhi%20Gupta!5e0!3m2!1sen!2sin!4v1709663738000!5m2!1sen!2sin" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade">
         </iframe>
-    </section>
+    </div>
 
     <!-- Mega Footer -->
     <footer class="bg-firm-blue text-white pt-20 pb-10 border-t-4 border-firm-teal">
@@ -524,7 +524,8 @@
                 <!-- Col 1 -->
                 <div>
                     <h4 class="text-2xl font-serif font-bold mb-6 flex items-center">
-                         <img src="https://canidhigupta.com/wp-content/uploads/2025/07/CA-India-Logo.pdf.png" alt="CA India Logo" class="h-10 w-auto mr-3 bg-white rounded p-1">
+                         <!-- UPDATED: Using local logo.png -->
+                         <img src="logo.png" alt="CA India Logo" class="h-10 w-auto mr-3 bg-white rounded p-1 object-contain">
                          Nidhi G and Company
                     </h4>
                     <p class="text-blue-200 text-sm leading-relaxed mb-6">
