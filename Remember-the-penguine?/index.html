@@ -53,7 +53,7 @@
         #invoice-html {
             width: 100%;
             height: 100%;
-            padding: 0; /* Remove padding to fit image perfectly */
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -168,6 +168,18 @@
             border: 1px dashed rgba(255,255,255,0.4);
         }
 
+        /* Music Toggle Button */
+        #music-toggle {
+            position: fixed; bottom: 20px; right: 20px; z-index: 100;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);
+            border: 1px solid rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer; opacity: 0; transition: opacity 1s;
+        }
+        #music-toggle.visible { opacity: 1; }
+
         /* Utilities */
         .font-mono { font-family: 'Courier Prime', monospace; }
         .font-hand { font-family: 'Pacifico', cursive; }
@@ -176,6 +188,24 @@
     </style>
 </head>
 <body class="text-slate-800 antialiased selection:bg-cyan-200 selection:text-cyan-900">
+
+    <!-- AUDIO PLAYER (Points to your local song.mp3) -->
+    <audio id="bg-music" loop>
+        <source src="song.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- MUSIC TOGGLE BTN -->
+    <button id="music-toggle" onclick="toggleMusic()">
+        <!-- Speaker Icon -->
+        <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        </svg>
+        <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display:none;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+        </svg>
+    </button>
 
     <!-- SECURITY GATE -->
     <div id="security-gate" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
@@ -223,7 +253,7 @@
             </div>
         </section>
 
-        <!-- INVOICE SECTION (NOW USING YOUR IMAGE URL) -->
+        <!-- INVOICE SECTION (NOW USING YOUR URL) -->
         <section id="invoice-section" class="py-20 px-4 bg-sky-50 flex flex-col items-center">
             <div class="text-center mb-8">
                 <h2 class="text-2xl font-bold text-slate-900 mb-2">Due Diligence</h2>
@@ -360,6 +390,13 @@
         const mainContent = document.getElementById('main-content');
         let scanTimer, scanProgress = 0, isUnlocked = false;
 
+        // MUSIC VARS
+        const bgMusic = document.getElementById('bg-music');
+        const musicToggle = document.getElementById('music-toggle');
+        const iconOn = document.getElementById('icon-sound-on');
+        const iconOff = document.getElementById('icon-sound-off');
+        let isMusicPlaying = false;
+
         function startScan(e) {
             if(isUnlocked) return;
             e.preventDefault();
@@ -370,6 +407,15 @@
             statusText.textContent = "VERIFYING BIOMETRICS...";
             statusText.classList.add('text-cyan-400');
             if (navigator.vibrate) navigator.vibrate(20);
+            
+            // TRY TO PLAY MUSIC ON FIRST INTERACTION
+            if (!isMusicPlaying) {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicToggle.classList.add('visible');
+                }).catch(e => console.log("Audio play failed, user interaction needed"));
+            }
+
             scanTimer = setInterval(() => {
                 scanProgress += 2.5; 
                 progressBar.style.width = `${scanProgress}%`;
@@ -400,8 +446,24 @@
             setTimeout(() => {
                 gate.classList.add('gate-open');
                 mainContent.style.opacity = '1';
+                // Ensure music button is visible if it played
+                if(isMusicPlaying) musicToggle.classList.add('visible');
             }, 800);
         }
+        
+        // Music Toggle Logic
+        function toggleMusic() {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                iconOn.style.display = 'block';
+                iconOff.style.display = 'none';
+            } else {
+                bgMusic.pause();
+                iconOn.style.display = 'none';
+                iconOff.style.display = 'block';
+            }
+        }
+
         fingerBtn.addEventListener('mousedown', startScan);
         fingerBtn.addEventListener('touchstart', startScan);
         fingerBtn.addEventListener('mouseup', stopScan);
