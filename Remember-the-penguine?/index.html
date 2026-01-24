@@ -10,13 +10,13 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f9ff; /* Bright Ice Blue background */
+            background-color: #f0f9ff;
             overflow-x: hidden;
             touch-action: pan-y;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 1. Biometric Scanner Styles (KEPT DARK) */
+        /* 1. Biometric Scanner */
         @keyframes scan {
             0% { top: 0%; opacity: 0.5; }
             50% { opacity: 1; }
@@ -40,27 +40,30 @@
             position: relative;
             width: 100%;
             max-width: 340px;
-            height: 450px;
+            height: 480px; 
             margin: 0 auto;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 20px 25px -5px rgba(56, 189, 248, 0.2); /* Lighter shadow */
+            box-shadow: 0 20px 25px -5px rgba(56, 189, 248, 0.2);
             background: white;
             user-select: none;
             border: 1px solid #e2e8f0;
         }
+        
         #invoice-html {
             width: 100%;
             height: 100%;
-            padding: 0;
+            padding: 0; /* Remove padding to fit image perfectly */
             display: flex;
             align-items: center;
             justify-content: center;
             background: #fff;
             color: #1e293b;
             box-sizing: border-box;
+            position: relative;
             overflow: hidden;
         }
+
         canvas#scratch-canvas {
             position: absolute;
             top: 0;
@@ -69,46 +72,30 @@
             height: 100%;
             z-index: 10;
             touch-action: none;
-            transition: opacity 1s ease-out; /* Smooth fade out */
+            transition: opacity 1s ease-out;
         }
-        .canvas-hidden {
-            opacity: 0 !important;
-            pointer-events: none;
-        }
+        .canvas-hidden { opacity: 0 !important; pointer-events: none; }
 
-        /* 3. Haptic Pebble Styles */
-        .pebble-container {
-            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .pebble-container:active {
-            transform: scale(0.95);
-        }
-        .heartbeat-active {
-            animation: pulse-heart 1s infinite;
-        }
+        /* 3. Haptic Pebble */
+        .pebble-container { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .pebble-container:active { transform: scale(0.95); }
+        .heartbeat-active { animation: pulse-heart 1s infinite; }
         @keyframes pulse-heart {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
             70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(6, 182, 212, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
         }
-        /* New Realistic Heartbeat Animation for the Icon */
         @keyframes true-heartbeat {
-            0% { transform: scale(1); }
-            5% { transform: scale(1.2); }
-            10% { transform: scale(1); }
-            15% { transform: scale(1.3); }
-            50% { transform: scale(1); }
-            100% { transform: scale(1); }
+            0% { transform: scale(1); } 5% { transform: scale(1.2); } 10% { transform: scale(1); }
+            15% { transform: scale(1.3); } 50% { transform: scale(1); } 100% { transform: scale(1); }
         }
-        .beating-heart {
-            animation: true-heartbeat 1.3s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-        }
+        .beating-heart { animation: true-heartbeat 1.3s infinite cubic-bezier(0.215, 0.61, 0.355, 1); }
 
-        /* 4. Swipe Slider Styles (UPDATED FOR LIGHT THEME) */
+        /* 4. Slider */
         .slider-track {
             background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(148, 163, 184, 0.3); /* Darker border for visibility */
+            border: 1px solid rgba(148, 163, 184, 0.3);
             height: 64px;
             border-radius: 32px;
             position: relative;
@@ -117,144 +104,67 @@
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
         .slider-text {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b; /* Slate-500 */
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            color: #64748b; font-weight: 700; letter-spacing: 0.05em; pointer-events: none; transition: opacity 0.3s;
         }
         .slider-thumb {
-            width: 56px;
-            height: 56px;
-            background: #0ea5e9; /* Sky-500 */
-            border-radius: 50%;
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: grab;
-            box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.4);
-            touch-action: none;
-            z-index: 20;
-            color: white;
+            width: 56px; height: 56px; background: #0ea5e9; border-radius: 50%;
+            position: absolute; top: 4px; left: 4px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; cursor: grab; box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.4);
+            touch-action: none; z-index: 20; color: white;
         }
         .slider-thumb:active { cursor: grabbing; background: #0284c7; }
 
-        /* 5. Fading Quotes Slider Styles */
+        /* 5. Quotes */
         .quotes-wrapper {
-            width: 100%;
-            overflow: hidden;
-            position: relative;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            padding: 24px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 30px;
+            width: 100%; overflow: hidden; position: relative; background: white;
+            border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding: 24px; text-align: center; border: 1px solid #e2e8f0; margin-bottom: 30px;
         }
-        .quote-slide {
-            display: none;
-            animation: fadeQuote 0.8s ease-in-out;
-        }
-        .quote-slide.active {
-            display: block;
-        }
-        @keyframes fadeQuote {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .quote-slide { display: none; animation: fadeQuote 0.8s ease-in-out; }
+        .quote-slide.active { display: block; }
+        @keyframes fadeQuote { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 6. Endless Scroll Marquee Styles (NEW) */
+        /* 6. Marquee */
         .marquee-wrapper {
-            width: 100%;
-            overflow: hidden;
-            background: #f0f9ff;
-            padding: 10px 0 30px 0;
+            width: 100%; overflow: hidden; background: #f0f9ff; padding: 10px 0 30px 0;
             mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
             -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
         }
-        .marquee-track {
-            display: flex;
-            width: max-content;
-            animation: scroll 20s linear infinite;
-        }
+        .marquee-track { display: flex; width: max-content; animation: scroll 20s linear infinite; }
         .marquee-card {
-            background: white;
-            padding: 12px 20px;
-            margin: 0 10px;
-            border-radius: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            font-size: 14px;
-            color: #334155;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: white; padding: 12px 20px; margin: 0 10px; border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; font-size: 14px;
+            color: #334155; white-space: nowrap; display: flex; align-items: center; gap: 8px;
         }
-        @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-
-        /* 7. Falling Rose Petals */
+        /* 7. Rose Petals */
         .rose-petal {
-            position: fixed;
-            top: -10vh;
-            z-index: 100; /* Above overlay */
-            width: 15px;
-            height: 15px;
-            background-color: #fb7185; /* Light Red */
-            border-radius: 0% 100% 0% 100%; /* Petal shape */
-            opacity: 0.9;
-            pointer-events: none;
-            animation: fall-rotate linear forwards;
+            position: fixed; top: -10vh; z-index: 100; width: 15px; height: 15px;
+            background-color: #fb7185; border-radius: 0% 100% 0% 100%; opacity: 0.9;
+            pointer-events: none; animation: fall-rotate linear forwards;
             box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
-        .rose-petal:nth-child(2n) { background-color: #e11d48; width: 18px; height: 18px; } /* Darker Red */
-        .rose-petal:nth-child(3n) { background-color: #fda4af; width: 12px; height: 12px; } /* Pink */
-        
+        .rose-petal:nth-child(2n) { background-color: #e11d48; width: 18px; height: 18px; }
+        .rose-petal:nth-child(3n) { background-color: #fda4af; width: 12px; height: 12px; }
         @keyframes fall-rotate {
             0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; }
-            25% { transform: translateY(30vh) rotate(90deg) translateX(20px); }
-            50% { transform: translateY(60vh) rotate(180deg) translateX(-20px); }
-            75% { transform: translateY(90vh) rotate(270deg) translateX(20px); }
             100% { transform: translateY(120vh) rotate(360deg) translateX(0); opacity: 0; }
         }
 
-        /* Polaroid & Reveal */
+        /* Polaroid */
         .polaroid-frame {
-            background: white;
-            padding: 16px 16px 60px 16px;
+            background: white; padding: 16px 16px 60px 16px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transform: rotate(-3deg) scale(0.9);
-            opacity: 0;
+            transform: rotate(-3deg) scale(0.9); opacity: 0;
             transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .reveal-active .polaroid-frame {
-            opacity: 1;
-            transform: rotate(-3deg) scale(1);
-        }
+        .reveal-active .polaroid-frame { opacity: 1; transform: rotate(-3deg) scale(1); }
         .tape-strip {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%) rotate(2deg);
-            width: 120px;
-            height: 35px;
-            background-color: rgba(255,255,255,0.3);
-            backdrop-filter: blur(4px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%) rotate(2deg);
+            width: 120px; height: 35px; background-color: rgba(255,255,255,0.3);
+            backdrop-filter: blur(4px); box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border: 1px dashed rgba(255,255,255,0.4);
         }
 
@@ -267,40 +177,35 @@
 </head>
 <body class="text-slate-800 antialiased selection:bg-cyan-200 selection:text-cyan-900">
 
-    <!-- === FEATURE 1: BIOMETRIC SECURITY GATE (KEPT DARK) === -->
+    <!-- SECURITY GATE -->
     <div id="security-gate" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
         <div class="mb-8 relative w-24 h-24 rounded-full border-2 border-slate-700 bg-slate-800 flex items-center justify-center overflow-hidden transition-all duration-300" id="fingerprint-btn">
             <div class="scanner-line"></div>
-            <!-- Fingerprint Icon -->
             <svg id="finger-icon" xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-slate-500 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
             </svg>
         </div>
-        
         <h2 class="text-xl font-bold tracking-[0.2em] uppercase text-white mb-2">Security Check</h2>
         <p class="text-slate-400 text-sm mb-8 font-mono">Restricted Access. Penguins Only.</p>
-        
-        <!-- Progress Bar -->
         <div class="w-64 h-1.5 bg-slate-800 rounded-full overflow-hidden mb-4">
             <div id="scan-progress" class="h-full bg-cyan-400 w-0 transition-all duration-75 ease-linear"></div>
         </div>
         <p id="scan-status" class="text-xs text-slate-500 font-mono h-4">Touch & Hold ID Sensor</p>
     </div>
 
-    <!-- MAIN CONTENT WRAPPER (UPDATED TO BRIGHT THEME) -->
+    <!-- MAIN CONTENT -->
     <main id="main-content" class="relative min-h-screen pb-20 opacity-0 transition-opacity duration-1000 bg-sky-50">
         
-        <!-- HERO SECTION -->
+        <!-- HERO -->
         <section class="relative h-screen flex flex-col items-center justify-end pb-12 overflow-hidden">
-            <!-- Background -->
             <div class="absolute inset-0 z-0">
-                <img src="https://images.unsplash.com/photo-1598439210625-5067c578f3f6?q=80&w=2072&auto=format&fit=crop" 
+                <!-- Wallpaper Fallback to Unsplash if wallpaper.jpg missing -->
+                <img src="wallpaper.jpg" 
+                     onerror="this.src='https://images.unsplash.com/photo-1598439210625-5067c578f3f6?q=80&w=2072&auto=format&fit=crop'"
                      class="w-full h-full object-cover opacity-80" 
                      alt="Penguin Wallpaper">
-                <!-- White Gradient Overlay for Brightness -->
                 <div class="absolute inset-0 bg-gradient-to-t from-sky-50 via-white/30 to-transparent"></div>
             </div>
-
             <div class="relative z-10 px-6 text-center w-full max-w-md">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 backdrop-blur-md border border-cyan-100 text-xs font-bold mb-6 text-cyan-700 shadow-sm">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
@@ -310,7 +215,6 @@
                     Project <span class="text-cyan-600">Penguin</span>
                 </h1>
                 <p class="text-slate-600 text-lg mb-8 font-medium">The Merger & Acquisition Proposal of the Century.</p>
-                
                 <button onclick="document.getElementById('invoice-section').scrollIntoView({behavior:'smooth'})" 
                         class="group relative inline-flex items-center justify-center px-8 py-3 font-semibold text-white transition-all duration-200 bg-cyan-500 rounded-full hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 focus:ring-offset-white">
                     <span>Review Assets</span>
@@ -319,34 +223,31 @@
             </div>
         </section>
 
-        <!-- === FEATURE 2: SCRATCH CARD INVOICE (BRIGHT) === -->
+        <!-- INVOICE SECTION (NOW USING YOUR IMAGE URL) -->
         <section id="invoice-section" class="py-20 px-4 bg-sky-50 flex flex-col items-center">
             <div class="text-center mb-8">
                 <h2 class="text-2xl font-bold text-slate-900 mb-2">Due Diligence</h2>
                 <p class="text-slate-500 text-sm">Audit Findings (Scratch to Reveal)</p>
             </div>
-
             <div id="scratch-container">
-                <!-- Canvas Layer (The Grey Scratch Material) -->
                 <canvas id="scratch-canvas"></canvas>
                 
-                <!-- Hidden Content Layer (The Invoice) -->
+                <!-- INVOICE IMAGE -->
                 <div id="invoice-html">
-                    <img src="invoice.png" alt="Love Invoice" class="w-full h-full object-contain">
+                    <img src="https://kalashnandal.co.in/Remember-the-penguine%3F/Invoice.png" 
+                         alt="Love Invoice" 
+                         class="w-full h-full object-contain">
                 </div>
             </div>
-            
             <p id="scratch-hint" class="mt-6 text-sm text-cyan-600 animate-pulse flex items-center gap-2 font-semibold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path></svg>
                 Rub screen to reveal
             </p>
         </section>
 
-        <!-- === FEATURE 5: QUOTES (TWO TYPES) === -->
+        <!-- QUOTES -->
         <section class="px-6 pt-12 max-w-sm mx-auto">
             <h2 class="text-center text-2xl font-bold mb-6 font-mono text-cyan-600">&lt;Promises /&gt;</h2>
-            
-            <!-- Type 1: Beautiful Fading Slider -->
             <div class="quotes-wrapper">
                 <div class="quote-slide active">
                     <p class="font-hand text-xl text-slate-800 mb-2">"I choose you."</p>
@@ -367,17 +268,15 @@
             </div>
         </section>
 
-        <!-- Type 2: Endless Scroll Marquee (NEW) -->
+        <!-- MARQUEE -->
         <div class="marquee-wrapper">
             <div class="marquee-track">
-                <!-- Content duplicated for seamless loop -->
                 <div class="marquee-card">❤️ Your smile > Everything</div>
                 <div class="marquee-card">🐧 My Penguin</div>
                 <div class="marquee-card">🥟 Momo Date?</div>
                 <div class="marquee-card">✨ You are Magic</div>
                 <div class="marquee-card">📈 Stocks in Love: Bullish</div>
                 <div class="marquee-card">🔐 Encrypted Heart</div>
-                <!-- Duplicate -->
                 <div class="marquee-card">❤️ Your smile > Everything</div>
                 <div class="marquee-card">🐧 My Penguin</div>
                 <div class="marquee-card">🥟 Momo Date?</div>
@@ -387,11 +286,9 @@
             </div>
         </div>
 
-        <!-- === FEATURE 3: TERMS & HAPTIC PEBBLE (BRIGHT) === -->
+        <!-- TERMS & PEBBLE -->
         <section class="bg-white rounded-t-[2.5rem] relative z-20 px-6 py-12 pb-32 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] mt-8">
             <h2 class="text-center text-2xl font-bold mb-8 font-mono text-cyan-600">&lt;Terms /&gt;</h2>
-            
-            <!-- Terms Cards -->
             <div class="space-y-4 mb-12">
                 <div class="bg-sky-50 p-5 rounded-xl border border-sky-100 shadow-sm">
                     <h3 class="text-slate-800 font-bold text-sm mb-1 flex items-center gap-2">
@@ -407,20 +304,14 @@
                 </div>
             </div>
 
-            <!-- THE PEBBLE (HAPTIC INTERACTION) -->
             <div class="flex flex-col items-center justify-center mb-10">
                 <div id="pebble-btn" class="pebble-container relative w-32 h-32 cursor-pointer tap-highlight-transparent">
-                    <!-- Glow effect -->
                     <div class="absolute inset-0 bg-cyan-400 rounded-full blur-2xl opacity-20 animate-pulse"></div>
-                    
-                    <!-- Pebble SVG (Lighter for bright theme) -->
                     <svg viewBox="0 0 24 24" fill="currentColor" class="relative z-10 w-full h-full text-slate-200 drop-shadow-md">
                         <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" opacity="0.1"/>
                         <path d="M12,2c5.52,0,10,4.48,10,10s-4.48,10-10,10S2,17.52,2,12S6.48,2,12,2 M12,0C5.37,0,0,5.37,0,12s5.37,12,12,12s12-5.37,12-12S18.63,0,12,0L12,0z" fill="#cbd5e1"/>
                         <path d="M15.5,6.5c-3,0-4.5,2-4.5,2s-1.5-2-4.5-2S2,9,2,12.5c0,4,6,9.5,10,9.5s10-5.5,10-9.5C22,9,19.5,6.5,15.5,6.5z" fill="#f1f5f9"/>
                     </svg>
-                    
-                    <!-- Heartbeat icon overlay -->
                     <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
                         <svg class="w-12 h-12 text-red-500 beating-heart drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
@@ -430,7 +321,6 @@
                 <p class="mt-4 text-xs font-mono text-cyan-600 uppercase tracking-widest font-bold">Hold for Heartbeat</p>
             </div>
 
-            <!-- === FEATURE 4: SWIPE TO SIGN === -->
             <div class="max-w-xs mx-auto relative z-30">
                 <div id="slider-track" class="slider-track">
                     <div id="slider-text" class="slider-text">SWIPE TO MERGE</div>
@@ -440,16 +330,14 @@
         </section>
     </main>
 
-    <!-- SUCCESS REVEAL OVERLAY (KEPT DARK FOR DRAMATIC EFFECT) -->
+    <!-- SUCCESS REVEAL -->
     <div id="reveal-overlay" class="fixed inset-0 z-[60] bg-slate-900/95 flex flex-col items-center justify-center p-6 hidden-visually backdrop-blur-sm">
-        
-        <!-- Polaroid Container -->
         <div class="polaroid-frame bg-white relative max-w-sm w-full">
             <div class="tape-strip"></div>
-            <!-- Updated aspect ratio to 16:9 (aspect-video) for 4032x2268 image -->
+            <!-- Landscape Aspect Ratio for 4032x2268 -->
             <div class="aspect-video bg-slate-200 overflow-hidden mb-4 relative">
-                <!-- !!! REPLACE THIS URL WITH YOUR COUPLE PHOTO !!! -->
-                <img src="Our.dng" 
+                <!-- NOW USING YOUR URL FOR OUR.JPEG -->
+                <img src="https://kalashnandal.co.in/Remember-the-penguine%3F/Our.jpeg" 
                      class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" 
                      alt="Us">
             </div>
@@ -458,120 +346,93 @@
             </div>
             <div class="text-center font-mono text-[10px] text-slate-400 mt-2 uppercase tracking-widest">Est. 2026 • Lifetime Contract</div>
         </div>
-
         <button onclick="location.reload()" class="mt-12 text-slate-400 text-xs underline font-mono opacity-50 hover:opacity-100">Replay Experience</button>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- SCRIPTS -->
     <script>
-        // --- 1. BIOMETRIC LOGIC ---
+        // 1. BIOMETRIC
         const gate = document.getElementById('security-gate');
         const fingerBtn = document.getElementById('fingerprint-btn');
         const fingerIcon = document.getElementById('finger-icon');
         const progressBar = document.getElementById('scan-progress');
         const statusText = document.getElementById('scan-status');
         const mainContent = document.getElementById('main-content');
-        
-        let scanTimer;
-        let scanProgress = 0;
-        let isUnlocked = false;
+        let scanTimer, scanProgress = 0, isUnlocked = false;
 
         function startScan(e) {
             if(isUnlocked) return;
             e.preventDefault();
-            
             fingerBtn.classList.add('fingerprint-active');
             fingerBtn.classList.add('scanning');
             fingerIcon.classList.remove('text-slate-500');
             fingerIcon.classList.add('text-cyan-400');
             statusText.textContent = "VERIFYING BIOMETRICS...";
             statusText.classList.add('text-cyan-400');
-
             if (navigator.vibrate) navigator.vibrate(20);
-
             scanTimer = setInterval(() => {
-                scanProgress += 2.5; // Speed of scan
+                scanProgress += 2.5; 
                 progressBar.style.width = `${scanProgress}%`;
-                
                 if (scanProgress >= 100) {
                     clearInterval(scanTimer);
                     unlockSuccess();
                 }
             }, 30);
         }
-
         function stopScan() {
             if(isUnlocked) return;
             clearInterval(scanTimer);
-            
             fingerBtn.classList.remove('fingerprint-active');
             fingerBtn.classList.remove('scanning');
             fingerIcon.classList.add('text-slate-500');
             fingerIcon.classList.remove('text-cyan-400');
             statusText.textContent = "SCAN INTERRUPTED";
             statusText.classList.remove('text-cyan-400');
-            
             scanProgress = 0;
             progressBar.style.width = '0%';
         }
-
         function unlockSuccess() {
             isUnlocked = true;
             statusText.textContent = "IDENTITY CONFIRMED: THE QUEEN";
             statusText.classList.remove('text-cyan-400');
             statusText.classList.add('text-green-400');
-            
-            if (navigator.vibrate) navigator.vibrate([50, 50, 100]); // Success pattern
-
+            if (navigator.vibrate) navigator.vibrate([50, 50, 100]);
             setTimeout(() => {
                 gate.classList.add('gate-open');
                 mainContent.style.opacity = '1';
             }, 800);
         }
-
         fingerBtn.addEventListener('mousedown', startScan);
         fingerBtn.addEventListener('touchstart', startScan);
         fingerBtn.addEventListener('mouseup', stopScan);
         fingerBtn.addEventListener('touchend', stopScan);
         fingerBtn.addEventListener('mouseleave', stopScan);
 
-
-        // --- 2. SCRATCH CARD LOGIC ---
+        // 2. SCRATCH CARD
         const canvas = document.getElementById('scratch-canvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('scratch-container');
         const scratchHint = document.getElementById('scratch-hint');
-        let isDrawing = false;
-        let strokeCount = 0; // Track number of scratch strokes
-        let isRevealed = false;
+        let isDrawing = false, strokeCount = 0, isRevealed = false;
 
         function initCanvas() {
             canvas.width = container.offsetWidth;
             canvas.height = container.offsetHeight;
-            
-            // Fill grey layer - Changed to lighter grey for bright theme
-            ctx.fillStyle = '#cbd5e1'; // slate-300
+            ctx.fillStyle = '#cbd5e1'; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Add Text
             ctx.font = "bold 24px Inter";
-            ctx.fillStyle = "#475569"; // slate-600
+            ctx.fillStyle = "#475569"; 
             ctx.textAlign = "center";
             ctx.fillText("CONFIDENTIAL", canvas.width/2, canvas.height/2);
             ctx.font = "14px Inter";
             ctx.fillText("(Scratch to Reveal Invoice)", canvas.width/2, canvas.height/2 + 25);
         }
-
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
-            };
+            return { x: clientX - rect.left, y: clientY - rect.top };
         }
-
         function scratch(e) {
             if (!isDrawing || isRevealed) return;
             e.preventDefault();
@@ -581,7 +442,6 @@
             ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2);
             ctx.fill();
         }
-
         function revealAll() {
             isRevealed = true;
             canvas.classList.add('canvas-hidden');
@@ -590,133 +450,91 @@
             scratchHint.classList.add('text-green-500');
             if (navigator.vibrate) navigator.vibrate([50, 50]);
         }
-
-        // Wait for layout to settle before init
         window.addEventListener('load', initCanvas);
         window.addEventListener('resize', initCanvas);
-
         canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
         canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); });
-        
         const stopDrawing = () => {
             if (isDrawing && !isRevealed) {
                 strokeCount++;
-                // After 5 strokes, reveal everything
-                if (strokeCount >= 5) {
-                    revealAll();
-                }
+                if (strokeCount >= 5) revealAll();
             }
             isDrawing = false; 
         };
-
         window.addEventListener('mouseup', stopDrawing);
         window.addEventListener('touchend', stopDrawing);
         canvas.addEventListener('mousemove', scratch);
         canvas.addEventListener('touchmove', scratch);
 
-
-        // --- 3. HAPTIC PEBBLE LOGIC ---
+        // 3. HEARTBEAT
         const pebble = document.getElementById('pebble-btn');
         let heartbeatInterval;
-
         function startHeartbeat(e) {
             e.preventDefault();
             pebble.classList.add('heartbeat-active');
-            
-            // Trigger initial pulse
             if (navigator.vibrate) navigator.vibrate(50);
-            
-            // Loop for heartbeat rhythm (bum-bum... bum-bum)
             heartbeatInterval = setInterval(() => {
                 if (navigator.vibrate) navigator.vibrate([50, 100, 50]); 
             }, 1200);
         }
-
         function stopHeartbeat() {
             pebble.classList.remove('heartbeat-active');
             clearInterval(heartbeatInterval);
         }
-
         pebble.addEventListener('mousedown', startHeartbeat);
         pebble.addEventListener('touchstart', startHeartbeat);
         pebble.addEventListener('mouseup', stopHeartbeat);
         pebble.addEventListener('touchend', stopHeartbeat);
         pebble.addEventListener('mouseleave', stopHeartbeat);
 
-
-        // --- 4. SWIPE SLIDER LOGIC ---
+        // 4. SLIDER
         const sliderTrack = document.getElementById('slider-track');
         const sliderThumb = document.getElementById('slider-thumb');
         const sliderText = document.getElementById('slider-text');
         const revealOverlay = document.getElementById('reveal-overlay');
-        
-        let isDragging = false;
-        let startX;
-        let currentX = 0;
-
+        let isDragging = false, startX;
         function handleDragStart(e) {
             isDragging = true;
             startX = e.touches ? e.touches[0].clientX : e.clientX;
             sliderThumb.style.transition = 'none';
         }
-
         function handleDragMove(e) {
             if (!isDragging) return;
-            
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const trackWidth = sliderTrack.offsetWidth;
             const thumbWidth = sliderThumb.offsetWidth;
-            const maxDrag = trackWidth - thumbWidth - 8; // 8px margin
-
+            const maxDrag = trackWidth - thumbWidth - 8;
             let moveX = clientX - startX;
             if (moveX < 0) moveX = 0;
             if (moveX > maxDrag) moveX = maxDrag;
-
             sliderThumb.style.transform = `translateX(${moveX}px)`;
-            
-            // Opacity of text fades as you drag
             const percent = moveX / maxDrag;
             sliderText.style.opacity = 1 - percent;
-
-            // Trigger success
             if (percent >= 0.95) {
                 isDragging = false;
                 finishSwipe();
             }
         }
-
         function handleDragEnd() {
             if (!isDragging) return;
             isDragging = false;
-            // Snap back
             sliderThumb.style.transition = 'transform 0.3s ease-out';
             sliderThumb.style.transform = 'translateX(0px)';
             sliderText.style.opacity = 1;
         }
-
         function finishSwipe() {
-            // Visual lock at end
             const trackWidth = sliderTrack.offsetWidth;
             const thumbWidth = sliderThumb.offsetWidth;
             sliderThumb.style.transform = `translateX(${trackWidth - thumbWidth - 8}px)`;
             sliderThumb.innerHTML = '❤️';
-            
-            // Haptic
             if (navigator.vibrate) navigator.vibrate([50, 50, 50, 50, 200]);
-
-            // Confetti
             fireConfetti();
-
-            // Rose Petals Rain
             startRoseRain();
-
-            // Show Polaroid
             setTimeout(() => {
                 revealOverlay.classList.remove('hidden-visually');
                 revealOverlay.classList.add('reveal-active');
             }, 1000);
         }
-
         sliderThumb.addEventListener('mousedown', handleDragStart);
         sliderThumb.addEventListener('touchstart', handleDragStart);
         window.addEventListener('mousemove', handleDragMove);
@@ -724,61 +542,41 @@
         window.addEventListener('mouseup', handleDragEnd);
         window.addEventListener('touchend', handleDragEnd);
 
-        // --- 5. FADING QUOTES SLIDER LOGIC ---
+        // 5. QUOTES
         const quotes = document.querySelectorAll('.quote-slide');
         let currentQuote = 0;
-
         function rotateQuotes() {
             quotes[currentQuote].classList.remove('active');
             currentQuote = (currentQuote + 1) % quotes.length;
             quotes[currentQuote].classList.add('active');
         }
-
-        // Rotate every 3 seconds
         setInterval(rotateQuotes, 3000);
 
-        // --- 6. ROSE RAIN LOGIC ---
+        // 6. ROSE RAIN
         function createPetal() {
             const petal = document.createElement('div');
             petal.classList.add('rose-petal');
-            
-            // Random properties
             const startLeft = Math.random() * 100;
-            const duration = Math.random() * 3 + 4; // 4-7s
+            const duration = Math.random() * 3 + 4;
             const size = Math.random() * 10 + 10;
-            
             petal.style.left = startLeft + 'vw';
             petal.style.animationDuration = duration + 's';
             petal.style.width = size + 'px';
             petal.style.height = size + 'px';
-            
-            // Randomly flip some petals
-            if (Math.random() > 0.5) {
-                petal.style.transform = 'scaleX(-1)';
-            }
-            
+            if (Math.random() > 0.5) petal.style.transform = 'scaleX(-1)';
             document.body.appendChild(petal);
-            
-            // Clean up
-            setTimeout(() => {
-                petal.remove();
-            }, duration * 1000);
+            setTimeout(() => { petal.remove(); }, duration * 1000);
         }
-
         function startRoseRain() {
-            // Create petals intensely for a few seconds
             let count = 0;
             const interval = setInterval(() => {
-                createPetal();
-                createPetal();
-                createPetal(); // 3 at a time
+                createPetal(); createPetal(); createPetal();
                 count++;
-                if (count > 100) clearInterval(interval); // Stop creating after ~300 petals (approx 5-6 seconds)
+                if (count > 100) clearInterval(interval);
             }, 50);
         }
 
-
-        // Confetti Helper
+        // CONFETTI
         function fireConfetti() {
             var duration = 3 * 1000;
             var animationEnd = Date.now() + duration;
