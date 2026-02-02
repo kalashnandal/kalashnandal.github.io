@@ -49,19 +49,21 @@
         }
 
         .gif-container {
-            min-height: 150px;
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            border-radius: 15px;
         }
 
         .gif-container img {
             width: 100%;
-            max-width: 200px;
+            height: 250px; /* Fixed height to make user photos look good */
+            object-fit: cover; /* Crops the photo nicely to fill the box */
             border-radius: 15px;
-            margin-bottom: 1.5rem;
             pointer-events: none; /* User can't drag image */
-            display: block; /* Removes bottom space */
+            display: block;
         }
 
         h1 {
@@ -211,10 +213,13 @@
     <!-- Main Card -->
     <div class="card" id="mainCard">
         <div class="gif-container">
-            <!-- Reliable Giphy Link: Cute Bear Asking -->
-            <img src="https://media.giphy.com/media/LpdlqTkgO2Lwwixwv7/giphy.gif" 
-                 alt="Cute Bear Requesting"
-                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'font-size:50px\'>🥺</div><p>(Imagine a cute bear here)</p>'">
+            <!-- 
+                IMPORTANT: This tries to load 'img_0604.jpg'. 
+                If it's not found (like in the preview), it falls back to the bear GIF.
+            -->
+            <img src="IMG_0604.jpeg" 
+                 alt="My Valentine Request"
+                 onerror="this.onerror=null; this.src='https://media.giphy.com/media/LpdlqTkgO2Lwwixwv7/giphy.gif';">
         </div>
         <h1>Will you be my Valentine? 🥺</h1>
         
@@ -229,8 +234,7 @@
         <div class="gif-container">
             <!-- Reliable Giphy Link: Bears Hugging -->
             <img src="https://media.giphy.com/media/1HQHB98FnWOX6/giphy.gif" 
-                 alt="Bear Kisses"
-                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'font-size:50px\'>🥰</div><p>(Imagine bears hugging)</p>'">
+                 alt="Bear Kisses">
         </div>
         <h2>YAYYY! 🥰</h2>
         <p>I knew you wouldn't say no!</p>
@@ -365,6 +369,5 @@
     </script>
 </body>
 </html>
-
 
 
