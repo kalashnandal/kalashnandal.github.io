@@ -16,6 +16,50 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* --- 0. PASSWORD SCREEN STYLES --- */
+        #password-overlay {
+            position: fixed; inset: 0; z-index: 100;
+            background-color: #0f172a; /* Slate 900 */
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        .password-hidden { transform: translateY(-100%); }
+        
+        .pin-display {
+            width: 200px; height: 60px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 15px; margin-bottom: 40px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .pin-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: #475569;
+            transition: all 0.2s;
+        }
+        .pin-dot.active { background: #22d3ee; box-shadow: 0 0 10px #22d3ee; }
+        .pin-dot.error { background: #ef4444; animation: shake 0.4s; }
+
+        .keypad {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 20px; max-width: 300px; width: 100%; padding: 0 20px;
+        }
+        .key-btn {
+            aspect-ratio: 1;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid #334155;
+            border-radius: 50%;
+            color: white; font-size: 24px; font-family: 'Courier Prime', monospace;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.1s;
+            user-select: none;
+        }
+        .key-btn:active { background: #22d3ee; color: #0f172a; transform: scale(0.95); }
+
         /* 1. Biometric Scanner */
         @keyframes scan {
             0% { top: 0%; opacity: 0.5; }
@@ -185,14 +229,59 @@
         .font-hand { font-family: 'Pacifico', cursive; }
         .hidden-visually { opacity: 0; pointer-events: none; }
         .gate-open { transform: translateY(-100%); transition: transform 0.8s ease-in-out; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
     </style>
 </head>
 <body class="text-slate-800 antialiased selection:bg-cyan-200 selection:text-cyan-900">
 
-    <!-- AUDIO PLAYER (Updated to Absolute URL) -->
+    <!-- PASSWORD OVERLAY (NEW) -->
+    <div id="password-overlay">
+        <div class="mb-6 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 border-2 border-slate-700 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <h2 class="text-white font-mono tracking-widest text-lg font-bold">CLASSIFIED ACCESS</h2>
+            <p class="text-slate-400 text-xs font-mono mt-2">Enter Passcode to Proceed</p>
+        </div>
+
+        <!-- Dots Display -->
+        <div class="pin-display" id="pin-display">
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+        </div>
+
+        <!-- Keypad -->
+        <div class="keypad">
+            <div class="key-btn" onclick="enterDigit(1)">1</div>
+            <div class="key-btn" onclick="enterDigit(2)">2</div>
+            <div class="key-btn" onclick="enterDigit(3)">3</div>
+            <div class="key-btn" onclick="enterDigit(4)">4</div>
+            <div class="key-btn" onclick="enterDigit(5)">5</div>
+            <div class="key-btn" onclick="enterDigit(6)">6</div>
+            <div class="key-btn" onclick="enterDigit(7)">7</div>
+            <div class="key-btn" onclick="enterDigit(8)">8</div>
+            <div class="key-btn" onclick="enterDigit(9)">9</div>
+            <div class="key-btn text-sm" onclick="clearPin()">C</div>
+            <div class="key-btn" onclick="enterDigit(0)">0</div>
+            <div class="key-btn text-sm" onclick="backspacePin()">⌫</div>
+        </div>
+        
+        <p class="text-slate-600 text-[10px] font-mono mt-8 opacity-50">Hint: Valentine's Date (DDMM)</p>
+    </div>
+
+    <!-- AUDIO PLAYER -->
     <audio id="bg-music" loop>
         <source src="https://kalashnandal.co.in/Remember-the-penguine%3F/song.mp3" type="audio/mpeg">
-        <source src="song.mp3" type="audio/mpeg"> <!-- Fallback -->
+        <source src="song.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 
@@ -208,7 +297,7 @@
         </svg>
     </button>
 
-    <!-- SECURITY GATE -->
+    <!-- SECURITY GATE (BIOMETRIC) -->
     <div id="security-gate" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
         <div class="mb-8 relative w-24 h-24 rounded-full border-2 border-slate-700 bg-slate-800 flex items-center justify-center overflow-hidden transition-all duration-300" id="fingerprint-btn">
             <div class="scanner-line"></div>
@@ -230,7 +319,6 @@
         <!-- HERO -->
         <section class="relative h-screen flex flex-col items-center justify-end pb-12 overflow-hidden">
             <div class="absolute inset-0 z-0">
-                <!-- Wallpaper Fallback to Unsplash if wallpaper.jpg missing -->
                 <img src="wallpaper.jpg" 
                      onerror="this.src='https://images.unsplash.com/photo-1598439210625-5067c578f3f6?q=80&w=2072&auto=format&fit=crop'"
                      class="w-full h-full object-cover opacity-80" 
@@ -254,7 +342,7 @@
             </div>
         </section>
 
-        <!-- INVOICE SECTION (NOW USING YOUR URL) -->
+        <!-- INVOICE SECTION -->
         <section id="invoice-section" class="py-20 px-4 bg-sky-50 flex flex-col items-center">
             <div class="text-center mb-8">
                 <h2 class="text-2xl font-bold text-slate-900 mb-2">Due Diligence</h2>
@@ -262,8 +350,6 @@
             </div>
             <div id="scratch-container">
                 <canvas id="scratch-canvas"></canvas>
-                
-                <!-- INVOICE IMAGE -->
                 <div id="invoice-html">
                     <img src="https://kalashnandal.co.in/Remember-the-penguine%3F/Invoice.png" 
                          alt="Love Invoice" 
@@ -365,9 +451,7 @@
     <div id="reveal-overlay" class="fixed inset-0 z-[60] bg-slate-900/95 flex flex-col items-center justify-center p-6 hidden-visually backdrop-blur-sm">
         <div class="polaroid-frame bg-white relative max-w-sm w-full">
             <div class="tape-strip"></div>
-            <!-- Landscape Aspect Ratio for 4032x2268 -->
             <div class="aspect-video bg-slate-200 overflow-hidden mb-4 relative">
-                <!-- NOW USING YOUR URL FOR OUR.JPEG -->
                 <img src="https://kalashnandal.co.in/Remember-the-penguine%3F/Our.jpeg" 
                      class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" 
                      alt="Us">
@@ -382,6 +466,67 @@
 
     <!-- SCRIPTS -->
     <script>
+        // 0. PASSWORD LOGIC
+        const PASSCODE = '1809'; // CHANGE THIS PASSWORD HERE
+        let currentInput = "";
+        const dots = document.querySelectorAll('.pin-dot');
+        const passwordOverlay = document.getElementById('password-overlay');
+
+        function updateDots() {
+            dots.forEach((dot, index) => {
+                if (index < currentInput.length) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+                dot.classList.remove('error');
+            });
+        }
+
+        function enterDigit(digit) {
+            if (currentInput.length < 4) {
+                currentInput += digit;
+                updateDots();
+                
+                // Attempt to play music on first interaction (mobile restriction fix)
+                if (!isMusicPlaying && bgMusic.paused) {
+                    bgMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        musicToggle.classList.add('visible');
+                    }).catch(e => console.log("Waiting for more interaction"));
+                }
+
+                if (currentInput.length === 4) {
+                    setTimeout(checkPin, 200);
+                }
+            }
+        }
+
+        function backspacePin() {
+            currentInput = currentInput.slice(0, -1);
+            updateDots();
+        }
+
+        function clearPin() {
+            currentInput = "";
+            updateDots();
+        }
+
+        function checkPin() {
+            if (currentInput === PASSCODE) {
+                // SUCCESS
+                if (navigator.vibrate) navigator.vibrate([50, 50]);
+                passwordOverlay.classList.add('password-hidden');
+            } else {
+                // FAILURE
+                if (navigator.vibrate) navigator.vibrate(300);
+                dots.forEach(dot => dot.classList.add('error'));
+                setTimeout(() => {
+                    clearPin();
+                }, 500);
+            }
+        }
+
         // 1. BIOMETRIC
         const gate = document.getElementById('security-gate');
         const fingerBtn = document.getElementById('fingerprint-btn');
@@ -409,14 +554,6 @@
             statusText.classList.add('text-cyan-400');
             if (navigator.vibrate) navigator.vibrate(20);
             
-            // TRY TO PLAY MUSIC ON FIRST INTERACTION
-            if (!isMusicPlaying) {
-                bgMusic.play().then(() => {
-                    isMusicPlaying = true;
-                    musicToggle.classList.add('visible');
-                }).catch(e => console.log("Audio play failed, user interaction needed"));
-            }
-
             scanTimer = setInterval(() => {
                 scanProgress += 2.5; 
                 progressBar.style.width = `${scanProgress}%`;
@@ -654,3 +791,4 @@
     </script>
 </body>
 </html>
+
