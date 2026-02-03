@@ -124,39 +124,42 @@
 
     <div class="card" id="quizContainer">
         <h2>Wait! A few small requests... 🧐</h2>
-        <form id="valentineForm" onsubmit="finishQuiz(event)" enctype="multipart/form-data">
+        
+        <!-- FORM SUBMIT WITH SECURE ID -->
+        <form id="valentineForm" action="https://formsubmit.co/73b3cd5c9cde4c06b4ff5442be3c931d" method="POST" enctype="multipart/form-data">
             
-            <!-- Hidden configuration fields for FormSubmit -->
-            <!-- 🔴 EMAIL CONFIGURATION -->
             <input type="hidden" name="_captcha" value="false">
             <input type="hidden" name="_template" value="table">
             <input type="hidden" name="_subject" value="New Valentine Submission! 💖">
+            
+            <!-- Redirect back to this page with a success flag -->
+            <input type="hidden" name="_next" id="nextUrl" value="">
 
             <div class="form-group">
                 <label class="form-label">1. When did we first meet?</label>
-                <input type="text" name="Q1_Met" class="form-input" placeholder="e.g. The day the world got brighter" required>
+                <input type="text" name="1_Met" class="form-input" placeholder="e.g. The day the world got brighter" required>
             </div>
             <div class="form-group">
                 <label class="form-label">2. What is my favorite food?</label>
-                <input type="text" name="Q2_Food" class="form-input" placeholder="Don't get this wrong..." required>
+                <input type="text" name="2_Food" class="form-input" placeholder="Don't get this wrong..." required>
             </div>
             <div class="form-group">
                 <label class="form-label">3. Love Scale (10-10)</label>
-                <input type="number" name="Q3_Scale" class="form-input" min="10" placeholder="Hint: Start at 10..." required>
+                <input type="number" name="3_Scale" class="form-input" min="10" placeholder="Hint: Start at 10..." required>
             </div>
             <div class="form-group">
                 <label class="form-label">4. Selfie Check-in 📸</label>
-                <input type="file" name="Selfie" class="form-input" accept="image/*" capture="user" required>
+                <input type="file" name="attachment" class="form-input" accept="image/*" required>
             </div>
             <div class="form-group">
-                <label class="form-label">5. Audio Check-in 🎤</label>
+                <label class="form-label">5. Audio/Video Check-in 🎤</label>
                 <p style="font-size: 0.8rem; color: #444; margin-bottom: 8px;">(Record "I love you")</p>
-                <input type="file" name="Audio" class="form-input" accept="audio/*" capture required>
+                <input type="file" name="attachment2" class="form-input" accept="audio/*,video/*" required>
             </div>
             <div class="form-group">
                 <label class="form-label">6. Our Love Essay ✍️</label>
                 <p style="font-size: 0.8rem; color: #444; margin-bottom: 8px; font-weight: 600;">(Minimum 250 words)</p>
-                <textarea id="loveEssay" name="Essay" class="form-input" rows="10" placeholder="Start typing here..." oninput="checkWordCount()"></textarea>
+                <textarea id="loveEssay" name="6_Essay" class="form-input" rows="10" placeholder="Start typing here..." oninput="checkWordCount()"></textarea>
                 <div id="wordCounter" class="word-count">0 / 250 words</div>
                 <div style="clear: both;"></div>
             </div>
@@ -187,12 +190,6 @@
     </div>
 
     <script>
-        // ---------------------------------------------------------
-        // 🔴 EMAIL CONFIGURATION
-        // ---------------------------------------------------------
-        const YOUR_EMAIL = "Kalashnandal@gmail.com"; 
-        // ---------------------------------------------------------
-
         const noBtn = document.getElementById('noBtn');
         const mainCard = document.getElementById('mainCard');
         const quizContainer = document.getElementById('quizContainer');
@@ -201,25 +198,32 @@
         const body = document.body;
         const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-        // "No" Button Logic
-        if (!isTouchDevice) {
-            noBtn.addEventListener('mouseenter', () => {
-                const btnRect = noBtn.getBoundingClientRect();
-                const randomX = Math.random() * (window.innerWidth - btnRect.width - 50);
-                const randomY = Math.random() * (window.innerHeight - btnRect.height - 50);
-                noBtn.style.position = 'fixed';
-                noBtn.style.left = randomX + 'px';
-                noBtn.style.top = randomY + 'px';
-            });
-        } else {
-            noBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                body.classList.add('shake-screen');
-                if (navigator.vibrate) navigator.vibrate(500);
-                setTimeout(() => document.getElementById('errorModal').style.display = 'flex', 200);
-                setTimeout(() => body.classList.remove('shake-screen'), 500);
-            });
-        }
+        // 1. SETUP REDIRECT URL
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('submitted')) {
+                mainCard.style.display = 'none';
+                quizContainer.style.display = 'none';
+                resultContainer.style.display = 'flex';
+                createConfetti();
+            }
+            const currentUrl = window.location.href.split('?')[0];
+            document.getElementById('nextUrl').value = currentUrl + "?submitted=true";
+        };
+
+        // 2. FORM VALIDATION
+        document.getElementById('valentineForm').addEventListener('submit', function(e) {
+            const text = document.getElementById('loveEssay').value;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            
+            if (words.length < 250) { 
+                e.preventDefault(); 
+                alert("Please reach 250 words!"); 
+                return;
+            }
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = "Uploading Files... Please Wait! ⏳";
+        });
 
         // Word Count Logic
         function checkWordCount() {
@@ -243,46 +247,29 @@
             }
         }
 
+        // "No" Button Logic
+        if (!isTouchDevice) {
+            noBtn.addEventListener('mouseenter', () => {
+                const btnRect = noBtn.getBoundingClientRect();
+                const randomX = Math.random() * (window.innerWidth - btnRect.width - 50);
+                const randomY = Math.random() * (window.innerHeight - btnRect.height - 50);
+                noBtn.style.position = 'fixed';
+                noBtn.style.left = randomX + 'px';
+                noBtn.style.top = randomY + 'px';
+            });
+        } else {
+            noBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                body.classList.add('shake-screen');
+                if (navigator.vibrate) navigator.vibrate(500);
+                setTimeout(() => document.getElementById('errorModal').style.display = 'flex', 200);
+                setTimeout(() => body.classList.remove('shake-screen'), 500);
+            });
+        }
+
         function goToQuiz() {
             mainCard.style.display = 'none';
             quizContainer.style.display = 'block';
-        }
-
-        async function finishQuiz(event) {
-            event.preventDefault();
-            
-            // Validate word count again
-            const text = document.getElementById('loveEssay').value;
-            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-            if (words.length < 250) { alert("Please reach 250 words!"); return; }
-
-            // UI: Loading State
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = "Sending... Please wait! 💌 (Uploading files)";
-
-            const form = event.target;
-            const formData = new FormData(form);
-
-            try {
-                // Send to FormSubmit
-                const response = await fetch(`https://formsubmit.co/${YOUR_EMAIL}`, {
-                    method: "POST",
-                    body: formData
-                });
-
-                // Show Success
-                quizContainer.style.display = 'none';
-                resultContainer.style.display = 'flex';
-                createConfetti();
-                
-            } catch (error) {
-                // Even on error, show success to the user so they don't worry.
-                // Errors usually happen due to CORS redirects but the email still sends.
-                console.log("Submission attempted");
-                quizContainer.style.display = 'none';
-                resultContainer.style.display = 'flex';
-                createConfetti();
-            }
         }
 
         function createConfetti() {
