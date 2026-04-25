@@ -1,0 +1,374 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for premium typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        rose: {
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                        },
+                        midnight: '#020617',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #020617; /* midnight blue */
+            color: #f8fafc;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Heart Unlock Button Styles */
+        .unlock-btn {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            border: 2px solid rgba(253, 164, 175, 0.3);
+            transition: transform 0.2s ease;
+            touch-action: none; /* Prevent scrolling while holding */
+        }
+
+        .unlock-btn:active, .unlock-btn.active {
+            transform: scale(0.95);
+        }
+
+        .unlock-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #f43f5e, #fb7185);
+            transition: height 0.1s linear;
+            z-index: 1;
+        }
+
+        .unlock-icon {
+            z-index: 2;
+            font-size: 2.5rem;
+            color: rgba(255,255,255,0.8);
+            text-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+            transition: color 0.3s;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        .particle {
+            position: fixed;
+            bottom: -50px;
+            pointer-events: none;
+            color: rgba(253, 164, 175, 0.4);
+            font-size: 1rem;
+            animation: float linear forwards;
+            z-index: 0;
+        }
+
+        .fade-in {
+            animation: fadeIn 1.5s ease-in-out forwards;
+        }
+
+        .fade-out {
+            animation: fadeOut 1s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(1.1); pointer-events: none; }
+        }
+
+        /* Scrollbar hiding for clean look */
+        ::-webkit-scrollbar {
+            width: 0px;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen relative flex flex-col items-center justify-center">
+
+    <!-- Ambient Background Glow -->
+    <div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-rose-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <!-- LOCK SCREEN -->
+    <div id="lock-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-midnight/90 backdrop-blur-sm transition-opacity duration-1000">
+        <div class="text-center mb-12 px-6">
+            <h1 class="font-serif text-3xl md:text-5xl text-rose-300 tracking-wide mb-4">A Digital Vault</h1>
+            <p class="text-slate-400 font-light tracking-widest uppercase text-sm">Authorized Access Only</p>
+        </div>
+
+        <div class="flex flex-col items-center gap-6">
+            <!-- The Hold-to-Unlock Button -->
+            <div id="unlock-trigger" class="unlock-btn shadow-[0_0_40px_rgba(244,63,94,0.15)]">
+                <div id="unlock-progress" class="unlock-fill"></div>
+                <i class="fa-solid fa-heart unlock-icon"></i>
+            </div>
+            <p id="unlock-text" class="text-slate-400 text-sm tracking-wide animate-pulse">Press and hold to unlock</p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT (Hidden initially) -->
+    <div id="main-content" class="w-full max-w-3xl mx-auto px-6 py-16 hidden z-10 relative">
+        
+        <!-- Header Section -->
+        <header class="text-center mb-16 fade-in" style="animation-delay: 0.2s;">
+            <p class="text-rose-400 tracking-[0.2em] uppercase text-xs mb-4 font-semibold">Access Granted</p>
+            <h2 class="font-serif text-4xl md:text-6xl mb-6">Hello, Beautiful.</h2>
+            <div class="w-16 h-[1px] bg-gradient-to-r from-transparent via-rose-300 to-transparent mx-auto"></div>
+        </header>
+
+        <!-- The Letter (Glass Panel) -->
+        <section class="glass-panel p-8 md:p-12 mb-12 fade-in relative overflow-hidden" style="animation-delay: 0.6s;">
+            <!-- Decorative quote mark -->
+            <i class="fa-solid fa-quote-left absolute top-6 left-6 text-4xl text-rose-400/10"></i>
+            
+            <div class="relative z-10 text-slate-200 leading-relaxed space-y-6 font-light text-lg">
+                <p>
+                    I wanted to make something a little different for you. Not just a text, not just a card, but a tiny little corner of the internet that belongs entirely to us.
+                </p>
+                <p>
+                    Every day with you feels like discovering a new favorite song. You bring this incredible light into my life, and I catch myself smiling for no reason other than the fact that you crossed my mind.
+                </p>
+                <p>
+                    This vault is just a small reminder of how much you mean to me. You are my favorite notification, my favorite place to go, and my favorite person.
+                </p>
+            </div>
+            <div class="mt-8 text-right font-serif text-2xl text-rose-300 italic">
+                — Yours, truly.
+            </div>
+        </section>
+
+        <!-- The Love Audit (Ledger concept) -->
+        <section class="fade-in" style="animation-delay: 1s;">
+            <h3 class="font-serif text-2xl text-center mb-8 tracking-wide text-rose-300">The Love Audit 2026</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Asset 1 -->
+                <div class="glass-panel p-6 flex items-start gap-4 hover:bg-white/5 transition-colors">
+                    <div class="bg-rose-500/20 p-3 rounded-lg text-rose-400">
+                        <i class="fa-solid fa-face-smile-beam text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm tracking-widest uppercase text-slate-400 mb-1">Core Asset</h4>
+                        <p class="text-lg font-serif">Your Smile</p>
+                        <p class="text-sm text-slate-500 mt-1">Appreciating in value daily.</p>
+                    </div>
+                </div>
+
+                <!-- Asset 2 -->
+                <div class="glass-panel p-6 flex items-start gap-4 hover:bg-white/5 transition-colors">
+                    <div class="bg-rose-500/20 p-3 rounded-lg text-rose-400">
+                        <i class="fa-solid fa-infinity text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm tracking-widest uppercase text-slate-400 mb-1">Current Equity</h4>
+                        <p class="text-lg font-serif">Infinite Affection</p>
+                        <p class="text-sm text-slate-500 mt-1">Yielding massive returns of happiness.</p>
+                    </div>
+                </div>
+
+                <!-- Asset 3 -->
+                <div class="glass-panel p-6 flex items-start gap-4 hover:bg-white/5 transition-colors">
+                    <div class="bg-rose-500/20 p-3 rounded-lg text-rose-400">
+                        <i class="fa-solid fa-bolt text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm tracking-widest uppercase text-slate-400 mb-1">Energy Source</h4>
+                        <p class="text-lg font-serif">Our Late Night Talks</p>
+                        <p class="text-sm text-slate-500 mt-1">Fueling my soul consistently.</p>
+                    </div>
+                </div>
+
+                <!-- Asset 4 -->
+                <div class="glass-panel p-6 flex items-start gap-4 hover:bg-white/5 transition-colors">
+                    <div class="bg-rose-500/20 p-3 rounded-lg text-rose-400">
+                        <i class="fa-solid fa-shield-heart text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm tracking-widest uppercase text-slate-400 mb-1">Liabilities</h4>
+                        <p class="text-lg font-serif">Zero</p>
+                        <p class="text-sm text-slate-500 mt-1">All flaws forgiven and accepted.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-20 mb-10 text-center fade-in" style="animation-delay: 1.4s;">
+            <p class="text-slate-500 text-sm">Created with ❤️ just for you.</p>
+        </footer>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('unlock-trigger');
+            const progress = document.getElementById('unlock-progress');
+            const lockScreen = document.getElementById('lock-screen');
+            const mainContent = document.getElementById('main-content');
+            const unlockText = document.getElementById('unlock-text');
+            const icon = document.querySelector('.unlock-icon');
+            
+            let holdTimer;
+            let percent = 0;
+            let isUnlocked = false;
+
+            // Handle starting the hold
+            const startHold = (e) => {
+                if (isUnlocked) return;
+                // Prevent default touch behavior (like zooming/scrolling)
+                if(e.type === 'touchstart') e.preventDefault(); 
+                
+                btn.classList.add('active');
+                unlockText.innerText = "Keep holding...";
+                unlockText.classList.remove('animate-pulse');
+                icon.style.color = 'white';
+                
+                holdTimer = setInterval(() => {
+                    percent += 2; // Speed of fill (adjust to make it faster/slower)
+                    progress.style.height = `${percent}%`;
+                    
+                    if (percent >= 100) {
+                        unlock();
+                    }
+                }, 30); // Runs every 30ms
+            };
+
+            // Handle releasing the hold
+            const endHold = () => {
+                if (isUnlocked) return;
+                
+                clearInterval(holdTimer);
+                btn.classList.remove('active');
+                unlockText.innerText = "Press and hold to unlock";
+                unlockText.classList.add('animate-pulse');
+                icon.style.color = 'rgba(255,255,255,0.8)';
+                
+                // Animate progress dropping back down
+                const dropTimer = setInterval(() => {
+                    percent -= 5;
+                    if (percent <= 0) {
+                        percent = 0;
+                        clearInterval(dropTimer);
+                    }
+                    progress.style.height = `${percent}%`;
+                }, 20);
+            };
+
+            // Trigger the unlock sequence
+            const unlock = () => {
+                isUnlocked = true;
+                clearInterval(holdTimer);
+                progress.style.height = '100%';
+                unlockText.innerText = "Unlocked!";
+                
+                // Add a little pop effect
+                btn.style.transform = 'scale(1.1)';
+                
+                setTimeout(() => {
+                    // Fade out lock screen
+                    lockScreen.classList.add('fade-out');
+                    
+                    setTimeout(() => {
+                        lockScreen.style.display = 'none';
+                        // Show main content
+                        mainContent.classList.remove('hidden');
+                        
+                        // Start particle effect for the romantic vibe
+                        startParticles();
+                    }, 1000);
+                }, 500);
+            };
+
+            // Particle generation (floating hearts/stars)
+            const startParticles = () => {
+                const icons = ['fa-heart', 'fa-star', 'fa-sparkles'];
+                
+                setInterval(() => {
+                    const particle = document.createElement('i');
+                    const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+                    
+                    particle.classList.add('fa-solid', randomIcon, 'particle');
+                    
+                    // Randomize position, size, and duration
+                    const size = Math.random() * 0.8 + 0.4;
+                    const left = Math.random() * 100;
+                    const duration = Math.random() * 4 + 4; // 4 to 8 seconds
+                    
+                    particle.style.left = `${left}vw`;
+                    particle.style.transform = `scale(${size})`;
+                    particle.style.animationDuration = `${duration}s`;
+                    
+                    document.body.appendChild(particle);
+                    
+                    // Clean up after animation ends
+                    setTimeout(() => {
+                        particle.remove();
+                    }, duration * 1000);
+                    
+                }, 400); // Create a new particle every 400ms
+            };
+
+            // Event Listeners for both Mouse and Touch
+            btn.addEventListener('mousedown', startHold);
+            btn.addEventListener('touchstart', startHold, {passive: false});
+            
+            window.addEventListener('mouseup', endHold);
+            window.addEventListener('touchend', endHold);
+            
+            // Prevent right click on the button so it doesn't interrupt the hold
+            btn.addEventListener('contextmenu', e => e.preventDefault());
+        });
+    </script>
+</body>
+</html>
+
+```
