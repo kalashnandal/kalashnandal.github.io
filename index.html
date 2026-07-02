@@ -1332,8 +1332,8 @@
             if(cr<.68){ col[j]=.83; col[j+1]=.69; col[j+2]=.24; }
             else if(cr<.9){ col[j]=1; col[j+1]=.95; col[j+2]=.85; }
             else{ col[j]=.45; col[j+1]=.85; col[j+2]=1; }
-            br=.48+Math.random()*.5; col[j]*=br; col[j+1]*=br; col[j+2]*=br;
-            /* misc: seed + size (3% oversized glow motes) */
+            br=0.8+Math.random()*.5; col[j]*=br; col[j+1]*=br; col[j+2]*=br;
+/* misc: seed + size (3% oversized glow motes) */
             misc[i*2]=Math.random()*100;
             sr=Math.random();
             misc[i*2+1]= sr<.03 ? 3.4+Math.random()*2.4 : .8+Math.random()*1.7;
@@ -1440,7 +1440,7 @@
         '  float d = length(c);',
         '  float a = smoothstep(0.5, 0.02, d); a *= a;',
         '  a += smoothstep(0.14, 0.0, d) * 0.48;',
-        '  gl_FragColor = vec4(vC, min(a, 1.0) * uOpacity * 1.5);',
+        '  gl_FragColor = vec4(vC, min(a, 1.0) * uOpacity * 0.5);',
         '}'
         ].join('\n');
 
