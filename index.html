@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -301,95 +300,6 @@
     </style>
 </head>
 <body class="selection:bg-gold selection:text-black">
-<!-- PageDrop Unified FAB Widget -->
-<link rel="stylesheet" href="https://pagedrop.io/fab-widget.css?v=6">
-
-
-
-<!-- Expiration Warning Popup (only shown for content expiring soon) -->
-<div id="pagedrop-expiry-popup">
-  <div id="pagedrop-expiry-popup-content">
-    <div id="pagedrop-expiry-popup-icon">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12,6 12,12 16,14"/>
-      </svg>
-    </div>
-    <h3 id="pagedrop-expiry-popup-title">Content Expiring Soon</h3>
-    <p id="pagedrop-expiry-popup-desc">
-      This content will be deleted in less than 24 hours. If you like it, you can extend its lifetime to keep it available.
-    </p>
-    <div id="pagedrop-expiry-popup-actions">
-      <button class="pagedrop-popup-btn pagedrop-popup-btn-secondary" id="pagedrop-expiry-dismiss">
-        Dismiss
-      </button>
-      <button class="pagedrop-popup-btn pagedrop-popup-btn-primary" id="pagedrop-expiry-extend">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 5v14m-7-7h14"/>
-        </svg>
-        Extend Lifetime
-      </button>
-    </div>
-  </div>
-</div>
-
-<div id="pagedrop-fab-container">
-  <!-- Expanded Panel (appears above pill on hover/click) -->
-  <div id="pagedrop-fab-expanded">
-    
-    <div class="pagedrop-fab-row pagedrop-fab-row-info">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pagedrop-fab-row-icon">
-        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-      <span class="pagedrop-fab-label"><span id="pagedrop-view-count-expanded">1</span> view</span>
-    </div>
-    <div class="pagedrop-fab-row">
-      <span class="pagedrop-fab-label">3 days left</span>
-      <button id="pagedrop-extend-btn" class="pagedrop-fab-btn pagedrop-fab-btn-extend">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 5v14m-7-7h14"/>
-        </svg>
-        Extend
-      </button>
-    </div>
-    <div class="pagedrop-fab-cta">
-      Like what you see? <a href="https://pagedrop.io" target="_blank" rel="noopener">Create your own</a>
-    </div>
-    <div class="pagedrop-fab-report">
-      <a href="#" id="pagedrop-report-btn">Report this content</a>
-    </div>
-  </div>
-
-  <!-- Collapsed Pill (always visible) -->
-  <div id="pagedrop-fab-pill" class="">
-    <a href="https://pagedrop.io" target="_blank" rel="noopener" class="pagedrop-fab-logo" title="Hosted on PageDrop" onclick="event.stopPropagation();">
-      <img src="https://pagedrop.io/icon.png" alt="PageDrop" />
-    </a>
-    <div class="pagedrop-fab-divider"></div>
-    <div id="pagedrop-fab-views" class="pagedrop-fab-views" title="1 views">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-      <span id="pagedrop-view-count-pill">1</span>
-    </div>
-    <div class="pagedrop-fab-divider"></div>
-    
-    <div class="pagedrop-fab-days ">
-      
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12,6 12,12 16,14"/>
-      </svg>
-      
-      <span>3d</span>
-    </div>
-  </div>
-</div>
-
-<script src="https://pagedrop.io/fab-widget.js" data-slug="robust-raid-jtd9" data-base-url="https://pagedrop.io" data-is-explore="false" data-days-remaining="3" data-view-count="1" defer></script>
-
 
     <!-- ============ WEBGL PARTICLE VORTEX (fixed, behind all content) ============ -->
     <canvas id="vortex-canvas" aria-hidden="true"></canvas>
@@ -1063,8 +973,7 @@
     <script>
         lucide.createIcons();
 
-     
-/* =====================================================================
+    /* =====================================================================
            TOPOGRAPHIC WIREFRAME ENGINE — Three.js interactive terrain
            ===================================================================== */
         const IS_MOBILE = window.innerWidth < 768;
@@ -1241,31 +1150,6 @@
         /* =====================================================================
            GSAP CONTENT REVEALS — glass cards fade/rise as they enter view
            ===================================================================== */
-
-        /* =====================================================================
-           GSAP CONTENT REVEALS — glass cards fade/rise as they enter view
-           ===================================================================== */
-        if (!REDUCED_MOTION) {
-            gsap.utils.toArray('.reveal').forEach((el) => {
-                gsap.from(el, {
-                    y: 48,
-                    autoAlpha: 0,
-                    duration: 1.15,
-                    ease: 'power3.out',
-                    scrollTrigger: { trigger: el, start: 'top 86%', once: true }
-                });
-            });
-        }
-        // Skill bars fill on entry (works with or without reduced motion)
-        document.querySelectorAll('.skill-progress').forEach((bar) => {
-            ScrollTrigger.create({
-                trigger: bar,
-                start: 'top 92%',
-                once: true,
-                onEnter: () => { bar.style.width = bar.dataset.width; }
-            });
-        });
-
         /* ============ Existing UI logic (unchanged behavior) ============ */
 
         // 1. Scroll Logic: Depth bar, Back to Top, Smart Header
