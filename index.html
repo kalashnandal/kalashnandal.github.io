@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -9,14 +10,28 @@
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "uv3vr499de");
 </script>
-    
+
     <link rel="icon" type="image/png" href="https://kalashnandal.co.in/favicon.webp">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalash Nandal - Marketing Director & Digital Growth Architect of BackToFarms </title>
-    
-    <meta name="description" content="Senior Project Manager, Marketing Director of Back to Farms, and Head of Ops at IDS USA. Expert in SEO turnaround, enterprise operations, strategy building, and US-based team leadership at Denver SEO.">
-    
+
+    <!-- ============ SEO / META (matched to LinkedIn profile) ============ -->
+    <title>Kalash Nandal | Digital Growth Strategist — Head of Growth, Marketing & Ops @ iMark Digital Solutions</title>
+    <meta name="description" content="Digital Growth Strategist. Head of Growth, Marketing & Operations at iMark Digital Solutions and Project Manager at iMark Infotech. I stabilise high-friction enterprise accounts and scale multi-channel operations — SEO, PPC and SMM — for US clients.">
+    <link rel="canonical" href="https://kalashnandal.co.in/">
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="profile">
+    <meta property="og:url" content="https://kalashnandal.co.in/">
+    <meta property="og:title" content="Kalash Nandal — Digital Growth Strategist">
+    <meta property="og:description" content="Head of Growth, Marketing & Ops @ iMark Digital Solutions | Project Manager @ iMark Infotech. Specialist in red-flag account turnarounds and scaling complex operations.">
+    <meta property="og:image" content="https://kalashnandal.co.in/erasebg-1.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kalash Nandal — Digital Growth Strategist">
+    <meta name="twitter:description" content="Head of Growth, Marketing & Ops @ iMark Digital Solutions | Project Manager @ iMark Infotech.">
+    <meta name="twitter:image" content="https://kalashnandal.co.in/erasebg-1.webp">
+
+    <!-- Person schema (mirrors current LinkedIn headline, roles & dates) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -26,8 +41,8 @@
         "name": "Kalash Nandal",
         "url": "https://kalashnandal.co.in",
         "image": "https://kalashnandal.co.in/erasebg-1.webp",
-        "jobTitle": ["Marketing Director", "Senior Project Manager", "Head of Operations", "Digital Growth Architect"],
-        "description": "Kalash Nandal is a Senior Project Manager, Marketing Director of Back to Farms, and Head of Ops at IDS USA. Expert in SEO turnaround, US-based team leadership, digital growth strategy, and enterprise operations.",
+        "jobTitle": ["Digital Growth Strategist", "Head of Growth, Marketing & Operations", "Project Manager"],
+        "description": "Digital Growth Strategist specialising in stabilising high-friction scenarios and scaling complex operations. Head of Growth, Marketing & Operations at iMark Digital Solutions and Project Manager at iMark Infotech — the go-to lead for turning around red-flag enterprise accounts on the verge of churning.",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Mohali",
@@ -43,13 +58,11 @@
           "Consistent Performer Award 2025"
         ],
         "knowsAbout": [
-          "Strategic Leadership", "Crisis Management", "SEO Strategy", "Process Automation", "Figma Design", "Agri-Tech SMM", "Account Stabilization", "Team Management", "Enterprise Operations", "Business Strategy", "Package-based SEO"
+          "Agency Leadership", "Multi-Channel Strategy", "Demand Generation", "Enterprise SEO", "E-commerce SEO", "Strategic Entity Keywords", "PPC", "Social Media Marketing", "Quality Assurance", "Operations Leadership", "Account Turnaround & Retention", "Product Management", "Direct-to-Consumer Strategy", "Google Search Console"
         ],
         "worksFor": [
-          { "@type": "Organization", "name": "Back to Farms", "url": "https://backtofarms.com" },
-          { "@type": "Organization", "name": "iMark Infotech", "url": "https://www.imarkinfotech.com/" },
-          { "@type": "Organization", "name": "IDS USA" },
-          { "@type": "Organization", "name": "Denver SEO", "url": "https://www.seodenver.us/" }
+          { "@type": "Organization", "name": "iMark Digital Solutions" },
+          { "@type": "Organization", "name": "iMark Infotech Pvt. Ltd", "url": "https://www.imarkinfotech.com/" }
         ],
         "sameAs": [
           "https://linkedin.com/in/kalash-nandal",
@@ -66,142 +79,122 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Three.js (r128, global build) + GSAP core + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
     <style>
         :root {
             --gold: #D4AF37;
-            --charcoal: #080808;
-            --charcoal-light: #121212;
+            --charcoal: #000000;
             --linkedin: #0077b5;
+            --vortex-blue: #1e90ff;
+            --vortex-purple: #b429ff;
+            --vortex-orange: #ff7a18;
         }
 
         body {
             font-family: 'Montserrat', sans-serif;
-            background-color: var(--charcoal);
+            background-color: #000000; /* pitch black — the WebGL canvas matches */
             color: #f3f4f6;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
 
-        /* Cinematic Grain Texture */
-        body::before {
-            content: "";
+        /* ================= WEBGL VORTEX CANVAS =================
+           Fixed, full-viewport, behind everything. Content sections
+           sit above it on z-index:1 with frosted glass surfaces. */
+        #vortex-canvas {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.04;
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        /* 3D Grid Background Animation */
-        .hero-grid-wrapper {
-            position: absolute;
             inset: 0;
-            perspective: 1000px;
-            overflow: hidden;
+            width: 100%;
+            height: 100%;
             z-index: 0;
-            opacity: 0.5;
             pointer-events: none;
-        }
-        
-        .hero-grid-plane {
-            position: absolute;
-            bottom: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background-image:
-                linear-gradient(rgba(212, 175, 55, 0.2) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(212, 175, 55, 0.2) 2px, transparent 2px);
-            background-size: 80px 80px;
-            transform-origin: center center;
-            transform: rotateX(75deg);
-            animation: gridForward 4s linear infinite;
-            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
-            mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+            background: #000;
         }
 
-        @keyframes gridForward {
-            0% { transform: rotateX(75deg) translateY(0); }
-            100% { transform: rotateX(75deg) translateY(80px); }
-        }
+        section, .footer-terminal { position: relative; z-index: 1; }
 
         .heading-serif { font-family: 'Playfair Display', serif; }
         .text-gold { color: var(--gold); }
         .bg-gold { background-color: var(--gold); }
         .border-gold { border-color: var(--gold); }
-        
+
         .section-padding { padding-top: 3rem; padding-bottom: 3rem; }
         @media (min-width: 768px) { .section-padding { padding-top: 5rem; padding-bottom: 5rem; } }
 
+        /* Frosted glass — translucent enough for the vortex to swirl through */
         .glass-card {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(8, 8, 14, 0.52);
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .glass-card:hover {
             border-color: var(--gold);
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px -10px rgba(212, 175, 55, 0.15);
+            box-shadow: 0 15px 35px -10px rgba(212, 175, 55, 0.18),
+                        0 0 45px -18px rgba(30, 144, 255, 0.35);
         }
 
-        .nav-link {
-            position: relative;
-            transition: color 0.3s;
+        /* Floating glassmorphism header (pill) */
+        #main-header {
+            position: fixed;
+            top: 0.75rem;
+            left: 50%;
+            width: min(95%, 80rem);
+            transform: translate(-50%, 0);
+            z-index: 190;
+            background: rgba(5, 5, 10, 0.45);
+            backdrop-filter: blur(22px) saturate(150%);
+            -webkit-backdrop-filter: blur(22px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.25rem;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        #main-header.header-hidden { transform: translate(-50%, -140%); }
 
+        .nav-link { position: relative; transition: color 0.3s; }
         .nav-link::after {
             content: '';
             position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -4px;
-            left: 0;
+            width: 0; height: 2px;
+            bottom: -4px; left: 0;
             background-color: var(--gold);
             transition: width 0.3s;
         }
-
         .nav-link:hover::after { width: 100%; }
 
-        #mobile-menu {
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        
+        #mobile-menu { transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .menu-hidden { transform: translateX(100%); }
 
         .history-item {
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            opacity: 0.25;
+            opacity: 0.3;
             cursor: pointer;
             border-left: 2px solid rgba(255, 255, 255, 0.05);
             position: relative;
         }
-        
-        .history-item.current-job { opacity: 0.7; border-left-color: rgba(212, 175, 55, 0.3); }
-
+        .history-item.current-job { opacity: 0.75; border-left-color: rgba(212, 175, 55, 0.3); }
         .history-item:hover, .history-item.active {
             opacity: 1 !important;
             border-left-color: var(--gold) !important;
         }
-
         .history-item.active { transform: translateX(10px); }
-        
-        .timeline-node {
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            background-color: #222;
-        }
 
+        .timeline-node { transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); background-color: #222; }
         .history-item:hover .timeline-node,
-        .history-item.active .timeline-node, 
+        .history-item.active .timeline-node,
         .history-item.current-job .timeline-node {
             background-color: var(--gold);
             box-shadow: 0 0 15px var(--gold);
             transform: scale(1.5);
         }
-
         .history-item.active .timeline-node { transform: scale(2.2); box-shadow: 0 0 30px var(--gold); }
 
         @media (max-width: 640px) {
@@ -209,146 +202,56 @@
             .history-item { padding-left: 1.5rem !important; }
         }
 
-        .account-btn.active {
-            background-color: var(--gold);
-            color: black;
-            border-color: var(--gold);
-        }
-
-        .account-feed {
-            display: none;
-            animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-        }
-
+        .account-btn.active { background-color: var(--gold); color: black; border-color: var(--gold); }
+        .account-feed { display: none; animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
         .account-feed.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--charcoal); }
+        ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
-        .feed-wrapper {
-            position: relative;
-            width: 100%;
-            margin: 0 auto;
-            border-radius: 1.5rem;
-            background: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-
-        .iframe-container {
-            width: 100%;
-            height: 600px;
-            overflow: hidden;
-        }
+        .iframe-container { width: 100%; height: 600px; overflow: hidden; }
+        @media (max-width: 768px) { .iframe-container { height: 500px; } }
 
         .google-chat-btn {
             position: fixed;
-            bottom: 2rem;
-            right: 1.5rem;
+            bottom: 2rem; right: 1.5rem;
             z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: white;
-            color: black;
-            padding: 12px 24px;
-            border-radius: 9999px;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 10px;
-            letter-spacing: 0.1em;
+            display: flex; align-items: center; gap: 12px;
+            background: white; color: black;
+            padding: 12px 24px; border-radius: 9999px;
+            font-weight: 800; text-transform: uppercase;
+            font-size: 10px; letter-spacing: 0.1em;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
             border: 1px solid rgba(0,0,0,0.1);
         }
-
         @media (max-width: 768px) {
-            .google-chat-btn {
-                right: 1rem;
-                bottom: 1.5rem;
-                padding: 10px 18px;
-            }
+            .google-chat-btn { right: 1rem; bottom: 1.5rem; padding: 10px 18px; }
         }
-
         .google-chat-btn:hover {
             transform: scale(1.05) translateY(-5px);
             box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3);
             background: var(--gold);
         }
 
-        @media (max-width: 768px) {
-            .iframe-container { height: 500px; }
-        }
-
-        /* Testimonial & Logo Carousel Styles */
-        @keyframes infiniteScroll {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-
-        .scroll-track {
-            display: flex;
-            width: max-content;
-            animation: infiniteScroll 50s linear infinite;
-        }
-
+        @keyframes infiniteScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .scroll-track { display: flex; width: max-content; animation: infiniteScroll 50s linear infinite; }
         .scroll-track:hover { animation-play-state: paused; }
 
         .testimonial-img-card {
-            width: 240px;
-            height: 140px;
-            flex-shrink: 0;
-            cursor: pointer;
-            margin: 0 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 1rem;
+            width: 240px; height: 140px; flex-shrink: 0; cursor: pointer; margin: 0 8px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+            background: rgba(255, 255, 255, 0.03); border-radius: 1rem;
         }
-
-        @media (min-width: 768px) {
-            .testimonial-img-card { width: 320px; height: 180px; margin: 0 15px; }
-        }
-
+        @media (min-width: 768px) { .testimonial-img-card { width: 320px; height: 180px; margin: 0 15px; } }
         .testimonial-img-card img { max-width: 90%; max-height: 90%; object-fit: contain; }
 
-        #modal-overlay {
-            backdrop-filter: blur(15px);
-            background: rgba(0,0,0,0.9);
-            transition: opacity 0.3s ease;
-        }
+        #modal-overlay { backdrop-filter: blur(15px); background: rgba(0,0,0,0.9); transition: opacity 0.3s ease; }
 
-        /* Popping Animation */
-        @keyframes popUpDown {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
+        @keyframes popUpDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .animate-pop-up-down { animation: popUpDown 2.5s ease-in-out infinite; }
-
-        /* Smart Header Sticky Transition */
-        header { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .header-hidden { transform: translateY(-100%); }
-
-        /* Reveal Animation */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
 
         /* Typing cursor */
         .typing-text::after {
@@ -359,74 +262,137 @@
         }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        .skill-bar {
-            height: 2px;
-            background: rgba(255,255,255,0.1);
-            position: relative;
-            overflow: hidden;
-        }
+        .skill-bar { height: 2px; background: rgba(255,255,255,0.12); position: relative; overflow: hidden; }
         .skill-progress {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: var(--gold);
+            position: absolute; top: 0; left: 0; height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--vortex-orange));
             width: 0;
             transition: width 1.5s ease-in-out;
         }
 
-        /* Infinite Quote Scroll - Edge to Edge */
-        @keyframes quoteScroll {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-        .quote-track {
-            display: flex;
-            width: max-content;
-            animation: quoteScroll 100s linear infinite;
-        }
+        @keyframes quoteScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .quote-track { display: flex; width: max-content; animation: quoteScroll 100s linear infinite; }
         .quote-track:hover { animation-play-state: paused; }
 
-        /* Premium Footer Distinction */
         .footer-terminal {
-            background-color: #000000;
+            background-color: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border-top: 3px solid var(--gold);
             box-shadow: 0 -15px 50px rgba(212, 175, 55, 0.2);
             position: relative;
             overflow: hidden;
         }
-
-        /* 15% Transparency Background Image Overlay */
         .footer-terminal::before {
             content: '';
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.15;
-            z-index: 0;
-            pointer-events: none;
+            background-size: cover; background-position: center;
+            opacity: 0.15; z-index: 0; pointer-events: none;
         }
+        .footer-terminal > * { position: relative; z-index: 10; }
 
-        .footer-terminal > * {
-            position: relative;
-            z-index: 10;
-        }
+        @keyframes logoMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .logo-track { display: flex; width: max-content; animation: logoMarquee 30s linear infinite; }
 
-        /* Logo/Text Marquee */
-        @keyframes logoMarquee {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-        .logo-track {
-            display: flex;
-            width: max-content;
-            animation: logoMarquee 30s linear infinite;
-        }
+        /* Legibility helper for text sitting directly over the vortex */
+        .over-vortex { text-shadow: 0 2px 18px rgba(0,0,0,0.85); }
     </style>
 </head>
 <body class="selection:bg-gold selection:text-black">
+<!-- PageDrop Unified FAB Widget -->
+<link rel="stylesheet" href="https://pagedrop.io/fab-widget.css?v=6">
+
+
+
+<!-- Expiration Warning Popup (only shown for content expiring soon) -->
+<div id="pagedrop-expiry-popup">
+  <div id="pagedrop-expiry-popup-content">
+    <div id="pagedrop-expiry-popup-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12,6 12,12 16,14"/>
+      </svg>
+    </div>
+    <h3 id="pagedrop-expiry-popup-title">Content Expiring Soon</h3>
+    <p id="pagedrop-expiry-popup-desc">
+      This content will be deleted in less than 24 hours. If you like it, you can extend its lifetime to keep it available.
+    </p>
+    <div id="pagedrop-expiry-popup-actions">
+      <button class="pagedrop-popup-btn pagedrop-popup-btn-secondary" id="pagedrop-expiry-dismiss">
+        Dismiss
+      </button>
+      <button class="pagedrop-popup-btn pagedrop-popup-btn-primary" id="pagedrop-expiry-extend">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14m-7-7h14"/>
+        </svg>
+        Extend Lifetime
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="pagedrop-fab-container">
+  <!-- Expanded Panel (appears above pill on hover/click) -->
+  <div id="pagedrop-fab-expanded">
+    
+    <div class="pagedrop-fab-row pagedrop-fab-row-info">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pagedrop-fab-row-icon">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span class="pagedrop-fab-label"><span id="pagedrop-view-count-expanded">1</span> view</span>
+    </div>
+    <div class="pagedrop-fab-row">
+      <span class="pagedrop-fab-label">3 days left</span>
+      <button id="pagedrop-extend-btn" class="pagedrop-fab-btn pagedrop-fab-btn-extend">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14m-7-7h14"/>
+        </svg>
+        Extend
+      </button>
+    </div>
+    <div class="pagedrop-fab-cta">
+      Like what you see? <a href="https://pagedrop.io" target="_blank" rel="noopener">Create your own</a>
+    </div>
+    <div class="pagedrop-fab-report">
+      <a href="#" id="pagedrop-report-btn">Report this content</a>
+    </div>
+  </div>
+
+  <!-- Collapsed Pill (always visible) -->
+  <div id="pagedrop-fab-pill" class="">
+    <a href="https://pagedrop.io" target="_blank" rel="noopener" class="pagedrop-fab-logo" title="Hosted on PageDrop" onclick="event.stopPropagation();">
+      <img src="https://pagedrop.io/icon.png" alt="PageDrop" />
+    </a>
+    <div class="pagedrop-fab-divider"></div>
+    <div id="pagedrop-fab-views" class="pagedrop-fab-views" title="1 views">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span id="pagedrop-view-count-pill">1</span>
+    </div>
+    <div class="pagedrop-fab-divider"></div>
+    
+    <div class="pagedrop-fab-days ">
+      
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12,6 12,12 16,14"/>
+      </svg>
+      
+      <span>3d</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://pagedrop.io/fab-widget.js" data-slug="robust-raid-jtd9" data-base-url="https://pagedrop.io" data-is-explore="false" data-days-remaining="3" data-view-count="1" defer></script>
+
+
+    <!-- ============ WEBGL PARTICLE VORTEX (fixed, behind all content) ============ -->
+    <canvas id="vortex-canvas" aria-hidden="true"></canvas>
 
     <!-- Horizontal Scroll Progress Bar -->
     <div id="scroll-depth-bar" class="fixed top-0 left-0 h-1 bg-gold z-[210] transition-all duration-150 ease-out" style="width: 0%"></div>
@@ -442,9 +408,9 @@
         <i data-lucide="chevron-up" class="w-6 h-6"></i>
     </button>
 
-    <!-- Header -->
-    <header id="main-header" class="fixed top-0 w-full z-[190] bg-black/70 backdrop-blur-2xl border-b border-white/5">
-        <nav class="max-w-7xl mx-auto px-4 md:px-6 py-3 flex justify-between items-center">
+    <!-- Header (floating glass pill) -->
+    <header id="main-header">
+        <nav class="px-4 md:px-6 py-3 flex justify-between items-center">
             <div class="text-xl font-black tracking-tighter text-white">
                 KALASH<span class="text-gold">NANDAL</span>
             </div>
@@ -472,7 +438,8 @@
         <div class="flex flex-col space-y-8 text-center">
             <a href="#home" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Home</a>
             <a href="#mandates" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Mandates</a>
-            <a href="#history" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">History</a>            <a href="#accolades" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Accolades</a>
+            <a href="#history" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">History</a>
+            <a href="#accolades" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Accolades</a>
             <a href="#testimonials" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Testimonials</a>
             <a href="#creative" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Creative</a>
             <a href="#insights" class="mobile-nav-link text-xl font-black uppercase tracking-widest text-white hover:text-gold transition-colors">Insights</a>
@@ -480,30 +447,23 @@
         </div>
     </div>
 
-    <!-- Hero Section -->
-    <section id="home" class="min-h-screen flex items-center pt-24 relative overflow-hidden">
-        <!-- 3D Grid Animation layered behind -->
-        <div class="hero-grid-wrapper">
-            <div class="hero-grid-plane"></div>
-        </div>
-
-        <div class="absolute top-0 right-0 w-1/3 h-full bg-gold/5 -skew-x-12 transform translate-x-32 z-0"></div>
-        
-        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center z-10">
-            <div class="reveal">
+    <!-- ============ HERO ============ -->
+    <section id="home" class="min-h-screen flex items-center pt-28 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+            <div class="reveal over-vortex">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="h-[1px] w-10 bg-gold"></div>
-                    <span class="text-gold text-[10px] font-black uppercase tracking-[0.4em]">Operations & Strategy</span>
+                    <span class="text-gold text-[10px] font-black uppercase tracking-[0.4em]">Growth • Marketing • Operations</span>
                 </div>
                 <h1 class="heading-serif text-5xl md:text-8xl text-white mb-6 leading-[0.95] tracking-tight">
-                    Scaling <br><span class="typing-text text-gold italic font-bold" data-words='["Growth.", "Performance.", "Enterprise Ops.", "Business Strategy.", "SEO Packages."]'></span>
+                    Scaling <br><span class="typing-text text-gold italic font-bold" data-words='["Growth.", "Turnarounds.", "Enterprise Ops.", "Demand Gen.", "Multi-Channel SEO."]'></span>
                 </h1>
-                <p class="text-gray-400 text-base mb-10 leading-relaxed font-medium max-w-md">
-                    High-performance strategist and Operations Lead. Currently executing four strategic mandates simultaneously, overseeing 150+ global campaigns. Specializing in enterprise operations, crafting robust business strategies, and driving dominant SEO results tailored exactly to client packages.
+                <p class="text-gray-300 text-base mb-10 leading-relaxed font-medium max-w-md">
+                    Digital Growth Strategist. I specialise in stabilising high-friction scenarios and scaling complex operations — the go-to lead for turning around red-flag enterprise accounts on the verge of churning. No waiting for resources: if a bottleneck stalls a client, I build the solution myself.
                 </p>
-                
+
                 <!-- Live Status -->
-                <div class="flex items-center gap-4 mb-10 bg-white/5 border border-white/10 w-max px-4 py-2 rounded-full">
+                <div class="flex items-center gap-4 mb-10 glass-card w-max px-4 py-2 rounded-full">
                     <span class="flex h-2 w-2 relative">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -520,63 +480,71 @@
             </div>
             <div class="relative reveal mt-12 md:mt-0">
                 <div class="absolute -inset-4 bg-gold/10 rounded-[2rem] blur-3xl opacity-50"></div>
-                <div class="relative aspect-square max-w-[450px] mx-auto overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
+                <div class="relative aspect-square max-w-[450px] mx-auto overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl glass-card">
                     <img src="https://kalashnandal.co.in/erasebg-1.webp" alt="Kalash Nandal" class="w-full h-full object-cover grayscale transition-all duration-700 hover:grayscale-0" onerror="this.src='https://ui-avatars.com/api/?name=Kalash+Nandal&background=D4AF37&color=fff&size=512'">
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Mandates Grid -->
+    <!-- ============ MANDATES (mirrors LinkedIn Experience) ============ -->
     <section id="mandates" class="section-padding">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4 reveal text-center md:text-left">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4 reveal text-center md:text-left over-vortex">
                 <div>
                     <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Executive Roles</h2>
                     <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif italic">Current Strategic Scope</h3>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 reveal mb-16">
+                <!-- 1. iMark Digital Solutions — CURRENT (featured) -->
+                <div class="glass-card p-6 rounded-3xl flex flex-col text-center border-gold/40 bg-gold/[0.03]">
+                    <div class="mb-4 h-10 flex items-center justify-center">
+                        <img src="https://kalashnandal.co.in/IDS-logo-removebg-preview.png" alt="iMark Digital Solutions" class="h-8 w-auto invert brightness-0">
+                    </div>
+                    <span class="bg-gold text-black text-[7px] font-black uppercase px-2 py-0.5 rounded-full w-max mx-auto mb-3">Feb 2025 – Present</span>
+                    <h4 class="text-lg font-bold text-white mb-1">iMark Digital Solutions</h4>
+                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Head of Growth, Marketing & Operations</p>
+                    <p class="text-gray-300 text-[11px] leading-relaxed mb-6 flex-grow">End-to-end commercial strategy and fulfillment for an exclusive US enterprise portfolio — demand generation, SEO/PPC/SMM delivery and agency-wide QA standards.</p>
+                    <a href="onboarding.html" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">PORTAL <i data-lucide="external-link" class="w-3"></i></a>
+                </div>
+                <!-- 2. iMark Infotech — CURRENT -->
                 <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
-                    <div class="mb-6 h-10 flex items-center justify-center">
+                    <div class="mb-4 h-10 flex items-center justify-center">
+                        <img src="https://www.imarkinfotech.com/wp-content/themes/idigital/idigital/images/new/logo.png?v.345.0" alt="iMark Infotech" class="h-5 w-auto brightness-0 invert">
+                    </div>
+                    <span class="bg-gold text-black text-[7px] font-black uppercase px-2 py-0.5 rounded-full w-max mx-auto mb-3">Jan 2024 – Present</span>
+                    <h4 class="text-lg font-bold text-white mb-1">iMark Infotech</h4>
+                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Project Manager</p>
+                    <p class="text-gray-300 text-[11px] leading-relaxed mb-6 flex-grow">SEO client leadership across international accounts — aligning campaign strategy with client goals and translating technical SEO into clear business outcomes.</p>
+                    <a href="https://www.imarkinfotech.com/" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
+                </div>
+                <!-- 3. Back To Farms — completed mandate -->
+                <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
+                    <div class="mb-4 h-10 flex items-center justify-center">
                         <img src="https://backtofarms.com/assets/images/logo-dark.svg" alt="Back To Farms" class="h-8 w-auto invert brightness-0">
                     </div>
+                    <span class="border border-white/20 text-white/60 text-[7px] font-black uppercase px-2 py-0.5 rounded-full w-max mx-auto mb-3">Jun 2025 – Jun 2026</span>
                     <h4 class="text-lg font-bold text-white mb-1">Back To Farms</h4>
-                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Marketing Director & Product Lead</p>
-                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 flex-grow">Revolutionizing India's agricultural supply chain from 0-to-1.</p>
+                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Marketing Director</p>
+                    <p class="text-gray-300 text-[11px] leading-relaxed mb-6 flex-grow">Led end-to-end strategy, operations and product vision for a D2C agri-tech joint venture — a farm-to-table experience connecting rural farmers with urban households.</p>
                     <a href="https://backtofarms.com" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
                 </div>
-                <div class="glass-card p-6 rounded-3xl flex flex-col text-center border-gold/30 bg-gold/[0.02]">
-                    <div class="mb-6 h-10 flex items-center justify-center">
-                        <img src="https://kalashnandal.co.in/IDS-logo-removebg-preview.png" alt="IDS USA" class="h-8 w-auto invert brightness-0">
-                    </div>
-                    <h4 class="text-lg font-bold text-white mb-1">IDS USA</h4>
-                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Head of Operations</p>
-                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 flex-grow">High-volume US operations and AI-integrated portal architecture.</p>
-                    <a href="onboarding.html" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2"> PORTAL <i data-lucide="external-link" class="w-3"></i></a>
-                </div>
+                <!-- 4. Denver SEO — completed mandate -->
                 <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
-                    <div class="mb-6 h-10 flex items-center justify-center">
+                    <div class="mb-4 h-10 flex items-center justify-center">
                         <img src="https://www.seodenver.us/images/logo_new_02.svg" alt="Denver SEO" class="h-5 w-auto brightness-0 invert">
                     </div>
+                    <span class="border border-white/20 text-white/60 text-[7px] font-black uppercase px-2 py-0.5 rounded-full w-max mx-auto mb-3">Mar 2025 – Jun 2025</span>
                     <h4 class="text-lg font-bold text-white mb-1">Denver SEO</h4>
-                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Head of Agency</p>
-                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 flex-grow">Managing specialized US domestic teams and account scaling. Crafting precise marketing and SEO strategies mapped directly to business tier packages.</p>
+                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Head of Agency Operations</p>
+                    <p class="text-gray-300 text-[11px] leading-relaxed mb-6 flex-grow">Operational bridge between US client teams and India execution — 20+ specialists, follow-the-sun workflows and a unified SOP/QA framework.</p>
                     <a href="https://www.seodenver.us/" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
-                </div>
-                <div class="glass-card p-6 rounded-3xl flex flex-col text-center">
-                    <div class="mb-6 h-10 flex items-center justify-center">
-                        <img src="https://www.imarkinfotech.com/wp-content/themes/idigital/idigital/images/new/logo.png?v.345.0" alt="iMark" class="h-5 w-auto brightness-0 invert">
-                    </div>
-                    <h4 class="text-lg font-bold text-white mb-1">iMark Infotech</h4>
-                    <p class="text-gold text-[8px] font-black uppercase tracking-widest mb-4 italic">Project Manager (Team Lead)</p>
-                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 flex-grow">Directing 50+ international projects and managing 4 PMs. Overseeing enterprise-level SEO package fulfillment and operations strategy.</p>
-                    <a href="https://www.imarkinfotech.com/" target="_blank" class="text-gold font-bold text-[9px] uppercase tracking-widest hover:text-white flex items-center justify-center gap-2">OFFICIAL SITE <i data-lucide="external-link" class="w-3"></i></a>
                 </div>
             </div>
 
-            <!-- Trusted Ecosystem Marquee (Edge to Edge Infinite Scroll) -->
-            <div class="w-screen relative left-1/2 -translate-x-1/2 overflow-hidden py-10 border-y border-white/5 bg-white/[0.01]">
+            <!-- Trusted Ecosystem Marquee -->
+            <div class="w-screen relative left-1/2 -translate-x-1/2 overflow-hidden py-10 border-y border-white/5 bg-black/30 backdrop-blur-sm">
                 <div class="logo-track">
                     <div class="flex items-center space-x-12 md:space-x-20 px-10">
                         <span class="text-base md:text-xl font-black uppercase tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap text-white/30">Global Portfolio Excellence</span>
@@ -595,35 +563,35 @@
         </div>
     </section>
 
-    <!-- Skills Section -->
-    <section class="section-padding bg-black/20">
+    <!-- ============ SKILLS (mirrors LinkedIn skills) ============ -->
+    <section class="section-padding">
         <div class="max-w-7xl mx-auto px-6">
-            <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-12 text-center reveal">Core Competencies</h2>
+            <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-12 text-center reveal over-vortex">Core Competencies</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10 reveal mb-16 md:mb-20">
-                <div class="space-y-4">
+                <div class="space-y-4 glass-card p-5 rounded-2xl">
                     <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                        <span class="text-white">Strategic Ops</span>
+                        <span class="text-white">Multi-Channel Strategy</span>
                         <span class="text-gold">95%</span>
                     </div>
                     <div class="skill-bar"><div class="skill-progress" data-width="95%"></div></div>
                 </div>
-                <div class="space-y-4">
+                <div class="space-y-4 glass-card p-5 rounded-2xl">
                     <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
                         <span class="text-white">SEO Architecture</span>
                         <span class="text-gold">100%</span>
                     </div>
                     <div class="skill-bar"><div class="skill-progress" data-width="100%"></div></div>
                 </div>
-                <div class="space-y-4">
+                <div class="space-y-4 glass-card p-5 rounded-2xl">
                     <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                        <span class="text-white">Figma Design</span>
-                        <span class="text-gold">85%</span>
+                        <span class="text-white">Agency Ops & QA</span>
+                        <span class="text-gold">92%</span>
                     </div>
-                    <div class="skill-bar"><div class="skill-progress" data-width="85%"></div></div>
+                    <div class="skill-bar"><div class="skill-progress" data-width="92%"></div></div>
                 </div>
-                <div class="space-y-4">
+                <div class="space-y-4 glass-card p-5 rounded-2xl">
                     <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                        <span class="text-white">Process Automation</span>
+                        <span class="text-white">Demand Generation</span>
                         <span class="text-gold">90%</span>
                     </div>
                     <div class="skill-bar"><div class="skill-progress" data-width="90%"></div></div>
@@ -636,97 +604,125 @@
                         <i data-lucide="eye" class="text-gold w-6 h-6"></i>
                     </div>
                     <h4 class="text-xl font-bold text-white mb-4">Radical Transparency</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">No black boxes. Every growth pivot is backed by real-time data visualization and stakeholder alignment.</p>
+                    <p class="text-gray-400 text-sm leading-relaxed">No black boxes. Every growth pivot is backed by real-time data visualization and stakeholder alignment.</p>
                 </div>
                 <div class="glass-card p-8 md:p-10 rounded-[2.5rem] border-gold/10 text-center md:text-left">
                     <div class="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center mb-6 border border-gold/20 mx-auto md:mx-0">
-                        <i data-lucide="layers" class="text-gold w-6 h-6"></i>
+                        <i data-lucide="flame" class="text-gold w-6 h-6"></i>
                     </div>
-                    <h4 class="text-xl font-bold text-white mb-4">Process Integrity</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Scaling is a science of repeatability. I build systems that perform even when the builder isn't in the room.</p>
+                    <h4 class="text-xl font-bold text-white mb-4">Aggressive Problem-Solving</h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">I don't wait for resources. If a technical bottleneck is stalling a client, I teach myself the skills needed and build the solution immediately.</p>
                 </div>
                 <div class="glass-card p-8 md:p-10 rounded-[2.5rem] border-gold/10 text-center md:text-left">
                     <div class="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center mb-6 border border-gold/20 mx-auto md:mx-0">
-                        <i data-lucide="trending-up" class="text-gold w-6 h-6"></i>
+                        <i data-lucide="shield-check" class="text-gold w-6 h-6"></i>
                     </div>
-                    <h4 class="text-xl font-bold text-white mb-4">Compound Growth</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">We don't chase spikes; we build foundations. Consistent 1% gains outpace shortcuts every single time.</p>
+                    <h4 class="text-xl font-bold text-white mb-4">Red-Flag Turnarounds</h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">I built my reputation not just by managing projects, but by saving them — stabilising enterprise accounts on the verge of churning.</p>
                 </div>
                 <div class="glass-card p-8 md:p-10 rounded-[2.5rem] border-gold/10 text-center md:text-left">
                     <div class="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center mb-6 border border-gold/20 mx-auto md:mx-0">
                         <i data-lucide="briefcase" class="text-gold w-6 h-6"></i>
                     </div>
-                    <h4 class="text-xl font-bold text-white mb-4">Enterprise Strategy</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Designing precise marketing blueprints. I map out robust SEO and operational strategies aligned exactly to client tiers and packages for massive ROI.</p>
+                    <h4 class="text-xl font-bold text-white mb-4">High-Ticket Strategy</h4>
+                    <p class="text-gray-400 text-sm leading-relaxed">Bottom-of-the-funnel frameworks built on Strategic Entity keywords and advanced silo structures — driving immediate outcomes for B2C and B2B pipelines.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Trajectory Section -->
-    <section id="history" class="section-padding bg-black/40 border-y border-white/5">
+    <!-- ============ TRAJECTORY (exact LinkedIn dates & titles) ============ -->
+    <section id="history" class="section-padding border-y border-white/5">
         <div class="max-w-4xl mx-auto px-6">
-            <h2 class="text-center text-gold font-black uppercase tracking-[0.5em] mb-12 text-[10px] italic reveal">Trajectory</h2>
-            <div class="relative space-y-6 reveal">
-                <div class="history-item current-job relative pl-8 md:pl-12 pb-8 border-gold active" data-role="pm-ops">
+            <h2 class="text-center text-gold font-black uppercase tracking-[0.5em] mb-12 text-[10px] italic reveal over-vortex">Trajectory</h2>
+            <div class="relative space-y-6 reveal glass-card rounded-[2rem] p-6 md:p-10">
+                <!-- Current: iMark Digital Solutions -->
+                <div class="history-item current-job relative pl-8 md:pl-12 pb-8 border-gold active" data-role="ids-growth">
                     <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div class="mb-4 text-left">
                         <div class="flex flex-wrap items-center gap-2 mb-1">
-                            <span class="text-[10px] font-black text-gold uppercase tracking-widest">Jan 2024 - Present</span>
+                            <span class="text-[10px] font-black text-gold uppercase tracking-widest">Feb 2025 – Present</span>
                             <span class="bg-gold text-black text-[7px] font-black uppercase px-2 py-0.5 rounded-full">Current Role</span>
+                            <span class="text-[8px] font-black text-white/40 uppercase tracking-widest">United States • Hybrid</span>
                         </div>
-                        <h4 class="text-xl font-bold text-white uppercase leading-tight">Project Manager & Operations Lead</h4>
+                        <h4 class="text-xl font-bold text-white uppercase leading-tight">Head of Growth, Marketing & Operations</h4>
+                        <p class="text-gold text-[10px] font-black uppercase tracking-widest mt-1">iMark Digital Solutions</p>
                     </div>
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div class="bg-white/5 p-4 rounded-xl border border-gold/30">
-                            <h5 class="text-gold font-bold text-[10px] uppercase tracking-widest mb-2">iMark Infotech</h5>
-                            <p class="text-white text-[11px] leading-relaxed">Leading 50+ projects for 24 international clients and managing 4 PMs.</p>
+                            <h5 class="text-gold font-bold text-[10px] uppercase tracking-widest mb-2">Growth & Demand Gen</h5>
+                            <p class="text-white text-[11px] leading-relaxed">Qualified pipeline development with US acquisition teams — securing high-ticket B2C & B2B enterprise accounts.</p>
                         </div>
                         <div class="bg-white/5 p-4 rounded-xl border border-gold/30">
-                            <h5 class="text-gold font-bold text-[10px] uppercase tracking-widest mb-2">IDS & Back To Farms</h5>
-                            <p class="text-white text-[11px] leading-relaxed">Executing Head of Operations (IDS) and Marketing Director (Back To Farms) mandates.</p>
+                            <h5 class="text-gold font-bold text-[10px] uppercase tracking-widest mb-2">Ops, Fulfillment & QA</h5>
+                            <p class="text-white text-[11px] leading-relaxed">Directing Project Managers, technical experts and QA specialists across high-budget SEO, PPC and SMM campaigns.</p>
                         </div>
                     </div>
                 </div>
-                <div class="history-item relative pl-8 md:pl-12 pb-8 text-left" data-role="denver-seo">
+                <!-- Current: iMark Infotech -->
+                <div class="history-item current-job relative pl-8 md:pl-12 pb-8 text-left" data-role="imark-pm">
                     <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div>
-                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">March - May 2024</span>
-                        <h4 class="text-lg font-bold text-white/60 uppercase">Head of Denver SEO</h4>
-                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Handled US specialized team and communication workflows for domestic US client scaling.</p>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span class="text-[10px] font-black text-gold uppercase tracking-widest">Jan 2024 – Present</span>
+                            <span class="bg-gold text-black text-[7px] font-black uppercase px-2 py-0.5 rounded-full">Current Role</span>
+                            <span class="text-[8px] font-black text-white/40 uppercase tracking-widest">India • On-site</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white uppercase">Project Manager — iMark Infotech Pvt. Ltd</h4>
+                        <p class="text-gray-400 text-[11px] mt-1 leading-relaxed">SEO client leadership — aligning strategy with client goals, campaign analysis, and translating complex technical SEO into clear, client-friendly language.</p>
                     </div>
                 </div>
-                <div class="history-item relative pl-8 md:pl-12 pb-8 text-left" data-role="senior-analyst">
+                <!-- Past: Back to Farms -->
+                <div class="history-item relative pl-8 md:pl-12 pb-8 text-left" data-role="btf">
                     <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div>
-                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">Jan 2024 - July 2025</span>
-                        <h4 class="text-lg font-bold text-white/60 uppercase">Senior Project Analyst</h4>
-                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Promoted twice in 18 months for account stabilization. Leveraged Figma for solution visualization.</p>
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">Jun 2025 – Jun 2026 • Chandigarh, India</span>
+                        <h4 class="text-lg font-bold text-white/60 uppercase">Marketing Director — Back to Farms</h4>
+                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">End-to-end strategy, operations and product vision for a D2C agri-tech joint venture — farm-to-table go-to-market, creative direction, logistics architecture and tech-stack oversight.</p>
                     </div>
                 </div>
-                <div class="history-item relative pl-8 md:pl-12 text-left" data-role="qa">
+                <!-- Past: Denver SEO -->
+                <div class="history-item relative pl-8 md:pl-12 pb-8 text-left" data-role="denver">
                     <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
                     <div>
-                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">July 2022 - Jan 2024</span>
-                        <h4 class="text-lg font-bold text-white/60 uppercase">Quality Analyst</h4>
-                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Global interaction auditing. Analyzed transcripts/calls to improve compliance and conversions.</p>
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">Mar 2025 – Jun 2025 • Remote</span>
+                        <h4 class="text-lg font-bold text-white/60 uppercase">Head of Agency Operations — Denver SEO</h4>
+                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Strategic bridge between US client teams and India execution — 20+ specialists, follow-the-sun workflow, unified SOP framework for compliance and creativity.</p>
+                    </div>
+                </div>
+                <!-- Past: Teleperformance -->
+                <div class="history-item relative pl-8 md:pl-12 pb-8 text-left" data-role="tp">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
+                    <div>
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">Sep 2020 – Feb 2024 • SAS Nagar, Punjab</span>
+                        <h4 class="text-lg font-bold text-white/60 uppercase">Quality Analyst — Teleperformance</h4>
+                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Global interaction auditing — transcript and call analysis to lift compliance and conversions.</p>
+                    </div>
+                </div>
+                <!-- Past: Tech Mahindra -->
+                <div class="history-item relative pl-8 md:pl-12 text-left" data-role="tm">
+                    <div class="timeline-node absolute left-[-7px] top-0 w-3 h-3 rounded-full transition-all duration-300"></div>
+                    <div>
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest block mb-1">Feb 2020 – Sep 2020</span>
+                        <h4 class="text-lg font-bold text-white/60 uppercase">Escalation Specialist — Tech Mahindra</h4>
+                        <p class="text-gray-500 text-[11px] mt-1 leading-relaxed">Frontline escalation resolution and conflict management within enterprise BPO delivery.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Awards Section -->
+    <!-- ============ AWARDS (image sources corrected) ============ -->
     <section id="accolades" class="section-padding">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16 reveal">
+            <div class="text-center mb-16 reveal over-vortex">
                 <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Recognition of Excellence</h2>
                 <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif italic">Accolades & Milestones</h3>
             </div>
             <div class="grid md:grid-cols-2 gap-10 reveal">
                 <div class="glass-card rounded-[2.5rem] overflow-hidden group">
                     <div class="aspect-video relative overflow-hidden">
-                        <img src="https://kalashnandal.co.in/Consistent%20Performer%20-%202025.webp" alt="Rising Star Award" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110">
+                        <img src="https://kalashnandal.co.in/Rising%20Star-2024.webp" alt="Rising Star Award 2024" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110">
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60"></div>
                     </div>
                     <div class="p-8 md:p-10 relative text-center md:text-left">
@@ -744,7 +740,7 @@
                 </div>
                 <div class="glass-card rounded-[2.5rem] overflow-hidden group">
                     <div class="aspect-video relative overflow-hidden">
-                        <img src="https://kalashnandal.co.in/Rising%20Star-2024.webp" alt="Consistent Performer Award" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110">
+                        <img src="https://kalashnandal.co.in/Consistent%20Performer%20-%202025.webp" alt="Consistent Performer Award 2025" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110">
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60"></div>
                     </div>
                     <div class="p-8 md:p-10 relative text-center md:text-left">
@@ -764,9 +760,9 @@
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="section-padding bg-black/20 border-t border-white/5 overflow-hidden">
-        <div class="max-w-7xl mx-auto px-6 mb-12 reveal text-center md:text-left">
+    <!-- ============ TESTIMONIALS ============ -->
+    <section id="testimonials" class="section-padding border-t border-white/5 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 mb-12 reveal text-center md:text-left over-vortex">
             <div class="flex flex-col md:flex-row justify-between items-end gap-4 text-center md:text-left">
                 <div>
                     <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Proof of Impact</h2>
@@ -816,10 +812,10 @@
         </div>
     </div>
 
-    <!-- Creative Direction -->
+    <!-- ============ CREATIVE DIRECTION ============ -->
     <section id="creative" class="section-padding overflow-hidden">
         <div class="max-w-7xl mx-auto px-6 text-center md:text-left">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 reveal">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 reveal over-vortex">
                 <div class="max-w-2xl text-center md:text-left">
                     <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-2">Social Media Management</h2>
                     <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif mb-4 italic leading-tight">Creative Direction & SMM.</h3>
@@ -827,7 +823,7 @@
                         End-to-end management of high-engagement digital profiles.
                     </p>
                 </div>
-                <div class="flex bg-white/5 rounded-full p-1 border border-white/10 w-full md:w-auto">
+                <div class="flex glass-card rounded-full p-1 w-full md:w-auto">
                     <button id="btn-soul" class="account-btn active flex-1 md:flex-none px-6 sm:px-8 py-3 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all">Soul (Lifestyle)</button>
                     <button id="btn-btf" class="account-btn flex-1 md:flex-none px-6 sm:px-8 py-3 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all">Back To Farms (Business)</button>
                 </div>
@@ -863,17 +859,17 @@
         </div>
     </section>
 
-    <!-- LinkedIn Insights -->
-    <section id="insights" class="section-padding bg-black/20 border-t border-white/5">
-        <div class="max-w-7xl mx-auto px-6 text-center reveal">
+    <!-- ============ LINKEDIN INSIGHTS ============ -->
+    <section id="insights" class="section-padding border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 text-center reveal over-vortex">
             <h2 class="text-[#0077b5] font-black uppercase tracking-[0.4em] text-[10px] mb-2">Professional Network</h2>
             <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif italic mb-4">Strategic Networking & Industry Insights</h3>
             <p class="text-gray-500 text-xs md:text-sm max-w-2xl mx-auto mb-12 uppercase tracking-widest font-medium opacity-80 leading-relaxed px-4 md:px-0">
                 Decoding global digital shifts and sharing operational frameworks. This stream captures my ongoing dialogue with the architects of the digital economy.
             </p>
-            
+
             <!-- LinkedIn Shell -->
-            <div class="max-w-5xl mx-auto bg-[#0a0a0a] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
+            <div class="max-w-5xl mx-auto glass-card rounded-[2rem] overflow-hidden shadow-2xl">
                 <div class="bg-white/[0.03] border-b border-white/5 px-6 py-4 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
@@ -882,20 +878,20 @@
                         <span class="ml-4 text-[9px] font-black text-white/40 uppercase tracking-widest italic truncate max-w-[200px] md:max-w-none">REAL-TIME INSIGHTS STREAM // KALASH_NANDAL</span>
                     </div>
                 </div>
-                
+
                 <div class="iframe-container bg-white">
                     <iframe src="https://widgets.sociablekit.com/linkedin-profile-posts/iframe/25638319" frameborder="0" width="100%" height="100%"></iframe>
                 </div>
             </div>
-            
+
             <a href="https://linkedin.com/in/kalash-nandal" target="_blank" class="mt-12 inline-flex items-center gap-4 px-10 py-5 bg-[#0077b5] text-white rounded-full font-black text-[11px] uppercase tracking-[0.3em] transition-all hover:bg-white hover:text-[#0077b5] shadow-2xl">
                 Connect Directly on LinkedIn <i data-lucide="external-link" class="w-4"></i>
             </a>
         </div>
     </section>
 
-    <!-- Fitness Section -->
-    <section id="discipline" class="section-padding bg-black/40">
+    <!-- ============ DISCIPLINE ============ -->
+    <section id="discipline" class="section-padding">
         <div class="max-w-7xl mx-auto px-6">
             <div class="grid lg:grid-cols-2 gap-12 items-center reveal text-center md:text-left">
                 <div class="relative">
@@ -916,10 +912,10 @@
                         </div>
                     </div>
                 </div>
-                <div>
+                <div class="over-vortex">
                     <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-4">Personal symbol of mastery</h2>
                     <h3 class="text-3xl md:text-4xl text-white font-bold heading-serif mb-6 italic leading-tight">Discipline Beyond <br>The Gym.</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                    <p class="text-gray-300 text-sm leading-relaxed mb-6">
                         From 42kg to 86kg. Progress built on daily habits rather than shortcuts. This mirrors my professional ethos of process-driven growth.
                     </p>
                     <div class="flex justify-center md:justify-start gap-8 border-t border-white/5 pt-6">
@@ -937,11 +933,11 @@
         </div>
     </section>
 
-    <!-- Academics -->
-    <section class="section-padding bg-black/40 border-t border-white/5">
+    <!-- ============ ACADEMICS ============ -->
+    <section class="section-padding border-t border-white/5">
         <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-start reveal">
             <div>
-                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-6">Academic Foundation</h2>
+                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-6 over-vortex">Academic Foundation</h2>
                 <div class="glass-card p-8 rounded-3xl space-y-8 border-gold/10">
                     <div class="relative pl-8 border-l border-gold text-left">
                         <div class="absolute -left-1 w-2 h-2 rounded-full bg-gold shadow-[0_0_10px_#D4AF37]"></div>
@@ -957,8 +953,8 @@
                 </div>
             </div>
             <div class="lg:pl-8">
-                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-6">Languages</h2>
-                <div class="grid grid-cols-1 gap-6">
+                <h2 class="text-gold font-black uppercase tracking-[0.4em] text-[10px] mb-6 over-vortex">Languages</h2>
+                <div class="glass-card p-8 rounded-3xl grid grid-cols-1 gap-6">
                     <div class="flex justify-between items-center border-b border-white/10 pb-2">
                         <span class="text-xl font-bold text-white italic">English</span>
                         <span class="text-gold font-black uppercase text-[9px] tracking-widest border border-gold/20 px-3 py-1 rounded-full">Professional</span>
@@ -976,20 +972,17 @@
         </div>
     </section>
 
-    <!-- Unified Footer Area -->
+    <!-- ============ FOOTER ============ -->
     <div class="footer-terminal">
-        <!-- Message & Infinite Quotes Marquee (Full Width) -->
         <section class="py-28 text-center overflow-hidden">
             <div class="max-w-7xl mx-auto px-6 mb-20 reveal text-center">
                 <h2 class="heading-serif text-5xl md:text-8xl text-white leading-none">
                     Engineering <br><span class="text-gold italic font-bold">Excellence at Scale.</span>
                 </h2>
             </div>
-            
-            <!-- Infinite Quotes Edge-to-Edge -->
+
             <div class="w-full relative py-12 bg-white/[0.02] border-y border-white/5">
                 <div class="quote-track">
-                    <!-- Cards with responsive min-width -->
                     <div class="flex items-center space-x-6 md:space-x-12 px-4 md:px-6">
                         <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
                             <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
@@ -1008,7 +1001,6 @@
                             <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70">"Quality is doing it right when no one is looking." <span class="text-gold ml-2">— Henry Ford</span></p>
                         </div>
                     </div>
-                    <!-- Duplicate for infinite loop -->
                     <div class="flex items-center space-x-6 md:space-x-12 px-4 md:px-6">
                         <div class="glass-card px-8 md:px-10 py-6 md:py-8 rounded-[2rem] border border-white/10 flex items-center space-x-4 md:space-x-6 min-w-[280px] md:min-w-[420px] bg-white/[0.06] backdrop-blur-3xl">
                             <i data-lucide="quote" class="text-gold w-5 h-5 md:w-6 md:h-6 flex-shrink-0"></i>
@@ -1031,13 +1023,12 @@
             </div>
         </section>
 
-        <!-- Main Link Footer -->
         <footer class="pt-24 pb-12 border-t border-white/10 relative text-center md:text-left">
             <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12 md:gap-16 mb-24">
                 <div class="md:col-span-2">
                     <img src="https://kalashnandal.co.in/favicon.webp" alt="K N" class="h-14 md:h-16 w-auto mb-8 md:mb-10 mx-auto md:mx-0 object-contain brightness-125" onerror="this.src='https://ui-avatars.com/api/?name=K+N&background=D4AF37&color=fff'">
                     <p class="text-gray-400 max-w-sm text-xs leading-[2.4] italic border-l-2 border-gold/40 pl-6 md:pl-10 py-2 mx-auto md:mx-0">
-                        Strategic growth architect bridging technical precision with operational scale. Overseeing high-performance portfolios for global markets.
+                        Digital Growth Strategist bridging enterprise growth objectives with rigorous operational execution — leading multi-channel delivery for US enterprise portfolios.
                     </p>
                 </div>
                 <div>
@@ -1072,7 +1063,212 @@
     <script>
         lucide.createIcons();
 
-        // 1. Scroll Logic: Depth, Back to Top, and Smart Header
+     
+/* =====================================================================
+           TOPOGRAPHIC WIREFRAME ENGINE — Three.js interactive terrain
+           ===================================================================== */
+        const IS_MOBILE = window.innerWidth < 768;
+        const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Tuning parameters for the wireframe aesthetic and behavior
+        const TERRAIN_CONFIG = {
+            width: 140,
+            depth: 100,
+            segmentsW: IS_MOBILE ? 40 : 80, // Lower on mobile for 60fps performance
+            segmentsH: IS_MOBILE ? 30 : 60,
+            wireframeColor: 0x3a3a40,       // Deep architectural charcoal/slate
+            opacity: 0.5,                   // Subtle transparency so it doesn't overpower text
+            waveSpeed: 0.35,                // How fast the landscape undulates
+            waveHeight: 1.2,                // Overall height of the rolling hills
+            interactionRadius: 15,          // How wide the mouse reaction area is
+            interactionLift: 4,             // How high the terrain lifts toward the mouse
+            camera: {
+                fov: 60,
+                startZ: 28,                 // Distance at top of page
+                endZ: 12,                   // Distance at bottom of page (the dive)
+                startY: 10,                 // Elevation looking down
+                endY: 3                     // Levels out closer to the grid at the bottom
+            },
+            parallax: { x: 3, y: 2, ease: 0.05 }
+        };
+
+        // ---- Renderer / Scene / Camera --------------------------------------
+        const canvas = document.getElementById('vortex-canvas');
+        // Antialiasing is enabled here to keep the wireframe lines perfectly sharp
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 1); // Absolute pitch black canvas
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.022); // Depth falloff so edges fade into darkness
+
+        const camera = new THREE.PerspectiveCamera(
+            TERRAIN_CONFIG.camera.fov,
+            window.innerWidth / window.innerHeight,
+            0.1, 200
+        );
+        
+        const camState = {
+            z: TERRAIN_CONFIG.camera.startZ,
+            y: TERRAIN_CONFIG.camera.startY,
+            progress: 0
+        };
+        camera.position.set(0, camState.y, camState.z);
+        camera.lookAt(0, 0, 0);
+
+        // ---- Topographic Geometry -------------------------------------------
+        const geometry = new THREE.PlaneGeometry(
+            TERRAIN_CONFIG.width,
+            TERRAIN_CONFIG.depth,
+            TERRAIN_CONFIG.segmentsW,
+            TERRAIN_CONFIG.segmentsH
+        );
+        geometry.rotateX(-Math.PI / 2); // Lay the wall flat to become a floor
+
+        const material = new THREE.MeshBasicMaterial({
+            color: TERRAIN_CONFIG.wireframeColor,
+            wireframe: true,
+            transparent: true,
+            opacity: TERRAIN_CONFIG.opacity
+        });
+
+        const terrain = new THREE.Mesh(geometry, material);
+        scene.add(terrain);
+
+        // Store original base coordinates so we have a mathematical baseline to animate from
+        const positions = geometry.attributes.position;
+        const vertexCount = positions.count;
+        const initialY = new Float32Array(vertexCount);
+
+        for (let i = 0; i < vertexCount; i++) {
+            const x = positions.getX(i);
+            const z = positions.getZ(i);
+            // Create initial static hills and valleys using overlapping sine waves
+            const y = Math.sin(x * 0.08) * 2.5 + Math.cos(z * 0.08) * 2.5;
+            positions.setY(i, y);
+            initialY[i] = y;
+        }
+
+        // ---- Mouse Parallax & Interaction Tracking --------------------------
+        const mouse = { x: 0, y: 0 };          
+        const smoothMouse = { x: 0, y: 0 };    
+        
+        if (!REDUCED_MOTION) {
+            window.addEventListener('mousemove', (e) => {
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
+            }, { passive: true });
+        }
+
+        // ---- GSAP ScrollTrigger: Camera Dive --------------------------------
+        gsap.registerPlugin(ScrollTrigger);
+        if (!REDUCED_MOTION) {
+            gsap.to(camState, {
+                z: TERRAIN_CONFIG.camera.endZ,
+                y: TERRAIN_CONFIG.camera.endY,
+                progress: 1,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: document.body,
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 1.1 // Smooth lag for a premium feel
+                }
+            });
+        } else {
+            camState.z = 20; 
+            camState.y = 6;
+        }
+
+        // ---- Render Loop (The Engine) ---------------------------------------
+        const clock = new THREE.Clock();
+
+        function tick() {
+            const elapsedTime = clock.getElapsedTime();
+
+            // Estimate where the mouse is projected onto the 3D plane
+            const mouseWorldX = smoothMouse.x * (TERRAIN_CONFIG.width * 0.4);
+            const mouseWorldZ = -smoothMouse.y * (TERRAIN_CONFIG.depth * 0.4);
+
+            for (let i = 0; i < vertexCount; i++) {
+                const x = positions.getX(i);
+                const z = positions.getZ(i);
+                const baseY = initialY[i];
+
+                // 1. Base fluid undulation
+                const wave = Math.sin(x * 0.06 + elapsedTime * TERRAIN_CONFIG.waveSpeed) * TERRAIN_CONFIG.waveHeight +
+                             Math.cos(z * 0.06 + elapsedTime * TERRAIN_CONFIG.waveSpeed) * TERRAIN_CONFIG.waveHeight;
+
+                // 2. Interactive lift (terrain reacts to cursor proximity)
+                let interaction = 0;
+                if (!REDUCED_MOTION) {
+                    const dist = Math.sqrt(Math.pow(x - mouseWorldX, 2) + Math.pow(z - mouseWorldZ, 2));
+                    if (dist < TERRAIN_CONFIG.interactionRadius) {
+                        // Smooth, quadratic falloff curve so the lift looks organic, not jagged
+                        const intensity = 1 - (dist / TERRAIN_CONFIG.interactionRadius);
+                        interaction = intensity * intensity * TERRAIN_CONFIG.interactionLift;
+                    }
+                }
+
+                // Apply changes to the geometry
+                positions.setY(i, baseY + wave + interaction);
+            }
+            positions.needsUpdate = true; // Flag Three.js to push new vertices to the GPU
+
+            // 3. Smooth Camera Parallax Tracking
+            const P = TERRAIN_CONFIG.parallax;
+            smoothMouse.x += (mouse.x - smoothMouse.x) * P.ease;
+            smoothMouse.y += (mouse.y - smoothMouse.y) * P.ease;
+
+            camera.position.x = smoothMouse.x * P.x;
+            camera.position.y = camState.y + (-smoothMouse.y * P.y);
+            camera.position.z = camState.z;
+            camera.lookAt(0, 0, 0);
+
+            if (!document.hidden) renderer.render(scene, camera);
+            requestAnimationFrame(tick);
+        }
+        tick();
+
+        // ---- Window Resize Handler ------------------------------------------
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        /* =====================================================================
+           GSAP CONTENT REVEALS — glass cards fade/rise as they enter view
+           ===================================================================== */
+
+        /* =====================================================================
+           GSAP CONTENT REVEALS — glass cards fade/rise as they enter view
+           ===================================================================== */
+        if (!REDUCED_MOTION) {
+            gsap.utils.toArray('.reveal').forEach((el) => {
+                gsap.from(el, {
+                    y: 48,
+                    autoAlpha: 0,
+                    duration: 1.15,
+                    ease: 'power3.out',
+                    scrollTrigger: { trigger: el, start: 'top 86%', once: true }
+                });
+            });
+        }
+        // Skill bars fill on entry (works with or without reduced motion)
+        document.querySelectorAll('.skill-progress').forEach((bar) => {
+            ScrollTrigger.create({
+                trigger: bar,
+                start: 'top 92%',
+                once: true,
+                onEnter: () => { bar.style.width = bar.dataset.width; }
+            });
+        });
+
+        /* ============ Existing UI logic (unchanged behavior) ============ */
+
+        // 1. Scroll Logic: Depth bar, Back to Top, Smart Header
         const scrollBar = document.getElementById('scroll-depth-bar');
         const scrollToTopBtn = document.getElementById('scroll-to-top');
         const header = document.getElementById('main-header');
@@ -1082,7 +1278,7 @@
             const currentScrollY = window.scrollY;
             const windowHeight = window.innerHeight;
             const fullHeight = document.documentElement.scrollHeight;
-            
+
             const scrollPercent = (currentScrollY / (fullHeight - windowHeight)) * 100;
             if (scrollBar) scrollBar.style.width = scrollPercent + "%";
 
@@ -1106,20 +1302,7 @@
 
         scrollToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-        // 2. Section Reveal Observer
-        const revealCallback = (entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    const bars = entry.target.querySelectorAll('.skill-progress');
-                    bars.forEach(bar => bar.style.width = bar.dataset.width);
-                }
-            });
-        };
-        const revealObserver = new IntersectionObserver(revealCallback, { threshold: 0.1 });
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-        // 3. Typewriter Effect
+        // 2. Typewriter Effect
         const typingEl = document.querySelector('.typing-text');
         if (typingEl) {
             const words = JSON.parse(typingEl.getAttribute('data-words'));
@@ -1147,7 +1330,7 @@
             type();
         }
 
-        // 4. Local Time
+        // 3. Local Time
         const updateTime = () => {
             const now = new Date();
             const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' };
@@ -1157,7 +1340,7 @@
         setInterval(updateTime, 1000);
         updateTime();
 
-        // 5. Testimonial Modal
+        // 4. Testimonial Modal
         const modalOverlay = document.getElementById('modal-overlay'), modalContent = document.getElementById('modal-content');
         const openModal = (src) => {
             modalContent.src = src;
@@ -1175,7 +1358,7 @@
         if (modalOverlay) modalOverlay.addEventListener('click', (e) => e.target === modalOverlay && closeModal());
         document.addEventListener('keydown', (e) => (e.key === "Escape") && closeModal());
 
-        // 6. Navigation Logic
+        // 5. Navigation Logic
         const menuBtn = document.getElementById('menu-btn'), mobileMenu = document.getElementById('mobile-menu');
         const toggleMenu = (close = false) => {
             if (mobileMenu.classList.contains('menu-hidden') && !close) {
@@ -1191,7 +1374,7 @@
         if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => toggleMenu(true));
         document.querySelectorAll('.mobile-nav-link').forEach(link => link.addEventListener('click', () => toggleMenu(true)));
 
-        // 7. Trajectory logic
+        // 6. Trajectory logic
         const historyItems = document.querySelectorAll('.history-item');
         const setActiveHistoryItem = (item) => {
             historyItems.forEach(el => el.classList.remove('active'));
@@ -1202,7 +1385,7 @@
             item.addEventListener('click', () => { setActiveHistoryItem(item); item.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
         });
 
-        // 8. SMM Toggle
+        // 7. SMM Toggle
         const btnSoul = document.getElementById('btn-soul'), btnBtf = document.getElementById('btn-btf');
         const feedSoul = document.getElementById('feed-soul'), feedBtf = document.getElementById('feed-btf');
         const switchSMM = (target) => {
