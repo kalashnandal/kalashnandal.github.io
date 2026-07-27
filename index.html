@@ -1,15 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#030304">
-
     <!-- ============ SEO / META ============ -->
     <title>Kalash Nandal | Digital Growth Strategist — Director of Strategic Ops @ Sales by Summit</title>
     <meta name="description" content="Digital Growth Strategist. Director of Strategic Operations at Sales by Summit, Head of Growth at iMark Digital Solutions and Project Manager at iMark Infotech. I stabilise high-friction enterprise accounts and scale multi-channel operations.">
     <link rel="canonical" href="https://kalashnandal.co.in/">
-
     <meta property="og:type" content="profile">
     <meta property="og:url" content="https://kalashnandal.co.in/">
     <meta property="og:title" content="Kalash Nandal — Digital Growth Strategist">
@@ -19,19 +18,22 @@
     <meta name="twitter:title" content="Kalash Nandal — Digital Growth Strategist">
     <meta name="twitter:description" content="Director of Strategic Ops @ Sales by Summit | Head of Growth, Marketing & Ops @ iMark Digital Solutions.">
     <meta name="twitter:image" content="https://kalashnandal.co.in/erasebg-1.webp">
-
     <link rel="icon" type="image/png" href="https://kalashnandal.co.in/favicon.webp">
-
     <!-- LCP: preload hero portrait -->
     <link rel="preload" as="image" href="https://kalashnandal.co.in/erasebg-1.webp" fetchpriority="high">
-
+    <!-- V4 PROLOGUE: first-frame assets get priority; the rest stream in behind the loader -->
+    <link rel="preload" as="image" href="https://kalashnandal.co.in/Background%201%20%E2%80%94%20The%20Infinite%20Desert.png" fetchpriority="high">
+    <link rel="preload" as="image" href="https://kalashnandal.co.in/Foreground%203%20%E2%80%94%20Lone%20Traveler%20(Transparent%20PNG).png" fetchpriority="high">
     <!-- Fonts: non-blocking swap pattern, trimmed weights -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"></noscript>
-
+    <!-- V4 PROLOGUE: GSAP toolchain. defer = parsed in order, never render-blocking. -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
     <style>
         /* ================= TOKENS / RESET ================= */
         :root{
@@ -56,7 +58,6 @@
         [hidden]{display:none!important}
         .ic{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
         .s14{width:14px;height:14px}.s16{width:16px;height:16px}.s18{width:18px;height:18px}.s24{width:24px;height:24px}.s32{width:32px;height:32px}
-
         /* ================= FIXED CHROME ================= */
         .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;
             background:
@@ -75,7 +76,6 @@
         .hud b:nth-child(3){bottom:-1px;left:-1px;border-right:0;border-top:0}
         .hud b:nth-child(4){bottom:-1px;right:-1px;border-left:0;border-top:0}
         #progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));z-index:220}
-
         /* ================= LAYOUT SCAFFOLD ================= */
         section,.foot-shell{position:relative;z-index:1}
         .wrap{max-width:80rem;margin:0 auto;padding:0 1.5rem}
@@ -94,7 +94,6 @@
             .sec{padding:7rem 0}
             .tc-m{text-align:left}
         }
-
         /* ================= CARDS / BUTTONS ================= */
         .card{position:relative;background:rgba(9,10,15,.55);border:1px solid var(--line);border-radius:5px;
             backdrop-filter:blur(12px) saturate(135%);-webkit-backdrop-filter:blur(12px) saturate(135%);
@@ -113,7 +112,6 @@
         .link-ic:hover{color:var(--gold)}
         .link-gold{color:var(--gold)}
         .link-gold:hover{color:#fff}
-
         /* ================= HEADER / NAV ================= */
         #hdr{position:fixed;top:.9rem;left:50%;transform:translateX(-50%);width:min(95%,80rem);z-index:190;
             background:rgba(5,6,10,.6);backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
@@ -135,7 +133,6 @@
         #mmenu a{font-size:1.05rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase}
         #mmenu a:hover{color:var(--gold)}
         #mclose2{position:absolute;top:1.4rem;right:1.4rem;padding:.5rem;color:#fff}
-
         /* ================= HERO ================= */
         .hero{min-height:100svh;display:flex;align-items:center;padding-top:7.5rem;padding-bottom:3rem}
         .hero-grid{display:grid;gap:3rem;align-items:center}
@@ -167,7 +164,6 @@
         @keyframes scan{0%{transform:translateY(0)}60%,100%{transform:translateY(480%)}}
         .holo .tag{position:absolute;left:12px;bottom:12px;font-size:.5rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;
             color:rgba(255,255,255,.6);background:rgba(0,0,0,.55);padding:.4rem .6rem;border:1px solid var(--line)}
-
         /* ================= MARQUEES ================= */
         .mq{overflow:hidden;position:relative}
         .mq-track{display:flex;width:max-content;animation:mar var(--d,46s) linear infinite;align-items:center}
@@ -176,14 +172,12 @@
         .strip{width:100vw;position:relative;left:50%;transform:translateX(-50%);padding:2.4rem 0;
             border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(0,0,0,.35)}
         .strip span{font-size:clamp(.85rem,2vw,1.15rem);font-weight:800;letter-spacing:.4em;text-transform:uppercase;white-space:nowrap;color:rgba(255,255,255,.28);padding:0 3rem}
-
         /* ================= GRIDS ================= */
         .g2{display:grid;gap:2rem}
         .g4{display:grid;gap:1.4rem}
         @media(min-width:700px){.g4{grid-template-columns:1fr 1fr}}
         @media(min-width:900px){.g2{grid-template-columns:1fr 1fr}}
         @media(min-width:1100px){.g4{grid-template-columns:repeat(4,1fr)}}
-
         /* ================= MANDATES ================= */
         .mand{padding:1.8rem 1.5rem;display:flex;flex-direction:column;text-align:center}
         .mand.feat{border-color:rgba(212,175,55,.4);background:rgba(212,175,55,.04)}
@@ -195,7 +189,6 @@
         .mand h4{font-size:1.05rem;color:#fff;margin-bottom:.2rem}
         .mand .role{font-size:.55rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-style:italic;margin-bottom:1rem}
         .mand .d{font-size:.72rem;line-height:1.75;color:#c2c2cc;flex:1;margin-bottom:1.4rem}
-
         /* ================= SKILLS / VALUES ================= */
         .skills{display:grid;gap:1.2rem;margin-bottom:3.5rem}
         @media(min-width:700px){.skills{grid-template-columns:1fr 1fr}}
@@ -210,7 +203,6 @@
         .val h4{font-size:1.15rem;color:#fff;margin-bottom:.8rem}
         .val p{font-size:.78rem;color:var(--mut);line-height:1.8}
         @media(min-width:768px){.val .icbox{margin-left:0}}
-
         /* ================= TRAJECTORY ================= */
         .tl-wrap{padding:1.6rem;max-width:56rem;margin:0 auto}
         @media(min-width:768px){.tl-wrap{padding:2.6rem}}
@@ -237,7 +229,6 @@
         .duo>div{background:rgba(255,255,255,.04);border:1px solid rgba(212,175,55,.28);padding:1rem;border-radius:4px}
         .duo h5{color:var(--gold);font-size:.56rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;margin-bottom:.5rem}
         .duo p{font-size:.7rem;color:#e6e6ee;line-height:1.75}
-
         /* ================= ACCOLADES ================= */
         .aw{overflow:hidden}
         .aw .im{aspect-ratio:16/9;overflow:hidden;position:relative}
@@ -249,7 +240,6 @@
         .aw h4{font-size:1.35rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:-.01em;line-height:1.05}
         .aw .yr{color:var(--gold);font-size:.55rem;font-weight:800;letter-spacing:.3em;text-transform:uppercase;margin-top:.4rem}
         .aw .bd>p{font-size:.8rem;color:var(--mut);line-height:1.8}
-
         /* ================= TESTIMONIALS / MODAL ================= */
         .tcard{width:250px;height:150px;flex:none;margin:0 9px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;padding:.8rem}
         @media(min-width:768px){.tcard{width:330px;height:190px;margin:0 14px}}
@@ -263,7 +253,6 @@
         #modal .box img{max-width:100%;max-height:86vh;object-fit:contain;width:auto;height:auto}
         #mclose{position:absolute;top:1.2rem;right:1.2rem;color:#fff;padding:.5rem;z-index:2}
         #mclose:hover{color:var(--gold)}
-
         /* ================= CREATIVE / FACADES ================= */
         .smm-head{display:flex;flex-direction:column;gap:1.6rem;align-items:flex-start;justify-content:space-between;margin-bottom:2.6rem}
         @media(min-width:900px){.smm-head{flex-direction:row;align-items:flex-end}}
@@ -281,7 +270,6 @@
         .slot.ifr{height:600px;overflow:hidden;background:#fff;border-radius:0 0 5px 5px}
         .slot iframe{width:100%;height:100%;border:0;display:block}
         @media(max-width:768px){.slot.ifr{height:500px}}
-
         /* ================= INSIGHTS SHELL ================= */
         .shell{max-width:64rem;margin:0 auto;overflow:hidden}
         .tb{display:flex;align-items:center;gap:.5rem;padding:.9rem 1.3rem;border-bottom:1px solid var(--line);background:rgba(255,255,255,.03)}
@@ -292,7 +280,6 @@
         .li-cta{display:inline-flex;align-items:center;gap:1rem;margin-top:3rem;padding:1.2rem 2.4rem;background:var(--li);color:#fff;border-radius:99px;
             font-size:.62rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;transition:.3s;box-shadow:0 16px 40px -16px rgba(0,119,181,.65)}
         .li-cta:hover{background:#fff;color:var(--li)}
-
         /* ================= DISCIPLINE ================= */
         .disc{display:grid;gap:3rem;align-items:center}
         @media(min-width:1000px){.disc{grid-template-columns:1fr 1fr}}
@@ -313,7 +300,6 @@
         @media(min-width:768px){.dstats{justify-content:flex-start}}
         .dstats b{display:block;font-size:1.2rem;color:#fff;text-transform:uppercase}
         .dstats span{font-size:.5rem;color:var(--mut);font-weight:800;letter-spacing:.2em;text-transform:uppercase}
-
         /* ================= ACADEMICS ================= */
         .acad{display:grid;gap:3rem;align-items:start}
         @media(min-width:1000px){.acad{grid-template-columns:1fr 1fr}}
@@ -332,7 +318,6 @@
         .lrow b{font-family:var(--serif);font-style:italic;font-size:1.2rem;color:#fff;font-weight:700}
         .lrow span{color:var(--gold);font-size:.5rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
         .lrow span.bx{border:1px solid rgba(212,175,55,.25);padding:.3rem .8rem;border-radius:99px}
-
         /* ================= FOOTER ================= */
         .foot-shell{border-top:2px solid var(--gold);box-shadow:0 -15px 60px rgba(212,175,55,.14);
             background:linear-gradient(180deg,rgba(212,175,55,.05),transparent 30%),rgba(2,2,4,.88)}
@@ -363,7 +348,6 @@
         .fbar>p{font-size:.55rem;font-weight:800;letter-spacing:.5em;text-transform:uppercase;color:#fff}
         .fbar a{font-size:.55rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#5b5b66}
         .fbar a:hover{color:var(--gold)}
-
         /* ================= FLOATING ACTIONS ================= */
         .gbtn{position:fixed;bottom:1.6rem;right:1.4rem;z-index:100;display:flex;align-items:center;gap:.7rem;background:#fff;color:#000;
             padding:.8rem 1.4rem;border-radius:99px;font-size:.55rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
@@ -375,7 +359,6 @@
             opacity:0;visibility:hidden;transform:scale(.6);transition:.4s}
         #toTop.vis{opacity:1;visibility:visible;transform:none}
         #toTop:hover{background:var(--gold);color:#000}
-
         /* ================= REVEALS / MOBILE / A11Y ================= */
         .rv{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.16,1,.3,1)}
         .rv.in{opacity:1;transform:none}
@@ -391,7 +374,6 @@
             *,*::before,*::after{animation:none!important;transition:none!important}
             .rv{opacity:1;transform:none}
         }
-
         /* ================= V3: READABILITY + CYBER LAYER ================= */
         section,.foot-shell{z-index:2}
         .scrim{position:fixed;inset:0;z-index:1;pointer-events:none;
@@ -410,7 +392,6 @@
         .lead{color:#d6d7de}
         .qcard p{color:rgba(255,255,255,.78)}
         .strip span{color:rgba(255,255,255,.34)}
-
         /* ---- Typography: filled + outline mix ---- */
         h1{font-family:var(--sans);font-weight:800;text-transform:uppercase;letter-spacing:-.03em;line-height:.92;font-size:clamp(3rem,8.5vw,6.8rem)}
         .serif-ac{font-family:var(--serif);font-style:italic;font-weight:700;text-transform:none;letter-spacing:0;color:var(--gold)}
@@ -428,14 +409,12 @@
             transition:transform .4s cubic-bezier(.16,1,.3,1);z-index:-1}
         .btn-cyber:hover{color:#000;border-color:var(--gold)}
         .btn-cyber:hover::before{transform:scaleX(1);transform-origin:left}
-
         /* ---- Glitch (hover-only, gold/cyan) ---- */
         .gl-t{position:relative;display:inline-block}
         .gl-t::before,.gl-t::after{content:attr(data-text);position:absolute;inset:0;opacity:0;pointer-events:none}
         .gl-t:hover::before{opacity:.8;left:2px;text-shadow:-1px 0 var(--cyan);animation:glx 2.4s infinite linear alternate-reverse}
         .gl-t:hover::after{opacity:.8;left:-2px;text-shadow:1px 0 var(--gold);animation:glx 1.9s infinite linear alternate-reverse}
         @keyframes glx{0%{clip-path:inset(8% 0 62% 0)}25%{clip-path:inset(48% 0 22% 0)}50%{clip-path:inset(12% 0 70% 0)}75%{clip-path:inset(64% 0 8% 0)}100%{clip-path:inset(30% 0 44% 0)}}
-
         /* ---- Hero boot sequence (transform-only: LCP-safe) ---- */
         .boot>*{animation:bootUp .7s cubic-bezier(.16,1,.3,1) backwards}
         .boot>*:nth-child(1){animation-delay:.05s}
@@ -444,7 +423,6 @@
         .boot>*:nth-child(4){animation-delay:.4s}
         .boot>*:nth-child(5){animation-delay:.5s}
         @keyframes bootUp{from{transform:translateY(26px)}}
-
         /* ---- Telemetry HUD ---- */
         .telemetry{position:fixed;left:1.2rem;bottom:1.2rem;z-index:100;display:flex;gap:1.1rem;
             font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.42);
@@ -453,21 +431,172 @@
         .telemetry b{color:var(--gold);font-weight:600}
         @media(max-width:900px){.telemetry{display:none}}
         .tb span{font-family:var(--mono);font-style:normal}
-
-        /* ---- Custom cursor (fine pointers, motion allowed) ---- */
-        #cursor-dot,#cursor-ring{position:fixed;left:0;top:0;border-radius:50%;pointer-events:none;z-index:9999;display:none}
-        #cursor-dot{width:6px;height:6px;background:var(--gold)}
-        #cursor-ring{width:34px;height:34px;border:1px solid rgba(212,175,55,.5);transition:width .25s,height .25s,background-color .25s,border-color .25s}
-        #cursor-ring.big{width:54px;height:54px;background:rgba(212,175,55,.08);border-color:var(--gold)}
-        @media(pointer:fine) and (prefers-reduced-motion:no-preference){body,a,button,[data-modal]{cursor:none}}
-
+        /* ---- Custom cursor: removed in V4. The native cursor is kept so
+               links, buttons and the testimonial modal read as clickable. ---- */
         /* ---- Widget skeleton shimmer ---- */
         .skel{min-height:340px;height:100%;border-radius:4px;
             background:linear-gradient(90deg,#0b0c11 25%,#14151c 50%,#0b0c11 75%);
             background-size:200% 100%;animation:shim 1.4s infinite}
         @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    </style>
 
+        /* =====================================================================
+           V4: CINEMATIC PROLOGUE
+           Everything below is scoped to #pro-load / #prologue / body.pro-* /
+           html.gsap-on. No V1-V3 rule is redefined or overridden except the two
+           documented globals immediately below.
+           ===================================================================== */
+        :root{
+            --pro-black:#050505;   /* palette: background      */
+            --pro-g1:#141414;      /* palette: dark gray       */
+            --pro-g2:#3A3A3A;      /* palette: medium gray     */
+            --pro-white:#F5F5F5;   /* palette: soft white      */
+            --pro-ease:cubic-bezier(.16,1,.3,1);
+        }
+        /* GLOBAL 1 — native smooth-scroll fights ScrollToPlugin and ScrollTrigger
+           snap. Only disabled once GSAP has actually booted, so the no-JS and
+           GSAP-failed paths keep the original CSS smooth scrolling. */
+        html.gsap-on{scroll-behavior:auto}
+        /* GLOBAL 2 — overflow-x:hidden on <body> is a known cause of pin jitter
+           in Safari/iOS. `clip` is the pin-safe equivalent; the original
+           declaration stays as the @supports fallback. */
+        body{overflow-x:clip}
+        @supports not (overflow:clip){body{overflow-x:hidden}}
+
+        /* ---- Chrome suppression while the prologue owns the viewport ---- */
+        body.pro-active #hdr,
+        body.pro-active .telemetry,
+        body.pro-active .gbtn,
+        body.pro-active #toTop,
+        body.pro-active #progress{opacity:0;pointer-events:none}
+        #hdr,.telemetry,.gbtn,#toTop,#progress{transition:opacity .8s var(--pro-ease)}
+        body.pro-lock{overflow:hidden}
+
+        /* ---- Preloader ---- */
+        #pro-load{position:fixed;inset:0;z-index:400;background:var(--pro-black);
+            display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.7rem;
+            transition:opacity 1s var(--pro-ease),visibility 1s}
+        #pro-load.done{opacity:0;visibility:hidden}
+        .pl-mark{font-size:.6rem;font-weight:800;letter-spacing:.62em;text-transform:uppercase;
+            color:var(--pro-white);text-indent:.62em}
+        .pl-rail{display:block;width:min(240px,44vw);height:1px;background:rgba(245,245,245,.13);overflow:hidden}
+        .pl-fill{display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left;
+            background:linear-gradient(90deg,var(--gold),var(--gold2));will-change:transform}
+        .pl-pct{font-family:var(--mono);font-size:.55rem;letter-spacing:.34em;color:rgba(245,245,245,.3)}
+
+        /* ---- Stage ----
+           z-index 4 deliberately sits UNDER .grain (5) and .hud (6) so the film
+           grain and corner brackets grade the prologue too — one connected world. */
+        #prologue{position:relative;z-index:4;background:var(--pro-black)}
+        .pro-stage{position:relative;width:100%;height:100svh;overflow:hidden;background:var(--pro-black)}
+        .pro-scene{position:absolute;inset:0;opacity:0;will-change:opacity}
+        .pro-scene:first-of-type{opacity:1}
+        .pro-plate{position:absolute;inset:0;overflow:hidden}
+
+        /* Layer 1 — BACKGROUND (slowest) */
+        .pro-bg{position:absolute;inset:-8%;background-size:cover;background-position:center;
+            transform:scale(1.15);will-change:transform,filter}
+        /* Layer 2/4 — FOG (drifts continuously, overlaps between scenes)
+           .pro-fogw is deliberately transform-free and has no will-change: any
+           stacking context here would trap the child's mix-blend-mode inside an
+           empty group instead of letting it blend with the plate below. */
+        .pro-fogw{position:absolute;inset:0}
+        .pro-fog{position:absolute;inset:-28% -38%;background-size:cover;background-position:center;
+            mix-blend-mode:screen;opacity:.24;filter:blur(9px);will-change:transform,opacity}
+        .pro-fog.b{inset:-45% -22%;opacity:.13;filter:blur(26px)}
+        /* Layer 3 — FOREGROUND (moves faster than the background)
+           The blend lives on the WRAPPER, not the leaf: the wrapper is the
+           scrubbed element, so its transform would otherwise isolate the leaf's
+           blend mode. Blending on the transformed element itself is correct —
+           it still composites against .pro-plate. */
+        .pro-fgw{position:absolute;inset:0;will-change:transform;
+            /* The supplied "Transparent PNG" files ship with a solid grey matte.
+               screen-blend + a radial falloff mask dissolves that matte into the
+               plate and reads as a light bloom around the subject.
+               After you run them through background removal, add class
+               "pro-alpha" to <body> and this whole hack switches off. */
+            mix-blend-mode:screen;filter:contrast(1.3) brightness(1.03);
+            -webkit-mask-image:radial-gradient(closest-side at 50% 52%,#000 40%,rgba(0,0,0,.5) 66%,transparent 86%);
+                    mask-image:radial-gradient(closest-side at 50% 52%,#000 40%,rgba(0,0,0,.5) 66%,transparent 86%)}
+        .pro-fg{position:absolute;inset:2% 0 0;background-size:contain;background-repeat:no-repeat;
+            background-position:center;will-change:transform,opacity}
+        body.pro-alpha .pro-fgw{mix-blend-mode:normal;filter:none;
+            -webkit-mask-image:none;mask-image:none}
+        /* Layer 5 — colour grade + vignette */
+        .pro-grade{position:absolute;inset:0;pointer-events:none;
+            background:
+                radial-gradient(120% 92% at 50% 46%,transparent 32%,rgba(5,5,5,.5) 76%,rgba(5,5,5,.94) 100%),
+                linear-gradient(180deg,rgba(5,5,5,.6),transparent 24%,transparent 58%,rgba(5,5,5,.9))}
+        /* Letterbox */
+        .pro-bars{position:absolute;left:0;right:0;height:5.5vh;background:var(--pro-black);
+            pointer-events:none;z-index:5;transform:scaleY(0);will-change:transform}
+        .pro-bars.t{top:0;transform-origin:top}
+        .pro-bars.b{bottom:0;transform-origin:bottom}
+
+        /* ---- Editorial typography ---- */
+        .pro-copy{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;
+            justify-content:center;padding:0 clamp(1.5rem,7vw,7.5rem);pointer-events:none;will-change:transform}
+        .pc-eyebrow{font-size:.55rem;font-weight:800;letter-spacing:.55em;text-transform:uppercase;
+            color:var(--gold);margin-bottom:1.7rem;text-indent:.55em;will-change:transform,opacity}
+        .pro-copy h2{font-family:var(--sans);font-weight:800;text-transform:uppercase;
+            letter-spacing:-.035em;line-height:.9;font-size:clamp(2.5rem,8vw,7.4rem);
+            color:var(--pro-white);max-width:15ch}
+        .pro-copy .ln{display:block;overflow:hidden;padding-bottom:.06em}   /* clip mask for line reveal */
+        .pro-copy .w{display:inline-block;will-change:transform,opacity}
+        .pro-copy h2 em{font-family:var(--serif);font-style:italic;font-weight:700;
+            text-transform:none;letter-spacing:-.01em;color:var(--gold);font-size:.94em}
+        .pc-rule{display:block;width:min(22rem,40vw);height:1px;margin-top:2.3rem;transform:scaleX(0);
+            transform-origin:left;background:linear-gradient(90deg,var(--gold),transparent);will-change:transform}
+        .pc-sub{margin-top:1.9rem;font-size:.58rem;font-weight:800;letter-spacing:.32em;
+            text-transform:uppercase;color:rgba(245,245,245,.48);max-width:34ch;line-height:2.2;
+            will-change:transform,opacity}
+
+        /* ---- Scene rail / skip / scroll cue ---- */
+        .pro-rail{position:absolute;right:clamp(1rem,2.6vw,2.6rem);top:50%;transform:translateY(-50%);
+            z-index:6;display:grid;gap:1rem;pointer-events:none}
+        .pro-rail i{display:block;width:1px;height:34px;background:rgba(245,245,245,.15);position:relative;overflow:hidden}
+        .pro-rail i b{position:absolute;inset:0;background:var(--gold);transform:scaleY(0);
+            transform-origin:top;transition:transform .7s var(--pro-ease)}
+        .pro-rail i.on b{transform:scaleY(1)}
+        .pro-skip{position:absolute;right:clamp(1.2rem,4vw,3.2rem);bottom:clamp(1.6rem,4vh,3rem);z-index:7;
+            font-size:.55rem;font-weight:800;letter-spacing:.32em;text-transform:uppercase;
+            color:rgba(245,245,245,.4);display:inline-flex;align-items:center;gap:.7rem;transition:color .35s}
+        .pro-skip:hover{color:var(--gold)}
+        .pro-cue{position:absolute;left:50%;bottom:clamp(1.6rem,4vh,3rem);transform:translateX(-50%);z-index:7;
+            display:grid;justify-items:center;gap:.8rem;font-size:.5rem;font-weight:800;letter-spacing:.42em;
+            text-transform:uppercase;color:rgba(245,245,245,.32);pointer-events:none;text-indent:.42em}
+        .pro-cue i{display:block;width:1px;height:44px;transform-origin:top;
+            background:linear-gradient(180deg,var(--gold),transparent);animation:proCue 2.6s ease-in-out infinite}
+        @keyframes proCue{0%,100%{transform:scaleY(.3);opacity:.25}50%{transform:scaleY(1);opacity:1}}
+
+        /* ---- Scene backplates (kept out of the HTML so markup stays clean) ---- */
+        .pro-scene[data-scene="0"] .pro-bg{background-image:url("https://kalashnandal.co.in/Background%201%20%E2%80%94%20The%20Infinite%20Desert.png")}
+        .pro-scene[data-scene="0"] .pro-fg{background-image:url("https://kalashnandal.co.in/Foreground%203%20%E2%80%94%20Lone%20Traveler%20(Transparent%20PNG).png")}
+        .pro-scene[data-scene="1"] .pro-bg{background-image:url("https://kalashnandal.co.in/Background%202%20%E2%80%94%20Dark%20Mountain%20Valley.png")}
+        .pro-scene[data-scene="1"] .pro-fg{background-image:url("https://kalashnandal.co.in/Foreground%202%20%E2%80%94%20Floating%20Golden%20Monolith%20(Transparent%20PNG).png")}
+        .pro-scene[data-scene="2"] .pro-bg{background-image:url("https://kalashnandal.co.in/Background%203%20%E2%80%94%20Mirror%20Lake.png")}
+        .pro-scene[data-scene="2"] .pro-fg{background-image:url("https://kalashnandal.co.in/Foreground%201%20%E2%80%94%20Golden%20Tree%20(Transparent%20PNG).png")}
+        .pro-fog{background-image:url("https://kalashnandal.co.in/Bonus%20Layer.png")}
+
+        /* ---- Magnetic hover: gold glow on the existing button set ---- */
+        .mag{will-change:transform}
+        .btn-cyber:hover{box-shadow:0 0 0 1px rgba(212,175,55,.32),0 14px 46px -14px rgba(212,175,55,.6)}
+        .li-cta:hover,.li-btn:hover{box-shadow:0 16px 46px -14px rgba(212,175,55,.45)}
+
+        /* ---- Prologue: mobile ---- */
+        @media(max-width:768px){
+            .pro-copy h2{font-size:clamp(2.1rem,10.5vw,3.6rem);max-width:12ch}
+            .pro-copy{padding:0 1.5rem}
+            .pro-fg{inset:12% -14% 0}
+            .pro-rail,.pro-skip{display:none}
+            .pro-bars{height:3.5vh}
+        }
+        /* ---- Prologue: opt-outs. Reduced motion and the JS kill switch both
+               remove the prologue entirely rather than degrading it. ---- */
+        html.no-pro #prologue,html.no-pro #pro-load{display:none!important}
+        @media(prefers-reduced-motion:reduce){
+            #prologue,#pro-load{display:none!important}
+        }
+    </style>
     <!-- Person schema (Updated with Sales by Summit) -->
     <script type="application/ld+json">
     {
@@ -512,12 +641,12 @@
     </script>
 </head>
 <body>
-
     <!-- Inline SVG sprite (replaces Lucide runtime — zero JS, zero request) -->
     <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
         <symbol id="i-menu" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></symbol>
         <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
         <symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+        <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
         <symbol id="i-in" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></symbol>
         <symbol id="i-ig" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></symbol>
         <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
@@ -529,7 +658,6 @@
         <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></symbol>
         <symbol id="i-quote" viewBox="0 0 24 24"><path d="M10 11H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6a4 4 0 0 1-4 4"/><path d="M20 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6a4 4 0 0 1-4 4"/></symbol>
     </svg>
-
     <!-- Instant CSS backdrop (visible before WebGL loads, and its permanent floor) -->
     <div class="bgfx" aria-hidden="true"></div>
     <!-- GPU particle engine mounts here — loaded post-idle, never on the critical path -->
@@ -540,16 +668,92 @@
     <div class="hud" aria-hidden="true"><b></b><b></b><b></b><b></b></div>
     <div id="progress" aria-hidden="true"></div>
     <div class="telemetry" aria-hidden="true"><span>SCR <b id="tm-scr">000%</b></span><span>IST <b id="tm-time">--:--:--</b></span><span>SEC <b id="tm-sec">HOME</b></span></div>
-    <div id="cursor-dot" aria-hidden="true"></div>
-    <div id="cursor-ring" aria-hidden="true"></div>
-
     <!-- Find me on Google -->
     <a href="https://www.google.com/search?q=kalash+nandal&udm=50" target="_blank" rel="noopener" class="gbtn">
         <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
         <span>Find me on Google</span>
     </a>
-
     <button id="toTop" aria-label="Scroll to top"><svg class="ic s24"><use href="#i-up"/></svg></button>
+
+    <!-- ============ V4: CINEMATIC PROLOGUE (pre-hero) ============
+         Purely decorative. aria-hidden + role=presentation keeps it out of the
+         accessibility tree and out of the crawlable content graph, so the SEO
+         profile of the page is unchanged: the H1 in #home is still the first
+         heading a crawler meets. -->
+    <div id="pro-load" aria-hidden="true">
+        <span class="pl-mark">Kalash Nandal</span>
+        <span class="pl-rail"><b class="pl-fill"></b></span>
+        <span class="pl-pct">000</span>
+    </div>
+    <div id="prologue" role="presentation" aria-hidden="true">
+        <div class="pro-stage">
+            <!-- ---- Scene 01 : The Infinite Desert + Lone Traveler ---- -->
+            <div class="pro-scene" data-scene="0">
+                <div class="pro-plate">
+                    <div class="pro-bg"></div>
+                    <div class="pro-fogw"><div class="pro-fog"></div></div>
+                    <div class="pro-fgw"><div class="pro-fg"></div></div>
+                    <div class="pro-fogw"><div class="pro-fog b"></div></div>
+                    <div class="pro-grade"></div>
+                </div>
+                <div class="pro-copy">
+                    <p class="pc-eyebrow">I &mdash; The Approach</p>
+                    <h2>
+                        <span class="ln"><span class="w">Growth</span> <span class="w">begins</span></span>
+                        <span class="ln"><span class="w">where</span> <span class="w">the</span> <span class="w">map</span></span>
+                        <span class="ln"><em class="w">ends.</em></span>
+                    </h2>
+                    <span class="pc-rule"></span>
+                    <p class="pc-sub">Digital Growth Strategist &bull; Mohali, India</p>
+                </div>
+            </div>
+            <!-- ---- Scene 02 : Dark Mountain Valley + Golden Monolith ---- -->
+            <div class="pro-scene" data-scene="1">
+                <div class="pro-plate">
+                    <div class="pro-bg"></div>
+                    <div class="pro-fogw"><div class="pro-fog"></div></div>
+                    <div class="pro-fgw"><div class="pro-fg"></div></div>
+                    <div class="pro-fogw"><div class="pro-fog b"></div></div>
+                    <div class="pro-grade"></div>
+                </div>
+                <div class="pro-copy">
+                    <p class="pc-eyebrow">II &mdash; The Structure</p>
+                    <h2>
+                        <span class="ln"><span class="w">Order,</span> <span class="w">engineered</span></span>
+                        <span class="ln"><span class="w">out</span> <span class="w">of</span> <em class="w">friction.</em></span>
+                    </h2>
+                    <span class="pc-rule"></span>
+                    <p class="pc-sub">Red-flag enterprise accounts &bull; stabilised, then scaled</p>
+                </div>
+            </div>
+            <!-- ---- Scene 03 : Mirror Lake + Golden Tree ---- -->
+            <div class="pro-scene" data-scene="2">
+                <div class="pro-plate">
+                    <div class="pro-bg"></div>
+                    <div class="pro-fogw"><div class="pro-fog"></div></div>
+                    <div class="pro-fgw"><div class="pro-fg"></div></div>
+                    <div class="pro-fogw"><div class="pro-fog b"></div></div>
+                    <div class="pro-grade"></div>
+                </div>
+                <div class="pro-copy">
+                    <p class="pc-eyebrow">III &mdash; The Compound</p>
+                    <h2>
+                        <span class="ln"><span class="w">Systems</span> <span class="w">that</span></span>
+                        <span class="ln"><span class="w">compound</span> <em class="w">quietly.</em></span>
+                    </h2>
+                    <span class="pc-rule"></span>
+                    <p class="pc-sub">150+ campaigns &bull; United States &bull; Europe &bull; India</p>
+                </div>
+            </div>
+            <!-- ---- Fixed furniture inside the pinned stage ---- -->
+            <div class="pro-bars t"></div>
+            <div class="pro-bars b"></div>
+            <div class="pro-rail"><i class="on"><b></b></i><i><b></b></i><i><b></b></i></div>
+            <button class="pro-skip" type="button">Skip intro <svg class="ic s14"><use href="#i-down"/></svg></button>
+            <div class="pro-cue"><i></i><span>Scroll</span></div>
+        </div>
+    </div>
+    <!-- ============ /CINEMATIC PROLOGUE ============ -->
 
     <!-- Header -->
     <header id="hdr">
@@ -568,7 +772,6 @@
             <button class="mbtn" id="mbtn" aria-label="Toggle menu"><svg class="ic s24"><use href="#i-menu"/></svg></button>
         </nav>
     </header>
-
     <!-- Mobile menu -->
     <div id="mmenu">
         <button id="mclose2" aria-label="Close menu"><svg class="ic s32"><use href="#i-x"/></svg></button>
@@ -581,7 +784,6 @@
         <a href="#insights">Insights</a>
         <a href="#discipline">Discipline</a>
     </div>
-
     <!-- ============ HERO ============ -->
     <section id="home" class="hero">
         <div class="wrap hero-grid">
@@ -617,7 +819,6 @@
             </div>
         </div>
     </section>
-
     <!-- ============ MANDATES ============ -->
     <section id="mandates" class="sec">
         <div class="wrap">
@@ -677,7 +878,6 @@
             </div>
         </div>
     </section>
-
     <!-- ============ CORE COMPETENCIES ============ -->
     <section class="sec">
         <div class="wrap">
@@ -727,7 +927,6 @@
             </div>
         </div>
     </section>
-
     <!-- ============ TRAJECTORY ============ -->
     <section id="history" class="sec bt cv">
         <div class="wrap">
@@ -820,7 +1019,6 @@
             </div>
         </div>
     </section>
-
     <!-- ============ ACCOLADES ============ -->
     <section id="accolades" class="sec cv">
         <div class="wrap">
@@ -861,7 +1059,6 @@
             </div>
         </div>
     </section>
-
     <!-- ============ TESTIMONIALS ============ -->
     <section id="testimonials" class="sec bt cv" style="overflow:hidden">
         <div class="wrap smm-head rv">
@@ -885,13 +1082,11 @@
             </div>
         </div>
     </section>
-
     <!-- Modal -->
     <div id="modal" role="dialog" aria-modal="true" aria-label="Testimonial full view">
         <button id="mclose" aria-label="Close"><svg class="ic s32"><use href="#i-x"/></svg></button>
         <div class="box"><img src="" alt="Full resolution testimonial"></div>
     </div>
-
     <!-- ============ CREATIVE DIRECTION ============ -->
     <section id="creative" class="sec cv" style="overflow:hidden">
         <div class="wrap">
@@ -937,14 +1132,12 @@
             </div>
         </div>
     </section>
-
     <!-- ============ LINKEDIN INSIGHTS ============ -->
     <section id="insights" class="sec bt cv">
         <div class="wrap ctr rv">
             <p class="eyebrow net-eb" style="margin-bottom:.5rem">07 &bull; Professional Network</p>
             <h3 class="h-big" style="margin-bottom:1rem">Network <span class="ol">Insights</span></h3>
             <p class="net-sub">Decoding global digital shifts and sharing operational frameworks. This stream captures my ongoing dialogue with the architects of the digital economy.</p>
-
             <div class="card shell">
                 <div class="tb">
                     <i style="background:rgba(239,68,68,.5)"></i>
@@ -954,13 +1147,11 @@
                 </div>
                 <div class="slot ifr" id="slot-li"><div class="skel"></div></div>
             </div>
-
             <a href="https://linkedin.com/in/kalash-nandal" target="_blank" rel="noopener" class="li-cta">
                 Connect Directly on LinkedIn <svg class="ic s16"><use href="#i-ext"/></svg>
             </a>
         </div>
     </section>
-
     <!-- ============ DISCIPLINE ============ -->
     <section id="discipline" class="sec cv">
         <div class="wrap disc rv">
@@ -987,7 +1178,6 @@
             </div>
         </div>
     </section>
-
     <!-- ============ ACADEMICS ============ -->
     <section class="sec bt cv">
         <div class="wrap acad rv">
@@ -1017,13 +1207,11 @@
             </div>
         </div>
     </section>
-
     <!-- ============ FOOTER ============ -->
     <div class="foot-shell cv" id="site-foot">
         <div class="foot-hero rv">
             <h2>Engineer<br><span class="ol gl-t" data-text="Excellence">Excellence</span> <span class="serif-ac">at scale.</span></h2>
         </div>
-
         <div class="qwrap mq">
             <div class="mq-track" style="--d:95s">
                 <div class="card qcard">
@@ -1044,7 +1232,6 @@
                 </div>
             </div>
         </div>
-
         <footer>
             <div class="wrap">
                 <div class="fgrid tc-m">
@@ -1078,17 +1265,14 @@
             </div>
         </footer>
     </div>
-
     <script>
     (function(){
         'use strict';
         function $(s){return document.querySelector(s);}
         function $$(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
         var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
         /* ---- Duplicate marquee tracks once (halves the HTML payload) ---- */
         $$('.mq-track').forEach(function(t){ t.innerHTML += t.innerHTML; });
-
         /* ---- Local time (IST) ---- */
         var timeEl = $('#local-time');
         if(timeEl){
@@ -1100,7 +1284,6 @@
             };
             fmtTime(); setInterval(fmtTime,1000);
         }
-
         /* ---- Scroll: progress bar, smart header, to-top, morph progress (rAF-throttled) ---- */
         var bar=$('#progress'), topBtn=$('#toTop'), hdr=$('#hdr');
         var tmScr=$('#tm-scr'), tmSec=$('#tm-sec');
@@ -1111,6 +1294,9 @@
         function calcA(){
             anchors = anchorSel.map(function(s){ var e=$(s); return e ? e.offsetTop : 0; });
         }
+        /* V4: the legacy anchor cache is recomputed when GSAP re-measures the page
+           (the pinned prologue injects ~300vh of spacer). Exposed, not rewritten. */
+        window.__calcAnchors = calcA;
         function segProgress(y){
             var yy = y + window.innerHeight*0.4, p=0, i;
             for(i=0;i<4;i++){
@@ -1134,7 +1320,8 @@
             var mp = segProgress(y);
             window.__morph = mp;
             if(tmScr) tmScr.textContent = ('00'+Math.round(h>0?y/h*100:0)).slice(-3)+'%';
-            if(tmSec) tmSec.textContent = secNames[Math.min(4,Math.floor(mp+0.0001))];
+            /* V4: the prologue owns the SEC readout while it is on screen. */
+            if(tmSec && !document.body.classList.contains('pro-active')) tmSec.textContent = secNames[Math.min(4,Math.floor(mp+0.0001))];
             queued=false;
         }
         calcA();
@@ -1143,7 +1330,6 @@
         window.addEventListener('load', calcA);
         onScroll();
         if(topBtn) topBtn.addEventListener('click', function(){ window.scrollTo({top:0, behavior: RM?'auto':'smooth'}); });
-
         /* ---- Reveal on view + skill bars ---- */
         var io = new IntersectionObserver(function(es){
             es.forEach(function(e){
@@ -1156,7 +1342,6 @@
             });
         }, {threshold:.1, rootMargin:'0px 0px -4%'});
         $$('.rv').forEach(function(el){ io.observe(el); });
-
         /* ---- Trajectory focus ---- */
         var items = $$('.hitem');
         function setActive(it){ items.forEach(function(e){ e.classList.remove('on'); }); it.classList.add('on'); }
@@ -1164,7 +1349,6 @@
             it.addEventListener('mouseenter', function(){ setActive(it); });
             it.addEventListener('click', function(){ setActive(it); it.scrollIntoView({behavior: RM?'auto':'smooth', block:'center'}); });
         });
-
         /* ---- SMM toggle ---- */
         function smm(t){
             ['soul','btf'].forEach(function(k){
@@ -1177,7 +1361,6 @@
         }
         if($('#btn-soul')) $('#btn-soul').addEventListener('click', function(){ smm('soul'); });
         if($('#btn-btf')) $('#btn-btf').addEventListener('click', function(){ smm('btf'); });
-
         /* ---- Third-party facades: widgets load ONLY on demand ---- */
         var loadedScripts={};
         function ldScript(src){
@@ -1206,7 +1389,6 @@
         function autoEmbeds(){ loadEmbed('soul'); loadEmbed('li'); }
         window.addEventListener('load', function(){ setTimeout(autoEmbeds, 1200); });
         ['pointerdown','touchstart','keydown'].forEach(function(ev){ window.addEventListener(ev, autoEmbeds, {once:true, passive:true}); });
-
         /* ---- Testimonial modal (event delegation) ---- */
         var modal=$('#modal'), mimg=modal ? modal.querySelector('.box img') : null;
         function closeModal(){
@@ -1227,38 +1409,13 @@
             if(e.target===modal || (e.target.closest && e.target.closest('#mclose'))) closeModal();
         });
         document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
-
         /* ---- Mobile menu ---- */
         var mm=$('#mmenu');
         if($('#mbtn')) $('#mbtn').addEventListener('click', function(){ mm.classList.add('open'); document.body.style.overflow='hidden'; });
         function closeMenu(){ mm.classList.remove('open'); document.body.style.overflow=''; }
         if($('#mclose2')) $('#mclose2').addEventListener('click', closeMenu);
         $$('#mmenu a').forEach(function(a){ a.addEventListener('click', closeMenu); });
-
-        /* ---- Custom cursor (fine pointers, motion allowed) ---- */
-        if(window.matchMedia('(pointer:fine)').matches && !RM){
-            var cDot=$('#cursor-dot'), cRing=$('#cursor-ring');
-            if(cDot && cRing){
-                cDot.style.display='block'; cRing.style.display='block';
-                var cmx=window.innerWidth/2, cmy=window.innerHeight/2, crx=cmx, cry=cmy;
-                window.addEventListener('pointermove', function(e){
-                    cmx=e.clientX; cmy=e.clientY;
-                    cDot.style.transform='translate3d('+cmx+'px,'+cmy+'px,0) translate(-50%,-50%)';
-                }, {passive:true});
-                (function ringLoop(){
-                    crx+=(cmx-crx)*0.18; cry+=(cmy-cry)*0.18;
-                    cRing.style.transform='translate3d('+crx+'px,'+cry+'px,0) translate(-50%,-50%)';
-                    requestAnimationFrame(ringLoop);
-                })();
-                document.addEventListener('mouseover', function(e){
-                    if(e.target.closest && e.target.closest('a,button,.hitem,.tcard')) cRing.classList.add('big');
-                });
-                document.addEventListener('mouseout', function(e){
-                    if(e.target.closest && e.target.closest('a,button,.hitem,.tcard')) cRing.classList.remove('big');
-                });
-            }
-        }
-
+        /* ---- Custom cursor: removed in V4 (native cursor restored). ---- */
         /* ---- Microsoft Clarity: injected AFTER the page is interactive ---- */
         var clarityDone=false;
         function loadClarity(){
@@ -1271,7 +1428,6 @@
         }
         setTimeout(loadClarity, 3500);
         ['pointerdown','keydown'].forEach(function(ev){ window.addEventListener(ev, loadClarity, {once:true, passive:true}); });
-
         /* ---- Three.js: deferred load (idle or first interaction), never render-blocking ---- */
         var glStarted=false;
         window.__RM = RM;
@@ -1286,7 +1442,388 @@
         ['pointermove','touchstart','scroll','keydown'].forEach(function(ev){ window.addEventListener(ev, startGL, {once:true, passive:true}); });
     })();
     </script>
+    <script>
+    /* =====================================================================
+       V4 — CINEMATIC PROLOGUE ENGINE
+       Additive module. It never touches V1-V3 state; it only reads the
+       exposed hooks (window.__calcAnchors, window.__morph) and adds its own
+       ScrollTriggers. Three independent failure paths all leave the original
+       site fully functional:
+         · prefers-reduced-motion  -> prologue removed by CSS + JS
+         · GSAP CDN unreachable    -> kill() strips the prologue, native scroll
+         · image load stalls       -> 7s ceiling releases the loader anyway
+       Only transform / opacity / filter are animated. Nothing touches
+       width, height, left or top.
+       ===================================================================== */
+    (function(){
+        'use strict';
+        var pro = document.getElementById('prologue');
+        var ld  = document.getElementById('pro-load');
+        if(!pro) return;
 
+        var RM  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var MOB = window.matchMedia('(max-width:768px)').matches;
+        var TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+        var BLUR = !MOB;                       /* full-screen blur is desktop-only */
+        var SOFT_SNAP = !TOUCH && window.innerWidth > 900;
+        var SNAP_TOLERANCE = 0.14;             /* soft snap fires only within 14% of a viewport */
+
+        function kill(){
+            document.documentElement.classList.add('no-pro');
+            document.body.classList.remove('pro-active','pro-lock');
+            if(ld && ld.parentNode) ld.parentNode.removeChild(ld);
+            if(pro && pro.parentNode) pro.parentNode.removeChild(pro);
+            pro = null;
+        }
+        if(RM){ kill(); return; }
+
+        /* Start every visit at frame one of the film. Delete these two lines to
+           let the browser restore the previous scroll position instead. */
+        if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        window.scrollTo(0,0);
+        document.body.classList.add('pro-active','pro-lock');
+
+        /* ------------------------------------------------------------------
+           1. PRELOADER — gate the film on its own plates, nothing else
+           ------------------------------------------------------------------ */
+        var ASSETS = [
+            'https://kalashnandal.co.in/Background%201%20%E2%80%94%20The%20Infinite%20Desert.png',
+            'https://kalashnandal.co.in/Background%202%20%E2%80%94%20Dark%20Mountain%20Valley.png',
+            'https://kalashnandal.co.in/Background%203%20%E2%80%94%20Mirror%20Lake.png',
+            'https://kalashnandal.co.in/Foreground%201%20%E2%80%94%20Golden%20Tree%20(Transparent%20PNG).png',
+            'https://kalashnandal.co.in/Foreground%202%20%E2%80%94%20Floating%20Golden%20Monolith%20(Transparent%20PNG).png',
+            'https://kalashnandal.co.in/Foreground%203%20%E2%80%94%20Lone%20Traveler%20(Transparent%20PNG).png',
+            'https://kalashnandal.co.in/Bonus%20Layer.png'
+        ];
+        var fill = ld && ld.querySelector('.pl-fill');
+        var pctEl = ld && ld.querySelector('.pl-pct');
+        var done = 0, settled = false;
+
+        function paint(p){
+            if(fill)  fill.style.transform = 'scaleX(' + p + ')';
+            if(pctEl) pctEl.textContent = ('00' + Math.round(p*100)).slice(-3);
+        }
+        function bump(){ done++; paint(done/ASSETS.length); if(done >= ASSETS.length) release(); }
+        function release(){
+            if(settled) return; settled = true;
+            paint(1);
+            setTimeout(function(){
+                if(ld) ld.classList.add('done');
+                document.body.classList.remove('pro-lock');
+                waitForGSAP(0);
+            }, 450);
+        }
+        ASSETS.forEach(function(u){ var im = new Image(); im.onload = im.onerror = bump; im.src = u; });
+        setTimeout(release, 7000);                      /* hard ceiling — never trap the visitor */
+
+        /* ------------------------------------------------------------------
+           2. BOOT — GSAP may still be in flight behind `defer`
+           ------------------------------------------------------------------ */
+        function waitForGSAP(tries){
+            if(window.gsap && window.ScrollTrigger && window.ScrollToPlugin) return build();
+            if(tries > 60) return kill();               /* ~3s, then bail cleanly */
+            setTimeout(function(){ waitForGSAP(tries+1); }, 50);
+        }
+
+        function build(){
+            gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+            document.documentElement.classList.add('gsap-on');
+
+            var stage  = pro.querySelector('.pro-stage');
+            var scenes = gsap.utils.toArray('#prologue .pro-scene');
+            var rail   = gsap.utils.toArray('#prologue .pro-rail i');
+            var barT   = pro.querySelector('.pro-bars.t');
+            var barB   = pro.querySelector('.pro-bars.b');
+            var cue    = pro.querySelector('.pro-cue');
+            var skip   = pro.querySelector('.pro-skip');
+            var tmSec  = document.getElementById('tm-sec');
+            var N      = scenes.length;
+            var NAMES  = ['APPROACH','STRUCTURE','COMPOUND'];
+
+            function parts(sc){
+                return {
+                    bg  : sc.querySelector('.pro-bg'),
+                    fgw : sc.querySelector('.pro-fgw'),
+                    fg  : sc.querySelector('.pro-fg'),
+                    fogs: sc.querySelectorAll('.pro-fog'),
+                    copy: sc.querySelector('.pro-copy'),
+                    eb  : sc.querySelector('.pc-eyebrow'),
+                    words: sc.querySelectorAll('.w'),
+                    rule: sc.querySelector('.pc-rule'),
+                    sub : sc.querySelector('.pc-sub')
+                };
+            }
+
+            /* ---- 2a. Resting state -------------------------------------- */
+            scenes.forEach(function(sc,i){
+                var p = parts(sc);
+                var first = (i === 0);
+                gsap.set(sc,      {autoAlpha: first ? 1 : 0});
+                gsap.set(p.bg,    {scale: first ? 1 : 1.18, yPercent: 0, filter:'blur(0px)'});
+                gsap.set(p.fgw,   {yPercent: first ? 0 : 16, scale: first ? 1 : 1.14});
+                gsap.set(p.copy,  {yPercent: 0});
+                if(!first){
+                    gsap.set([p.eb, p.sub], {autoAlpha:0, yPercent:110});
+                    gsap.set(p.words,       {autoAlpha:0, yPercent:112});
+                    gsap.set(p.rule,        {scaleX:0});
+                }
+            });
+
+            /* ---- 2b. Ambient loops — independent of scroll ---------------
+               Foreground breathes on a sine; fog drifts continuously and
+               overlaps across the crossfades. These run on inner elements so
+               they never collide with the scrubbed transforms on the wrappers. */
+            scenes.forEach(function(sc,i){
+                var p = parts(sc);
+                gsap.to(p.fg, {yPercent:-2.6, duration:6.5+i*0.9, ease:'sine.inOut', repeat:-1, yoyo:true});
+                gsap.to(p.fg, {scale:1.035,   duration:9.5+i*1.2, ease:'sine.inOut', repeat:-1, yoyo:true});
+                Array.prototype.forEach.call(p.fogs, function(f,k){
+                    gsap.set(f, {xPercent: k ? 11 : -9, scale: 1});
+                    gsap.to(f,  {xPercent: k ? -11 : 9, duration: 40+k*15+i*4, ease:'sine.inOut', repeat:-1, yoyo:true});
+                    gsap.to(f,  {opacity : k ? 0.19 : 0.31, duration: 12+k*6, ease:'sine.inOut', repeat:-1, yoyo:true});
+                    gsap.to(f,  {scale: 1.2, duration: 28+k*10, ease:'sine.inOut', repeat:-1, yoyo:true});
+                });
+            });
+
+            /* ---- 2c. Opening title card (real time, not scrubbed) --------- */
+            var p0 = parts(scenes[0]);
+            var intro = [
+                gsap.to([barT,barB], {scaleY:1, duration:1.4, ease:'expo.out', delay:0.15}),
+                gsap.from(p0.eb,    {autoAlpha:0, yPercent:110, duration:1,    ease:'power3.out', delay:0.5}),
+                gsap.from(p0.words, {autoAlpha:0, yPercent:112, duration:1.15, ease:'power3.out', stagger:0.06, delay:0.6}),
+                gsap.from(p0.rule,  {scaleX:0,                  duration:1.2,  ease:'power3.out', delay:1.05}),
+                gsap.from(p0.sub,   {autoAlpha:0, yPercent:70,  duration:1,    ease:'power3.out', delay:1.15})
+            ];
+            /* If the visitor scrolls during the title card, hand control to the
+               scrub immediately rather than letting the two fight over the
+               same properties. */
+            function killIntro(){
+                if(!intro) return;
+                intro.forEach(function(t){ if(t !== intro[0]) t.progress(1).kill(); });
+                intro = null;
+            }
+
+            /* ---- 2d. Master scrub timeline -------------------------------
+               One timeline unit per TRANSITION, so t=0,1,2 are exactly the
+               three settled frames and the timeline ends ON scene 3. That maps
+               1:1 onto snap points of 1/(N-1) and leaves no trailing dead
+               scroll inside the pin. */
+            var tl = gsap.timeline({defaults:{ease:'none'}});
+            tl.to(cue, {autoAlpha:0, duration:0.22, ease:'power2.in'}, 0.02);
+
+            /* One unit per TRANSITION, not per scene: t=0,1,2 are the three
+               settled frames and the timeline simply ends on scene 3. */
+            for(var i=0;i<N-1;i++){
+                var cur = scenes[i], nxt = scenes[i+1];
+                var c = parts(cur);
+                var tA = i + 0.30;      /* dwell ends, transition begins */
+                var tB = i + 0.92;      /* transition ends               */
+
+                /* Camera pushes forward through the outgoing scene.
+                   Foreground travels further than background = parallax. */
+                tl.to(c.bg,   {scale:1.13, yPercent:-3.5, ease:'power1.in', duration:tB-i}, i)
+                  .to(c.fgw,  {yPercent:-12, scale:1.11,  ease:'power1.in', duration:tB-i}, i)
+                  .to(c.copy, {yPercent:-10,               ease:'power1.in', duration:tB-i}, i);
+
+                /* Copy leaves first, staggered, so the frame empties before it cuts */
+                tl.to(c.words, {autoAlpha:0, yPercent:-105, ease:'power2.in', duration:(tB-tA)*0.5, stagger:0.02}, tA)
+                  .to([c.eb, c.sub], {autoAlpha:0, yPercent:-70, ease:'power2.in', duration:(tB-tA)*0.45}, tA)
+                  .to(c.rule, {scaleX:0, transformOrigin:'right', ease:'power2.in', duration:(tB-tA)*0.4}, tA);
+
+                var n = parts(nxt);
+                tl.to(cur, {autoAlpha:0, ease:'power2.inOut', duration:tB-tA}, tA)
+                  /* Incoming plate: scale 1.18 -> 1, blur resolves, slight Y settle */
+                  .fromTo(nxt, {autoAlpha:0}, {autoAlpha:1, ease:'power2.inOut', duration:tB-tA}, tA)
+                  .fromTo(n.bg,
+                          {scale:1.18, yPercent:4, filter: BLUR ? 'blur(16px)' : 'blur(0px)'},
+                          {scale:1, yPercent:0, filter:'blur(0px)', ease:'power2.out', duration:(i+1.06)-tA}, tA)
+                  .fromTo(n.fgw, {yPercent:16, scale:1.14}, {yPercent:0, scale:1, ease:'power2.out', duration:(i+1.06)-tA}, tA)
+                  /* Text enters clipped by .ln overflow — a true line reveal */
+                  .fromTo(n.eb,    {autoAlpha:0, yPercent:110}, {autoAlpha:1, yPercent:0, ease:'power3.out', duration:0.34}, tA+0.26)
+                  .fromTo(n.words, {autoAlpha:0, yPercent:112}, {autoAlpha:1, yPercent:0, ease:'power3.out', duration:0.42, stagger:0.038}, tA+0.30)
+                  .fromTo(n.rule,  {scaleX:0}, {scaleX:1, transformOrigin:'left', ease:'power3.out', duration:0.5}, tA+0.46)
+                  .fromTo(n.sub,   {autoAlpha:0, yPercent:70}, {autoAlpha:1, yPercent:0, ease:'power3.out', duration:0.36}, tA+0.5);
+            }
+
+            /* ---- 2e. Pin + hard snap ------------------------------------ */
+            function setChrome(inPrologue){
+                document.body.classList.toggle('pro-active', inPrologue);
+            }
+            function setRail(idx){
+                rail.forEach(function(el,k){ el.classList.toggle('on', k <= idx); });
+                if(tmSec && document.body.classList.contains('pro-active')) tmSec.textContent = NAMES[idx] || 'INTRO';
+            }
+
+            var master = ScrollTrigger.create({
+                id:'prologue',
+                animation: tl,
+                trigger: pro,
+                start: 'top top',
+                end: '+=' + ((N-1) * 100) + '%',   /* pin releases ON scene 3, not after it */
+                pin: stage,
+                pinSpacing: true,
+                anticipatePin: 1,
+                scrub: 1.15,                 /* the "heavy" weight — inertia on every input */
+                invalidateOnRefresh: true,
+                snap:{
+                    snapTo: gsap.utils.snap(1 / (N-1)),
+                    duration: {min:0.35, max:1.05},
+                    delay: 0.06,
+                    ease: 'power3.inOut',
+                    inertia: false           /* deterministic: always settle on a frame */
+                },
+                onUpdate: function(self){
+                    if(self.progress > 0.002) killIntro();
+                    setChrome(true);            /* master is only active inside the prologue */
+                    setRail(Math.min(N-1, Math.round(self.progress * (N-1))));
+                },
+                onEnterBack:  function(){ setChrome(true); },
+                onRefresh:    function(self){ if(self.progress < 1) setChrome(true); }
+                /* no onLeave: the handoff trigger below owns the chrome from here */
+            });
+
+            /* ---- 2f. Handoff: scene 3 -> hero, as one snap ---------------
+               The pin has released, so the stage is now a normal 100vh block
+               physically scrolling away with the hero rising underneath it.
+               This trigger covers exactly that gap and snaps it to [0,1], so a
+               nudge past scene 3 lands you on the hero and a nudge back returns
+               you to scene 3. No dead scroll, no black frame in between. */
+            var handoff = gsap.timeline({defaults:{ease:'none'}})
+                .to([barT,barB], {scaleY:0, ease:'power2.inOut', duration:0.35}, 0)
+                .to(parts(scenes[N-1]).bg, {scale:1.1, ease:'power1.in', duration:1}, 0)
+                .to(stage, {autoAlpha:0, ease:'power2.in', duration:0.55}, 0.45);
+
+            ScrollTrigger.create({
+                id:'pro-handoff',
+                animation: handoff,
+                start: function(){ return pro.offsetTop + pro.offsetHeight - window.innerHeight; },
+                end:   function(){ return pro.offsetTop + pro.offsetHeight; },
+                scrub: 0.9,
+                invalidateOnRefresh: true,
+                snap:{
+                    snapTo: [0, 1],
+                    duration: {min:0.3, max:0.8},
+                    delay: 0.04,
+                    ease: 'power3.inOut',
+                    inertia: false
+                },
+                onUpdate:    function(self){ setChrome(self.progress < 0.5); },
+                onRefresh:   function(self){ setChrome(self.progress < 0.5); },
+                onLeave:     function(){ setChrome(false); },
+                onEnterBack: function(){ setChrome(true); },
+                onLeaveBack: function(){ setChrome(true); }
+            });
+
+            /* Skip: same easing language as the snap, so it reads as one system */
+            if(skip) skip.addEventListener('click', function(){
+                gsap.to(window, {duration:1.4, ease:'power3.inOut', scrollTo:{y:'#home', autoKill:true}});
+            });
+
+            /* ---- 3. SOFT SNAP for the existing site ---------------------
+               Deliberately gentle: it only completes a snap you were already
+               nearly making. Outside the tolerance it returns the raw progress,
+               so long sections, the footer and the embeds scroll freely. */
+            if(SOFT_SNAP){
+                var SECTIONS = ['#home','#mandates','#history','#accolades','#testimonials','#creative','#insights','#discipline'];
+                ScrollTrigger.create({
+                    id:'soft-snap',
+                    start: function(){ return pro.offsetTop + pro.offsetHeight; },
+                    end: 'max',
+                    snap:{
+                        snapTo: function(p, self){
+                            /* never fight a modal or the mobile menu */
+                            if(document.body.style.overflow === 'hidden') return p;
+                            var s = self.start, span = self.end - self.start;
+                            if(span <= 0) return p;
+                            var y = s + p * span, best = null, bd = 1e9;
+                            SECTIONS.forEach(function(sel){
+                                var el = document.querySelector(sel);
+                                if(!el) return;
+                                var top = el.getBoundingClientRect().top + window.scrollY - 84; /* fixed header */
+                                var d = Math.abs(top - y);
+                                if(d < bd){ bd = d; best = top; }
+                            });
+                            if(best === null || bd > window.innerHeight * SNAP_TOLERANCE) return p;
+                            return gsap.utils.clamp(0, 1, (best - s) / span);
+                        },
+                        duration: {min:0.25, max:0.7},
+                        delay: 0.45,
+                        ease: 'power2.inOut',
+                        inertia: false
+                    }
+                });
+            }
+
+            /* ---- 4. Anchors via ScrollToPlugin --------------------------
+               Capture phase so it runs before the existing menu-close handler,
+               which still fires normally. Replaces the CSS scroll-behavior we
+               had to disable for snap to work. */
+            document.addEventListener('click', function(e){
+                var a = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+                if(!a) return;
+                var id = a.getAttribute('href');
+                if(!id || id.length < 2) return;
+                var el = document.querySelector(id);
+                if(!el) return;
+                e.preventDefault();
+                gsap.to(window, {
+                    duration: 1.2, ease:'power3.inOut', overwrite:true,
+                    scrollTo:{ y: el, offsetY: (id === '#home' ? 0 : 88), autoKill:true }
+                });
+            }, true);
+
+            /* ---- 5. Magnetic buttons ------------------------------------
+               quickTo = one pre-compiled tween per property, reused on every
+               pointermove. No per-frame tween allocation.
+               .gbtn is excluded on purpose: it owns its own bob keyframes. */
+            if(window.matchMedia('(pointer:fine)').matches){
+                gsap.utils.toArray('.btn-cyber, .btn, .li-btn, .li-cta, .seg button, .pro-skip').forEach(function(b){
+                    b.classList.add('mag');
+                    var qx = gsap.quickTo(b,'x',{duration:0.55, ease:'power3'});
+                    var qy = gsap.quickTo(b,'y',{duration:0.55, ease:'power3'});
+                    var qs = gsap.quickTo(b,'scale',{duration:0.45, ease:'power3'});
+                    b.addEventListener('pointermove', function(e){
+                        var r = b.getBoundingClientRect();
+                        qx((e.clientX - (r.left + r.width/2)) * 0.26);
+                        qy((e.clientY - (r.top + r.height/2)) * 0.32);
+                        qs(1.045);
+                    });
+                    b.addEventListener('pointerleave', function(){ qx(0); qy(0); qs(1); });
+                });
+            }
+
+            /* ---- 6. Micro-parallax on the existing site ------------------
+               Additive only: the .rv IntersectionObserver reveals still own
+               opacity/entry. This just stops hero art and headings sitting
+               perfectly still. */
+            if(!MOB){
+                gsap.to('.holo', {yPercent:-9, ease:'none',
+                    scrollTrigger:{trigger:'#home', start:'top top', end:'bottom top', scrub:0.8}});
+                gsap.utils.toArray('.h-big, .foot-hero h2').forEach(function(h){
+                    gsap.fromTo(h, {yPercent:14}, {yPercent:-6, ease:'none',
+                        scrollTrigger:{trigger:h, start:'top bottom', end:'bottom top', scrub:1}});
+                });
+            }
+
+            /* ---- 7. Re-measure ------------------------------------------
+               content-visibility:auto sections change height as they render,
+               and the pin injects ~300vh of spacer. Refresh ScrollTrigger, then
+               hand the legacy anchor cache its new numbers. */
+            function resync(){
+                ScrollTrigger.refresh();
+                if(window.__calcAnchors) window.__calcAnchors();
+            }
+            var rid;
+            if('ResizeObserver' in window){
+                new ResizeObserver(function(){
+                    clearTimeout(rid); rid = setTimeout(resync, 180);
+                }).observe(document.body);
+            }
+            window.addEventListener('load', function(){ setTimeout(resync, 260); });
+            setTimeout(resync, 400);
+        }
+    })();
+    </script>
     <script>
     /* =====================================================================
        DIGITAL CONSTELLATION — GPU particle morph engine
@@ -1303,16 +1840,13 @@
         var RM  = !!window.__RM;
         var MOB = window.matchMedia('(max-width:768px)').matches;
         var N   = MOB ? 14000 : 28000;
-
         var renderer = new THREE.WebGLRenderer({canvas:cv, alpha:true, antialias:false, powerPreference:'high-performance'});
         renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, MOB?1.5:2));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setClearColor(0x000000, 0);
-
         var scene = new THREE.Scene();
         var cam = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 300);
         cam.position.set(0,0,42);
-
         /* ---- Bake the five formations ---- */
         var p0=new Float32Array(N*3), p1=new Float32Array(N*3), p2=new Float32Array(N*3),
             p3=new Float32Array(N*3), p4=new Float32Array(N*3),
@@ -1360,7 +1894,6 @@
             sr=Math.random();
             misc[i*2+1]= sr<.03 ? 3.4+Math.random()*2.4 : .8+Math.random()*1.7;
         }
-
         var g=new THREE.BufferGeometry();
         g.setAttribute('position', new THREE.BufferAttribute(p0,3));
         g.setAttribute('aP1', new THREE.BufferAttribute(p1,3));
@@ -1369,7 +1902,6 @@
         g.setAttribute('aP4', new THREE.BufferAttribute(p4,3));
         g.setAttribute('aColor', new THREE.BufferAttribute(col,3));
         g.setAttribute('aMisc', new THREE.BufferAttribute(misc,2));
-
         var U={
             uTime:{value:0}, uProg:{value:0},
             uPR:{value:renderer.getPixelRatio()},
@@ -1378,7 +1910,6 @@
             uMouseF:{value:(MOB||RM)?0:4.5},
             uOpacity:{value:0}
         };
-
         var VS = [
         'attribute vec3 aP1;','attribute vec3 aP2;','attribute vec3 aP3;','attribute vec3 aP4;',
         'attribute vec3 aColor;','attribute vec2 aMisc;',
@@ -1452,7 +1983,6 @@
         '  vC = aColor;',
         '}'
         ].join('\n');
-
         var FS = [
         'precision mediump float;',
         'varying vec3 vC;',
@@ -1465,7 +1995,6 @@
         '  gl_FragColor = vec4(vC, min(a, 1.0) * uOpacity * 0.5);',
         '}'
         ].join('\n');
-
         var mat = new THREE.ShaderMaterial({
             uniforms:U, vertexShader:VS, fragmentShader:FS,
             transparent:true, depthWrite:false, depthTest:false,
@@ -1474,7 +2003,6 @@
         var pts = new THREE.Points(g, mat);
         pts.frustumCulled = false;
         scene.add(pts);
-
         /* ---- Interaction + loop: uniforms only ---- */
         var mx=0,my=0,tx=0,ty=0,pr=0,t0=performance.now();
         if(!MOB && !RM){
@@ -1489,7 +2017,6 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             if(RM) draw();
         }, {passive:true});
-
         function draw(){
             var tt=(performance.now()-t0)/1000;
             U.uTime.value = RM ? 3 : tt;
@@ -1505,7 +2032,6 @@
             U.uOpacity.value = RM ? 1 : Math.min(1, tt/1.4);
             renderer.render(scene, cam);
         }
-
         cv.classList.add('on');
         if(RM){
             /* Static constellation: render only when the morph state changes */
