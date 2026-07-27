@@ -488,44 +488,168 @@
            grain and corner brackets grade the prologue too — one connected world. */
         #prologue{position:relative;z-index:4;background:var(--pro-black)}
         .pro-stage{position:relative;width:100%;height:100svh;overflow:hidden;background:var(--pro-black)}
-        .pro-scene{position:absolute;inset:0;opacity:0;will-change:opacity}
+        .pro-scene{position:absolute;inset:0;opacity:0}
         .pro-scene:first-of-type{opacity:1}
-        .pro-plate{position:absolute;inset:0;overflow:hidden}
+        /* isolation:isolate keeps every screen-blended plane inside its own
+           scene, so a scene crossfading out never blends into the one below. */
+        .pro-plate{position:absolute;inset:0;overflow:hidden;isolation:isolate}
 
-        /* Layer 1 — BACKGROUND (slowest) */
-        .pro-bg{position:absolute;inset:-8%;background-size:cover;background-position:center;
-            transform:scale(1.15);will-change:transform,filter}
-        /* Layer 2/4 — FOG (drifts continuously, overlaps between scenes)
-           .pro-fogw is deliberately transform-free and has no will-change: any
-           stacking context here would trap the child's mix-blend-mode inside an
-           empty group instead of letting it blend with the plate below. */
+        /* =====================================================================
+           DEPTH RIG
+           Every parallax plane is three nested boxes, and each level has exactly
+           one owner, so the three motion systems never fight over one matrix:
+
+             .pl    CAMERA  — pointer / scroll-velocity parallax   (plain style
+                              writes from one rAF loop)
+             .pw    DOLLY   — the scroll-scrubbed push through the scene (GSAP
+                              master timeline)
+             leaf   AMBIENT — perpetual drift, breathing, twinkle    (GSAP
+                              repeat:-1 tweens)
+
+           A plane carries data-d = its depth, 0 (against the lens) .. 1 (at
+           infinity). The engine derives one parallax factor f = 1 - d from it
+           and uses that SAME f for both the pointer camera and the scroll
+           dolly, so the two agree geometrically instead of being hand-tuned
+           against each other. That single fact is what makes the stack read as
+           a volume you are moving through rather than a stack of images.
+
+           Blend modes live on .pl — the OUTERMOST transformed box. A transform
+           isolates its descendants' blend modes, but never its own, so the leaf
+           is composited into the group first and the whole group is then
+           screen-blended against the plate.
+           ===================================================================== */
+        .pl{position:absolute;inset:0;transform:translate3d(0,0,0)}
+        .pw{position:absolute;inset:0}
+        .pl,.pw{pointer-events:none}
+
+        /* Layer 1 — BACKGROUND. Furthest plane, so it barely moves. */
+        .pro-bg{position:absolute;inset:-9%;background-size:cover;background-position:center;
+            will-change:transform}
+        .pl-bg{will-change:transform}
+        .pw-bg{will-change:transform,filter}          /* rack focus lives here */
+
+        /* Layer 2 — AERIAL PERSPECTIVE.
+           The strongest painterly depth cue there is: distance loses contrast
+           and takes on the colour of the air. A warm wash pinned to each
+           scene's own horizon line lifts the far blacks toward the sky while
+           the near ground keeps its full contrast, which is exactly what a
+           single flat plate can never do.
+
+           Every gradient plane below is inset:0 rather than oversized, because
+           these gradients are positioned in PERCENTAGES of their own box: grow
+           the box and --lx/--hzy silently stop pointing at the light and the
+           horizon. They are only ever nudged a few px by the camera, and
+           .pro-grade + .pro-vig black out the outer edge, so nothing shows. */
+        .pro-aerial{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
+            background:
+                radial-gradient(66% 30% at var(--lx,50%) var(--hzy,30%),
+                    var(--haze,rgba(214,150,70,.38)), transparent 74%),
+                linear-gradient(180deg, transparent 0%,
+                    var(--haze2,rgba(198,150,92,.20)) var(--hzy,30%),
+                    transparent calc(var(--hzy,30%) + 26%))}
+
+        /* Layer 3 — VOLUMETRIC LIGHT. Beams fanned out of the scene's real
+           light source, plus the bloom around it. Both are screen-blended and
+           both sit on their own depth plane, so they slide against the plate
+           when the camera moves — light with a position in space. */
+        .pro-rays{position:absolute;inset:0;pointer-events:none;
+            mix-blend-mode:screen;opacity:.55}
+        .pro-rays i{position:absolute;left:var(--lx,50%);top:var(--ly,20%);
+            width:var(--rw,26px);height:180vh;transform-origin:50% 0;
+            transform:translateX(-50%) rotate(var(--ra,0deg));
+            background:linear-gradient(180deg,
+                rgba(255,228,168,.60),rgba(255,206,126,.20) 34%,rgba(255,190,100,.06) 62%,transparent 84%);
+            filter:blur(14px)}
+        .pro-glow{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
+            background:radial-gradient(circle at var(--lx,50%) var(--ly,20%),
+                rgba(255,222,158,.60),rgba(255,186,96,.20) 16%,transparent 42%)}
+
+        /* Layer 4 — FOG BANKS.
+           One puff asset, painted twice per plane at different scales and
+           anchors and mirrored on the near plane, so three planes never read as
+           three copies of the same cloud. Far fog is tight and sharp, near fog
+           is enormous and heavily defocused: that blur difference alone is a
+           depth-of-field cue the eye reads instantly. */
         .pro-fogw{position:absolute;inset:0}
-        .pro-fog{position:absolute;inset:-28% -38%;background-size:cover;background-position:center;
-            mix-blend-mode:screen;opacity:.24;filter:blur(9px);will-change:transform,opacity}
-        .pro-fog.b{inset:-45% -22%;opacity:.13;filter:blur(26px)}
-        /* Layer 3 — FOREGROUND (moves faster than the background)
-           The blend lives on the WRAPPER, not the leaf: the wrapper is the
-           scrubbed element, so its transform would otherwise isolate the leaf's
-           blend mode. Blending on the transformed element itself is correct —
-           it still composites against .pro-plate. */
-        .pro-fgw{position:absolute;inset:0;will-change:transform;
-            /* The supplied "Transparent PNG" files ship with a solid grey matte.
-               screen-blend + a radial falloff mask dissolves that matte into the
-               plate and reads as a light bloom around the subject.
-               After you run them through background removal, add class
-               "pro-alpha" to <body> and this whole hack switches off. */
-            mix-blend-mode:screen;filter:contrast(1.3) brightness(1.03);
-            -webkit-mask-image:radial-gradient(closest-side at 50% 52%,#000 40%,rgba(0,0,0,.5) 66%,transparent 86%);
-                    mask-image:radial-gradient(closest-side at 50% 52%,#000 40%,rgba(0,0,0,.5) 66%,transparent 86%)}
-        .pro-fg{position:absolute;inset:2% 0 0;background-size:contain;background-repeat:no-repeat;
-            background-position:center;will-change:transform,opacity}
-        body.pro-alpha .pro-fgw{mix-blend-mode:normal;filter:none;
-            -webkit-mask-image:none;mask-image:none}
-        /* Layer 5 — colour grade + vignette */
+        .pro-fog{position:absolute;inset:-30% -40%;background-repeat:no-repeat,no-repeat;
+            will-change:transform,opacity}
+        .fog-far  .pro-fog{background-size:82% auto,124% auto;
+            background-position:14% 64%,86% 44%;opacity:.19;filter:blur(10px)}
+        .fog-mid  .pro-fog{background-size:118% auto,156% auto;
+            background-position:78% 72%,8% 52%;opacity:.21;filter:blur(20px);transform:scaleX(-1)}
+        /* The near bank is the single most expensive surface in the build: a
+           blur is O(area), and this one is ~1.8x the viewport in both axes.
+           Inset and radius are both kept to the smallest values that still
+           read as "out of focus", because the alternative is a 6 megapixel
+           gaussian every frame on the one layer nobody looks at directly. */
+        .fog-near .pro-fog{inset:-34% -40%;background-size:172% auto,210% auto;
+            background-position:24% 86%,92% 64%;opacity:.12;filter:blur(32px)}
+        .fog-far,.fog-mid,.fog-near{mix-blend-mode:screen}
+
+        /* Layer 5 — CONTACT SHADOW. Grounds the subject to the plate it stands
+           on. Sits behind the subject, so it reads as the subject's own shadow
+           rather than a smudge over it. Off by default; scenes that need it
+           set --cbo. */
+        .pro-contact{position:absolute;left:0;right:0;bottom:var(--cby,0%);height:22%;
+            pointer-events:none;opacity:var(--cbo,0);
+            background:radial-gradient(46% 100% at var(--cbx,50%) 100%,rgba(0,0,0,.62),transparent 68%)}
+
+        /* Layer 6 — SUBJECT.
+           These plates ship with a real alpha channel (70-90% of every file is
+           fully transparent), so they are composited normally: an opaque cutout
+           standing IN FRONT of the plate. The V4 build screen-blended them
+           behind a radial matte-dissolve mask, which is the correct treatment
+           for a grey-matted cutout and the wrong one for this art — screen maps
+           black to transparent, so it erased the dark traveler entirely and
+           turned the gold monolith into a ghost. Removing it is what restores
+           the near plane. */
+        .pro-fgw{position:absolute;inset:0}
+        /* --fgs/--fgp frame the subject per scene. Dropped in 1:1 over the
+           plate the subject is roughly the height of the frame, which reads as
+           "standing at the lens" and buries the type. Sized down and pushed
+           right of centre, the same cutout reads as a figure a long way into a
+           very large landscape — and scale contrast against a distant horizon
+           IS depth. It also clears the left third for the copy. */
+        .pro-fg{position:absolute;inset:-9%;background-repeat:no-repeat;
+            background-size:var(--fgs,cover);background-position:var(--fgp,center);
+            will-change:transform,opacity}
+        /* Rim light: a soft warm bloom pinned to the subject, keyed to each
+           scene's light direction. Separates the silhouette from the plate the
+           way a practical backlight would. */
+        .pro-rim{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
+            opacity:var(--rimo,.5);
+            background:radial-gradient(30% 26% at var(--rimx,50%) var(--rimy,52%),
+                rgba(255,214,150,.34),transparent 70%)}
+
+        /* Layer 7 — DUST MOTES. Built by JS into three depth bands. Each band
+           gets ONE blur on its wrapper rather than a filter per mote, so a
+           60-particle volume costs three composited surfaces, not sixty. */
+        .pro-motes{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen}
+        .pro-motes i{position:absolute;border-radius:50%;opacity:0;
+            background:radial-gradient(circle,rgba(255,240,205,.95),rgba(255,206,128,.34) 44%,transparent 70%);
+            animation:moteFly var(--t,26s) linear var(--dl,0s) infinite}
+        .mb-far{filter:none;opacity:.62}
+        .mb-mid{filter:blur(1.6px);opacity:.78}
+        .mb-near{filter:blur(4px);opacity:.72}
+        @keyframes moteFly{
+            0%  {transform:translate3d(0,0,0) scale(1);opacity:0}
+            12% {opacity:var(--o,.7)}
+            88% {opacity:var(--o,.7)}
+            100%{transform:translate3d(var(--dx,0px),var(--dy,-110vh),0) scale(var(--s2,1));opacity:0}
+        }
+
+        /* Layer 8 — colour grade + vignette (per scene, so each scene can carry
+           its own temperature) */
         .pro-grade{position:absolute;inset:0;pointer-events:none;
             background:
                 radial-gradient(120% 92% at 50% 46%,transparent 32%,rgba(5,5,5,.5) 76%,rgba(5,5,5,.94) 100%),
                 linear-gradient(180deg,rgba(5,5,5,.6),transparent 24%,transparent 58%,rgba(5,5,5,.9))}
+        .pro-tint{position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;
+            background:var(--tint,transparent);opacity:.34}
+        /* Stage-level vignette: sits above the dust so the motes are graded too,
+           and rides its own depth plane so it breathes with the camera. */
+        .pro-vig{position:absolute;inset:-4%;pointer-events:none;
+            background:radial-gradient(116% 88% at 50% 50%,transparent 42%,rgba(5,5,5,.62) 82%,rgba(5,5,5,.95) 100%)}
         /* Letterbox */
         .pro-bars{position:absolute;left:0;right:0;height:5.5vh;background:var(--pro-black);
             pointer-events:none;z-index:5;transform:scaleY(0);will-change:transform}
@@ -568,61 +692,113 @@
             background:linear-gradient(180deg,var(--gold),transparent);animation:proCue 2.6s ease-in-out infinite}
         @keyframes proCue{0%,100%{transform:scaleY(.3);opacity:.25}50%{transform:scaleY(1);opacity:1}}
 
-        /* ---- Scene backplates (kept out of the HTML so markup stays clean) ---- */
+        /* ---- Scene backplates + per-scene depth constants -------------------
+           --lx/--ly  the light source's real position inside that plate, read
+                      off the artwork. The rays, the bloom and the subject's rim
+                      light all key off it, so every scene is lit from where it
+                      is actually lit from.
+           --hzy      the horizon line, where the aerial haze is centred.
+           --haze     the colour of that scene's air.
+           --tint     soft-light grade over the finished frame.
+           --cb*      contact-shadow placement (--cbo 0 = no shadow, for the
+                      monolith, which floats).
+           --rim*     where the subject's rim light sits. ------------------- */
+        .pro-scene[data-scene="0"]{--lx:9%;--ly:12%;--hzy:19%;
+            --haze:rgba(219,155,74,.26);--haze2:rgba(186,138,84,.12);
+            --tint:linear-gradient(180deg,#6b4a1f,#241a2e);
+            --fgs:42% auto;--fgp:77% 89%;
+            --cbx:66%;--cby:4%;--cbo:.8;--rimx:66%;--rimy:74%;--rimo:.5}
+        .pro-scene[data-scene="1"]{--lx:66%;--ly:7%;--hzy:17%;
+            --haze:rgba(228,180,98,.28);--haze2:rgba(198,158,96,.13);
+            --tint:linear-gradient(180deg,#7a5a24,#1d2430);
+            --fgs:48% auto;--fgp:91% 48%;
+            --cbo:0;--rimx:72%;--rimy:46%;--rimo:.7}
+        .pro-scene[data-scene="2"]{--lx:56%;--ly:24%;--hzy:52%;
+            --haze:rgba(240,198,112,.30);--haze2:rgba(206,170,108,.13);
+            --tint:linear-gradient(180deg,#7d6128,#20232c);
+            --fgs:53% auto;--fgp:91% 72%;
+            --cbx:70%;--cby:6%;--cbo:.5;--rimx:70%;--rimy:54%;--rimo:.55}
         .pro-scene[data-scene="0"] .pro-bg{background-image:url("https://kalashnandal.co.in/Background%201%20%E2%80%94%20The%20Infinite%20Desert.webp")}
         .pro-scene[data-scene="0"] .pro-fg{background-image:url("https://kalashnandal.co.in/Foreground%203%20%E2%80%94%20Lone%20Traveler%20(Transparent%20PNG).webp")}
         .pro-scene[data-scene="1"] .pro-bg{background-image:url("https://kalashnandal.co.in/Background%202%20%E2%80%94%20Dark%20Mountain%20Valley.webp")}
         .pro-scene[data-scene="1"] .pro-fg{background-image:url("https://kalashnandal.co.in/Foreground%202%20%E2%80%94%20Floating%20Golden%20Monolith%20(Transparent%20PNG).webp")}
         .pro-scene[data-scene="2"] .pro-bg{background-image:url("https://kalashnandal.co.in/Background%203%20%E2%80%94%20Mirror%20Lake.webp")}
         .pro-scene[data-scene="2"] .pro-fg{background-image:url("https://kalashnandal.co.in/Foreground%201%20%E2%80%94%20Golden%20Tree%20(Transparent%20PNG).webp")}
-        .pro-fog{background-image:url("https://kalashnandal.co.in/Bonus%20Layer.webp")}
+        /* The fog puff is painted twice per plane — see the .fog-* rules. */
+        .pro-fog{background-image:url("https://kalashnandal.co.in/Bonus%20Layer.webp"),
+                                  url("https://kalashnandal.co.in/Bonus%20Layer.webp")}
 
         /* ---- Magnetic hover: gold glow on the existing button set ---- */
         .mag{will-change:transform}
         .btn-cyber:hover{box-shadow:0 0 0 1px rgba(212,175,55,.32),0 14px 46px -14px rgba(212,175,55,.6)}
         .li-cta:hover,.li-btn:hover{box-shadow:0 16px 46px -14px rgba(212,175,55,.45)}
 
-        /* ---- Prologue: mobile ---- */
+        /* ---- Prologue: mobile ----
+           The plates are 3:2 and a phone is ~1:2, so `cover` crops away most of
+           the width and the subject drifts off centre. Pulling the subject box
+           wider than the viewport and anchoring it low keeps it framed, and the
+           heavy near-fog blur is dropped because a 44px blur over a full screen
+           is the single most expensive thing in this scene. */
         @media(max-width:768px){
             .pro-copy h2{font-size:clamp(2.1rem,10.5vw,3.6rem);max-width:12ch}
             .pro-copy{padding:0 1.5rem}
-            .pro-fg{inset:12% -14% 0}
+            /* --fgs is a percentage of the LAYER'S WIDTH, so the desktop values
+               shrink to nothing on a 390px viewport. Phones also have no free
+               left column to protect — the copy spans the full width — so the
+               subject is re-framed low and centred, under the type. */
+            .pro-scene[data-scene="0"]{--fgs:104% auto;--fgp:56% 88%;--cbx:52%;--rimx:52%;--rimy:78%}
+            .pro-scene[data-scene="1"]{--fgs:112% auto;--fgp:60% 62%;--rimx:56%;--rimy:60%}
+            .pro-scene[data-scene="2"]{--fgs:112% auto;--fgp:56% 97%;--cbx:54%;--rimx:54%;--rimy:74%}
+            /* Portrait puts the copy straight over the brightest part of the
+               plate (the canopy in III, the sun in II), where white-on-gold
+               falls under contrast minimums. A scrim behind the type only —
+               not over the whole frame — keeps the art bright and the words
+               readable. */
+            .pro-grade{background:
+                radial-gradient(120% 92% at 50% 46%,transparent 32%,rgba(5,5,5,.5) 76%,rgba(5,5,5,.94) 100%),
+                linear-gradient(180deg,rgba(5,5,5,.72),rgba(5,5,5,.26) 22%,rgba(5,5,5,.62) 52%,rgba(5,5,5,.92))}
+            .fog-near .pro-fog{filter:blur(22px)}
+            .fog-mid  .pro-fog{filter:blur(12px)}
+            .pro-rays i{filter:blur(9px)}
             .pro-rail,.pro-skip{display:none}
             .pro-bars{height:3.5vh}
         }
         /* =====================================================================
            V4: CINEMATIC OUTRO — the last frame, after the footer
-           Reuses the prologue layer primitives (.pro-plate, .pro-fogw/.pro-fog,
-           .pro-fgw/.pro-fg, .pro-grade) rather than redeclaring them, so the
-           fog and the traveler behave identically to scene 01.
+           Runs on the same depth rig as the prologue (.pl / .pw / leaf, the
+           .fog-* planes, .pro-aerial, .pro-rays, .pro-motes), so the closing
+           frame is a volume you can move the camera through exactly like the
+           three opening scenes — not a still with a sun pasted on it.
            ===================================================================== */
-        .outro{position:relative;height:100vh;height:100svh;overflow:hidden;background:var(--pro-black)}
-        /* isolate = blend modes composite against this section only, never
-           against .bgfx / #gl sitting behind it */
+        .outro{position:relative;height:100vh;height:100svh;overflow:hidden;background:var(--pro-black);
+            --lx:70%;--ly:44%;--hzy:45%;
+            --haze:rgba(245,192,92,.42);--haze2:rgba(206,162,88,.20);
+            --tint:linear-gradient(180deg,#7d5c1e,#1b1d28);
+            --cbx:50%;--cby:2%;--cbo:.7;--rimx:50%;--rimy:74%;--rimo:.6}
         .outro .pro-plate{isolation:isolate}
         /* 1 — Final Background */
-        .out-bg{position:absolute;inset:-6%;background-position:center;background-size:cover;
-            background-repeat:no-repeat;transform:scale(1.08);will-change:transform;
+        .out-bg{position:absolute;inset:-8%;background-position:center;background-size:cover;
+            background-repeat:no-repeat;will-change:transform;
             background-image:url("https://kalashnandal.co.in/Final%20Background.webp")}
         /* 2 — Animated Sun */
-        .out-sun{position:absolute;inset:-10%;background-position:center;background-size:cover;
-            background-repeat:no-repeat;mix-blend-mode:screen;opacity:.55;will-change:transform,opacity;
+        .out-sun{position:absolute;inset:-12%;background-position:center;background-size:cover;
+            background-repeat:no-repeat;opacity:.55;will-change:transform,opacity;
             background-image:url("https://kalashnandal.co.in/Animated%20Sun%20Layer.webp")}
+        .pl-sun{mix-blend-mode:screen}
         /* 4 — Golden Dust. Double height + a background tiled exactly twice, so a
                linear yPercent 0 -> -50 loop is seamless with no gap and no
                background-position animation. */
         .out-dust{position:absolute;left:-10%;right:-10%;top:0;height:200%;
             background-image:url("https://kalashnandal.co.in/Golden%20Dust%20Layer.webp");
             background-size:100% 50%;background-repeat:repeat;background-position:center top;
-            mix-blend-mode:screen;opacity:.3;will-change:transform}
+            opacity:.3;will-change:transform}
         .out-dust.b{opacity:.16;filter:blur(3px)}
-        /* 5 — Lone Traveler: same wrapper/leaf split and same grey-matte handling
-               as the prologue, just re-anchored to the horizon and re-masked. */
-        .outro .pro-fgw{
-            -webkit-mask-image:radial-gradient(closest-side at 50% 76%,#000 36%,rgba(0,0,0,.45) 62%,transparent 84%);
-                    mask-image:radial-gradient(closest-side at 50% 76%,#000 36%,rgba(0,0,0,.45) 62%,transparent 84%)}
-        .out-traveler{inset:auto 0 -1% 0;height:58%;background-size:auto 100%;background-position:center bottom;
+        .pl-dust{mix-blend-mode:screen}
+        /* 5 — Lone Traveler. Composited normally against the plate, like every
+               other subject in this build: the file has a real alpha channel. */
+        .out-traveler{inset:auto 0 -1% 0;height:60%;background-size:auto 100%;background-position:center bottom;
             background-image:url("https://kalashnandal.co.in/Foreground%203%20%E2%80%94%20Lone%20Traveler%20(Transparent%20PNG).webp")}
+        .outro .pro-rim{inset:auto 0 0 0;height:60%}
         /* Text scrim — the sun sits behind centred copy, so the type needs a
            floor to read against. Grading only; not a content layer. */
         .out-scrim{position:absolute;inset:0;pointer-events:none;
@@ -645,12 +821,17 @@
         @media(max-width:768px){
             .out-h{font-size:clamp(2.4rem,13vw,3.6rem)}
             .out-body{font-size:.55rem;letter-spacing:.3em;line-height:2.4}
-            .out-traveler{height:46%}
+            .out-traveler{height:48%}
+            .outro .pro-rim{height:48%}
             .out-rule{margin:1.9rem auto}
         }
-        /* Reduced motion keeps the composition, drops the motion. */
+        /* Reduced motion keeps the composition and drops the motion. The outro
+           engine bails out on its own, but the dust motes are driven by a CSS
+           @keyframes rather than by GSAP, so they have to be stopped here — the
+           JS opt-out never reaches them. */
         @media(prefers-reduced-motion:reduce){
-            .out-bg{transform:none}
+            .pro-motes i{animation:none;opacity:var(--o,.7)}
+            .pro-cue i{animation:none}
         }
 
         /* ---- Prologue: opt-outs. Reduced motion and the JS kill switch both
@@ -750,15 +931,27 @@
     </div>
     <div id="prologue" role="presentation" aria-hidden="true">
         <div class="pro-stage">
-            <!-- ---- Scene 01 : The Infinite Desert + Lone Traveler ---- -->
+            <!-- ---- Scene 01 : The Infinite Desert + Lone Traveler ----
+                 Nine planes, back to front, each tagged with its depth. The
+                 engine reads data-d and derives everything else from it, so the
+                 z-order you see here IS the parallax order — nothing to keep in
+                 sync by hand. -->
             <div class="pro-scene" data-scene="0">
                 <div class="pro-plate">
-                    <div class="pro-bg"></div>
-                    <div class="pro-fogw"><div class="pro-fog"></div></div>
-                    <div class="pro-fgw"><div class="pro-fg"></div></div>
-                    <div class="pro-fogw"><div class="pro-fog b"></div></div>
+                    <div class="pl pl-bg" data-d=".95"><div class="pw pw-bg"><div class="pro-bg"></div></div></div>
+                    <div class="pl" data-d=".88"><div class="pw"><div class="pro-aerial"></div></div></div>
+                    <div class="pl fog-far" data-d=".72"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+                    <div class="pl" data-d=".66"><div class="pw"><div class="pro-rays"><i></i><i></i><i></i><i></i><i></i></div></div></div>
+                    <div class="pl" data-d=".60"><div class="pw"><div class="pro-glow"></div></div></div>
+                    <div class="pl" data-d=".46"><div class="pw"><div class="pro-contact"></div></div></div>
+                    <div class="pl" data-d=".44"><div class="pw pw-fg"><div class="pro-fgw"><div class="pro-fg"></div></div></div></div>
+                    <div class="pl" data-d=".42"><div class="pw"><div class="pro-rim"></div></div></div>
+                    <div class="pl fog-mid" data-d=".26"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+                    <div class="pl fog-near" data-d=".08"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+                    <div class="pro-tint"></div>
                     <div class="pro-grade"></div>
                 </div>
+                <div class="pl" data-d=".34" style="z-index:4">
                 <div class="pro-copy">
                     <p class="pc-eyebrow">I &mdash; The Approach</p>
                     <h2>
@@ -769,16 +962,25 @@
                     <span class="pc-rule"></span>
                     <p class="pc-sub">Digital Growth Strategist &bull; Mohali, India</p>
                 </div>
+                </div>
             </div>
             <!-- ---- Scene 02 : Dark Mountain Valley + Golden Monolith ---- -->
             <div class="pro-scene" data-scene="1">
                 <div class="pro-plate">
-                    <div class="pro-bg"></div>
-                    <div class="pro-fogw"><div class="pro-fog"></div></div>
-                    <div class="pro-fgw"><div class="pro-fg"></div></div>
-                    <div class="pro-fogw"><div class="pro-fog b"></div></div>
+                    <div class="pl pl-bg" data-d=".95"><div class="pw pw-bg"><div class="pro-bg"></div></div></div>
+                    <div class="pl" data-d=".88"><div class="pw"><div class="pro-aerial"></div></div></div>
+                    <div class="pl fog-far" data-d=".72"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+                    <div class="pl" data-d=".66"><div class="pw"><div class="pro-rays"><i></i><i></i><i></i><i></i><i></i></div></div></div>
+                    <div class="pl" data-d=".60"><div class="pw"><div class="pro-glow"></div></div></div>
+                    <div class="pl" data-d=".46"><div class="pw"><div class="pro-contact"></div></div></div>
+                    <div class="pl" data-d=".44"><div class="pw pw-fg"><div class="pro-fgw"><div class="pro-fg"></div></div></div></div>
+                    <div class="pl" data-d=".42"><div class="pw"><div class="pro-rim"></div></div></div>
+                    <div class="pl fog-mid" data-d=".26"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+                    <div class="pl fog-near" data-d=".08"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+                    <div class="pro-tint"></div>
                     <div class="pro-grade"></div>
                 </div>
+                <div class="pl" data-d=".34" style="z-index:4">
                 <div class="pro-copy">
                     <p class="pc-eyebrow">II &mdash; The Structure</p>
                     <h2>
@@ -788,16 +990,25 @@
                     <span class="pc-rule"></span>
                     <p class="pc-sub">Red-flag enterprise accounts &bull; stabilised, then scaled</p>
                 </div>
+                </div>
             </div>
             <!-- ---- Scene 03 : Mirror Lake + Golden Tree ---- -->
             <div class="pro-scene" data-scene="2">
                 <div class="pro-plate">
-                    <div class="pro-bg"></div>
-                    <div class="pro-fogw"><div class="pro-fog"></div></div>
-                    <div class="pro-fgw"><div class="pro-fg"></div></div>
-                    <div class="pro-fogw"><div class="pro-fog b"></div></div>
+                    <div class="pl pl-bg" data-d=".95"><div class="pw pw-bg"><div class="pro-bg"></div></div></div>
+                    <div class="pl" data-d=".88"><div class="pw"><div class="pro-aerial"></div></div></div>
+                    <div class="pl fog-far" data-d=".72"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+                    <div class="pl" data-d=".66"><div class="pw"><div class="pro-rays"><i></i><i></i><i></i><i></i><i></i></div></div></div>
+                    <div class="pl" data-d=".60"><div class="pw"><div class="pro-glow"></div></div></div>
+                    <div class="pl" data-d=".46"><div class="pw"><div class="pro-contact"></div></div></div>
+                    <div class="pl" data-d=".44"><div class="pw pw-fg"><div class="pro-fgw"><div class="pro-fg"></div></div></div></div>
+                    <div class="pl" data-d=".42"><div class="pw"><div class="pro-rim"></div></div></div>
+                    <div class="pl fog-mid" data-d=".26"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+                    <div class="pl fog-near" data-d=".08"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+                    <div class="pro-tint"></div>
                     <div class="pro-grade"></div>
                 </div>
+                <div class="pl" data-d=".34" style="z-index:4">
                 <div class="pro-copy">
                     <p class="pc-eyebrow">III &mdash; The Compound</p>
                     <h2>
@@ -807,12 +1018,26 @@
                     <span class="pc-rule"></span>
                     <p class="pc-sub">150+ campaigns &bull; United States &bull; Europe &bull; India</p>
                 </div>
+                </div>
             </div>
+            <!-- ---- Airborne dust, shared by every scene ----
+                 Deliberately NOT inside a scene: the dust is in the camera's
+                 volume, not in the geography, so it has to survive the
+                 crossfades. Keeping one copy at stage level also makes it three
+                 times cheaper than one set per scene. JS fills the bands. -->
+            <div class="pl" data-d=".30" style="z-index:5"><div class="pro-motes mb-far"></div></div>
+            <div class="pl" data-d=".16" style="z-index:5"><div class="pro-motes mb-mid"></div></div>
+            <div class="pl" data-d=".05" style="z-index:5"><div class="pro-motes mb-near"></div></div>
+            <div class="pl" data-d=".02" style="z-index:5"><div class="pro-vig"></div></div>
             <!-- ---- Fixed furniture inside the pinned stage ---- -->
             <div class="pro-bars t"></div>
             <div class="pro-bars b"></div>
             <div class="pro-rail"><i class="on"><b></b></i><i><b></b></i><i><b></b></i></div>
-            <button class="pro-skip" type="button">Skip intro <svg class="ic s14"><use href="#i-down"/></svg></button>
+            <!-- tabindex=-1: the whole prologue is aria-hidden, and a focusable
+                 control inside an aria-hidden subtree is a keyboard trap that
+                 screen readers cannot announce. Keyboard users skip the
+                 prologue by scrolling or by tabbing straight to the header. -->
+            <button class="pro-skip" type="button" tabindex="-1">Skip intro <svg class="ic s14"><use href="#i-down"/></svg></button>
             <div class="pro-cue"><i></i><span>Scroll</span></div>
         </div>
     </div>
@@ -1107,7 +1332,7 @@
                     </div>
                 </div>
                 <div class="card aw">
-                    <div class="im"><img src="https://kalashnandal.co.in/Consistent%20Performer%20-%202025.webp" alt="Consistent Performer Award 2025" width="1280" height="720" loading="lazy" decoding="async"></div>
+                    <div class="im"><img src="https://kalashnandal.co.in/Consistent%20Performer%20-%202025.webp" alt="Consistent Performer Award 2025" width="1600" height="1067" loading="lazy" decoding="async"></div>
                     <div class="bd tc-m">
                         <div class="hd">
                             <div class="icbox" style="margin:0"><svg class="ic s24"><use href="#i-award"/></svg></div>
@@ -1333,12 +1558,22 @@
          frame: no links, no buttons, no CTA, no icons, no form. -->
     <section id="outro" class="outro" aria-label="Closing frame">
         <div class="pro-plate" aria-hidden="true">
-            <div class="out-bg"></div>                                  <!-- 1 background   -->
-            <div class="out-sun"></div>                                 <!-- 2 sun          -->
-            <div class="pro-fogw"><div class="pro-fog"></div></div>     <!-- 3 fog (reused) -->
-            <div class="out-dust"></div>                                <!-- 4 dust         -->
-            <div class="out-dust b"></div>
-            <div class="pro-fgw"><div class="pro-fg out-traveler"></div></div>  <!-- 5 traveler (reused) -->
+            <div class="pl pl-bg" data-d=".95"><div class="pw pw-bg"><div class="out-bg"></div></div></div>          <!-- 1 background -->
+            <div class="pl" data-d=".88"><div class="pw"><div class="pro-aerial"></div></div></div>                  <!-- 2 aerial haze -->
+            <div class="pl pl-sun" data-d=".82"><div class="pw"><div class="out-sun"></div></div></div>              <!-- 3 sun -->
+            <div class="pl fog-far" data-d=".70"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+            <div class="pl" data-d=".64"><div class="pw"><div class="pro-rays"><i></i><i></i><i></i><i></i><i></i></div></div></div>
+            <div class="pl" data-d=".58"><div class="pw"><div class="pro-glow"></div></div></div>
+            <div class="pl pl-dust" data-d=".50"><div class="pw"><div class="out-dust"></div></div></div>            <!-- 4 dust -->
+            <div class="pl" data-d=".46"><div class="pw"><div class="pro-contact"></div></div></div>
+            <div class="pl" data-d=".44"><div class="pw pw-fg"><div class="pro-fgw"><div class="pro-fg out-traveler"></div></div></div></div>  <!-- 5 traveler -->
+            <div class="pl" data-d=".42"><div class="pw"><div class="pro-rim"></div></div></div>
+            <div class="pl fog-mid" data-d=".26"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+            <div class="pl pl-dust" data-d=".18"><div class="pw"><div class="out-dust b"></div></div></div>
+            <div class="pl fog-near" data-d=".08"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
+            <div class="pl" data-d=".14" style="z-index:2"><div class="pro-motes mb-mid"></div></div>
+            <div class="pl" data-d=".05" style="z-index:2"><div class="pro-motes mb-near"></div></div>
+            <div class="pro-tint"></div>
             <div class="pro-grade"></div>
             <div class="out-scrim"></div>
         </div>
@@ -1529,6 +1764,190 @@
     </script>
     <script>
     /* =====================================================================
+       V5 — DEPTH RIG
+       The one piece of shared machinery under both the prologue and the outro.
+
+       Every parallax plane in the page is a `.pl[data-d]` box. data-d is the
+       plane's depth: 0 sits against the lens, 1 sits at infinity. From that one
+       number the rig derives a parallax factor f = 1 - d and moves the plane by
+       f x amplitude. Nothing else in the build hand-tunes a parallax offset —
+       the scroll dolly in the prologue engine reads the SAME f off the SAME
+       attribute, which is why the pointer camera and the scroll camera agree
+       with each other instead of sliding apart.
+
+       Two input sources, whichever the device has:
+         · pointer  — where the cursor sits in the viewport (fine pointers)
+         · scroll   — scroll velocity, decayed (touch, where there is no cursor)
+       Both land in the same [-1,1] pair, so the rest of the rig is identical.
+
+       Writes go straight to style.transform on the .pl box in one rAF loop, not
+       through GSAP. That keeps the whole camera off GSAP's property ledger, so
+       the dolly (which owns .pw) and the ambient loops (which own the leaf) can
+       never collide with it. The loop parks itself when nothing is moving.
+       ===================================================================== */
+    window.__DEPTH = (function(){
+        'use strict';
+        var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var FINE = window.matchMedia('(pointer:fine)').matches;
+        var groups = [];                 /* {planes:[{el,f}], live:bool} */
+        var tx = 0, ty = 0;              /* target, [-1,1]               */
+        var cx = 0, cy = 0;              /* current, eased               */
+        /* px travelled by a plane at f = 1, i.e. the full sweep of the nearest
+           possible plane. Scaled to the viewport so the effect keeps its
+           proportion on a laptop and on a 34" monitor, and capped so it never
+           becomes a lurch. */
+        var AMPX = Math.min(46, Math.max(22, window.innerWidth  * 0.030));
+        var AMPY = Math.min(28, Math.max(14, window.innerHeight * 0.026));
+        var running = false, bound = false;
+        var sv = 0, lastY = window.scrollY;   /* scroll velocity, for touch */
+
+        /* Follow rate. Low enough that the camera has visible mass — it arrives
+           a beat after the cursor rather than being glued to it, which is what
+           makes it read as a camera and not as a hover effect. */
+        function ease(){ return 0.10; }
+
+        window.addEventListener('resize', function(){
+            AMPX = Math.min(46, Math.max(22, window.innerWidth  * 0.030));
+            AMPY = Math.min(28, Math.max(14, window.innerHeight * 0.026));
+        }, {passive:true});
+
+        function frame(){
+            var dx = tx - cx, dy = ty - cy;
+            cx += dx * ease();
+            cy += dy * ease();
+            sv *= 0.92;
+            if(!FINE) ty = Math.max(-1, Math.min(1, sv));
+
+            var i, j, g, p, n = 0;
+            for(i = 0; i < groups.length; i++){
+                g = groups[i];
+                if(!g.live) continue;
+                for(j = 0; j < g.planes.length; j++){
+                    p = g.planes[j];
+                    p.el.style.transform =
+                        'translate3d(' + (cx * AMPX * p.f).toFixed(2) + 'px,' +
+                                         (cy * AMPY * p.f).toFixed(2) + 'px,0)';
+                    n++;
+                }
+            }
+            /* Park the loop once the camera has settled and there is no live
+               plane left to move — an idle prologue should cost nothing. */
+            if(n === 0 || (Math.abs(dx) < 0.0006 && Math.abs(dy) < 0.0006 && Math.abs(sv) < 0.0006)){
+                running = false;
+                return;
+            }
+            requestAnimationFrame(frame);
+        }
+        function wake(){
+            if(running || RM) return;
+            running = true;
+            requestAnimationFrame(frame);
+        }
+        function bind(){
+            if(bound) return; bound = true;
+            if(FINE){
+                window.addEventListener('pointermove', function(e){
+                    tx = (e.clientX / window.innerWidth)  * 2 - 1;
+                    ty = (e.clientY / window.innerHeight) * 2 - 1;
+                    wake();
+                }, {passive:true});
+                /* Pointer out of the window = recentre, so the frame never
+                   stays parked at an extreme after the cursor leaves. */
+                window.addEventListener('pointerout', function(e){
+                    if(e.relatedTarget) return;
+                    tx = ty = 0; wake();
+                }, {passive:true});
+            }else{
+                window.addEventListener('scroll', function(){
+                    var y = window.scrollY;
+                    sv = Math.max(-1, Math.min(1, sv + (y - lastY) / 220));
+                    lastY = y;
+                    wake();
+                }, {passive:true});
+            }
+        }
+
+        return {
+            /* Register every .pl[data-d] under `root` as one switchable group.
+               Returns a handle so a section can stop being driven while it is
+               off screen. */
+            add: function(root){
+                var planes = [];
+                Array.prototype.forEach.call(root.querySelectorAll('.pl[data-d]'), function(el){
+                    var d = parseFloat(el.getAttribute('data-d'));
+                    if(isNaN(d)) return;
+                    planes.push({ el: el, f: 1 - Math.max(0, Math.min(1, d)) });
+                });
+                var g = { planes: planes, live: true };
+                groups.push(g);
+                bind(); wake();
+                return {
+                    live: function(v){ g.live = !!v; if(v) wake(); },
+                    /* f for a plane, so callers can key other motion (the scroll
+                       dolly, ambient amplitudes) off the same depth number. */
+                    factor: function(el){
+                        for(var i=0;i<planes.length;i++) if(planes[i].el === el) return planes[i].f;
+                        var d = parseFloat(el && el.getAttribute && el.getAttribute('data-d'));
+                        return isNaN(d) ? 0 : 1 - d;
+                    }
+                };
+            },
+            /* Depth factor straight off an element or a raw depth. */
+            f: function(d){ return 1 - Math.max(0, Math.min(1, d)); },
+            reduced: RM,
+
+            /* ---- Dust motes -------------------------------------------------
+               Built here rather than shipped as markup: 50-odd <i> elements of
+               pure decoration have no business in the HTML payload, and the
+               randomised depth spread is the entire point of them.
+               Each band gets ONE blur, on its wrapper, so a 50-particle volume
+               costs three composited surfaces instead of fifty. */
+            motes: function(host, n, opt){
+                if(RM || !host) return;
+                opt = opt || {};
+                var frag = document.createDocumentFragment();
+                var minS = opt.min || 1.4, maxS = opt.max || 3.2;
+                for(var i = 0; i < n; i++){
+                    var m  = document.createElement('i');
+                    var sz = minS + Math.random() * (maxS - minS);
+                    var st = m.style;
+                    st.width  = sz.toFixed(2) + 'px';
+                    st.height = sz.toFixed(2) + 'px';
+                    st.left   = (Math.random() * 104 - 2).toFixed(2) + '%';
+                    /* Start below the frame and drift up through it. The spread
+                       past 100% is what stops every mote entering at once. */
+                    st.top    = (100 + Math.random() * 42).toFixed(2) + '%';
+                    st.setProperty('--dx', (Math.random() * 84 - 42).toFixed(1) + 'px');
+                    st.setProperty('--dy', (-142 - Math.random() * 46).toFixed(0) + 'vh');
+                    st.setProperty('--s2', (0.6 + Math.random() * 0.9).toFixed(2));
+                    st.setProperty('--o',  ((opt.o || 0.7) * (0.45 + Math.random() * 0.55)).toFixed(2));
+                    st.setProperty('--t',  ((opt.t || 30) + Math.random() * (opt.tv || 24)).toFixed(1) + 's');
+                    st.setProperty('--dl', (-Math.random() * 60).toFixed(1) + 's');
+                    frag.appendChild(m);
+                }
+                host.appendChild(frag);
+            },
+
+            /* ---- God rays ---------------------------------------------------
+               Fans the five <i> beams out of the scene's light source. Kept in
+               JS so the spread is one line to retune rather than five CSS rules
+               repeated per scene. */
+            rays: function(root){
+                Array.prototype.forEach.call(root.querySelectorAll('.pro-rays'), function(box){
+                    Array.prototype.forEach.call(box.children, function(b, k, all){
+                        var n = all.length;
+                        var t = n > 1 ? (k / (n - 1)) * 2 - 1 : 0;   /* -1 .. 1 */
+                        b.style.setProperty('--ra', (t * 26 + (Math.random() * 5 - 2.5)).toFixed(1) + 'deg');
+                        b.style.setProperty('--rw', (16 + Math.abs(1 - Math.abs(t)) * 42).toFixed(0) + 'px');
+                        b.style.opacity = (0.45 + (1 - Math.abs(t)) * 0.55).toFixed(2);
+                    });
+                });
+            }
+        };
+    })();
+    </script>
+    <script>
+    /* =====================================================================
        V4 — CINEMATIC PROLOGUE ENGINE
        Additive module. It never touches V1-V3 state; it only reads the
        exposed hooks (window.__calcAnchors, window.__morph) and adds its own
@@ -1624,13 +2043,50 @@
             var tmSec  = document.getElementById('tm-sec');
             var N      = scenes.length;
             var NAMES  = ['APPROACH','STRUCTURE','COMPOUND'];
+            /* If the depth-rig script failed to parse, the film still plays —
+               it just plays flat. A missing decoration must never take the
+               scroll experience down with it. */
+            var DEPTH  = window.__DEPTH || {
+                f: function(d){ return 1 - d; }, rays: function(){}, motes: function(){},
+                add: function(){ return { live:function(){}, factor:function(){ return 0; } }; }
+            };
 
+            /* ---- 0. Populate the depth rig ------------------------------
+               Rays and dust are generated rather than authored: they are pure
+               decoration, and the randomised spread across depth bands is the
+               entire point of them. Mote counts are cut hard on phones, where
+               every extra composited surface is felt. */
+            DEPTH.rays(pro);
+            var farBand  = pro.querySelector('.mb-far');
+            var midBand  = pro.querySelector('.mb-mid');
+            var nearBand = pro.querySelector('.mb-near');
+            DEPTH.motes(farBand,  MOB ? 10 : 24, {min:1.0, max:2.0, o:0.55, t:46, tv:26});
+            DEPTH.motes(midBand,  MOB ?  7 : 16, {min:2.0, max:3.6, o:0.70, t:34, tv:20});
+            DEPTH.motes(nearBand, MOB ?  4 : 10, {min:4.0, max:8.0, o:0.55, t:22, tv:14});
+            /* The camera only drives the prologue while the prologue is on
+               screen; past the handoff those writes would be wasted work. */
+            var cam = DEPTH.add(pro);
+
+            /* Every .pw dolly box in a scene, tagged with the depth factor of
+               the .pl it lives inside. The scroll dolly below multiplies its
+               travel by that same f, so the scroll camera and the pointer
+               camera describe one consistent space. */
+            function dollies(sc){
+                return gsap.utils.toArray(sc.querySelectorAll('.pl[data-d] > .pw')).map(function(pw){
+                    return { el: pw, f: DEPTH.f(parseFloat(pw.parentNode.getAttribute('data-d'))) };
+                });
+            }
             function parts(sc){
                 return {
+                    dolly: dollies(sc),
+                    bgw : sc.querySelector('.pw-bg'),
                     bg  : sc.querySelector('.pro-bg'),
                     fgw : sc.querySelector('.pro-fgw'),
                     fg  : sc.querySelector('.pro-fg'),
                     fogs: sc.querySelectorAll('.pro-fog'),
+                    glow: sc.querySelector('.pro-glow'),
+                    rays: sc.querySelector('.pro-rays'),
+                    rim : sc.querySelector('.pro-rim'),
                     copy: sc.querySelector('.pro-copy'),
                     eb  : sc.querySelector('.pc-eyebrow'),
                     words: sc.querySelectorAll('.w'),
@@ -1638,15 +2094,37 @@
                     sub : sc.querySelector('.pc-sub')
                 };
             }
+            /* The dolly push for one plane, at f = its depth factor.
+               DEPTH_TRAVEL is how far the nearest possible plane (f = 1) moves
+               through a full transition; everything else is a fraction of it.
+               A near plane sweeping 15% of the viewport while the background
+               creeps 0.75% is the whole illusion. */
+            /* "50% 20%" for a scene, read off its own --lx/--ly. */
+            function lightOrigin(el){
+                var cs = getComputedStyle(el);
+                var x  = (cs.getPropertyValue('--lx') || '50%').trim();
+                var y  = (cs.getPropertyValue('--ly') || '20%').trim();
+                return x + ' ' + y;
+            }
+            var DEPTH_TRAVEL = 15;      /* yPercent at f = 1 */
+            var DEPTH_PUSH   = 0.30;    /* extra scale at f = 1 */
+            function outY(f){ return -DEPTH_TRAVEL * f; }
+            function outS(f){ return 1 + DEPTH_PUSH * f; }
+            function inY(f) { return  DEPTH_TRAVEL * f * 0.62; }
+            function inS(f) { return 1 + DEPTH_PUSH * f * 0.78; }
+
+            var P = scenes.map(parts);
 
             /* ---- 2a. Resting state -------------------------------------- */
             scenes.forEach(function(sc,i){
-                var p = parts(sc);
+                var p = P[i];
                 var first = (i === 0);
-                gsap.set(sc,      {autoAlpha: first ? 1 : 0});
-                gsap.set(p.bg,    {scale: first ? 1 : 1.18, yPercent: 0, filter:'blur(0px)'});
-                gsap.set(p.fgw,   {yPercent: first ? 0 : 16, scale: first ? 1 : 1.14});
-                gsap.set(p.copy,  {yPercent: 0});
+                gsap.set(sc, {autoAlpha: first ? 1 : 0});
+                p.dolly.forEach(function(d){
+                    gsap.set(d.el, first ? {yPercent:0, scale:1}
+                                         : {yPercent:inY(d.f), scale:inS(d.f)});
+                });
+                gsap.set(p.bgw, {filter:'blur(0px)'});
                 if(!first){
                     gsap.set([p.eb, p.sub], {autoAlpha:0, yPercent:110});
                     gsap.set(p.words,       {autoAlpha:0, yPercent:112});
@@ -1655,38 +2133,96 @@
             });
 
             /* ---- 2b. Ambient loops — independent of scroll ---------------
-               Foreground breathes on a sine; fog drifts continuously and
-               overlaps across the crossfades. These run on inner elements so
-               they never collide with the scrubbed transforms on the wrappers. */
+               Everything here runs on the LEAF of each plane, never on .pw
+               (owned by the dolly) or .pl (owned by the pointer camera).
+
+               Amplitudes are scaled by depth as well: near fog crawls a long
+               way across the frame, the far bank barely stirs. Air at distance
+               is nearly still — that difference is a depth cue in its own
+               right, and the reason the three fog banks never read as three
+               copies of one texture drifting in lockstep. */
             scenes.forEach(function(sc,i){
-                var p = parts(sc);
-                gsap.to(p.fg, {yPercent:-2.6, duration:6.5+i*0.9, ease:'sine.inOut', repeat:-1, yoyo:true});
-                gsap.to(p.fg, {scale:1.035,   duration:9.5+i*1.2, ease:'sine.inOut', repeat:-1, yoyo:true});
+                var p = P[i];
+                /* Subject: a slow breath, plus a drift keyed to its own depth. */
+                gsap.to(p.fg, {yPercent:-1.8, duration:6.5+i*0.9, ease:'sine.inOut', repeat:-1, yoyo:true});
+                gsap.to(p.fg, {scale:1.028,   duration:9.5+i*1.2, ease:'sine.inOut', repeat:-1, yoyo:true});
+
+                /* Fog: each bank gets its own period so they never sync up. */
                 Array.prototype.forEach.call(p.fogs, function(f,k){
-                    gsap.set(f, {xPercent: k ? 11 : -9, scale: 1});
-                    gsap.to(f,  {xPercent: k ? -11 : 9, duration: 40+k*15+i*4, ease:'sine.inOut', repeat:-1, yoyo:true});
-                    gsap.to(f,  {opacity : k ? 0.19 : 0.31, duration: 12+k*6, ease:'sine.inOut', repeat:-1, yoyo:true});
-                    gsap.to(f,  {scale: 1.2, duration: 28+k*10, ease:'sine.inOut', repeat:-1, yoyo:true});
+                    var host = f.closest ? f.closest('.pl[data-d]') : null;
+                    var ff   = host ? DEPTH.f(parseFloat(host.getAttribute('data-d'))) : 0.5;
+                    var amp  = 4 + ff * 10;   /* xPercent of the bank's own (oversized) box */
+                    var base = parseFloat(getComputedStyle(f).opacity) || 0.24;
+                    gsap.set(f, {xPercent:-amp});
+                    gsap.to(f, {xPercent: amp,          duration: 62 - ff*26 + i*5, ease:'sine.inOut', repeat:-1, yoyo:true});
+                    gsap.to(f, {yPercent: -3 - ff * 5,  duration: 44 - ff*14 + i*3, ease:'sine.inOut', repeat:-1, yoyo:true});
+                    gsap.to(f, {scale: 1 + 0.10 + ff*0.22, duration: 34 + k*9 + i*4, ease:'sine.inOut', repeat:-1, yoyo:true});
+                    gsap.to(f, {opacity: base * 1.32,   duration: 13 + k*5,         ease:'sine.inOut', repeat:-1, yoyo:true});
                 });
+
+                /* Light: the bloom and the beams breathe on two different
+                   periods, so the frame never pulses on a single beat. */
+                /* Both pulse and rotate about the LIGHT, not about the middle of
+                   the box, so the beams swing from their source the way real
+                   shafts do. --lx/--ly are read off the scene rather than
+                   hardcoded here, so retuning a scene means editing one CSS
+                   line and nothing else. */
+                var org = lightOrigin(sc);
+                if(p.glow){
+                    gsap.set(p.glow, {transformOrigin: org});
+                    gsap.to(p.glow, {opacity:0.62, duration:5.4+i*0.7, ease:'sine.inOut', repeat:-1, yoyo:true});
+                    gsap.to(p.glow, {scale:1.09,   duration:8.1+i*0.9, ease:'sine.inOut', repeat:-1, yoyo:true});
+                }
+                if(p.rays){
+                    gsap.set(p.rays, {transformOrigin: org});
+                    gsap.to(p.rays, {opacity:0.30,   duration:9.5+i*1.1, ease:'sine.inOut', repeat:-1, yoyo:true});
+                    gsap.to(p.rays, {rotation:1.6,   duration:23+i*3,    ease:'sine.inOut', repeat:-1, yoyo:true});
+                    gsap.to(p.rays, {scaleX:1.06,    duration:16+i*2,    ease:'sine.inOut', repeat:-1, yoyo:true});
+                }
+                if(p.rim) gsap.to(p.rim, {opacity:'*=0.62', duration:7.2+i*0.8, ease:'sine.inOut', repeat:-1, yoyo:true});
             });
 
-            /* ---- 2c. Opening title card (real time, not scrubbed) --------- */
-            var p0 = parts(scenes[0]);
+            /* ---- 2c. Opening title card (real time, not scrubbed) ---------
+               The camera finds its mark: the plate settles out of a slight
+               push-in while the background pulls into focus, then the type
+               reveals over it.
+
+               Deliberately staged on .pro-plate and .pw-bg — two boxes the
+               scrub timeline's per-plane dolly never touches. An opening move
+               on the .pw dolly boxes themselves would read better still, but
+               the scrub records its own start values the first time it renders,
+               so a real-time tween sitting on the same box at that moment gets
+               baked in as the scrub's origin and the transition drifts. Two
+               cameras, two boxes. */
+            var p0 = P[0];
+            var plate0 = scenes[0].querySelector('.pro-plate');
             var intro = [
                 gsap.to([barT,barB], {scaleY:1, duration:1.4, ease:'expo.out', delay:0.15}),
                 gsap.from(p0.eb,    {autoAlpha:0, yPercent:110, duration:1,    ease:'power3.out', delay:0.5}),
                 gsap.from(p0.words, {autoAlpha:0, yPercent:112, duration:1.15, ease:'power3.out', stagger:0.06, delay:0.6}),
                 gsap.from(p0.rule,  {scaleX:0,                  duration:1.2,  ease:'power3.out', delay:1.05}),
-                gsap.from(p0.sub,   {autoAlpha:0, yPercent:70,  duration:1,    ease:'power3.out', delay:1.15})
+                gsap.from(p0.sub,   {autoAlpha:0, yPercent:70,  duration:1,    ease:'power3.out', delay:1.15}),
+                gsap.from(plate0,   {scale:1.07, duration:2.6, ease:'expo.out'})
             ];
+            if(BLUR && p0.bgw){
+                intro.push(gsap.fromTo(p0.bgw, {filter:'blur(16px)'},
+                                               {filter:'blur(0px)', duration:2.0, ease:'power2.out'}));
+            }
             /* If the visitor scrolls during the title card, hand control to the
-               scrub immediately rather than letting the two fight over the
-               same properties. */
+               scrub immediately rather than letting the two fight over the same
+               properties. Bound to the raw input events rather than to the
+               master's onUpdate, so the intro is always fully resolved BEFORE
+               the scrub renders its first frame — the ordering the start-value
+               capture above depends on. The onUpdate guard stays as a backstop
+               for programmatic scrolls that fire no input event. */
             function killIntro(){
                 if(!intro) return;
                 intro.forEach(function(t){ if(t !== intro[0]) t.progress(1).kill(); });
                 intro = null;
             }
+            ['wheel','touchstart','keydown','scroll'].forEach(function(ev){
+                window.addEventListener(ev, killIntro, {once:true, passive:true});
+            });
 
             /* ---- 2d. Master scrub timeline -------------------------------
                One timeline unit per TRANSITION, so t=0,1,2 are exactly the
@@ -1699,41 +2235,89 @@
             /* One unit per TRANSITION, not per scene: t=0,1,2 are the three
                settled frames and the timeline simply ends on scene 3. */
             for(var i=0;i<N-1;i++){
+                (function(i){
                 var cur = scenes[i], nxt = scenes[i+1];
-                var c = parts(cur);
+                var c = P[i], n = P[i+1];
                 var tA = i + 0.30;      /* dwell ends, transition begins */
                 var tB = i + 0.92;      /* transition ends               */
 
-                /* Camera pushes forward through the outgoing scene.
-                   Foreground travels further than background = parallax. */
-                tl.to(c.bg,   {scale:1.13, yPercent:-3.5, ease:'power1.in', duration:tB-i}, i)
-                  .to(c.fgw,  {yPercent:-12, scale:1.11,  ease:'power1.in', duration:tB-i}, i)
-                  .to(c.copy, {yPercent:-10,               ease:'power1.in', duration:tB-i}, i);
+                /* THE DOLLY.
+                   Not "foreground moves a bit more than background" — every
+                   plane is pushed by its own depth factor, so an eleven-plane
+                   stack fans out exactly the way a real camera track would.
+                   The near fog sweeps 15% of the frame and swells 30%; the
+                   background creeps under 1% and swells 1.5%. That spread is
+                   what a single background image can never produce, no matter
+                   how it is scaled. */
+                c.dolly.forEach(function(d){
+                    tl.to(d.el, {yPercent: outY(d.f), scale: outS(d.f),
+                                 ease:'power1.in', duration: tB - i}, i);
+                });
+
+                /* RACK FOCUS. The plate defocuses as the camera leaves it while
+                   the subject stays sharp, then the incoming plate resolves out
+                   of blur. Depth of field is the one cue that says "these two
+                   things are at different distances" even when nothing moves.
+                   Desktop only — a full-screen blur is the most expensive thing
+                   in the scene and phones do not need convincing. */
+                if(BLUR && c.bgw){
+                    tl.to(c.bgw, {filter:'blur(9px)', ease:'power2.in', duration:(tB-i)*0.9}, i+(tB-i)*0.1);
+                }
 
                 /* Copy leaves first, staggered, so the frame empties before it cuts */
                 tl.to(c.words, {autoAlpha:0, yPercent:-105, ease:'power2.in', duration:(tB-tA)*0.5, stagger:0.02}, tA)
                   .to([c.eb, c.sub], {autoAlpha:0, yPercent:-70, ease:'power2.in', duration:(tB-tA)*0.45}, tA)
                   .to(c.rule, {scaleX:0, transformOrigin:'right', ease:'power2.in', duration:(tB-tA)*0.4}, tA);
 
-                var n = parts(nxt);
                 tl.to(cur, {autoAlpha:0, ease:'power2.inOut', duration:tB-tA}, tA)
-                  /* Incoming plate: scale 1.18 -> 1, blur resolves, slight Y settle */
-                  .fromTo(nxt, {autoAlpha:0}, {autoAlpha:1, ease:'power2.inOut', duration:tB-tA}, tA)
-                  .fromTo(n.bg,
-                          {scale:1.18, yPercent:4, filter: BLUR ? 'blur(16px)' : 'blur(0px)'},
-                          {scale:1, yPercent:0, filter:'blur(0px)', ease:'power2.out', duration:(i+1.06)-tA}, tA)
-                  .fromTo(n.fgw, {yPercent:16, scale:1.14}, {yPercent:0, scale:1, ease:'power2.out', duration:(i+1.06)-tA}, tA)
-                  /* Text enters clipped by .ln overflow — a true line reveal */
-                  .fromTo(n.eb,    {autoAlpha:0, yPercent:110}, {autoAlpha:1, yPercent:0, ease:'power3.out', duration:0.34}, tA+0.26)
+                  .fromTo(nxt, {autoAlpha:0}, {autoAlpha:1, ease:'power2.inOut', duration:tB-tA}, tA);
+
+                /* The incoming scene runs the same dolly in reverse: it starts
+                   pushed back into the frame and settles forward onto its mark.
+
+                   The settle lands on i+1 EXACTLY, not i+1.06. The snap points
+                   are gsap.utils.snap(1/(N-1)), i.e. timeline times 0,1,2 — so
+                   an incoming plate that finished settling at 1.06 was still
+                   6% short of its mark at the moment the snap declared it
+                   arrived, and the frame you actually rested on was a slightly
+                   pushed-in one. Ending on the integer makes the snap target
+                   and the settled frame the same frame. */
+                n.dolly.forEach(function(d){
+                    tl.fromTo(d.el, {yPercent: inY(d.f), scale: inS(d.f)},
+                                    {yPercent: 0, scale: 1, ease:'power2.out',
+                                     duration:(i+1)-tA}, tA);
+                });
+                if(n.bgw){
+                    tl.fromTo(n.bgw, {filter: BLUR ? 'blur(15px)' : 'blur(0px)'},
+                                     {filter:'blur(0px)', ease:'power2.out', duration:(i+1)-tA}, tA);
+                }
+
+                /* Text enters clipped by .ln overflow — a true line reveal */
+                tl.fromTo(n.eb,    {autoAlpha:0, yPercent:110}, {autoAlpha:1, yPercent:0, ease:'power3.out', duration:0.34}, tA+0.26)
                   .fromTo(n.words, {autoAlpha:0, yPercent:112}, {autoAlpha:1, yPercent:0, ease:'power3.out', duration:0.42, stagger:0.038}, tA+0.30)
                   .fromTo(n.rule,  {scaleX:0}, {scaleX:1, transformOrigin:'left', ease:'power3.out', duration:0.5}, tA+0.46)
                   .fromTo(n.sub,   {autoAlpha:0, yPercent:70}, {autoAlpha:1, yPercent:0, ease:'power3.out', duration:0.36}, tA+0.5);
+                })(i);
             }
 
-            /* ---- 2e. Pin + hard snap ------------------------------------ */
-            function setChrome(inPrologue){
-                document.body.classList.toggle('pro-active', inPrologue);
+            /* ---- 2e. Pin + hard snap ------------------------------------
+               Chrome visibility has exactly ONE owner: scroll position. The V4
+               build let the master trigger and the handoff trigger each call
+               setChrome() from their own onUpdate, and when a fast scroll fired
+               both in the same frame the header flickered on the way out
+               depending on which trigger happened to run last. Deriving it from
+               scrollY instead makes the answer the same no matter who asks. */
+            function syncChrome(){
+                if(!pro) return;
+                var handoffMid = pro.offsetTop + pro.offsetHeight - window.innerHeight * 0.5;
+                var inside = window.scrollY < handoffMid;
+                document.body.classList.toggle('pro-active', inside);
+                /* The camera only writes while the prologue is actually on
+                   screen — past the handoff those transform writes are wasted. */
+                if(cam) cam.live(window.scrollY < pro.offsetTop + pro.offsetHeight);
+                return inside;
             }
+            function setChrome(){ syncChrome(); }
             function setRail(idx){
                 rail.forEach(function(el,k){ el.classList.toggle('on', k <= idx); });
                 if(tmSec && document.body.classList.contains('pro-active')) tmSec.textContent = NAMES[idx] || 'INTRO';
@@ -1759,12 +2343,11 @@
                 },
                 onUpdate: function(self){
                     if(self.progress > 0.002) killIntro();
-                    setChrome(true);            /* master is only active inside the prologue */
+                    syncChrome();
                     setRail(Math.min(N-1, Math.round(self.progress * (N-1))));
                 },
-                onEnterBack:  function(){ setChrome(true); },
-                onRefresh:    function(self){ if(self.progress < 1) setChrome(true); }
-                /* no onLeave: the handoff trigger below owns the chrome from here */
+                onEnterBack:  syncChrome,
+                onRefresh:    syncChrome
             });
 
             /* ---- 2f. Handoff: scene 3 -> hero, as one snap ---------------
@@ -1774,9 +2357,14 @@
                nudge past scene 3 lands you on the hero and a nudge back returns
                you to scene 3. No dead scroll, no black frame in between. */
             var handoff = gsap.timeline({defaults:{ease:'none'}})
-                .to([barT,barB], {scaleY:0, ease:'power2.inOut', duration:0.35}, 0)
-                .to(parts(scenes[N-1]).bg, {scale:1.1, ease:'power1.in', duration:1}, 0)
-                .to(stage, {autoAlpha:0, ease:'power2.in', duration:0.55}, 0.45);
+                .to([barT,barB], {scaleY:0, ease:'power2.inOut', duration:0.35}, 0);
+            /* The last exit is a dolly too, so the film leaves the way it
+               arrived rather than simply fading out. */
+            P[N-1].dolly.forEach(function(d){
+                handoff.to(d.el, {yPercent: outY(d.f) * 0.7, scale: 1 + (outS(d.f) - 1) * 0.55,
+                                  ease:'power1.in', duration:1}, 0);
+            });
+            handoff.to(stage, {autoAlpha:0, ease:'power2.in', duration:0.55}, 0.45);
 
             ScrollTrigger.create({
                 id:'pro-handoff',
@@ -1792,11 +2380,11 @@
                     ease: 'power3.inOut',
                     inertia: false
                 },
-                onUpdate:    function(self){ setChrome(self.progress < 0.5); },
-                onRefresh:   function(self){ setChrome(self.progress < 0.5); },
-                onLeave:     function(){ setChrome(false); },
-                onEnterBack: function(){ setChrome(true); },
-                onLeaveBack: function(){ setChrome(true); }
+                onUpdate:    syncChrome,
+                onRefresh:   syncChrome,
+                onLeave:     syncChrome,
+                onEnterBack: syncChrome,
+                onLeaveBack: syncChrome
             });
 
             /* Skip: same easing language as the snap, so it reads as one system */
@@ -1894,13 +2482,27 @@
                content-visibility:auto sections change height as they render,
                and the pin injects ~300vh of spacer. Refresh ScrollTrigger, then
                hand the legacy anchor cache its new numbers. */
+            var rid, syncing = false, lastH = 0, lastW = 0;
             function resync(){
+                /* ScrollTrigger.refresh() re-lays-out the pin spacer, which
+                   resizes <body>, which fires the ResizeObserver, which calls
+                   resync again. Guarding the re-entry AND ignoring sub-pixel
+                   noise keeps that from becoming a feedback loop on pages whose
+                   content-visibility sections keep resolving. */
+                if(syncing) return;
+                syncing = true;
                 ScrollTrigger.refresh();
                 if(window.__calcAnchors) window.__calcAnchors();
+                lastH = document.body.offsetHeight;
+                lastW = window.innerWidth;
+                syncing = false;
             }
-            var rid;
             if('ResizeObserver' in window){
                 new ResizeObserver(function(){
+                    if(syncing) return;
+                    /* A pin spacer settling by a pixel is not a resize. */
+                    if(Math.abs(document.body.offsetHeight - lastH) < 4 &&
+                       window.innerWidth === lastW) return;
                     clearTimeout(rid); rid = setTimeout(resync, 180);
                 }).observe(document.body);
             }
@@ -1941,32 +2543,78 @@
         })(0);
 
         function init(){
-            var bg    = sec.querySelector('.out-bg');
+            var DEPTH = window.__DEPTH;
+            var MOB   = window.matchMedia('(max-width:768px)').matches;
             var sun   = sec.querySelector('.out-sun');
-            var fog   = sec.querySelector('.pro-fog');
+            var fogs  = sec.querySelectorAll('.pro-fog');
             var dust  = sec.querySelectorAll('.out-dust');
             var fg    = sec.querySelector('.out-traveler');
+            var glow  = sec.querySelector('.pro-glow');
+            var rays  = sec.querySelector('.pro-rays');
+            var rim   = sec.querySelector('.pro-rim');
             var words = sec.querySelectorAll('.outro-copy .w');
             var rule  = sec.querySelector('.out-rule');
             var body  = sec.querySelector('.out-body');
             var sig   = sec.querySelector('.out-sig');
             var amb   = [];                          /* every perpetual tween */
 
-            /* --- Layer 3: fog. Same three loops as prologue scene 01, so the
-                   atmosphere reads as the same weather system. --- */
-            gsap.set(fog, {xPercent:-9});
-            amb.push(gsap.to(fog, {xPercent:9,     duration:44, ease:'sine.inOut', repeat:-1, yoyo:true}));
-            amb.push(gsap.to(fog, {opacity:0.31,   duration:13, ease:'sine.inOut', repeat:-1, yoyo:true}));
-            amb.push(gsap.to(fog, {scale:1.2,      duration:30, ease:'sine.inOut', repeat:-1, yoyo:true}));
+            /* --- The closing frame runs the same depth rig as the prologue, so
+                   the camera keeps moving through a volume right to the last
+                   frame instead of landing on a flat plate. --- */
+            var cam = null;
+            if(DEPTH){
+                DEPTH.rays(sec);
+                DEPTH.motes(sec.querySelector('.mb-mid'),  MOB ? 7 : 16, {min:2.0, max:3.6, o:0.70, t:34, tv:20});
+                DEPTH.motes(sec.querySelector('.mb-near'), MOB ? 4 : 10, {min:4.0, max:8.0, o:0.55, t:22, tv:14});
+                cam = DEPTH.add(sec);
+                cam.live(false);                     /* woken by the visibility trigger below */
+            }
+            /* Depth factor of the plane a leaf sits on, so the outro's ambient
+               amplitudes are keyed off depth exactly like the prologue's. */
+            function fOf(el){
+                var host = el && el.closest ? el.closest('.pl[data-d]') : null;
+                return host ? (1 - parseFloat(host.getAttribute('data-d'))) : 0.5;
+            }
+            var dollies = Array.prototype.map.call(sec.querySelectorAll('.pl[data-d] > .pw'), function(pw){
+                return { el: pw, f: 1 - parseFloat(pw.parentNode.getAttribute('data-d')) };
+            });
+
+            /* --- Fog: three banks, each drifting at its own depth. --- */
+            Array.prototype.forEach.call(fogs, function(f,k){
+                var ff = fOf(f), amp = 4 + ff * 10;
+                var base = parseFloat(getComputedStyle(f).opacity) || 0.24;
+                gsap.set(f, {xPercent:-amp});
+                amb.push(gsap.to(f, {xPercent: amp,               duration: 62 - ff*26, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                amb.push(gsap.to(f, {yPercent: -3 - ff*5,         duration: 44 - ff*14, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                amb.push(gsap.to(f, {scale: 1.10 + ff*0.22,       duration: 34 + k*9,   ease:'sine.inOut', repeat:-1, yoyo:true}));
+                amb.push(gsap.to(f, {opacity: base * 1.32,        duration: 13 + k*5,   ease:'sine.inOut', repeat:-1, yoyo:true}));
+            });
 
             /* --- Layer 5: traveler. Identical breathing pair to the prologue. --- */
-            amb.push(gsap.to(fg,  {yPercent:-2.6,  duration:6.5, ease:'sine.inOut', repeat:-1, yoyo:true}));
-            amb.push(gsap.to(fg,  {scale:1.035,    duration:9.5, ease:'sine.inOut', repeat:-1, yoyo:true}));
+            amb.push(gsap.to(fg,  {yPercent:-1.8,  duration:6.5, ease:'sine.inOut', repeat:-1, yoyo:true}));
+            amb.push(gsap.to(fg,  {scale:1.028,    duration:9.5, ease:'sine.inOut', repeat:-1, yoyo:true}));
 
             /* --- Layer 2: sun. Slow pulse on two different periods so the
                    brightness and the size never peak together. --- */
             amb.push(gsap.to(sun, {scale:1.055,    duration:7.6, ease:'sine.inOut', repeat:-1, yoyo:true}));
             amb.push(gsap.to(sun, {opacity:0.72,   duration:4.9, ease:'sine.inOut', repeat:-1, yoyo:true}));
+
+            /* --- Volumetric light, on the outro's own sun position. --- */
+            var ocs = getComputedStyle(sec);
+            var org = (ocs.getPropertyValue('--lx') || '50%').trim() + ' ' +
+                      (ocs.getPropertyValue('--ly') || '40%').trim();
+            if(glow){
+                gsap.set(glow, {transformOrigin: org});
+                amb.push(gsap.to(glow, {opacity:0.62, duration:5.4, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                amb.push(gsap.to(glow, {scale:1.09,   duration:8.1, ease:'sine.inOut', repeat:-1, yoyo:true}));
+            }
+            if(rays){
+                gsap.set(rays, {transformOrigin: org});
+                amb.push(gsap.to(rays, {opacity:0.30, duration:9.5, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                amb.push(gsap.to(rays, {rotation:1.6, duration:23,  ease:'sine.inOut', repeat:-1, yoyo:true}));
+                amb.push(gsap.to(rays, {scaleX:1.06,  duration:16,  ease:'sine.inOut', repeat:-1, yoyo:true}));
+            }
+            if(rim) amb.push(gsap.to(rim, {opacity:'*=0.62', duration:7.2, ease:'sine.inOut', repeat:-1, yoyo:true}));
 
             /* --- Layer 4: dust rising forever. The element is 200% tall with the
                    texture tiled exactly twice, so yPercent 0 -> -50 on a linear
@@ -1978,10 +2626,16 @@
                 amb.push(gsap.to(d,     {xPercent: k ? -2 : 2,       duration: k ? 19 : 13, ease:'sine.inOut', repeat:-1, yoyo:true}));
             });
 
-            /* --- Entrance: background settles 1.08 -> 1 as the section rises --- */
-            gsap.fromTo(bg, {scale:1.08}, {
-                scale:1, ease:'none',
+            /* --- Entrance: the whole stack settles out of a push-in as the
+                   section rises, each plane by its own depth factor. Same dolly
+                   the prologue runs between scenes, so the film closes in the
+                   grammar it opened with. --- */
+            var enter = gsap.timeline({
                 scrollTrigger:{ trigger:sec, start:'top bottom', end:'top top', scrub:1, invalidateOnRefresh:true }
+            });
+            dollies.forEach(function(d){
+                enter.fromTo(d.el, {yPercent: 9 * d.f, scale: 1 + 0.22 * d.f},
+                                   {yPercent: 0, scale: 1, ease:'none', duration:1}, 0);
             });
 
             /* --- Type. from()/fromTo() render their start state immediately, so
@@ -2000,13 +2654,15 @@
                 onRefresh: function(self){ if(self.progress > 0) play(); }
             });
 
-            /* --- Idle the perpetual tweens while the section is off screen.
-                   They default to playing, so the failure mode is "always
-                   animating" rather than "frozen at the bottom". --- */
+            /* --- Idle the perpetual tweens AND the depth camera while the
+                   section is off screen. They default to playing, so the
+                   failure mode is "always animating" rather than "frozen at the
+                   bottom". --- */
             ScrollTrigger.create({
                 trigger: sec, start:'top bottom', end:'bottom top',
                 onToggle: function(self){
                     amb.forEach(function(t){ self.isActive ? t.play() : t.pause(); });
+                    if(cam) cam.live(self.isActive);
                 }
             });
         }
