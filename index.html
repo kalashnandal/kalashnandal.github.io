@@ -757,11 +757,54 @@
             .pro-grade{background:
                 radial-gradient(120% 92% at 50% 46%,transparent 32%,rgba(5,5,5,.5) 76%,rgba(5,5,5,.94) 100%),
                 linear-gradient(180deg,rgba(5,5,5,.72),rgba(5,5,5,.26) 22%,rgba(5,5,5,.62) 52%,rgba(5,5,5,.92))}
-            .fog-near .pro-fog{filter:blur(22px)}
-            .fog-mid  .pro-fog{filter:blur(12px)}
-            .pro-rays i{filter:blur(9px)}
             .pro-rail,.pro-skip{display:none}
             .pro-bars{height:3.5vh}
+        }
+        /* =====================================================================
+           TOUCH / SMALL-SCREEN PERFORMANCE PROFILE
+           A gaussian blur costs O(area), and the desktop rig asks for ~16
+           megapixels of it per frame across 29 layers. On a laptop GPU that is
+           free. On a phone — whose whole screen is ~2.4 megapixels of device
+           pixels — it is roughly seven screens' worth of blur every frame, on
+           top of 27 blend passes and 50 compositor promotions. That is what
+           made the intro stutter, and it is an order of magnitude over budget,
+           not a tuning problem.
+
+           So the phone gets a different rig, not a scaled-down one. The rule
+           applied here: keep every cue that is a GRADIENT (free — aerial haze,
+           bloom, rim, contact shadow, vignette) and every cue that is a
+           TRANSFORM (free — the whole scroll dolly, the parallax fan). Drop
+           every cue that needs a per-frame blur or an extra blend pass.
+
+           Depth survives, because depth was never in the blur: it is in the
+           per-plane dolly, which is pure transform and costs nothing.
+
+           pointer:coarse is included so tablets get this too — they have phone
+           GPUs and no cursor, which is also why the pointer camera is off.
+           ===================================================================== */
+        @media(max-width:900px),(pointer:coarse){
+            /* Two of three fog banks and every fog blur. The plates already
+               carry painted atmosphere; the near bank was the single most
+               expensive surface in the build. */
+            .fog-near,.fog-mid{display:none}
+            .fog-far .pro-fog{filter:none;opacity:.3}
+            /* Beams are 5 blurred 180vh columns per scene = 15 live layers.
+               .pro-glow reads as the same light source for the cost of one
+               radial gradient, so the bloom stays and the beams go. */
+            .pro-rays{display:none}
+            /* One dust band, unblurred. JS also cuts the particle count. */
+            .mb-far,.mb-near{display:none}
+            .mb-mid{filter:none}
+            /* soft-light is a full extra blend pass for a grade the plates
+               mostly already have. */
+            .pro-tint{display:none}
+            /* Every will-change is a retained GPU texture. At full-viewport
+               size, a handful is prudent and fifty is a memory problem — so
+               only the two planes that are genuinely animated every frame
+               keep their promotion. */
+            .pl,.pw,.pro-fog,.pro-bars,.pro-copy,.pc-eyebrow,.pc-rule,.pc-sub,
+            .pro-copy .w,.outro-copy .w,.out-body,.out-sig,.out-rule{will-change:auto}
+            .pw-bg,.pro-fg{will-change:transform}
         }
         /* =====================================================================
            V4: CINEMATIC OUTRO — the last frame, after the footer
@@ -1843,28 +1886,27 @@
             running = true;
             requestAnimationFrame(frame);
         }
+        /* The camera is a POINTER affordance and nothing else.
+           An earlier build drove it from scroll velocity on touch devices, so
+           that every scroll event woke a rAF loop writing transforms to ~37
+           planes — competing with ScrollTrigger's scrub for the main thread at
+           the exact moment smoothness matters most, to produce an effect
+           nobody on a phone can attribute to their own input anyway. Without a
+           cursor there is no camera. The scroll dolly still moves every plane
+           by its own depth, so the parallax is not lost. */
         function bind(){
-            if(bound) return; bound = true;
-            if(FINE){
-                window.addEventListener('pointermove', function(e){
-                    tx = (e.clientX / window.innerWidth)  * 2 - 1;
-                    ty = (e.clientY / window.innerHeight) * 2 - 1;
-                    wake();
-                }, {passive:true});
-                /* Pointer out of the window = recentre, so the frame never
-                   stays parked at an extreme after the cursor leaves. */
-                window.addEventListener('pointerout', function(e){
-                    if(e.relatedTarget) return;
-                    tx = ty = 0; wake();
-                }, {passive:true});
-            }else{
-                window.addEventListener('scroll', function(){
-                    var y = window.scrollY;
-                    sv = Math.max(-1, Math.min(1, sv + (y - lastY) / 220));
-                    lastY = y;
-                    wake();
-                }, {passive:true});
-            }
+            if(bound || !FINE) return; bound = true;
+            window.addEventListener('pointermove', function(e){
+                tx = (e.clientX / window.innerWidth)  * 2 - 1;
+                ty = (e.clientY / window.innerHeight) * 2 - 1;
+                wake();
+            }, {passive:true});
+            /* Pointer out of the window = recentre, so the frame never
+               stays parked at an extreme after the cursor leaves. */
+            window.addEventListener('pointerout', function(e){
+                if(e.relatedTarget) return;
+                tx = ty = 0; wake();
+            }, {passive:true});
         }
 
         return {
@@ -1873,9 +1915,15 @@
                off screen. */
             add: function(root){
                 var planes = [];
+                /* No cursor, no camera — skip the whole registration on touch
+                   so nothing is even walked, let alone written. */
+                if(!FINE || RM) return { live:function(){}, factor:function(){ return 0; } };
                 Array.prototype.forEach.call(root.querySelectorAll('.pl[data-d]'), function(el){
                     var d = parseFloat(el.getAttribute('data-d'));
                     if(isNaN(d)) return;
+                    /* Planes the performance profile switched off must not be
+                       written to every frame. */
+                    if(getComputedStyle(el).display === 'none') return;
                     planes.push({ el: el, f: 1 - Math.max(0, Math.min(1, d)) });
                 });
                 var g = { planes: planes, live: true };
@@ -1904,6 +1952,10 @@
                costs three composited surfaces instead of fifty. */
             motes: function(host, n, opt){
                 if(RM || !host) return;
+                /* Bands switched off by the performance profile get no
+                   particles built at all — no elements, no infinite CSS
+                   animations, no compositor layers. */
+                if(getComputedStyle(host).display === 'none') return;
                 opt = opt || {};
                 var frag = document.createDocumentFragment();
                 var minS = opt.min || 1.4, maxS = opt.max || 3.2;
@@ -1934,6 +1986,7 @@
                repeated per scene. */
             rays: function(root){
                 Array.prototype.forEach.call(root.querySelectorAll('.pro-rays'), function(box){
+                    if(getComputedStyle(box).display === 'none') return;
                     Array.prototype.forEach.call(box.children, function(b, k, all){
                         var n = all.length;
                         var t = n > 1 ? (k / (n - 1)) * 2 - 1 : 0;   /* -1 .. 1 */
@@ -1969,6 +2022,9 @@
         var MOB = window.matchMedia('(max-width:768px)').matches;
         var TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
         var BLUR = !MOB;                       /* full-screen blur is desktop-only */
+        /* Mirrors the CSS performance-profile query exactly. If you change one,
+           change the other — they have to agree about which planes exist. */
+        var LOWFX = window.matchMedia('(max-width:900px),(pointer:coarse)').matches;
         var SOFT_SNAP = !TOUCH && window.innerWidth > 900;
         var SNAP_TOLERANCE = 0.14;             /* soft snap fires only within 14% of a viewport */
 
@@ -2057,12 +2113,11 @@
                entire point of them. Mote counts are cut hard on phones, where
                every extra composited surface is felt. */
             DEPTH.rays(pro);
-            var farBand  = pro.querySelector('.mb-far');
-            var midBand  = pro.querySelector('.mb-mid');
-            var nearBand = pro.querySelector('.mb-near');
-            DEPTH.motes(farBand,  MOB ? 10 : 24, {min:1.0, max:2.0, o:0.55, t:46, tv:26});
-            DEPTH.motes(midBand,  MOB ?  7 : 16, {min:2.0, max:3.6, o:0.70, t:34, tv:20});
-            DEPTH.motes(nearBand, MOB ?  4 : 10, {min:4.0, max:8.0, o:0.55, t:22, tv:14});
+            /* motes() no-ops on a band the profile hid, so the phone ends up
+               with one unblurred band of 8 rather than three bands of 50. */
+            DEPTH.motes(pro.querySelector('.mb-far'),  24, {min:1.0, max:2.0, o:0.55, t:46, tv:26});
+            DEPTH.motes(pro.querySelector('.mb-mid'),  LOWFX ? 8 : 16, {min:2.0, max:3.6, o:0.70, t:34, tv:20});
+            DEPTH.motes(pro.querySelector('.mb-near'), 10, {min:4.0, max:8.0, o:0.55, t:22, tv:14});
             /* The camera only drives the prologue while the prologue is on
                screen; past the handoff those writes would be wasted work. */
             var cam = DEPTH.add(pro);
@@ -2072,9 +2127,20 @@
                travel by that same f, so the scroll camera and the pointer
                camera describe one consistent space. */
             function dollies(sc){
-                return gsap.utils.toArray(sc.querySelectorAll('.pl[data-d] > .pw')).map(function(pw){
-                    return { el: pw, f: DEPTH.f(parseFloat(pw.parentNode.getAttribute('data-d'))) };
-                });
+                return gsap.utils.toArray(sc.querySelectorAll('.pl[data-d] > .pw'))
+                    /* A plane the performance profile switched off still has a
+                       .pw box in the DOM. Tweening it would cost a full
+                       timeline slot per scene for something that paints
+                       nothing. */
+                    .filter(function(pw){ return getComputedStyle(pw.parentNode).display !== 'none'; })
+                    .map(function(pw){
+                        return { el: pw, f: DEPTH.f(parseFloat(pw.parentNode.getAttribute('data-d'))) };
+                    });
+            }
+            /* Same test for leaf elements driven by the ambient loops. */
+            function shown(el){
+                return !!el && getComputedStyle(el).display !== 'none' &&
+                       (!el.closest('.pl') || getComputedStyle(el.closest('.pl')).display !== 'none');
             }
             function parts(sc){
                 return {
@@ -2141,23 +2207,35 @@
                is nearly still — that difference is a depth cue in its own
                right, and the reason the three fog banks never read as three
                copies of one texture drifting in lockstep. */
+            /* Ambient tweens, bucketed by scene. Two of the three scenes are
+               hidden at any settled moment, and a repeat:-1 tween on a hidden
+               scene still writes a style property every frame — which still
+               costs a style recalc for pixels nobody sees. Bucketing them lets
+               the master trigger idle the scenes that are off screen. */
+            var AMB = scenes.map(function(){ return []; });
             scenes.forEach(function(sc,i){
                 var p = P[i];
+                var amb = AMB[i];
+                function A(t){ amb.push(t); return t; }
                 /* Subject: a slow breath, plus a drift keyed to its own depth. */
-                gsap.to(p.fg, {yPercent:-1.8, duration:6.5+i*0.9, ease:'sine.inOut', repeat:-1, yoyo:true});
-                gsap.to(p.fg, {scale:1.028,   duration:9.5+i*1.2, ease:'sine.inOut', repeat:-1, yoyo:true});
+                A(gsap.to(p.fg, {yPercent:-1.8, duration:6.5+i*0.9, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                A(gsap.to(p.fg, {scale:1.028,   duration:9.5+i*1.2, ease:'sine.inOut', repeat:-1, yoyo:true}));
 
-                /* Fog: each bank gets its own period so they never sync up. */
+                /* Fog: each bank gets its own period so they never sync up.
+                   Banks the performance profile switched off are skipped —
+                   an infinite tween on a display:none leaf is pure main-thread
+                   cost for zero pixels. */
                 Array.prototype.forEach.call(p.fogs, function(f,k){
+                    if(!shown(f)) return;
                     var host = f.closest ? f.closest('.pl[data-d]') : null;
                     var ff   = host ? DEPTH.f(parseFloat(host.getAttribute('data-d'))) : 0.5;
                     var amp  = 4 + ff * 10;   /* xPercent of the bank's own (oversized) box */
                     var base = parseFloat(getComputedStyle(f).opacity) || 0.24;
                     gsap.set(f, {xPercent:-amp});
-                    gsap.to(f, {xPercent: amp,          duration: 62 - ff*26 + i*5, ease:'sine.inOut', repeat:-1, yoyo:true});
-                    gsap.to(f, {yPercent: -3 - ff * 5,  duration: 44 - ff*14 + i*3, ease:'sine.inOut', repeat:-1, yoyo:true});
-                    gsap.to(f, {scale: 1 + 0.10 + ff*0.22, duration: 34 + k*9 + i*4, ease:'sine.inOut', repeat:-1, yoyo:true});
-                    gsap.to(f, {opacity: base * 1.32,   duration: 13 + k*5,         ease:'sine.inOut', repeat:-1, yoyo:true});
+                    A(gsap.to(f, {xPercent: amp,          duration: 62 - ff*26 + i*5, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                    A(gsap.to(f, {yPercent: -3 - ff * 5,  duration: 44 - ff*14 + i*3, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                    A(gsap.to(f, {scale: 1 + 0.10 + ff*0.22, duration: 34 + k*9 + i*4, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                    A(gsap.to(f, {opacity: base * 1.32,   duration: 13 + k*5,         ease:'sine.inOut', repeat:-1, yoyo:true}));
                 });
 
                 /* Light: the bloom and the beams breathe on two different
@@ -2168,19 +2246,23 @@
                    hardcoded here, so retuning a scene means editing one CSS
                    line and nothing else. */
                 var org = lightOrigin(sc);
-                if(p.glow){
+                if(shown(p.glow)){
                     gsap.set(p.glow, {transformOrigin: org});
-                    gsap.to(p.glow, {opacity:0.62, duration:5.4+i*0.7, ease:'sine.inOut', repeat:-1, yoyo:true});
-                    gsap.to(p.glow, {scale:1.09,   duration:8.1+i*0.9, ease:'sine.inOut', repeat:-1, yoyo:true});
+                    A(gsap.to(p.glow, {opacity:0.62, duration:5.4+i*0.7, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                    A(gsap.to(p.glow, {scale:1.09,   duration:8.1+i*0.9, ease:'sine.inOut', repeat:-1, yoyo:true}));
                 }
-                if(p.rays){
+                if(shown(p.rays)){
                     gsap.set(p.rays, {transformOrigin: org});
-                    gsap.to(p.rays, {opacity:0.30,   duration:9.5+i*1.1, ease:'sine.inOut', repeat:-1, yoyo:true});
-                    gsap.to(p.rays, {rotation:1.6,   duration:23+i*3,    ease:'sine.inOut', repeat:-1, yoyo:true});
-                    gsap.to(p.rays, {scaleX:1.06,    duration:16+i*2,    ease:'sine.inOut', repeat:-1, yoyo:true});
+                    A(gsap.to(p.rays, {opacity:0.30,   duration:9.5+i*1.1, ease:'sine.inOut', repeat:-1, yoyo:true}));
+                    A(gsap.to(p.rays, {rotation:1.6,   duration:23+i*3,    ease:'sine.inOut', repeat:-1, yoyo:true}));
+                    A(gsap.to(p.rays, {scaleX:1.06,    duration:16+i*2,    ease:'sine.inOut', repeat:-1, yoyo:true}));
                 }
-                if(p.rim) gsap.to(p.rim, {opacity:'*=0.62', duration:7.2+i*0.8, ease:'sine.inOut', repeat:-1, yoyo:true});
+                if(shown(p.rim)) A(gsap.to(p.rim, {opacity:'*=0.62', duration:7.2+i*0.8, ease:'sine.inOut', repeat:-1, yoyo:true}));
             });
+
+            /* Only scene 01 is on screen at load. Without this the other two
+               scenes' loops would run from boot until the first scroll event. */
+            AMB.forEach(function(list, k){ if(k) list.forEach(function(t){ t.pause(); }); });
 
             /* ---- 2c. Opening title card (real time, not scrubbed) ---------
                The camera finds its mark: the plate settles out of a slight
@@ -2312,12 +2394,26 @@
                 var handoffMid = pro.offsetTop + pro.offsetHeight - window.innerHeight * 0.5;
                 var inside = window.scrollY < handoffMid;
                 document.body.classList.toggle('pro-active', inside);
-                /* The camera only writes while the prologue is actually on
-                   screen — past the handoff those transform writes are wasted. */
-                if(cam) cam.live(window.scrollY < pro.offsetTop + pro.offsetHeight);
+                /* Neither the camera nor the ambient loops should run once the
+                   prologue has left the screen: past the handoff every one of
+                   those writes is a style recalc for pixels nobody can see. */
+                var onScreen = window.scrollY < pro.offsetTop + pro.offsetHeight;
+                if(cam) cam.live(onScreen);
+                if(!onScreen) setAmbient(-1, -1);
                 return inside;
             }
             function setChrome(){ syncChrome(); }
+            /* Play only the scenes actually on screen. During a crossfade that
+               is two of them; at rest it is one. */
+            var ambLo = -1, ambHi = -1;
+            function setAmbient(lo, hi){
+                if(lo === ambLo && hi === ambHi) return;
+                ambLo = lo; ambHi = hi;
+                AMB.forEach(function(list, k){
+                    var on = (k >= lo && k <= hi);
+                    list.forEach(function(t){ on ? t.play() : t.pause(); });
+                });
+            }
             function setRail(idx){
                 rail.forEach(function(el,k){ el.classList.toggle('on', k <= idx); });
                 if(tmSec && document.body.classList.contains('pro-active')) tmSec.textContent = NAMES[idx] || 'INTRO';
@@ -2344,7 +2440,9 @@
                 onUpdate: function(self){
                     if(self.progress > 0.002) killIntro();
                     syncChrome();
-                    setRail(Math.min(N-1, Math.round(self.progress * (N-1))));
+                    var t = self.progress * (N-1);
+                    setRail(Math.min(N-1, Math.round(t)));
+                    setAmbient(Math.max(0, Math.floor(t)), Math.min(N-1, Math.ceil(t)));
                 },
                 onEnterBack:  syncChrome,
                 onRefresh:    syncChrome
@@ -2544,7 +2642,13 @@
 
         function init(){
             var DEPTH = window.__DEPTH;
-            var MOB   = window.matchMedia('(max-width:768px)').matches;
+            var LOWFX = window.matchMedia('(max-width:900px),(pointer:coarse)').matches;
+            /* Same test the prologue uses: a plane the CSS performance profile
+               switched off must not be tweened or registered. */
+            function shown(el){
+                return !!el && getComputedStyle(el).display !== 'none' &&
+                       (!el.closest('.pl') || getComputedStyle(el.closest('.pl')).display !== 'none');
+            }
             var sun   = sec.querySelector('.out-sun');
             var fogs  = sec.querySelectorAll('.pro-fog');
             var dust  = sec.querySelectorAll('.out-dust');
@@ -2564,8 +2668,8 @@
             var cam = null;
             if(DEPTH){
                 DEPTH.rays(sec);
-                DEPTH.motes(sec.querySelector('.mb-mid'),  MOB ? 7 : 16, {min:2.0, max:3.6, o:0.70, t:34, tv:20});
-                DEPTH.motes(sec.querySelector('.mb-near'), MOB ? 4 : 10, {min:4.0, max:8.0, o:0.55, t:22, tv:14});
+                DEPTH.motes(sec.querySelector('.mb-mid'),  LOWFX ? 8 : 16, {min:2.0, max:3.6, o:0.70, t:34, tv:20});
+                DEPTH.motes(sec.querySelector('.mb-near'), 10, {min:4.0, max:8.0, o:0.55, t:22, tv:14});
                 cam = DEPTH.add(sec);
                 cam.live(false);                     /* woken by the visibility trigger below */
             }
@@ -2575,12 +2679,15 @@
                 var host = el && el.closest ? el.closest('.pl[data-d]') : null;
                 return host ? (1 - parseFloat(host.getAttribute('data-d'))) : 0.5;
             }
-            var dollies = Array.prototype.map.call(sec.querySelectorAll('.pl[data-d] > .pw'), function(pw){
+            var dollies = Array.prototype.filter.call(sec.querySelectorAll('.pl[data-d] > .pw'), function(pw){
+                return getComputedStyle(pw.parentNode).display !== 'none';
+            }).map(function(pw){
                 return { el: pw, f: 1 - parseFloat(pw.parentNode.getAttribute('data-d')) };
             });
 
             /* --- Fog: three banks, each drifting at its own depth. --- */
             Array.prototype.forEach.call(fogs, function(f,k){
+                if(!shown(f)) return;
                 var ff = fOf(f), amp = 4 + ff * 10;
                 var base = parseFloat(getComputedStyle(f).opacity) || 0.24;
                 gsap.set(f, {xPercent:-amp});
@@ -2603,18 +2710,18 @@
             var ocs = getComputedStyle(sec);
             var org = (ocs.getPropertyValue('--lx') || '50%').trim() + ' ' +
                       (ocs.getPropertyValue('--ly') || '40%').trim();
-            if(glow){
+            if(shown(glow)){
                 gsap.set(glow, {transformOrigin: org});
                 amb.push(gsap.to(glow, {opacity:0.62, duration:5.4, ease:'sine.inOut', repeat:-1, yoyo:true}));
                 amb.push(gsap.to(glow, {scale:1.09,   duration:8.1, ease:'sine.inOut', repeat:-1, yoyo:true}));
             }
-            if(rays){
+            if(shown(rays)){
                 gsap.set(rays, {transformOrigin: org});
                 amb.push(gsap.to(rays, {opacity:0.30, duration:9.5, ease:'sine.inOut', repeat:-1, yoyo:true}));
                 amb.push(gsap.to(rays, {rotation:1.6, duration:23,  ease:'sine.inOut', repeat:-1, yoyo:true}));
                 amb.push(gsap.to(rays, {scaleX:1.06,  duration:16,  ease:'sine.inOut', repeat:-1, yoyo:true}));
             }
-            if(rim) amb.push(gsap.to(rim, {opacity:'*=0.62', duration:7.2, ease:'sine.inOut', repeat:-1, yoyo:true}));
+            if(shown(rim)) amb.push(gsap.to(rim, {opacity:'*=0.62', duration:7.2, ease:'sine.inOut', repeat:-1, yoyo:true}));
 
             /* --- Layer 4: dust rising forever. The element is 200% tall with the
                    texture tiled exactly twice, so yPercent 0 -> -50 on a linear
@@ -2658,12 +2765,20 @@
                    section is off screen. They default to playing, so the
                    failure mode is "always animating" rather than "frozen at the
                    bottom". --- */
+            function idle(active){
+                amb.forEach(function(t){ active ? t.play() : t.pause(); });
+                if(cam) cam.live(active);
+            }
+            /* Start idled. onToggle only fires on a CHANGE of state, and the
+               outro is the last section on the page — so on a fresh load every
+               one of these loops would run, unwatched, from boot until the
+               visitor first scrolled into view. onRefresh syncs the real state
+               once measurements exist. */
+            idle(false);
             ScrollTrigger.create({
                 trigger: sec, start:'top bottom', end:'bottom top',
-                onToggle: function(self){
-                    amb.forEach(function(t){ self.isActive ? t.play() : t.pause(); });
-                    if(cam) cam.live(self.isActive);
-                }
+                onToggle:  function(self){ idle(self.isActive); },
+                onRefresh: function(self){ idle(self.isActive); }
             });
         }
     })();
