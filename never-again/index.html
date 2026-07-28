@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Never Again — your personal restaurant blacklist</title>
+<meta name="description" content="Block the restaurants that let you down and get warned before you walk back in.">
+
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#111216">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Never Again">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" href="./icons/icon-192.png">
+
+<link rel="stylesheet" href="./style.css">
+
+<!--
+  Google Maps JavaScript API — official dynamic library loader.
+  Replace YOUR_GOOGLE_MAPS_API_KEY with your key, and restrict it by HTTP referrer
+  in the Google Cloud console. Required APIs: "Maps JavaScript API" and
+  "Places API (New)". Libraries (maps, places, marker, geometry) are imported
+  on demand from app.js via google.maps.importLibrary().
+-->
+<script>
+  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+    key: "YOUR_GOOGLE_MAPS_API_KEY",
+    v: "weekly",
+  });
+</script>
+</head>
+
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ONBOARDING / SPLASH — shown on first launch, or until permissions
+     have been dealt with. Permission prompts must be triggered by a real
+     user gesture, which is exactly what these buttons are for.
+     ══════════════════════════════════════════════════════════════════ -->
+<section id="splash" class="splash" aria-labelledby="splash-title">
+  <div class="splash__inner">
+    <div class="splash__mark" aria-hidden="true">
+      <span class="blockmark blockmark--lg"></span>
+    </div>
+
+    <h1 id="splash-title" class="splash__title">Never Again</h1>
+    <p class="splash__tagline">
+      Never eat bad food twice. Block the places that let you down and get
+      warned <em>before</em> you walk back in.
+    </p>
+
+    <ul class="perm-list">
+      <li class="perm" id="perm-location">
+        <span class="perm__icon" aria-hidden="true">📍</span>
+        <span class="perm__text">
+          <strong>Location</strong>
+          <small>See where you are and spot blocked places nearby.</small>
+        </span>
+        <button class="perm__btn" type="button" data-action="grant-location">Allow</button>
+      </li>
+      <li class="perm" id="perm-notifications">
+        <span class="perm__icon" aria-hidden="true">🔔</span>
+        <span class="perm__text">
+          <strong>Notifications</strong>
+          <small>Get the warning on your lock screen.</small>
+        </span>
+        <button class="perm__btn" type="button" data-action="grant-notifications">Allow</button>
+      </li>
+    </ul>
+
+    <button class="btn btn--primary btn--block" type="button" data-action="enter-app">
+      Open the map
+    </button>
+    <p class="splash__fine">
+      Everything stays on this device — your list is saved in this browser's
+      local storage and never uploaded anywhere.
+    </p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MAP + CHROME
+     ══════════════════════════════════════════════════════════════════ -->
+<main id="app" class="app" hidden>
+
+  <div id="map" class="map" role="application" aria-label="Map"></div>
+
+  <!-- Floating search bar (Google Places Autocomplete gets mounted here) -->
+  <div class="searchbar" id="searchbar">
+    <span class="searchbar__icon" aria-hidden="true">🔎</span>
+    <div class="searchbar__field" id="autocomplete-host"></div>
+  </div>
+
+  <!-- Tracking / proximity status pill -->
+  <div class="statuspill" id="statuspill" hidden>
+    <span class="statuspill__dot"></span>
+    <span id="statuspill-text">Watching your location</span>
+  </div>
+
+  <!-- Floating action buttons -->
+  <div class="fabs">
+    <button class="fab" type="button" data-action="locate" aria-label="Go to my current location">
+      <span aria-hidden="true">🎯</span>
+    </button>
+    <button class="fab fab--primary" type="button" data-action="open-list" aria-label="Open my blacklist">
+      <span aria-hidden="true">🚫</span>
+      <span class="fab__badge" id="list-badge" hidden>0</span>
+    </button>
+  </div>
+
+  <!-- Hint shown when the map is idle and the list is empty -->
+  <p class="hint" id="hint" hidden>Tap a place on the map, or search for it above.</p>
+</main>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     BOTTOM SHEET — place details, then the blocking form
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="scrim" id="sheet-scrim" hidden></div>
+
+<section class="sheet" id="sheet" aria-labelledby="sheet-name" aria-hidden="true" hidden>
+  <div class="sheet__grabber" role="presentation"></div>
+
+  <!-- ── View 1: place details ── -->
+  <div class="sheet__view" id="view-details">
+    <header class="sheet__head">
+      <div>
+        <h2 class="sheet__name" id="sheet-name">—</h2>
+        <p class="sheet__addr" id="sheet-addr"></p>
+      </div>
+      <button class="iconbtn" type="button" data-action="close-sheet" aria-label="Close">✕</button>
+    </header>
+
+    <!-- Rendered when the place is already on the blacklist -->
+    <div class="blocked-card" id="blocked-card" hidden>
+      <div class="blocked-card__head">
+        <span class="blockmark"></span>
+        <div>
+          <strong>You blocked this place</strong>
+          <small id="blocked-when"></small>
+        </div>
+      </div>
+      <ul class="tagrow" id="blocked-tags"></ul>
+      <p class="note" id="blocked-note"></p>
+    </div>
+
+    <div class="sheet__actions">
+      <button class="btn btn--danger btn--block" type="button" data-action="block">
+        Block This Place
+      </button>
+      <div class="sheet__actions-row" id="blocked-actions" hidden>
+        <button class="btn btn--ghost" type="button" data-action="edit">Edit</button>
+        <button class="btn btn--ghost btn--warn" type="button" data-action="forgive">Forgive</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── View 2: blocking form ── -->
+  <form class="sheet__view" id="view-form" hidden>
+    <header class="sheet__head">
+      <div>
+        <h2 class="sheet__name" id="form-name">—</h2>
+        <p class="sheet__addr">What went wrong?</p>
+      </div>
+      <button class="iconbtn" type="button" data-action="close-sheet" aria-label="Close">✕</button>
+    </header>
+
+    <fieldset class="tags">
+      <legend class="label">Reasons</legend>
+      <div class="tags__grid" id="tags-grid"><!-- chips injected by app.js --></div>
+    </fieldset>
+
+    <label class="label" for="note">Personal note</label>
+    <textarea id="note" class="textarea" rows="3" maxlength="500"
+              placeholder="e.g. The chicken was raw and it cost $40."></textarea>
+
+    <div class="sheet__actions">
+      <button class="btn btn--danger btn--block" type="submit">Save to Blacklist</button>
+      <button class="btn btn--ghost btn--block" type="button" data-action="cancel-form">Cancel</button>
+    </div>
+  </form>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     BLACKLIST PANEL
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="scrim" id="panel-scrim" hidden></div>
+
+<aside class="panel" id="panel" aria-labelledby="panel-title" aria-hidden="true" hidden>
+  <header class="panel__head">
+    <h2 id="panel-title">My Blacklist</h2>
+    <button class="iconbtn" type="button" data-action="close-panel" aria-label="Close">✕</button>
+  </header>
+
+  <div class="panel__toolbar">
+    <div class="segmented" role="group" aria-label="Sort blacklist">
+      <button type="button" class="segmented__btn is-active" data-sort="recent">Recent</button>
+      <button type="button" class="segmented__btn" data-sort="near">Nearest</button>
+    </div>
+    <span class="panel__count" id="panel-count"></span>
+  </div>
+
+  <ul class="places" id="places"><!-- entries injected by app.js --></ul>
+
+  <p class="empty" id="panel-empty" hidden>
+    Nothing blocked yet.<br><small>Search for a place, or tap one on the map.</small>
+  </p>
+
+  <footer class="panel__foot">
+    <button class="btn btn--ghost" type="button" data-action="export">Export JSON</button>
+    <button class="btn btn--ghost btn--warn" type="button" data-action="clear-all">Clear all</button>
+  </footer>
+</aside>
+
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="./app.js"></script>
+</body>
+</html>
