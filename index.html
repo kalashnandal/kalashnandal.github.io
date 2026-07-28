@@ -559,7 +559,11 @@
             transform:translateX(-50%) rotate(var(--ra,0deg));
             background:linear-gradient(180deg,
                 rgba(255,228,168,.60),rgba(255,206,126,.20) 34%,rgba(255,190,100,.06) 62%,transparent 84%);
-            filter:blur(14px)}
+            filter:blur(8px)}
+        /* JS lays out five beams; two are dropped here. Each one is a blurred
+           180vh column, so beams four and five cost a full extra layer apiece
+           for fan detail that the bloom underneath already implies. */
+        .pro-rays i:nth-child(n+4){display:none}
         .pro-glow{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
             background:radial-gradient(circle at var(--lx,50%) var(--ly,20%),
                 rgba(255,222,158,.60),rgba(255,186,96,.20) 16%,transparent 42%)}
@@ -573,18 +577,27 @@
         .pro-fogw{position:absolute;inset:0}
         .pro-fog{position:absolute;inset:-30% -40%;background-repeat:no-repeat,no-repeat;
             will-change:transform,opacity}
-        .fog-far  .pro-fog{background-size:82% auto,124% auto;
-            background-position:14% 64%,86% 44%;opacity:.19;filter:blur(10px)}
-        .fog-mid  .pro-fog{background-size:118% auto,156% auto;
-            background-position:78% 72%,8% 52%;opacity:.21;filter:blur(20px);transform:scaleX(-1)}
-        /* The near bank is the single most expensive surface in the build: a
-           blur is O(area), and this one is ~1.8x the viewport in both axes.
-           Inset and radius are both kept to the smallest values that still
-           read as "out of focus", because the alternative is a 6 megapixel
-           gaussian every frame on the one layer nobody looks at directly. */
-        .fog-near .pro-fog{inset:-34% -40%;background-size:172% auto,210% auto;
-            background-position:24% 86%,92% 64%;opacity:.12;filter:blur(32px)}
-        .fog-far,.fog-mid,.fog-near{mix-blend-mode:screen}
+        /* TWO banks, not three: one behind the subject and one in front of it.
+           That is the whole job — the sandwich is what puts the subject inside
+           the volume, and a third bank between them added ~4 megapixels of
+           per-frame blur for a difference nobody could point at.
+
+           Both boxes are also kept as small as the drift allows. A blur costs
+           O(area), and these were oversized to ~3x the viewport for a drift
+           that never needed more than ~20% of it. Overhang is now sized to the
+           actual amplitude in the ambient loop (amp = 4 + f*10 xPercent) plus
+           the scale-up, and not a percent more. */
+        /* Only ONE blur survives in the whole scene, and it is the one doing
+           real work: the near bank in front of the subject. Defocus on the
+           thing closest to the lens is the depth-of-field cue the eye actually
+           reads. The far bank sits BEHIND the subject, where sharpness is what
+           a real lens focused on the subject would give you anyway — so its
+           blur was costing ~2.4 megapixels a frame to be slightly wrong. */
+        .fog-far  .pro-fog{inset:-16% -20%;background-size:82% auto,124% auto;
+            background-position:14% 64%,86% 44%;opacity:.20;filter:none}
+        .fog-near .pro-fog{inset:-20% -24%;background-size:172% auto,210% auto;
+            background-position:24% 86%,92% 64%;opacity:.13;filter:blur(14px)}
+        .fog-far,.fog-near{mix-blend-mode:screen}
 
         /* Layer 5 — CONTACT SHADOW. Grounds the subject to the plate it stands
            on. Sits behind the subject, so it reads as the subject's own shadow
@@ -629,8 +642,14 @@
             background:radial-gradient(circle,rgba(255,240,205,.95),rgba(255,206,128,.34) 44%,transparent 70%);
             animation:moteFly var(--t,26s) linear var(--dl,0s) infinite}
         .mb-far{filter:none;opacity:.62}
-        .mb-mid{filter:blur(1.6px);opacity:.78}
-        .mb-near{filter:blur(4px);opacity:.72}
+        /* Band blur is a full-viewport surface per band. The mid band's 1.6px
+           was below the threshold anyone could see, so it pays nothing for its
+           layer; only the near band keeps a defocus, and a smaller one. */
+        /* Band blur is a full-viewport surface. Bokeh on the near band reads as
+           depth — but so does a bigger, dimmer, slower particle, and that costs
+           nothing. The engine sizes them up to compensate. */
+        .mb-mid{filter:none;opacity:.78}
+        .mb-near{filter:none;opacity:.5}
         @keyframes moteFly{
             0%  {transform:translate3d(0,0,0) scale(1);opacity:0}
             12% {opacity:var(--o,.7)}
@@ -761,50 +780,46 @@
             .pro-bars{height:3.5vh}
         }
         /* =====================================================================
-           TOUCH / SMALL-SCREEN PERFORMANCE PROFILE
-           A gaussian blur costs O(area), and the desktop rig asks for ~16
-           megapixels of it per frame across 29 layers. On a laptop GPU that is
-           free. On a phone — whose whole screen is ~2.4 megapixels of device
-           pixels — it is roughly seven screens' worth of blur every frame, on
-           top of 27 blend passes and 50 compositor promotions. That is what
-           made the intro stutter, and it is an order of magnitude over budget,
-           not a tuning problem.
+           LIGHT PROFILE  —  html.fx-lite
+           A gaussian blur costs O(area), and the full rig asks for several
+           screens' worth of it every frame. Some machines eat that; some do
+           not, and screen size turns out to be a poor proxy for which is which
+           — this build guessed wrong on phones, then guessed wrong again on
+           desktop. So the profile is driven by a CLASS, and the engine decides
+           who gets it: small screens and coarse pointers up front, plus
+           anything that is measurably dropping frames once it starts running.
 
-           So the phone gets a different rig, not a scaled-down one. The rule
-           applied here: keep every cue that is a GRADIENT (free — aerial haze,
-           bloom, rim, contact shadow, vignette) and every cue that is a
-           TRANSFORM (free — the whole scroll dolly, the parallax fan). Drop
-           every cue that needs a per-frame blur or an extra blend pass.
+           The rule: keep every cue that is a GRADIENT (aerial haze, bloom, rim
+           light, contact shadow, vignette — free) and every cue that is a
+           TRANSFORM (the whole scroll dolly and its per-plane parallax fan —
+           also free). Drop every cue that needs a per-frame blur or an extra
+           blend pass.
 
-           Depth survives, because depth was never in the blur: it is in the
-           per-plane dolly, which is pure transform and costs nothing.
-
-           pointer:coarse is included so tablets get this too — they have phone
-           GPUs and no cursor, which is also why the pointer camera is off.
+           Depth survives, because the depth was never in the blur: it is in
+           the per-plane dolly, which costs nothing.
            ===================================================================== */
+        html.fx-lite .fog-near{display:none}                 /* the costliest surface */
+        html.fx-lite .fog-far .pro-fog{filter:none;opacity:.3}
+        /* Blurred 180vh columns. .pro-glow reads as the same light source for
+           the cost of one radial gradient, so the bloom stays and the shafts go. */
+        html.fx-lite .pro-rays{display:none}
+        /* One dust band, unblurred. The engine also cuts the particle count. */
+        html.fx-lite .mb-far,html.fx-lite .mb-near{display:none}
+        html.fx-lite .mb-mid{filter:none}
+        /* soft-light is a full extra blend pass for a grade the plates already
+           mostly carry. */
+        html.fx-lite .pro-tint{display:none}
+        /* Every will-change is a retained full-viewport GPU texture: a handful
+           is prudent, fifty is a memory problem before it is a speed one. Only
+           the two planes genuinely animated every frame keep their promotion. */
+        html.fx-lite :is(.pl,.pw,.pro-fog,.pro-bars,.pro-copy,.pc-eyebrow,.pc-rule,
+            .pc-sub,.pro-copy .w,.outro-copy .w,.out-body,.out-sig,.out-rule){will-change:auto}
+        html.fx-lite :is(.pw-bg,.pro-fg){will-change:transform}
+        /* No-JS floor: the class is applied by the engine, so a phone with
+           scripting off would otherwise paint the full stack. It only paints
+           once with no JS, but there is no reason for it to be expensive. */
         @media(max-width:900px),(pointer:coarse){
-            /* Two of three fog banks and every fog blur. The plates already
-               carry painted atmosphere; the near bank was the single most
-               expensive surface in the build. */
-            .fog-near,.fog-mid{display:none}
-            .fog-far .pro-fog{filter:none;opacity:.3}
-            /* Beams are 5 blurred 180vh columns per scene = 15 live layers.
-               .pro-glow reads as the same light source for the cost of one
-               radial gradient, so the bloom stays and the beams go. */
-            .pro-rays{display:none}
-            /* One dust band, unblurred. JS also cuts the particle count. */
-            .mb-far,.mb-near{display:none}
-            .mb-mid{filter:none}
-            /* soft-light is a full extra blend pass for a grade the plates
-               mostly already have. */
-            .pro-tint{display:none}
-            /* Every will-change is a retained GPU texture. At full-viewport
-               size, a handful is prudent and fifty is a memory problem — so
-               only the two planes that are genuinely animated every frame
-               keep their promotion. */
-            .pl,.pw,.pro-fog,.pro-bars,.pro-copy,.pc-eyebrow,.pc-rule,.pc-sub,
-            .pro-copy .w,.outro-copy .w,.out-body,.out-sig,.out-rule{will-change:auto}
-            .pw-bg,.pro-fg{will-change:transform}
+            html:not(.fx-lite) .fog-near,html:not(.fx-lite) .pro-rays{display:none}
         }
         /* =====================================================================
            V4: CINEMATIC OUTRO — the last frame, after the footer
@@ -989,7 +1004,6 @@
                     <div class="pl" data-d=".46"><div class="pw"><div class="pro-contact"></div></div></div>
                     <div class="pl" data-d=".44"><div class="pw pw-fg"><div class="pro-fgw"><div class="pro-fg"></div></div></div></div>
                     <div class="pl" data-d=".42"><div class="pw"><div class="pro-rim"></div></div></div>
-                    <div class="pl fog-mid" data-d=".26"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
                     <div class="pl fog-near" data-d=".08"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
                     <div class="pro-tint"></div>
                     <div class="pro-grade"></div>
@@ -1018,7 +1032,6 @@
                     <div class="pl" data-d=".46"><div class="pw"><div class="pro-contact"></div></div></div>
                     <div class="pl" data-d=".44"><div class="pw pw-fg"><div class="pro-fgw"><div class="pro-fg"></div></div></div></div>
                     <div class="pl" data-d=".42"><div class="pw"><div class="pro-rim"></div></div></div>
-                    <div class="pl fog-mid" data-d=".26"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
                     <div class="pl fog-near" data-d=".08"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
                     <div class="pro-tint"></div>
                     <div class="pro-grade"></div>
@@ -1046,7 +1059,6 @@
                     <div class="pl" data-d=".46"><div class="pw"><div class="pro-contact"></div></div></div>
                     <div class="pl" data-d=".44"><div class="pw pw-fg"><div class="pro-fgw"><div class="pro-fg"></div></div></div></div>
                     <div class="pl" data-d=".42"><div class="pw"><div class="pro-rim"></div></div></div>
-                    <div class="pl fog-mid" data-d=".26"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
                     <div class="pl fog-near" data-d=".08"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
                     <div class="pro-tint"></div>
                     <div class="pro-grade"></div>
@@ -1611,7 +1623,6 @@
             <div class="pl" data-d=".46"><div class="pw"><div class="pro-contact"></div></div></div>
             <div class="pl" data-d=".44"><div class="pw pw-fg"><div class="pro-fgw"><div class="pro-fg out-traveler"></div></div></div></div>  <!-- 5 traveler -->
             <div class="pl" data-d=".42"><div class="pw"><div class="pro-rim"></div></div></div>
-            <div class="pl fog-mid" data-d=".26"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
             <div class="pl pl-dust" data-d=".18"><div class="pw"><div class="out-dust b"></div></div></div>
             <div class="pl fog-near" data-d=".08"><div class="pw"><div class="pro-fogw"><div class="pro-fog"></div></div></div></div>
             <div class="pl" data-d=".14" style="z-index:2"><div class="pro-motes mb-mid"></div></div>
@@ -1929,8 +1940,20 @@
                 var g = { planes: planes, live: true };
                 groups.push(g);
                 bind(); wake();
+                function scan(){
+                    g.planes = [];
+                    Array.prototype.forEach.call(root.querySelectorAll('.pl[data-d]'), function(el){
+                        var d = parseFloat(el.getAttribute('data-d'));
+                        if(isNaN(d) || getComputedStyle(el).display === 'none') return;
+                        g.planes.push({ el: el, f: 1 - Math.max(0, Math.min(1, d)) });
+                    });
+                    planes = g.planes;
+                }
                 return {
                     live: function(v){ g.live = !!v; if(v) wake(); },
+                    /* Re-read which planes still exist, for when the quality
+                       tier changes after boot and some of them go display:none. */
+                    rescan: function(){ scan(); wake(); },
                     /* f for a plane, so callers can key other motion (the scroll
                        dolly, ambient amplitudes) off the same depth number. */
                     factor: function(el){
@@ -2021,10 +2044,52 @@
         var RM  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var MOB = window.matchMedia('(max-width:768px)').matches;
         var TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-        var BLUR = !MOB;                       /* full-screen blur is desktop-only */
-        /* Mirrors the CSS performance-profile query exactly. If you change one,
-           change the other — they have to agree about which planes exist. */
+        /* ---- Quality tier ------------------------------------------------
+           Small screens and coarse pointers start light. Everyone else starts
+           full and has to EARN it — see the watchdog below. Screen size is a
+           poor proxy for GPU: this build shipped a stutter to phones by
+           assuming desktop budgets, then shipped one to desktops by assuming
+           the phone fix was enough. Measuring beats guessing. */
         var LOWFX = window.matchMedia('(max-width:900px),(pointer:coarse)').matches;
+        function setLite(on){
+            LOWFX = on;
+            document.documentElement.classList.toggle('fx-lite', on);
+        }
+        setLite(LOWFX);
+        var BLUR = !LOWFX;                     /* rack focus is a full-screen blur */
+
+        /* ---- Frame-rate watchdog ----------------------------------------
+           Samples real frame intervals once the film is running and drops to
+           the light profile if the machine cannot hold a smooth rate. It only
+           ever downgrades, never upgrades, so the picture can never oscillate
+           mid-scroll. Deliberately slow to fire: it wants a sustained problem,
+           not the GC pause or the first-paint hitch that every page has.
+
+           This is the honest answer to "will it run well on your machine?",
+           which no amount of emulation here can predict. */
+        function watchFrames(){
+            if(LOWFX || RM) return;
+            var frames = 0, slow = 0, last = performance.now(), started = last;
+            function tick(now){
+                var dt = now - last; last = now;
+                /* Ignore the first second (decode, layout, first composite) and
+                   any single hitch over 200ms (tab switch, GC, image decode). */
+                if(now - started > 1000 && dt < 200){
+                    frames++;
+                    if(dt > 22) slow++;          /* slower than ~45fps */
+                }
+                if(frames >= 180){               /* ~3s of real frames */
+                    if(slow / frames > 0.25){    /* a quarter of them late */
+                        setLite(true);
+                        if(window.__onFxLite) window.__onFxLite();
+                    }
+                    return;                      /* one verdict, then stop */
+                }
+                requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        }
+
         var SOFT_SNAP = !TOUCH && window.innerWidth > 900;
         var SNAP_TOLERANCE = 0.14;             /* soft snap fires only within 14% of a viewport */
 
@@ -2117,7 +2182,7 @@
                with one unblurred band of 8 rather than three bands of 50. */
             DEPTH.motes(pro.querySelector('.mb-far'),  24, {min:1.0, max:2.0, o:0.55, t:46, tv:26});
             DEPTH.motes(pro.querySelector('.mb-mid'),  LOWFX ? 8 : 16, {min:2.0, max:3.6, o:0.70, t:34, tv:20});
-            DEPTH.motes(pro.querySelector('.mb-near'), 10, {min:4.0, max:8.0, o:0.55, t:22, tv:14});
+            DEPTH.motes(pro.querySelector('.mb-near'), 10, {min:7.0, max:14.0, o:0.42, t:26, tv:16});
             /* The camera only drives the prologue while the prologue is on
                screen; past the handoff those writes would be wasted work. */
             var cam = DEPTH.add(pro);
@@ -2343,7 +2408,7 @@
                    Desktop only — a full-screen blur is the most expensive thing
                    in the scene and phones do not need convincing. */
                 if(BLUR && c.bgw){
-                    tl.to(c.bgw, {filter:'blur(9px)', ease:'power2.in', duration:(tB-i)*0.9}, i+(tB-i)*0.1);
+                    tl.to(c.bgw, {filter:'blur(6px)', ease:'power2.in', duration:(tB-i)*0.9}, i+(tB-i)*0.1);
                 }
 
                 /* Copy leaves first, staggered, so the frame empties before it cuts */
@@ -2370,7 +2435,7 @@
                                      duration:(i+1)-tA}, tA);
                 });
                 if(n.bgw){
-                    tl.fromTo(n.bgw, {filter: BLUR ? 'blur(15px)' : 'blur(0px)'},
+                    tl.fromTo(n.bgw, {filter: BLUR ? 'blur(9px)' : 'blur(0px)'},
                                      {filter:'blur(0px)', ease:'power2.out', duration:(i+1)-tA}, tA);
                 }
 
@@ -2606,6 +2671,22 @@
             }
             window.addEventListener('load', function(){ setTimeout(resync, 260); });
             setTimeout(resync, 400);
+
+            /* If the watchdog downgrades us mid-film, the planes it just hid
+               are gone from the compositor immediately (display:none) — but
+               their tweens would keep writing styles to elements that paint
+               nothing, and the camera would keep transforming them. Drop both. */
+            window.__onFxLite = function(){
+                if(cam) cam.rescan();
+                AMB.forEach(function(list){
+                    for(var i = list.length - 1; i >= 0; i--){
+                        var tg = list[i].targets()[0];
+                        if(tg && !shown(tg)){ list[i].kill(); list.splice(i, 1); }
+                    }
+                });
+                ScrollTrigger.refresh();
+            };
+            watchFrames();
         }
     })();
     </script>
@@ -2669,7 +2750,7 @@
             if(DEPTH){
                 DEPTH.rays(sec);
                 DEPTH.motes(sec.querySelector('.mb-mid'),  LOWFX ? 8 : 16, {min:2.0, max:3.6, o:0.70, t:34, tv:20});
-                DEPTH.motes(sec.querySelector('.mb-near'), 10, {min:4.0, max:8.0, o:0.55, t:22, tv:14});
+                DEPTH.motes(sec.querySelector('.mb-near'), 10, {min:7.0, max:14.0, o:0.42, t:26, tv:16});
                 cam = DEPTH.add(sec);
                 cam.live(false);                     /* woken by the visibility trigger below */
             }
