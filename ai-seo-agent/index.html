@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoSEO.ai | AI SEO Agent — Master Dashboard</title>
+<meta name="description" content="Interactive prototype of an autonomous SEO agent pipeline: campaign config, silo architecture, keyword matrix approval, content factory and generated page preview.">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+if (window.tailwind) tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'ui-monospace', 'monospace'] },
+      colors: {
+        dark: { 900: '#0B0F19', 850: '#101725', 800: '#151C2C', 700: '#1E293B', 600: '#334155' },
+        brand: { 600: '#4F46E5', 500: '#6366F1', 400: '#818CF8', 300: '#A5B4FC' }
+      }
+    }
+  }
+}
+</script>
+
+<style>
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0B0F19; }
+  ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+  body { background-image:
+      radial-gradient(60rem 40rem at 12% -10%, rgba(99,102,241,0.13), transparent 60%),
+      radial-gradient(50rem 40rem at 100% 0%, rgba(168,85,247,0.10), transparent 55%);
+    background-attachment: fixed; }
+
+  .glass-panel { background: rgba(21, 28, 44, 0.66); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.06); }
+  .dark-input { background-color: #0B0F19; border: 1px solid #1E293B; color: #E2E8F0; transition: all .2s ease; }
+  .dark-input:focus { outline: none; border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,0.18); }
+  .dark-input::placeholder { color: #475569; }
+
+  .btn-primary { background-image: linear-gradient(to right, #6366F1, #9333EA); box-shadow: 0 0 24px rgba(99,102,241,.28); transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+  .btn-primary:hover { filter: brightness(1.1); box-shadow: 0 0 34px rgba(99,102,241,.45); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .45; filter: grayscale(.6); box-shadow: none; transform: none; cursor: not-allowed; }
+
+  /* Boot screen */
+  #boot-screen { transition: opacity .7s ease-in-out, visibility .7s; z-index: 9999; }
+  .glitch-text { animation: glitch 1.6s linear infinite; }
+  @keyframes glitch { 2%,64% { transform: translate(2px,0) skew(0deg); } 4%,60% { transform: translate(-2px,0) skew(0deg); } 62% { transform: translate(0,0) skew(5deg); } }
+  @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+  /* Views */
+  .app-view { display: none; }
+  .app-view.active { display: block; animation: fadeIn .4s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Toasts */
+  .toast-enter { animation: slideIn .32s cubic-bezier(.16,1,.3,1) forwards; }
+  .toast-exit  { animation: slideOut .3s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes slideIn  { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+
+  /* Excel table */
+  .excel-table { border-collapse: separate; border-spacing: 0; }
+  .excel-table th, .excel-table td { border-right: 1px solid #24314a; border-bottom: 1px solid #24314a; padding: .55rem .75rem; vertical-align: top; }
+  .excel-table th { background-color: #151C2C; font-weight: 600; color: #94A3B8; text-transform: uppercase; font-size: .625rem; letter-spacing: .06em; position: sticky; top: 0; z-index: 5; border-top: 1px solid #24314a; white-space: nowrap; }
+  .excel-row:hover td { background-color: rgba(99,102,241,.05); }
+  .excel-row.is-approved td { background-color: rgba(16,185,129,.055); }
+  .excel-cell-id { background-color: #151C2C; text-align: center; color: #64748B; font-size: .68rem; font-weight: 700; width: 38px; }
+  .kw-chip { background:#0F1626; border:1px solid #263349; padding:.1rem .4rem; border-radius:.25rem; white-space:nowrap; }
+
+  /* Tree */
+  .tree-children { margin-left: .35rem; padding-left: 1.5rem; }
+  .tree-item { position: relative; padding: .18rem 0; }
+  .tree-item::before { content:''; position:absolute; left:-1.5rem; top: 1.02rem; width: 1.15rem; height: 1px; background:#334155; }
+  .tree-item::after  { content:''; position:absolute; left:-1.5rem; top: 0; bottom: 0; width: 1px; background:#334155; }
+  .tree-item:last-child::after { bottom: auto; height: 1.02rem; }
+  .node { display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; padding:.3rem .6rem; border-radius:.4rem; }
+  .node-new { color:#34D399; background: rgba(16,185,129,.06); border:1px solid rgba(16,185,129,.22); box-shadow: inset 2px 0 0 #10B981; }
+  .badge { font-size:10px; letter-spacing:.06em; padding:.1rem .45rem; border-radius:.25rem; text-transform:uppercase; font-weight:700; }
+
+  .pulse-dot { animation: pulseDot 1.4s ease-in-out infinite; }
+  @keyframes pulseDot { 0%,100% { opacity:.25; transform: scale(.85);} 50% { opacity:1; transform: scale(1);} }
+
+  .log-line { animation: logIn .3s ease-out forwards; }
+  @keyframes logIn { from { opacity:0; transform: translateY(4px);} to { opacity:1; transform:none; } }
+
+  .vp-btn.active { background:#1E293B; color:#fff; border-color:#334155; }
+</style>
+</head>
+
+<body class="bg-dark-900 text-gray-200 font-sans h-screen flex overflow-hidden selection:bg-brand-500 selection:text-white">
+
+<!-- ══════════════════════ BOOT SCREEN ══════════════════════ -->
+<div id="boot-screen" class="fixed inset-0 bg-dark-900 flex flex-col items-center justify-center font-mono">
+  <div class="relative w-32 h-32 mb-8">
+    <div class="absolute inset-0 rounded-full border border-brand-500/20"></div>
+    <div class="absolute inset-2 rounded-full border-t-2 border-brand-500 animate-spin" style="animation-duration:3s;"></div>
+    <div class="absolute inset-4 rounded-full border-b-2 border-purple-500 animate-spin" style="animation-duration:2s; animation-direction:reverse;"></div>
+    <div class="absolute inset-0 flex items-center justify-center text-brand-400 text-4xl glitch-text"><i class="fa-solid fa-robot"></i></div>
+  </div>
+  <div class="w-80 h-32 bg-dark-800/50 rounded p-4 border border-dark-700 overflow-hidden relative shadow-[0_0_40px_rgba(99,102,241,0.18)]">
+    <div class="absolute left-0 w-full h-[1px] bg-brand-500/60" style="animation: scan 1.5s infinite linear;"></div>
+    <div id="boot-logs" class="text-[11px] text-brand-400 space-y-1 flex flex-col justify-end h-full"></div>
+  </div>
+  <div class="mt-5 text-[10px] tracking-[0.35em] text-gray-500 uppercase animate-pulse">System Initializing</div>
+</div>
+
+<!-- ══════════════════════ SIDEBAR ══════════════════════ -->
+<div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 z-30 hidden md:hidden"></div>
+
+<aside id="sidebar" class="w-64 bg-dark-800/95 backdrop-blur-xl border-r border-dark-700 flex-shrink-0 flex flex-col z-40
+        fixed inset-y-0 left-0 -translate-x-full transition-transform duration-300 md:static md:translate-x-0">
+  <div class="h-16 flex items-center px-6 border-b border-dark-700">
+    <div class="flex items-center gap-2 text-white font-bold text-lg tracking-wide">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-[0_0_18px_rgba(99,102,241,.45)]">
+        <i class="fa-solid fa-robot text-sm"></i>
+      </div>
+      AutoSEO<span class="text-brand-500">.ai</span>
+    </div>
+  </div>
+
+  <nav class="flex-1 py-6 px-3 space-y-1.5 overflow-y-auto" id="sidebar-nav">
+    <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-[0.15em] mb-3 px-3">Pipeline Stages</div>
+
+    <button class="nav-btn w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" data-view="view-onboarding">
+      <i class="fa-solid fa-rocket w-5 text-center"></i><span class="font-medium text-sm">1. Campaign Config</span>
+      <i class="fa-solid fa-circle-check ml-auto text-[11px] stage-tick opacity-0 text-emerald-400"></i>
+    </button>
+    <button class="nav-btn w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" data-view="view-silo">
+      <i class="fa-solid fa-sitemap w-5 text-center"></i><span class="font-medium text-sm">2. Silo Architect</span>
+      <i class="fa-solid fa-circle-check ml-auto text-[11px] stage-tick opacity-0 text-emerald-400"></i>
+    </button>
+    <button class="nav-btn w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" data-view="view-mapping">
+      <i class="fa-solid fa-table w-5 text-center"></i><span class="font-medium text-sm">3. Keyword Matrix</span>
+      <i class="fa-solid fa-circle-check ml-auto text-[11px] stage-tick opacity-0 text-emerald-400"></i>
+    </button>
+    <button class="nav-btn w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" data-view="view-factory">
+      <i class="fa-solid fa-industry w-5 text-center"></i><span class="font-medium text-sm">4. Content Factory</span>
+      <i class="fa-solid fa-circle-check ml-auto text-[11px] stage-tick opacity-0 text-emerald-400"></i>
+    </button>
+    <button class="nav-btn w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" data-view="view-output" id="nav-output-btn">
+      <i class="fa-solid fa-laptop-code w-5 text-center"></i><span class="font-medium text-sm">5. Generated Output</span>
+      <i class="fa-solid fa-circle-check ml-auto text-[11px] stage-tick opacity-0 text-emerald-400"></i>
+    </button>
+
+    <div class="pt-6">
+      <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-[0.15em] mb-3 px-3">Campaign</div>
+      <div class="mx-1 rounded-lg border border-dark-700 bg-dark-900/60 p-3 space-y-2.5">
+        <div class="flex items-center justify-between text-[11px]"><span class="text-gray-500">Domain</span><span id="side-domain" class="text-gray-300 font-mono truncate max-w-[110px]">—</span></div>
+        <div class="flex items-center justify-between text-[11px]"><span class="text-gray-500">Pages queued</span><span id="side-pages" class="text-gray-300 font-mono">0</span></div>
+        <div class="flex items-center justify-between text-[11px]"><span class="text-gray-500">Approved</span><span id="side-approved" class="text-emerald-400 font-mono">0</span></div>
+        <div class="h-1 rounded-full bg-dark-700 overflow-hidden"><div id="side-progress" class="h-full bg-gradient-to-r from-brand-500 to-purple-500 transition-all duration-500" style="width:0%"></div></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="p-3 border-t border-dark-700">
+    <button onclick="resetCampaign()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs text-gray-400 hover:text-gray-200 hover:bg-dark-700 transition-all">
+      <i class="fa-solid fa-rotate-right"></i> Reset pipeline
+    </button>
+  </div>
+</aside>
+
+<!-- ══════════════════════ MAIN ══════════════════════ -->
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+  <header class="h-16 flex items-center justify-between gap-4 px-4 md:px-8 bg-dark-900/80 backdrop-blur-md border-b border-dark-700 z-20">
+    <div class="flex items-center gap-3 min-w-0">
+      <button id="sidebar-toggle" class="md:hidden w-9 h-9 rounded-lg border border-dark-700 text-gray-400 hover:text-white flex-shrink-0"><i class="fa-solid fa-bars"></i></button>
+      <div class="min-w-0">
+        <h1 class="text-lg md:text-xl font-semibold text-white truncate" id="header-title">Campaign Configuration</h1>
+        <div class="text-xs text-gray-400 truncate" id="header-subtitle">Define constraints &amp; launch agents</div>
+      </div>
+    </div>
+    <div class="hidden sm:flex items-center gap-3 flex-shrink-0">
+      <div class="flex items-center gap-2 text-[11px] text-gray-400 bg-dark-800 border border-dark-700 rounded-full px-3 py-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span> Agents online
+      </div>
+      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white">KN</div>
+    </div>
+  </header>
+
+  <div class="flex-1 overflow-y-auto p-4 md:p-8">
+    <div class="max-w-6xl mx-auto pb-24">
+
+      <!-- ═══════ VIEW 1 — CAMPAIGN CONFIGURATION ═══════ -->
+      <div id="view-onboarding" class="app-view active space-y-6">
+
+        <div class="glass-panel rounded-xl p-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-dark-900 border border-dark-600 flex items-center justify-center text-brand-400"><i class="fa-solid fa-terminal"></i></div>
+              <div>
+                <h2 class="text-lg font-semibold text-white">Campaign Master Prompt</h2>
+                <p class="text-sm text-gray-400">Define strategy, limits and the Location × Service matrix.</p>
+              </div>
+            </div>
+            <select id="in-strategy" class="dark-input rounded-lg py-2 px-3 text-sm border-brand-500/50 text-brand-300">
+              <option value="local">Strategy: Location + Service Pages</option>
+              <option value="national">Strategy: National / E-Com</option>
+              <option value="info">Strategy: Informational Silo</option>
+            </select>
+          </div>
+
+          <textarea id="in-prompt" spellcheck="false" class="dark-input w-full rounded-lg py-3 px-4 text-[13px] h-64 font-mono text-gray-300 leading-relaxed resize-y">Package: Custom Enterprise
+Limits: Target 10 URLs max. 4 keywords per URL (1 Focus, 3 Secondary).
+
+Strategy: Generate hyper-local service pages based on the following matrix:
+- Lafayette Water Damage
+- Lafayette Mold Remediation
+- Youngsville Water Damage
+- Youngsville Mold Remediation
+- Abbeville Water Damage
+- Abbeville Mold Remediation
+- Scott Water Damage
+- Scott Mold Remediation
+- New Iberia Water Damage
+- New Iberia Mold Remediation</textarea>
+
+          <div class="flex flex-wrap items-center gap-2 mt-3 text-[11px] text-gray-500">
+            <i class="fa-solid fa-circle-info text-brand-400"></i>
+            <span>One <span class="text-gray-300">Location + Service</span> pair per line, prefixed with <code class="text-brand-300">-</code>. The parser reads this live:</span>
+            <span id="prompt-parse-hint" class="text-emerald-400 font-mono">0 pairs detected</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="glass-panel rounded-xl p-6">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-lg bg-dark-900 border border-dark-600 flex items-center justify-center text-brand-400"><i class="fa-solid fa-globe"></i></div>
+              <div><h2 class="text-lg font-semibold text-white">Client Identity</h2><p class="text-sm text-gray-400">Primary domain to optimize.</p></div>
+            </div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Target URL <span class="text-red-400">*</span></label>
+            <input id="in-url" type="url" placeholder="https://example.com" class="dark-input w-full rounded-lg py-2.5 px-4 text-sm" value="https://aivastconstruction.com">
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-gray-300 mb-2">Primary Business Category</label>
+              <input id="in-category" type="text" class="dark-input w-full rounded-lg py-2.5 px-4 text-sm" value="Restoration &amp; General Contracting">
+            </div>
+          </div>
+
+          <div class="glass-panel rounded-xl p-6">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-lg bg-dark-900 border border-dark-600 flex items-center justify-center text-purple-400"><i class="fa-solid fa-sliders"></i></div>
+              <div><h2 class="text-lg font-semibold text-white">Resource Allocation</h2><p class="text-sm text-gray-400">Hard limits for this campaign run.</p></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">Max New URLs</label>
+                <input id="in-max" type="number" min="1" max="50" value="10" class="dark-input w-full rounded-lg py-2 px-3 text-sm text-center font-mono">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">Keywords / URL</label>
+                <input type="text" value="1 Focus + 3 Secondary" readonly class="dark-input w-full rounded-lg py-2 px-3 text-sm text-center text-gray-500 cursor-not-allowed">
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">Target Geo-Zones</label>
+                <input id="in-geo" type="text" value="Lafayette, Youngsville, Abbeville, Scott, New Iberia" class="dark-input w-full rounded-lg py-2 px-3 text-sm">
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">Blog Silo Support Articles</label>
+                <input id="in-blogs" type="number" min="0" max="6" value="2" class="dark-input w-full rounded-lg py-2 px-3 text-sm text-center font-mono">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-end gap-3">
+          <button onclick="loadSample()" class="px-5 py-3 rounded-lg border border-dark-600 text-gray-300 hover:bg-dark-800 text-sm transition-all">
+            <i class="fa-solid fa-wand-magic-sparkles mr-2 text-brand-400"></i>Load sample matrix
+          </button>
+          <button onclick="runDiscovery()" class="btn-primary px-6 py-3 text-white font-medium rounded-lg flex items-center justify-center gap-3">
+            <i class="fa-solid fa-satellite-dish text-lg"></i><span>Run Discovery Audit</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════ VIEW 2 — SILO ARCHITECT ═══════ -->
+      <div id="view-silo" class="app-view space-y-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Proposed Site Architecture</h2>
+            <p class="text-sm text-gray-400">Crawl of existing URLs merged with the AI-proposed silo from your matrix.</p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[11px]">
+            <span class="badge bg-dark-700 text-gray-400 border border-dark-600">Existing</span>
+            <span class="badge bg-brand-500/20 text-brand-300 border border-brand-500/30">Core Pillar</span>
+            <span class="badge bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">Proposed New</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-panel rounded-xl p-4"><div class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Crawled URLs</div><div class="text-2xl font-bold text-white" id="stat-crawled">0</div></div>
+          <div class="glass-panel rounded-xl p-4"><div class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Proposed New</div><div class="text-2xl font-bold text-emerald-400" id="stat-proposed">0</div><div class="text-[10px] text-gray-500 mt-0.5" id="stat-proposed-split">&nbsp;</div></div>
+          <div class="glass-panel rounded-xl p-4"><div class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Silo Depth</div><div class="text-2xl font-bold text-white">3</div></div>
+          <div class="glass-panel rounded-xl p-4"><div class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Geo-Zones</div><div class="text-2xl font-bold text-brand-300" id="stat-geo">0</div></div>
+        </div>
+
+        <div id="silo-notice" class="hidden rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs px-4 py-3"></div>
+
+        <div class="glass-panel rounded-xl p-5 md:p-6 font-mono text-[13px] bg-[#0B0F19]/80 overflow-x-auto">
+          <div id="silo-tree" class="min-w-[520px]"></div>
+        </div>
+
+        <div class="flex justify-end">
+          <button onclick="runKeywordMap()" class="btn-primary px-6 py-3 text-white font-medium rounded-lg flex items-center gap-3">
+            <i class="fa-solid fa-table-list text-lg"></i><span>Execute Step 2: Generate Keyword Map</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════ VIEW 3 — KEYWORD MATRIX ═══════ -->
+      <div id="view-mapping" class="app-view space-y-4">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Keyword Matrix Mapping</h2>
+            <p class="text-sm text-gray-400">1 Focus Keyword + 3 Secondary Keywords per URL. Approve rows to unlock the factory.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="approveAll()" class="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded text-xs hover:bg-emerald-500/20 transition-all"><i class="fa-solid fa-check-double mr-1.5"></i>Approve all</button>
+            <button onclick="exportCSV()" class="px-3 py-1.5 bg-dark-700 text-gray-300 rounded text-xs border border-dark-600 hover:bg-dark-600 transition-all"><i class="fa-solid fa-download mr-1.5"></i>Export CSV</button>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-lg border border-dark-600 overflow-hidden shadow-2xl">
+          <div class="bg-dark-800 border-b border-dark-600 px-4 py-2 flex items-center gap-3 text-gray-400 text-xs">
+            <i class="fa-solid fa-font"></i><i class="fa-solid fa-bold"></i>
+            <div class="w-px h-4 bg-dark-600"></div>
+            <i class="fa-solid fa-align-left text-white"></i><i class="fa-solid fa-align-center"></i>
+            <div class="w-px h-4 bg-dark-600"></div>
+            <span class="bg-dark-900 px-2 py-1 rounded border border-dark-700 w-full font-mono text-[10px] truncate">fx = MATCH(URL, KEYWORD_INTENT) → SERP_VOLUME(geo)</span>
+          </div>
+          <div class="overflow-auto bg-dark-900 max-h-[58vh]">
+            <table class="w-full text-left excel-table">
+              <thead>
+                <tr>
+                  <th class="excel-cell-id"></th>
+                  <th>A · Target URL</th>
+                  <th>B · Focus Keyword</th>
+                  <th class="text-right">C · Vol</th>
+                  <th class="text-right">D · KD</th>
+                  <th>E · Secondary Keywords (3)</th>
+                  <th>F · Content Suggestions</th>
+                  <th class="text-center">G · Status</th>
+                </tr>
+              </thead>
+              <tbody id="matrix-body" class="text-sm text-gray-300"></tbody>
+            </table>
+          </div>
+          <div class="bg-dark-800 border-t border-dark-600 px-4 py-2 flex items-center justify-between text-[11px] text-gray-500 font-mono">
+            <span id="matrix-status">Ready</span>
+            <span>Sheet 1 of 1 · AutoSEO Engine v2.4</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="btn-run-factory" onclick="runFactory()" class="btn-primary px-6 py-3 text-white font-medium rounded-lg flex items-center gap-3">
+            <i class="fa-solid fa-industry text-lg"></i><span>Execute Step 3: Run Content Factory</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════ VIEW 4 — CONTENT FACTORY ═══════ -->
+      <div id="view-factory" class="app-view space-y-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Content Factory — Live</h2>
+            <p class="text-sm text-gray-400">Four agents executing in parallel against approved rows.</p>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] uppercase tracking-wider text-gray-500">Overall</div>
+            <div class="text-2xl font-bold text-white font-mono"><span id="factory-total">0</span>%</div>
+          </div>
+        </div>
+
+        <div id="agent-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+
+        <div class="glass-panel rounded-xl p-4">
+          <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-gray-500 mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span> Agent stream
+          </div>
+          <div id="factory-log" class="font-mono text-[11px] text-gray-400 space-y-1 h-44 overflow-y-auto pr-2"></div>
+        </div>
+
+        <div class="text-center pt-2">
+          <p class="text-gray-400 mb-4 text-sm" id="factory-caption">Agents are drafting assets…</p>
+          <button id="btn-preview" disabled onclick="openOutput()" class="btn-primary px-8 py-4 text-white font-bold rounded-lg flex items-center gap-3 mx-auto">
+            <i class="fa-solid fa-eye text-lg"></i><span>Preview Generated Landing Page</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════ VIEW 5 — GENERATED OUTPUT ═══════ -->
+      <div id="view-output" class="app-view space-y-4">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Generated Asset: CRO Landing Page</h2>
+            <p class="text-sm text-gray-400 font-mono" id="output-target">/water-damage-restoration-lafayette</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <div class="flex rounded-lg border border-dark-600 overflow-hidden">
+              <button data-vp="100%"  class="vp-btn active px-3 py-2 text-xs text-gray-400 border-r border-dark-600" title="Desktop"><i class="fa-solid fa-desktop"></i></button>
+              <button data-vp="820px" class="vp-btn px-3 py-2 text-xs text-gray-400 border-r border-dark-600" title="Tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
+              <button data-vp="420px" class="vp-btn px-3 py-2 text-xs text-gray-400" title="Mobile"><i class="fa-solid fa-mobile-screen"></i></button>
+            </div>
+            <button onclick="injectLandingPage(true)" class="px-4 py-2 bg-dark-700 border border-dark-600 text-gray-300 rounded text-sm hover:bg-dark-600 transition-all"><i class="fa-solid fa-rotate-right mr-2"></i>Reload</button>
+            <button onclick="exportHTML()" class="px-4 py-2 bg-brand-500 text-white rounded text-sm font-medium hover:bg-brand-400 shadow-lg transition-all"><i class="fa-solid fa-code mr-2"></i>Export HTML</button>
+          </div>
+        </div>
+
+        <div id="preview-shell" class="w-full mx-auto transition-all duration-300 rounded-xl overflow-hidden border border-dark-600 shadow-2xl bg-white flex flex-col h-[76vh]">
+          <div class="bg-[#1e1e1e] border-b border-[#333] px-4 py-3 flex items-center gap-4 shrink-0">
+            <div class="flex gap-2 shrink-0">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            </div>
+            <div class="bg-[#333] text-gray-300 text-[11px] font-mono py-1 px-4 rounded w-full max-w-md text-center mx-auto flex items-center justify-center gap-2 truncate">
+              <i class="fa-solid fa-lock text-[9px] text-emerald-400"></i><span id="preview-url" class="truncate">aivastconstruction.com/water-damage-restoration-lafayette</span>
+            </div>
+            <div class="text-gray-500 text-xs shrink-0 hidden sm:block"><i class="fa-solid fa-arrows-rotate"></i></div>
+          </div>
+          <div class="relative w-full grow bg-white">
+            <iframe id="html-preview-frame" title="Generated landing page preview" class="w-full h-full border-none bg-white"></iframe>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="glass-panel rounded-xl p-4"><div class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Word count</div><div class="text-xl font-bold text-white">1,480</div></div>
+          <div class="glass-panel rounded-xl p-4"><div class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">On-page score</div><div class="text-xl font-bold text-emerald-400">96 / 100</div></div>
+          <div class="glass-panel rounded-xl p-4"><div class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Schema</div><div class="text-xl font-bold text-white">LocalBusiness + FAQ</div></div>
+          <div class="glass-panel rounded-xl p-4"><div class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">CTAs placed</div><div class="text-xl font-bold text-brand-300">7</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════════════ PROCESSING OVERLAY ══════════════════════ -->
+<div id="processing-overlay" class="fixed inset-0 bg-dark-900/95 z-50 hidden flex-col items-center justify-center backdrop-blur-md">
+  <div class="w-20 h-20 relative mb-6">
+    <div class="absolute inset-0 rounded-full border-4 border-dark-700"></div>
+    <div class="absolute inset-0 rounded-full border-4 border-brand-500 border-t-transparent animate-spin"></div>
+    <div class="absolute inset-0 flex items-center justify-center text-brand-400 text-2xl"><i class="fa-solid fa-robot"></i></div>
+  </div>
+  <h2 class="text-2xl font-bold text-white mb-2">Agent Working</h2>
+  <p class="text-gray-400 mb-6 w-80 md:w-96 text-center text-sm" id="processing-text">Executing instructions…</p>
+  <div class="w-80 md:w-96 h-1 rounded-full bg-dark-700 overflow-hidden mb-6">
+    <div id="processing-bar" class="h-full bg-gradient-to-r from-brand-500 to-purple-500 transition-all duration-200" style="width:0%"></div>
+  </div>
+  <div id="processing-log" class="font-mono text-[11px] text-brand-400/80 space-y-1 h-20 w-80 md:w-96 text-center"></div>
+</div>
+
+<!-- ══════════════════════ TOASTS ══════════════════════ -->
+<div id="toast-container" class="fixed bottom-6 right-6 z-[60] flex flex-col gap-3 w-[320px] max-w-[calc(100vw-3rem)]"></div>
+
+<!--
+  ══════════════════════════════════════════════════════════════════
+  RAW GENERATED HTML — the Content Agent's output.
+  Stored as inert text inside a <template> so the parser cannot strip
+  the <!DOCTYPE>, <html> or <body> attributes, and so its Tailwind
+  build can never collide with the dashboard's own Tailwind config.
+  Injected into the iframe via srcdoc when View 5 opens.
+  ══════════════════════════════════════════════════════════════════
+-->
+<template id="raw-html">
+<script type="text/html" id="raw-html-source"><!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Water Damage Restoration Lafayette, LA | 24/7 Emergency | Aivast</title>
+<meta name="description" content="24/7 emergency water damage restoration in Lafayette, LA. Water extraction, structural drying, mold remediation and full rebuild. Licensed, insured, insurance-approved. Call (337) 345-1078.">
+<link rel="canonical" href="https://aivastconstruction.com/water-damage-restoration-lafayette">
+<script src="https://cdn.tailwindcss.com"><\/script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>
+if (window.tailwind) tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Inter','sans-serif'], serif: ['Montserrat','sans-serif'] },
+      colors: {
+        brand: {
+          primary: '#b91c1c', secondary: '#1a3258', fourth: '#234173',
+          fifth: '#4a5568', sixth: '#a0aec0', bg1: '#ffffff', bg2: '#f8fafc'
+        }
+      },
+      boxShadow: {
+        premium: '0 20px 40px -10px rgba(0,0,0,0.08)',
+        float: '0 10px 30px -5px rgba(185,28,28,0.3)'
+      },
+      letterSpacing: { 'widest-lux': '0.15em' }
+    }
+  }
+}
+<\/script>
+<style>
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #fafafa; }
+  ::-webkit-scrollbar-thumb { background: #b91c1c; border-radius: 4px; }
+  .btn-luxury { position: relative; z-index: 1; overflow: hidden; transition: color .4s cubic-bezier(.25,1,.5,1); }
+  .btn-luxury::after { content:''; position:absolute; bottom:0; left:0; width:100%; height:0%; background-color:#b91c1c; z-index:-1; transition: height .4s cubic-bezier(.25,1,.5,1); }
+  .btn-luxury:hover::after { height: 100%; }
+  .btn-luxury:hover { color:#fff !important; }
+  .cta-pulse { animation: pulse-red 2s infinite; }
+  @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(185,28,28,.4);} 70% { box-shadow: 0 0 0 10px rgba(185,28,28,0);} 100% { box-shadow: 0 0 0 0 rgba(185,28,28,0);} }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.25,1,.5,1), transform .8s cubic-bezier(.25,1,.5,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .faq-body { max-height: 0; overflow: hidden; transition: max-height .45s cubic-bezier(.25,1,.5,1); }
+  .divider-lux { width: 60px; height: 3px; background: #b91c1c; }
+</style>
+</head>
+
+<body class="font-sans text-brand-fifth bg-brand-bg1 selection:bg-brand-primary selection:text-white antialiased pt-[75px] lg:pt-[125px]">
+
+<!-- ░░ TOP BAR + HEADER ░░ -->
+<div class="fixed top-0 left-0 w-full z-[100] flex flex-col pointer-events-none">
+  <div class="hidden lg:flex bg-white text-brand-secondary text-xs py-3 px-12 justify-between items-center relative uppercase tracking-widest border-b border-gray-200 border-t-4 border-t-brand-primary pointer-events-auto">
+    <div class="flex items-center space-x-3">
+      <span class="font-bold flex items-center"><i class="fa-solid fa-shield-halved mr-2 text-brand-primary"></i>24/7 Emergency Water Extraction in Lafayette</span>
+    </div>
+    <div class="flex items-center space-x-6">
+      <span class="flex items-center text-brand-fifth"><i class="fa-solid fa-location-dot mr-2 text-brand-primary"></i>Serving Lafayette Parish &amp; Acadiana</span>
+      <a href="tel:3373451078" class="hover:text-brand-primary transition-colors flex items-center font-bold"><i class="fa-solid fa-phone mr-2 text-brand-secondary"></i>(337) 345-1078</a>
+    </div>
+  </div>
+
+  <header id="main-header" class="relative z-[100] bg-white/95 backdrop-blur-md border-b border-gray-100 py-4 lg:py-5 pointer-events-auto">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 flex justify-between items-center">
+      <a href="#top" class="font-serif font-black text-xl lg:text-2xl text-brand-secondary tracking-tight">AIVAST <span class="text-brand-primary">RESTORATION</span></a>
+      <nav class="hidden lg:flex items-center space-x-8 text-[11px] uppercase tracking-widest font-semibold text-brand-secondary">
+        <a href="#services" class="hover:text-brand-primary transition-colors">Services</a>
+        <a href="#process" class="hover:text-brand-primary transition-colors">Process</a>
+        <a href="#why" class="hover:text-brand-primary transition-colors">Why Aivast</a>
+        <a href="#areas" class="hover:text-brand-primary transition-colors">Service Area</a>
+        <a href="#faq" class="hover:text-brand-primary transition-colors">FAQ</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="tel:3373451078" class="lg:hidden text-brand-secondary font-bold text-sm"><i class="fa-solid fa-phone text-brand-primary"></i></a>
+        <a href="tel:3373451078" class="bg-brand-primary text-white px-4 lg:px-5 py-2.5 rounded-sm cta-pulse shadow-md flex items-center gap-2">
+          <i class="fa-solid fa-truck-fast text-xs"></i>
+          <span class="text-[11px] lg:text-[12px] uppercase tracking-widest font-bold">Emergency Dispatch</span>
+        </a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<!-- ░░ HERO ░░ -->
+<section id="top" class="relative pt-12 pb-24 lg:pt-20 lg:pb-32 overflow-hidden bg-brand-secondary text-white min-h-[78vh] flex items-center">
+  <div class="absolute inset-0 z-0 bg-[url('https://aivastconstruction.com/wp-content/uploads/2025/04/396472069_818019826999767_7675307557135912333_n.jpg')] bg-cover bg-center">
+    <div class="absolute inset-0 bg-gradient-to-r from-brand-secondary/95 via-brand-secondary/88 to-brand-secondary/45"></div>
+  </div>
+
+  <div class="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+    <div class="lg:col-span-7">
+      <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full mb-6">
+        <div class="flex text-brand-primary gap-0.5">
+          <i class="fas fa-star text-[10px]"></i><i class="fas fa-star text-[10px]"></i><i class="fas fa-star text-[10px]"></i><i class="fas fa-star text-[10px]"></i><i class="fas fa-star text-[10px]"></i>
+        </div>
+        <span class="text-white text-[10px] uppercase tracking-widest font-semibold">5.0 Star Rated Lafayette Contractor</span>
+      </div>
+
+      <h1 class="text-4xl md:text-5xl lg:text-7xl font-serif font-black text-white leading-[1.05] mb-6 drop-shadow-md uppercase">
+        Water Damage Restoration<br><span class="text-brand-primary">In Lafayette, LA.</span>
+      </h1>
+
+      <p class="text-lg md:text-xl text-gray-200 font-light max-w-xl mb-9 leading-relaxed drop-shadow">
+        When floods or leaks strike, every hour counts. We provide 24/7 emergency water extraction, structural drying and complete restoration — from the first pump to the final coat of paint.
+      </p>
+
+      <ul class="space-y-4 mb-10">
+        <li class="flex items-start text-white font-light text-base"><i class="fa-solid fa-check w-5 text-brand-primary mr-3 mt-1"></i><span><strong class="font-semibold">60-Minute Response:</strong> On-site rapidly across Lafayette Parish to stop the damage spreading.</span></li>
+        <li class="flex items-start text-white font-light text-base"><i class="fa-solid fa-check w-5 text-brand-primary mr-3 mt-1"></i><span><strong class="font-semibold">Insurance Approved:</strong> We bill your carrier directly and handle the paperwork.</span></li>
+        <li class="flex items-start text-white font-light text-base"><i class="fa-solid fa-check w-5 text-brand-primary mr-3 mt-1"></i><span><strong class="font-semibold">One Crew, Start To Finish:</strong> Extraction, drying, mold remediation and rebuild under one roof.</span></li>
+      </ul>
+
+      <div class="flex flex-col sm:flex-row gap-4">
+        <a href="tel:3373451078" class="bg-brand-primary text-white px-8 py-4 text-xs uppercase tracking-widest font-bold rounded-sm shadow-float text-center hover:bg-red-800 transition-colors">
+          <i class="fa-solid fa-phone mr-2"></i>Call (337) 345-1078
+        </a>
+        <a href="#hero-form" class="border border-white/40 text-white px-8 py-4 text-xs uppercase tracking-widest font-bold rounded-sm text-center hover:bg-white hover:text-brand-secondary transition-colors">
+          Request Free Inspection
+        </a>
+      </div>
+    </div>
+
+    <div class="lg:col-span-5 relative" id="hero-form">
+      <div class="bg-white/95 backdrop-blur-md rounded-sm shadow-2xl p-8 lg:p-10 text-brand-secondary border border-gray-100">
+        <h2 class="text-3xl font-serif font-bold mb-2">Request Emergency Dispatch</h2>
+        <p class="text-sm font-light text-brand-fifth mb-8">Our Lafayette response team is on standby 24/7. Average callback: under 10 minutes.</p>
+
+        <form class="space-y-5" onsubmit="return handleLead(event)">
+          <div>
+            <label class="block text-[10px] uppercase tracking-widest font-semibold mb-2">Name *</label>
+            <input type="text" required class="w-full bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-brand-primary text-sm font-light">
+          </div>
+          <div>
+            <label class="block text-[10px] uppercase tracking-widest font-semibold mb-2">Phone *</label>
+            <input type="tel" required class="w-full bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-brand-primary text-sm font-light">
+          </div>
+          <div>
+            <label class="block text-[10px] uppercase tracking-widest font-semibold mb-2">Type Of Damage</label>
+            <select class="w-full bg-transparent border-b border-gray-300 py-2 focus:outline-none focus:border-brand-primary text-sm font-light">
+              <option>Burst pipe / plumbing leak</option>
+              <option>Storm or flood water</option>
+              <option>Roof leak</option>
+              <option>Sewage backup</option>
+              <option>Mold discovered after water damage</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full bg-brand-primary text-white py-4 text-xs uppercase tracking-widest font-bold btn-luxury rounded-sm mt-2">
+            Send Team Now
+          </button>
+          <p id="lead-msg" class="hidden text-center text-xs text-green-700 font-semibold pt-1">Dispatch request received — a coordinator is calling you now.</p>
+          <p class="text-[10px] text-brand-sixth text-center leading-relaxed pt-1">By submitting you agree to be contacted about your restoration project. No spam, ever.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ TRUST BAR ░░ -->
+<section class="bg-white py-10 relative z-20 border-b border-gray-100">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 text-brand-secondary text-center md:text-left">
+      <div class="md:border-r border-gray-200 md:pr-8 flex flex-col items-center md:items-start">
+        <i class="fa-solid fa-shield-halved text-2xl text-brand-primary mb-4"></i>
+        <p class="text-xs uppercase tracking-widest text-brand-fifth font-bold">Licensed &amp; Insured</p>
+      </div>
+      <div class="md:border-r border-gray-200 md:px-8 flex flex-col items-center md:items-start">
+        <i class="fa-solid fa-clock text-2xl text-brand-primary mb-4"></i>
+        <p class="text-xs uppercase tracking-widest text-brand-fifth font-bold">24/7 Response</p>
+      </div>
+      <div class="md:border-r border-gray-200 md:px-8 flex flex-col items-center md:items-start">
+        <i class="fa-solid fa-map-pin text-2xl text-brand-primary mb-4"></i>
+        <p class="text-xs uppercase tracking-widest text-brand-fifth font-bold">Lafayette Local</p>
+      </div>
+      <div class="md:pl-8 flex flex-col items-center md:items-start">
+        <div class="flex space-x-1 mb-4 text-brand-primary">
+          <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+        </div>
+        <p class="text-xs uppercase tracking-widest text-brand-fifth font-bold">5.0 Star Rated</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ SERVICES ░░ -->
+<section id="services" class="py-20 lg:py-28 bg-brand-bg2">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
+    <div class="max-w-3xl mb-14 reveal">
+      <span class="text-[11px] uppercase tracking-widest-lux font-bold text-brand-primary">What We Do</span>
+      <h2 class="text-3xl md:text-5xl font-serif font-black text-brand-secondary mt-3 mb-5 uppercase leading-tight">Complete Water Damage Services In Lafayette</h2>
+      <div class="divider-lux mb-6"></div>
+      <p class="text-lg font-light leading-relaxed">From the first emergency water extraction call to the final rebuild inspection, Aivast handles every phase in-house — so you are never left coordinating four different contractors during the worst week of your year.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="reveal bg-white p-8 border border-gray-100 shadow-premium hover:-translate-y-1 transition-transform duration-300 group">
+        <div class="w-14 h-14 bg-brand-secondary/5 flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors"><i class="fa-solid fa-droplet text-xl text-brand-primary group-hover:text-white transition-colors"></i></div>
+        <h3 class="text-xl font-serif font-bold text-brand-secondary mb-3">Emergency Water Extraction</h3>
+        <p class="font-light leading-relaxed text-sm">Truck-mounted extractors pull standing water out fast, before it wicks into drywall, subfloor and framing. Available 24/7, holidays included.</p>
+      </div>
+
+      <div class="reveal bg-white p-8 border border-gray-100 shadow-premium hover:-translate-y-1 transition-transform duration-300 group">
+        <div class="w-14 h-14 bg-brand-secondary/5 flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors"><i class="fa-solid fa-wind text-xl text-brand-primary group-hover:text-white transition-colors"></i></div>
+        <h3 class="text-xl font-serif font-bold text-brand-secondary mb-3">Structural Drying &amp; Dehumidification</h3>
+        <p class="font-light leading-relaxed text-sm">Commercial air movers and LGR dehumidifiers with daily moisture-meter logs, so we can prove the structure is dry — not just guess.</p>
+      </div>
+
+      <div class="reveal bg-white p-8 border border-gray-100 shadow-premium hover:-translate-y-1 transition-transform duration-300 group">
+        <div class="w-14 h-14 bg-brand-secondary/5 flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors"><i class="fa-solid fa-bacterium text-xl text-brand-primary group-hover:text-white transition-colors"></i></div>
+        <h3 class="text-xl font-serif font-bold text-brand-secondary mb-3">Mold Remediation</h3>
+        <p class="font-light leading-relaxed text-sm">Louisiana humidity means mold can bloom in 24–48 hours. We contain, remove and treat affected materials, then verify with post-remediation testing.</p>
+      </div>
+
+      <div class="reveal bg-white p-8 border border-gray-100 shadow-premium hover:-translate-y-1 transition-transform duration-300 group">
+        <div class="w-14 h-14 bg-brand-secondary/5 flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors"><i class="fa-solid fa-house-flood-water text-xl text-brand-primary group-hover:text-white transition-colors"></i></div>
+        <h3 class="text-xl font-serif font-bold text-brand-secondary mb-3">Storm &amp; Flood Cleanup</h3>
+        <p class="font-light leading-relaxed text-sm">Hurricane season damage, flash flooding, roof failures — we tarp, board up, extract and document everything your adjuster will ask for.</p>
+      </div>
+
+      <div class="reveal bg-white p-8 border border-gray-100 shadow-premium hover:-translate-y-1 transition-transform duration-300 group">
+        <div class="w-14 h-14 bg-brand-secondary/5 flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors"><i class="fa-solid fa-biohazard text-xl text-brand-primary group-hover:text-white transition-colors"></i></div>
+        <h3 class="text-xl font-serif font-bold text-brand-secondary mb-3">Sewage &amp; Category 3 Cleanup</h3>
+        <p class="font-light leading-relaxed text-sm">Contaminated "black water" requires full PPE, antimicrobial treatment and controlled disposal. We handle it to IICRC standard.</p>
+      </div>
+
+      <div class="reveal bg-white p-8 border border-gray-100 shadow-premium hover:-translate-y-1 transition-transform duration-300 group">
+        <div class="w-14 h-14 bg-brand-secondary/5 flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors"><i class="fa-solid fa-hammer text-xl text-brand-primary group-hover:text-white transition-colors"></i></div>
+        <h3 class="text-xl font-serif font-bold text-brand-secondary mb-3">Reconstruction &amp; Rebuild</h3>
+        <p class="font-light leading-relaxed text-sm">Drywall, flooring, cabinetry, paint and trim. As a licensed general contractor we put your home back better than the day before the loss.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ PROCESS ░░ -->
+<section id="process" class="py-20 lg:py-28 bg-brand-secondary text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_20%_20%,#fff_1px,transparent_1px)] [background-size:28px_28px]"></div>
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 relative">
+    <div class="max-w-3xl mb-16 reveal">
+      <span class="text-[11px] uppercase tracking-widest-lux font-bold text-brand-primary">How It Works</span>
+      <h2 class="text-3xl md:text-5xl font-serif font-black mt-3 mb-5 uppercase leading-tight">Our 4-Step Restoration Process</h2>
+      <div class="divider-lux mb-6"></div>
+      <p class="text-lg font-light text-gray-300 leading-relaxed">A documented, insurance-ready process — you always know what is happening next.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="reveal relative pt-8 border-t-2 border-white/10">
+        <div class="absolute -top-[19px] left-0 w-9 h-9 rounded-full bg-brand-primary flex items-center justify-center font-serif font-black text-sm">01</div>
+        <h3 class="text-lg font-serif font-bold mb-3 uppercase tracking-wide">Emergency Call</h3>
+        <p class="text-sm font-light text-gray-300 leading-relaxed">You call, a human answers — day or night. We triage the loss over the phone and dispatch the nearest Lafayette crew immediately.</p>
+      </div>
+      <div class="reveal relative pt-8 border-t-2 border-white/10">
+        <div class="absolute -top-[19px] left-0 w-9 h-9 rounded-full bg-brand-primary flex items-center justify-center font-serif font-black text-sm">02</div>
+        <h3 class="text-lg font-serif font-bold mb-3 uppercase tracking-wide">Inspect &amp; Extract</h3>
+        <p class="text-sm font-light text-gray-300 leading-relaxed">Moisture mapping with thermal imaging, then immediate water extraction. Every reading is photographed for your claim file.</p>
+      </div>
+      <div class="reveal relative pt-8 border-t-2 border-white/10">
+        <div class="absolute -top-[19px] left-0 w-9 h-9 rounded-full bg-brand-primary flex items-center justify-center font-serif font-black text-sm">03</div>
+        <h3 class="text-lg font-serif font-bold mb-3 uppercase tracking-wide">Dry &amp; Sanitize</h3>
+        <p class="text-sm font-light text-gray-300 leading-relaxed">Air movers and dehumidifiers run 3–5 days with daily monitoring, plus antimicrobial treatment to stop mold before it starts.</p>
+      </div>
+      <div class="reveal relative pt-8 border-t-2 border-white/10">
+        <div class="absolute -top-[19px] left-0 w-9 h-9 rounded-full bg-brand-primary flex items-center justify-center font-serif font-black text-sm">04</div>
+        <h3 class="text-lg font-serif font-bold mb-3 uppercase tracking-wide">Restore &amp; Rebuild</h3>
+        <p class="text-sm font-light text-gray-300 leading-relaxed">Drywall, flooring and finishes rebuilt by our own licensed crews — one contract, one point of contact, one final walkthrough.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ WHY / STATS ░░ -->
+<section id="why" class="py-20 lg:py-28 bg-white">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+    <div class="reveal">
+      <span class="text-[11px] uppercase tracking-widest-lux font-bold text-brand-primary">Why Aivast</span>
+      <h2 class="text-3xl md:text-5xl font-serif font-black text-brand-secondary mt-3 mb-5 uppercase leading-tight">Acadiana's Water Damage Specialists</h2>
+      <div class="divider-lux mb-6"></div>
+      <p class="text-lg font-light leading-relaxed mb-8">We are a Lafayette-based general contractor, not a national franchise routing your call to a call center three states away. When your home floods at 2 a.m., a local crew is already on the road.</p>
+
+      <ul class="space-y-5 mb-10">
+        <li class="flex items-start"><i class="fa-solid fa-circle-check text-brand-primary mt-1 mr-4"></i><div><h4 class="font-semibold text-brand-secondary mb-1">Direct Insurance Billing</h4><p class="text-sm font-light">We document the loss to carrier standard and bill them directly, so you are usually only responsible for your deductible.</p></div></li>
+        <li class="flex items-start"><i class="fa-solid fa-circle-check text-brand-primary mt-1 mr-4"></i><div><h4 class="font-semibold text-brand-secondary mb-1">IICRC-Aligned Drying Standards</h4><p class="text-sm font-light">Documented moisture readings every single day, not "it feels dry to me."</p></div></li>
+        <li class="flex items-start"><i class="fa-solid fa-circle-check text-brand-primary mt-1 mr-4"></i><div><h4 class="font-semibold text-brand-secondary mb-1">Mitigation Through Rebuild</h4><p class="text-sm font-light">One licensed company for extraction, remediation and full reconstruction — no handoff gaps, no finger-pointing.</p></div></li>
+      </ul>
+
+      <a href="tel:3373451078" class="inline-block bg-brand-secondary text-white px-8 py-4 text-xs uppercase tracking-widest font-bold btn-luxury rounded-sm">Speak To A Project Manager</a>
+    </div>
+
+    <div class="reveal grid grid-cols-2 gap-5">
+      <div class="bg-brand-bg2 p-8 border border-gray-100 text-center">
+        <div class="text-4xl lg:text-5xl font-serif font-black text-brand-primary mb-2">60</div>
+        <p class="text-[11px] uppercase tracking-widest font-bold text-brand-fifth">Minute Target Response</p>
+      </div>
+      <div class="bg-brand-bg2 p-8 border border-gray-100 text-center">
+        <div class="text-4xl lg:text-5xl font-serif font-black text-brand-primary mb-2">24/7</div>
+        <p class="text-[11px] uppercase tracking-widest font-bold text-brand-fifth">Emergency Availability</p>
+      </div>
+      <div class="bg-brand-bg2 p-8 border border-gray-100 text-center">
+        <div class="text-4xl lg:text-5xl font-serif font-black text-brand-primary mb-2">500+</div>
+        <p class="text-[11px] uppercase tracking-widest font-bold text-brand-fifth">Acadiana Properties Restored</p>
+      </div>
+      <div class="bg-brand-bg2 p-8 border border-gray-100 text-center">
+        <div class="text-4xl lg:text-5xl font-serif font-black text-brand-primary mb-2">5.0</div>
+        <p class="text-[11px] uppercase tracking-widest font-bold text-brand-fifth">Average Client Rating</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ INSURANCE ░░ -->
+<section class="py-16 lg:py-20 bg-brand-bg2 border-y border-gray-100">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-10 justify-between reveal">
+    <div class="flex items-start gap-6 max-w-2xl">
+      <i class="fa-solid fa-file-signature text-3xl text-brand-primary mt-1"></i>
+      <div>
+        <h2 class="text-2xl md:text-3xl font-serif font-black text-brand-secondary mb-3 uppercase">We Handle Your Insurance Claim</h2>
+        <p class="font-light leading-relaxed">Photos, moisture logs, scope of work and line-item estimates — submitted in the format adjusters expect. Most Lafayette homeowners pay only their deductible.</p>
+      </div>
+    </div>
+    <a href="tel:3373451078" class="bg-brand-primary text-white px-8 py-4 text-xs uppercase tracking-widest font-bold rounded-sm shadow-float whitespace-nowrap hover:bg-red-800 transition-colors">
+      <i class="fa-solid fa-phone mr-2"></i>Start My Claim
+    </a>
+  </div>
+</section>
+
+<!-- ░░ TESTIMONIALS ░░ -->
+<section class="py-20 lg:py-28 bg-white">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
+    <div class="max-w-3xl mb-14 reveal">
+      <span class="text-[11px] uppercase tracking-widest-lux font-bold text-brand-primary">Client Results</span>
+      <h2 class="text-3xl md:text-5xl font-serif font-black text-brand-secondary mt-3 mb-5 uppercase leading-tight">Trusted Across Lafayette Parish</h2>
+      <div class="divider-lux"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="reveal bg-brand-bg2 p-8 border border-gray-100 flex flex-col">
+        <div class="flex text-brand-primary gap-1 mb-5"><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i></div>
+        <p class="font-light leading-relaxed mb-6 grow">"A supply line let go while we were out of town. Aivast had extraction equipment running within the hour and walked our adjuster through everything. We never had to argue with the insurance company once."</p>
+        <div><div class="font-semibold text-brand-secondary text-sm">Michelle T.</div><div class="text-[11px] uppercase tracking-widest text-brand-sixth">River Ranch, Lafayette</div></div>
+      </div>
+      <div class="reveal bg-brand-bg2 p-8 border border-gray-100 flex flex-col">
+        <div class="flex text-brand-primary gap-1 mb-5"><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i></div>
+        <p class="font-light leading-relaxed mb-6 grow">"Storm flooding took out our entire downstairs. They dried it, remediated mold in the laundry wall and rebuilt the flooring — same company the whole way. Zero runaround."</p>
+        <div><div class="font-semibold text-brand-secondary text-sm">Brandon G.</div><div class="text-[11px] uppercase tracking-widest text-brand-sixth">Youngsville, LA</div></div>
+      </div>
+      <div class="reveal bg-brand-bg2 p-8 border border-gray-100 flex flex-col">
+        <div class="flex text-brand-primary gap-1 mb-5"><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i><i class="fa-solid fa-star text-xs"></i></div>
+        <p class="font-light leading-relaxed mb-6 grow">"Called at 11 p.m. on a Sunday and an actual person picked up. Crew arrived before midnight. As a property manager, that response time is the entire ballgame."</p>
+        <div><div class="font-semibold text-brand-secondary text-sm">Dana R.</div><div class="text-[11px] uppercase tracking-widest text-brand-sixth">Commercial Property Manager</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ SERVICE AREAS ░░ -->
+<section id="areas" class="py-20 lg:py-24 bg-brand-bg2">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
+    <div class="max-w-3xl mb-12 reveal">
+      <span class="text-[11px] uppercase tracking-widest-lux font-bold text-brand-primary">Coverage</span>
+      <h2 class="text-3xl md:text-5xl font-serif font-black text-brand-secondary mt-3 mb-5 uppercase leading-tight">Water Damage Service Areas</h2>
+      <div class="divider-lux mb-6"></div>
+      <p class="text-lg font-light leading-relaxed">Crews stationed in Lafayette, responding across Acadiana within the hour.</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 reveal">
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>Lafayette</div>
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>Youngsville</div>
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>Broussard</div>
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>Scott</div>
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>Abbeville</div>
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>New Iberia</div>
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>Carencro</div>
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>Duson</div>
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>Milton</div>
+      <div class="bg-white border border-gray-100 px-5 py-4 text-sm font-semibold text-brand-secondary flex items-center gap-3"><i class="fa-solid fa-location-dot text-brand-primary text-xs"></i>Maurice</div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ FAQ ░░ -->
+<section id="faq" class="py-20 lg:py-28 bg-white">
+  <div class="max-w-[900px] mx-auto px-4 sm:px-6 lg:px-12">
+    <div class="mb-12 reveal text-center">
+      <span class="text-[11px] uppercase tracking-widest-lux font-bold text-brand-primary">Answers</span>
+      <h2 class="text-3xl md:text-5xl font-serif font-black text-brand-secondary mt-3 mb-5 uppercase leading-tight">Water Damage FAQs</h2>
+      <div class="divider-lux mx-auto"></div>
+    </div>
+
+    <div class="divide-y divide-gray-200 border-y border-gray-200">
+      <div class="faq-item">
+        <button class="w-full flex items-center justify-between text-left py-6 group" onclick="toggleFaq(this)">
+          <span class="font-serif font-bold text-lg text-brand-secondary pr-8">How fast can you get to my Lafayette property?</span>
+          <i class="fa-solid fa-plus text-brand-primary transition-transform duration-300 shrink-0"></i>
+        </button>
+        <div class="faq-body"><p class="pb-6 font-light leading-relaxed">Our target is 60 minutes anywhere in Lafayette Parish, 24 hours a day. Crews are dispatched from Lafayette itself, so during hurricane season and major storm events we are already local — not driving in from out of state.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="w-full flex items-center justify-between text-left py-6 group" onclick="toggleFaq(this)">
+          <span class="font-serif font-bold text-lg text-brand-secondary pr-8">Will my homeowners insurance cover water damage restoration?</span>
+          <i class="fa-solid fa-plus text-brand-primary transition-transform duration-300 shrink-0"></i>
+        </button>
+        <div class="faq-body"><p class="pb-6 font-light leading-relaxed">Sudden and accidental water damage — burst pipes, appliance failures, storm intrusion — is typically covered. Gradual leaks and flood water may fall under separate policies. We document everything to carrier standard and bill your insurer directly, so most clients pay only their deductible.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="w-full flex items-center justify-between text-left py-6 group" onclick="toggleFaq(this)">
+          <span class="font-serif font-bold text-lg text-brand-secondary pr-8">How long does structural drying take?</span>
+          <i class="fa-solid fa-plus text-brand-primary transition-transform duration-300 shrink-0"></i>
+        </button>
+        <div class="faq-body"><p class="pb-6 font-light leading-relaxed">Most residential losses dry in three to five days with commercial air movers and LGR dehumidifiers running continuously. We take moisture readings daily and only pull equipment once materials hit documented dry standard — never on a guess.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="w-full flex items-center justify-between text-left py-6 group" onclick="toggleFaq(this)">
+          <span class="font-serif font-bold text-lg text-brand-secondary pr-8">How quickly does mold grow after water damage in Louisiana?</span>
+          <i class="fa-solid fa-plus text-brand-primary transition-transform duration-300 shrink-0"></i>
+        </button>
+        <div class="faq-body"><p class="pb-6 font-light leading-relaxed">In our humidity, mold can begin colonizing within 24 to 48 hours. That is exactly why speed matters — every hour water sits in drywall and subfloor raises the odds of a remediation job on top of a drying job.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="w-full flex items-center justify-between text-left py-6 group" onclick="toggleFaq(this)">
+          <span class="font-serif font-bold text-lg text-brand-secondary pr-8">Do you also rebuild, or only dry the property out?</span>
+          <i class="fa-solid fa-plus text-brand-primary transition-transform duration-300 shrink-0"></i>
+        </button>
+        <div class="faq-body"><p class="pb-6 font-light leading-relaxed">Both. Aivast is a licensed general contractor, so the same company that extracts the water also replaces the drywall, flooring, trim and paint. One contract, one project manager, one final walkthrough.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ FINAL CTA ░░ -->
+<section class="py-20 lg:py-24 bg-brand-secondary text-white relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-r from-brand-secondary via-brand-fourth to-brand-secondary opacity-90"></div>
+  <div class="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-12 text-center relative reveal">
+    <h2 class="text-3xl md:text-5xl font-serif font-black uppercase leading-tight mb-5">Water Spreading Right Now?</h2>
+    <p class="text-lg font-light text-gray-300 mb-10 max-w-2xl mx-auto">Every hour of standing water raises the cost of the repair. Call the Lafayette crew that answers at 2 a.m.</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="tel:3373451078" class="bg-brand-primary text-white px-10 py-5 text-xs uppercase tracking-widest font-bold rounded-sm shadow-float cta-pulse"><i class="fa-solid fa-phone mr-2"></i>(337) 345-1078</a>
+      <a href="#hero-form" class="border border-white/40 text-white px-10 py-5 text-xs uppercase tracking-widest font-bold rounded-sm hover:bg-white hover:text-brand-secondary transition-colors">Request Free Inspection</a>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ FOOTER ░░ -->
+<footer class="bg-[#0f1f38] text-gray-400 pt-16 pb-8">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-white/10">
+      <div class="md:col-span-1">
+        <div class="font-serif font-black text-xl text-white mb-4">AIVAST <span class="text-brand-primary">RESTORATION</span></div>
+        <p class="text-sm font-light leading-relaxed">Licensed general contractor and 24/7 water damage restoration team serving Lafayette and greater Acadiana.</p>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold text-xs uppercase tracking-widest mb-5">Services</h4>
+        <ul class="space-y-3 text-sm font-light">
+          <li><a href="#services" class="hover:text-brand-primary transition-colors">Emergency Water Extraction</a></li>
+          <li><a href="#services" class="hover:text-brand-primary transition-colors">Structural Drying</a></li>
+          <li><a href="#services" class="hover:text-brand-primary transition-colors">Mold Remediation</a></li>
+          <li><a href="#services" class="hover:text-brand-primary transition-colors">Storm &amp; Flood Cleanup</a></li>
+          <li><a href="#services" class="hover:text-brand-primary transition-colors">Reconstruction</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold text-xs uppercase tracking-widest mb-5">Service Area</h4>
+        <ul class="space-y-3 text-sm font-light">
+          <li>Lafayette, LA</li><li>Youngsville &amp; Broussard</li><li>Scott &amp; Duson</li><li>Abbeville &amp; Maurice</li><li>New Iberia</li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold text-xs uppercase tracking-widest mb-5">Contact</h4>
+        <ul class="space-y-3 text-sm font-light">
+          <li class="flex items-start gap-3"><i class="fa-solid fa-phone text-brand-primary mt-1"></i><a href="tel:3373451078" class="hover:text-brand-primary transition-colors">(337) 345-1078</a></li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-envelope text-brand-primary mt-1"></i><a href="mailto:info@aivastconstruction.com" class="hover:text-brand-primary transition-colors">info@aivastconstruction.com</a></li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-location-dot text-brand-primary mt-1"></i>Lafayette, Louisiana</li>
+          <li class="flex items-start gap-3"><i class="fa-solid fa-clock text-brand-primary mt-1"></i>Emergency service 24/7/365</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] uppercase tracking-widest">
+      <span>&copy; <span id="year">2026</span> Aivast Construction. All rights reserved.</span>
+      <span>Licensed &amp; Insured · Louisiana General Contractor</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ░░ STICKY MOBILE CALL BAR ░░ -->
+<a href="tel:3373451078" class="lg:hidden fixed bottom-0 left-0 w-full z-[110] bg-brand-primary text-white py-4 text-center text-xs uppercase tracking-widest font-bold shadow-[0_-4px_20px_rgba(0,0,0,.2)]">
+  <i class="fa-solid fa-phone mr-2"></i>Tap To Call — 24/7 Emergency
+</a>
+<div class="lg:hidden h-14"></div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Aivast Construction — Water Damage Restoration Lafayette",
+  "image": "https://aivastconstruction.com/logo.png",
+  "telephone": "+1-337-345-1078",
+  "email": "info@aivastconstruction.com",
+  "priceRange": "$$",
+  "address": { "@type": "PostalAddress", "addressLocality": "Lafayette", "addressRegion": "LA", "addressCountry": "US" },
+  "areaServed": ["Lafayette","Youngsville","Broussard","Scott","Abbeville","New Iberia","Carencro","Duson","Milton","Maurice"],
+  "openingHoursSpecification": { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"], "opens": "00:00", "closes": "23:59" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "reviewCount": "48" }
+}
+<\/script>
+
+<script>
+  // Scroll reveal
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(function (el, i) { el.style.transitionDelay = (i % 3) * 90 + 'ms'; io.observe(el); });
+
+  // FAQ accordion
+  function toggleFaq(btn) {
+    var body = btn.nextElementSibling, icon = btn.querySelector('i'), open = body.style.maxHeight && body.style.maxHeight !== '0px';
+    document.querySelectorAll('.faq-body').forEach(function (b) { b.style.maxHeight = '0px'; });
+    document.querySelectorAll('.faq-item i').forEach(function (i) { i.classList.remove('fa-minus', 'rotate-180'); i.classList.add('fa-plus'); });
+    if (!open) { body.style.maxHeight = body.scrollHeight + 'px'; icon.classList.remove('fa-plus'); icon.classList.add('fa-minus'); }
+  }
+
+  // Lead form
+  function handleLead(e) { e.preventDefault(); document.getElementById('lead-msg').classList.remove('hidden'); e.target.reset(); return false; }
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+<\/script>
+</body>
+</html></script>
+</template>
+
+<!-- ══════════════════════ DASHBOARD LOGIC ══════════════════════ -->
+<script>
+/* ═════════ 1. SERVICE LIBRARY ═════════ */
+const SERVICE_LIB = [
+  {
+    keys: ['water damage restoration', 'water damage', 'water extraction', 'flood'],
+    slug: 'water-damage-restoration', label: 'Water Damage Restoration', pillar: 'water-damage-restoration',
+    icon: 'fa-house-flood-water', baseVol: 1200, baseKd: 46,
+    secondary: ['emergency water extraction {loc}', '{loc} flood cleanup', 'structural drying {loc}'],
+    suggestion: '24/7 emergency CTA in hero + sticky mobile call bar. Trust badges (Licensed / Insured / IICRC). H2 on "60-Minute Response".',
+    blog: { slug: 'first-24-hours-after-water-damage', title: 'What To Do In The First 24 Hours After Water Damage', focus: 'what to do after water damage', vol: 2400, kd: 21,
+            secondary: ['water damage checklist', 'stop water damage spreading', 'water damage insurance claim'],
+            suggestion: 'Informational ToFu. Numbered checklist + downloadable PDF. Internal link down-silo to every location page.' }
+  },
+  {
+    keys: ['mold remediation', 'mold removal', 'mold'],
+    slug: 'mold-remediation', label: 'Mold Remediation', pillar: 'mold-remediation',
+    icon: 'fa-bacterium', baseVol: 620, baseKd: 38,
+    secondary: ['black mold removal {loc}', 'mold inspection {loc}', 'mold testing near me'],
+    suggestion: 'Lead with health-risk framing + before/after gallery. Add "Free Mold Inspection" form. FAQ schema on 5 questions.',
+    blog: { slug: 'spot-black-mold-louisiana-homes', title: 'How To Spot Black Mold In Louisiana Homes', focus: 'how to spot black mold', vol: 1600, kd: 24,
+            secondary: ['black mold symptoms', 'mold behind drywall signs', 'louisiana humidity mold'],
+            suggestion: 'Informational ToFu. Photo-led identification guide. Internal link to all mold remediation location pages.' }
+  },
+  {
+    keys: ['fire damage', 'smoke damage'],
+    slug: 'fire-damage-restoration', label: 'Fire Damage Restoration', pillar: 'fire-damage-restoration',
+    icon: 'fa-fire', baseVol: 480, baseKd: 41,
+    secondary: ['smoke damage cleanup {loc}', 'soot removal {loc}', 'fire restoration company {loc}'],
+    suggestion: 'Empathy-first copy. Insurance claim assistance block. Board-up + secure property USP above the fold.',
+    blog: { slug: 'fire-damage-insurance-claim-guide', title: 'Filing A Fire Damage Insurance Claim In Louisiana', focus: 'fire damage insurance claim', vol: 900, kd: 27,
+            secondary: ['fire claim documentation', 'smoke damage coverage', 'adjuster fire inspection'],
+            suggestion: 'Informational ToFu. Claim timeline table. Internal link to fire restoration pillar.' }
+  },
+  {
+    keys: ['storm damage', 'hurricane damage', 'roof repair', 'roofing'],
+    slug: 'storm-damage-repair', label: 'Storm Damage Repair', pillar: 'storm-damage-repair',
+    icon: 'fa-wind', baseVol: 540, baseKd: 35,
+    secondary: ['hurricane damage repair {loc}', 'emergency roof tarping {loc}', 'wind damage contractor {loc}'],
+    suggestion: 'Seasonal urgency banner (hurricane season). Emergency tarping USP. Add storm-damage claim FAQ block.',
+    blog: { slug: 'preparing-roof-hurricane-season', title: 'Preparing Your Roof For Hurricane Season', focus: 'prepare roof for hurricane', vol: 850, kd: 15,
+            secondary: ['louisiana roof inspection', 'hurricane strapping', 'wind damage prevention'],
+            suggestion: 'Informational ToFu. Bulleted homeowner checklist. Internal link to /services and storm repair pages.' }
+  },
+  {
+    keys: ['commercial contracting', 'commercial contractor', 'general contracting'],
+    slug: 'commercial-contractor', label: 'Commercial Contracting', pillar: 'commercial-contractor',
+    icon: 'fa-helmet-safety', baseVol: 420, baseKd: 24,
+    secondary: ['metal building construction {loc}', 'warehouse build-outs {loc}', 'tenant improvements {loc}'],
+    suggestion: 'CRO: "Fast Estimates" sticky header + 5-star badges. H2 for Metal Buildings. Project gallery with square footage.',
+    blog: { slug: 'commercial-build-out-timeline', title: 'How Long Does A Commercial Build-Out Actually Take?', focus: 'commercial build out timeline', vol: 590, kd: 19,
+            secondary: ['tenant improvement schedule', 'commercial permit timeline louisiana', 'build out cost per sqft'],
+            suggestion: 'Informational ToFu targeting business owners. Gantt-style timeline graphic.' }
+  },
+  {
+    keys: ['sewage cleanup', 'sewage'],
+    slug: 'sewage-cleanup', label: 'Sewage Cleanup', pillar: 'sewage-cleanup',
+    icon: 'fa-biohazard', baseVol: 260, baseKd: 29,
+    secondary: ['sewage backup cleanup {loc}', 'black water cleanup {loc}', 'biohazard cleaning {loc}'],
+    suggestion: 'Health/safety authority framing. IICRC Category 3 protocol explainer. Same-day dispatch CTA.',
+    blog: { slug: 'sewage-backup-what-to-do', title: 'Sewage Backup In Your Home: What To Do First', focus: 'sewage backup what to do', vol: 720, kd: 22,
+            secondary: ['sewage cleanup cost', 'category 3 water', 'sewage health risks'],
+            suggestion: 'Informational ToFu with strong safety warnings. Internal link to sewage cleanup pages.' }
+  }
+];
+
+/* Rough demand weighting so volumes read realistically per city */
+const GEO_WEIGHT = {
+  'lafayette': 1.0, 'new iberia': 0.55, 'abbeville': 0.4, 'broussard': 0.36,
+  'youngsville': 0.35, 'scott': 0.3, 'carencro': 0.3, 'opelousas': 0.34,
+  'duson': 0.15, 'milton': 0.13, 'maurice': 0.14, 'breaux bridge': 0.26
+};
+
+/* Existing crawl result (what the discovery audit "found") */
+const EXISTING = [
+  { path: 'index.html', label: 'index.html' },
+  { path: 'about-us.html', label: 'about-us.html' },
+  { path: 'contact.html', label: 'contact.html' },
+  { path: 'services/commercial-contracting.html', label: 'commercial-contracting.html' },
+  { path: 'services/roofing.html', label: 'roofing.html' }
+];
+
+/* ═════════ 2. STATE ═════════ */
+const state = {
+  domain: 'aivastconstruction.com',
+  targetUrl: 'https://aivastconstruction.com',
+  maxUrls: 10,
+  blogCount: 2,
+  geo: [],
+  pages: [],
+  truncated: 0,
+  factoryRunning: false,
+  factoryDone: false
+};
+
+/* ═════════ 3. HELPERS ═════════ */
+function hash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return Math.abs(h);
+}
+function slugify(s) { return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+function titleCase(s) { return s.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase()); }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+function fmt(n) { return n.toLocaleString('en-US'); }
+
+function kdClass(kd) { return kd < 30 ? 'text-emerald-400' : kd < 50 ? 'text-yellow-400' : 'text-red-400'; }
+
+/* ═════════ 4. PROMPT PARSER ═════════ */
+function parseMatrix(text) {
+  const pairs = [];
+  text.split('\n').forEach(line => {
+    let raw = line.trim();
+    if (!/^[-*•]/.test(raw)) return;
+    raw = raw.replace(/^[-*•]\s*/, '').trim();
+    if (!raw) return;
+
+    const lower = raw.toLowerCase();
+    let best = null, bestKey = '';
+    SERVICE_LIB.forEach(svc => {
+      svc.keys.forEach(k => {
+        if (lower.includes(k) && k.length > bestKey.length) { best = svc; bestKey = k; }
+      });
+    });
+    if (!best) return;
+
+    const location = titleCase(lower.replace(bestKey, '').replace(/\b(in|for|near|services?|page)\b/g, '').replace(/[,|]/g, ' ').replace(/\s+/g, ' ').trim());
+    if (!location) return;
+    pairs.push({ location, service: best });
+  });
+  return pairs;
+}
+
+function updateParseHint() {
+  const n = parseMatrix(document.getElementById('in-prompt').value).length;
+  const el = document.getElementById('prompt-parse-hint');
+  el.textContent = n + (n === 1 ? ' pair detected' : ' pairs detected');
+  el.className = 'font-mono ' + (n ? 'text-emerald-400' : 'text-red-400');
+}
+
+/* ═════════ 5. CAMPAIGN BUILD ═════════ */
+function buildCampaign() {
+  const url = document.getElementById('in-url').value.trim() || 'https://example.com';
+  state.targetUrl = url;
+  state.domain = url.replace(/^https?:\/\//, '').replace(/\/.*$/, '') || 'example.com';
+  state.maxUrls = clamp(parseInt(document.getElementById('in-max').value, 10) || 10, 1, 50);
+  state.blogCount = clamp(parseInt(document.getElementById('in-blogs').value, 10) || 0, 0, 6);
+  state.geo = document.getElementById('in-geo').value.split(',').map(s => s.trim()).filter(Boolean);
+
+  let pairs = parseMatrix(document.getElementById('in-prompt').value);
+  state.truncated = Math.max(0, pairs.length - state.maxUrls);
+  pairs = pairs.slice(0, state.maxUrls);
+
+  const pages = pairs.map(p => {
+    const svc = p.service;
+    const seed = hash(p.location + svc.slug);
+    const weight = GEO_WEIGHT[p.location.toLowerCase()] !== undefined ? GEO_WEIGHT[p.location.toLowerCase()] : 0.28;
+    const vol = Math.max(40, Math.round((svc.baseVol * weight * (0.78 + (seed % 45) / 100)) / 10) * 10);
+    const kd = clamp(Math.round(svc.baseKd * weight + 12 + (seed >> 4) % 14), 6, 79);
+    return {
+      type: 'service',
+      pillar: svc.pillar,
+      pillarLabel: svc.label,
+      file: svc.slug + '-' + slugify(p.location) + '.html',
+      url: '/services/' + svc.pillar + '/' + svc.slug + '-' + slugify(p.location),
+      location: p.location,
+      focus: (svc.label + ' ' + p.location).toLowerCase(),
+      vol, kd,
+      secondary: svc.secondary.map(s => s.replace('{loc}', p.location).toLowerCase()),
+      suggestion: 'CRO: ' + svc.suggestion,
+      approved: false
+    };
+  });
+
+  // Blog silo — one supporting article per distinct service, capped by the blog input
+  const seen = [];
+  pairs.forEach(p => { if (!seen.some(s => s.slug === p.service.slug)) seen.push(p.service); });
+  seen.slice(0, state.blogCount).forEach(svc => {
+    const b = svc.blog, seed = hash(b.slug);
+    pages.push({
+      type: 'blog',
+      pillar: svc.pillar,
+      pillarLabel: svc.label,
+      file: b.slug + '.html',
+      url: '/blog/' + b.slug,
+      location: '',
+      title: b.title,
+      focus: b.focus,
+      vol: b.vol + (seed % 12) * 10,
+      kd: b.kd,
+      secondary: b.secondary,
+      suggestion: 'Informational: ' + b.suggestion,
+      approved: false
+    });
+  });
+
+  state.pages = pages;
+  state.factoryDone = false;
+  renderSilo();
+  renderMatrix();
+  syncSidebar();
+}
+
+/* ═════════ 6. VIEW 2 — SILO TREE ═════════ */
+function nodeHTML(icon, label, badge, isNew) {
+  const badgeMap = {
+    existing: '<span class="badge bg-dark-700 text-gray-400 border border-dark-600">Existing</span>',
+    pillar: '<span class="badge bg-brand-500/20 text-brand-300 border border-brand-500/30">Core Pillar</span>',
+    'new': '<span class="badge bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">Proposed New</span>',
+    hub: '<span class="badge bg-purple-500/20 text-purple-300 border border-purple-500/30">Silo Hub</span>'
+  };
+  return '<div class="node ' + (isNew ? 'node-new font-semibold' : '') + '">' +
+         '<i class="fa-solid ' + icon + ' ' + (isNew ? 'text-emerald-400' : 'text-gray-500') + '"></i>' +
+         '<span class="' + (isNew ? '' : 'text-gray-300') + '">' + esc(label) + '</span>' +
+         (badgeMap[badge] || '') + '</div>';
+}
+
+function renderSilo() {
+  const svcPages = state.pages.filter(p => p.type === 'service');
+  const blogPages = state.pages.filter(p => p.type === 'blog');
+
+  const groups = {};
+  svcPages.forEach(p => { (groups[p.pillar] = groups[p.pillar] || { label: p.pillarLabel, items: [] }).items.push(p); });
+
+  let html = '<div class="flex items-center gap-2 text-white font-bold mb-2">' +
+             '<i class="fa-solid fa-globe text-brand-400"></i>' + esc(state.domain) + '/</div>' +
+             '<div class="tree-children">';
+
+  EXISTING.filter(e => !e.path.includes('/')).forEach(e => {
+    html += '<div class="tree-item">' + nodeHTML('fa-file-code', e.label, 'existing', false) + '</div>';
+  });
+
+  // services/ pillar
+  html += '<div class="tree-item">' + nodeHTML('fa-folder-open', 'services/', 'pillar', false) + '<div class="tree-children">';
+  EXISTING.filter(e => e.path.startsWith('services/')).forEach(e => {
+    html += '<div class="tree-item">' + nodeHTML('fa-file-code', e.label, 'existing', false) + '</div>';
+  });
+  Object.keys(groups).forEach(key => {
+    const g = groups[key];
+    html += '<div class="tree-item">' + nodeHTML('fa-folder-tree', key + '/', 'hub', false) + '<div class="tree-children">';
+    g.items.forEach(p => {
+      html += '<div class="tree-item">' + nodeHTML('fa-file-circle-plus', p.file, 'new', true) + '</div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div></div>';
+
+  // blog/
+  html += '<div class="tree-item">' + nodeHTML('fa-folder-open', 'blog/', 'existing', false) + '<div class="tree-children">';
+  if (blogPages.length) {
+    blogPages.forEach(p => { html += '<div class="tree-item">' + nodeHTML('fa-file-circle-plus', p.file, 'new', true) + '</div>'; });
+  } else {
+    html += '<div class="tree-item">' + nodeHTML('fa-file-code', '(no new articles queued)', '', false) + '</div>';
+  }
+  html += '</div></div></div>';
+
+  document.getElementById('silo-tree').innerHTML = html;
+  document.getElementById('stat-crawled').textContent = EXISTING.length + 2;
+  document.getElementById('stat-proposed').textContent = state.pages.length;
+  document.getElementById('stat-proposed-split').textContent =
+    svcPages.length + ' service · ' + blogPages.length + ' blog';
+  document.getElementById('stat-geo').textContent = new Set(svcPages.map(p => p.location)).size;
+
+  const notice = document.getElementById('silo-notice');
+  if (state.truncated > 0) {
+    notice.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i>' +
+      state.truncated + ' matrix pair' + (state.truncated === 1 ? '' : 's') +
+      ' held back — the run is capped at <strong>' + state.maxUrls + ' new service URLs</strong> (blog silo articles are budgeted separately). Raise "Max New URLs" in Campaign Config to queue the rest.';
+    notice.classList.remove('hidden');
+  } else {
+    notice.classList.add('hidden');
+  }
+}
+
+/* ═════════ 7. VIEW 3 — KEYWORD MATRIX ═════════ */
+function renderMatrix() {
+  const body = document.getElementById('matrix-body');
+  if (!state.pages.length) {
+    body.innerHTML = '<tr><td colspan="8" class="text-center text-gray-500 py-10 text-sm">No rows — add Location + Service pairs in Campaign Config and re-run the discovery audit.</td></tr>';
+    updateMatrixStatus();
+    return;
+  }
+
+  body.innerHTML = state.pages.map((p, i) => {
+    const urlColor = p.type === 'blog' ? 'text-purple-300' : 'text-brand-300';
+    return '<tr class="excel-row" id="row-' + i + '">' +
+      '<td class="excel-cell-id">' + (i + 1) + '</td>' +
+      '<td class="font-mono ' + urlColor + ' text-[11px] whitespace-nowrap">' + esc(p.url) + '</td>' +
+      '<td class="font-semibold text-white text-[13px]">' + esc(p.focus) + '</td>' +
+      '<td class="text-right font-mono text-gray-400 text-xs">' + fmt(p.vol) + '</td>' +
+      '<td class="text-right font-mono text-xs ' + kdClass(p.kd) + '">' + p.kd + '</td>' +
+      '<td class="text-[11px]"><div class="flex flex-wrap gap-1">' +
+        p.secondary.map(s => '<span class="kw-chip">' + esc(s) + '</span>').join('') +
+      '</div></td>' +
+      '<td class="text-[11px] text-gray-400 italic max-w-[260px]">' + esc(p.suggestion) + '</td>' +
+      '<td class="text-center align-middle">' +
+        '<button id="btn-row-' + i + '" onclick="approveRow(' + i + ')" class="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 rounded hover:bg-emerald-500 hover:text-white transition-all text-[10px] uppercase font-bold w-full whitespace-nowrap">Approve</button>' +
+      '</td></tr>';
+  }).join('');
+
+  updateMatrixStatus();
+}
+
+function approveRow(i, silent) {
+  const p = state.pages[i];
+  if (!p || p.approved) return;
+  p.approved = true;
+
+  const btn = document.getElementById('btn-row-' + i);
+  if (btn) {
+    btn.innerHTML = 'Approved <i class="fa-solid fa-check ml-1"></i>';
+    btn.className = 'px-2 py-1 bg-dark-700 text-emerald-400 border border-dark-600 rounded cursor-not-allowed text-[10px] uppercase font-bold w-full whitespace-nowrap';
+    btn.disabled = true;
+  }
+  const row = document.getElementById('row-' + i);
+  if (row) row.classList.add('is-approved');
+
+  if (!silent) toast('Row approved', p.url + ' queued for the content factory.', 'success');
+  updateMatrixStatus();
+  syncSidebar();
+}
+
+function approveAll() {
+  const pending = state.pages.filter(p => !p.approved).length;
+  if (!pending) { toast('Nothing to approve', 'Every row in the matrix is already approved.', 'info'); return; }
+  state.pages.forEach((p, i) => approveRow(i, true));
+  toast('Batch approved', pending + ' rows pushed to the content queue.', 'success');
+}
+
+function approvedCount() { return state.pages.filter(p => p.approved).length; }
+
+function updateMatrixStatus() {
+  const a = approvedCount(), t = state.pages.length;
+  document.getElementById('matrix-status').textContent =
+    t ? a + ' of ' + t + ' rows approved · ' + (t * 4) + ' keywords mapped' : 'No data';
+}
+
+function exportCSV() {
+  if (!state.pages.length) { toast('Nothing to export', 'Run the discovery audit first.', 'info'); return; }
+  const rows = [['Target URL', 'Focus Keyword', 'Search Volume', 'KD', 'Secondary 1', 'Secondary 2', 'Secondary 3', 'Content Suggestions', 'Status']];
+  state.pages.forEach(p => rows.push([p.url, p.focus, p.vol, p.kd, p.secondary[0] || '', p.secondary[1] || '', p.secondary[2] || '', p.suggestion, p.approved ? 'Approved' : 'Pending']));
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+  download(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'keyword-matrix-' + state.domain + '.csv');
+  toast('CSV exported', state.pages.length + ' rows written to disk.', 'success');
+}
+
+/* ═════════ 8. VIEW 4 — CONTENT FACTORY ═════════ */
+const AGENTS = [
+  { id: 'lp',     name: 'Landing Page Agent',  desc: 'Drafting BoFu copy &amp; CRO-ready HTML',        icon: 'fa-pen-nib',   color: 'brand',   speed: 4.4 },
+  { id: 'blog',   name: 'Blog Silo Agent',     desc: 'Writing ToFu articles &amp; internal links',     icon: 'fa-feather',   color: 'purple',  speed: 3.1 },
+  { id: 'schema', name: 'Schema &amp; Meta Agent', desc: 'JSON-LD, titles, meta descriptions',         icon: 'fa-code',      color: 'cyan',    speed: 5.6 },
+  { id: 'link',   name: 'Interlinking Agent',  desc: 'Mapping the silo link graph',                    icon: 'fa-link',      color: 'emerald', speed: 3.7 }
+];
+
+const COLOR = {
+  brand:   { ring: 'border-brand-500/30',   chip: 'bg-brand-500/20 text-brand-400',     bar: 'bg-brand-500',   text: 'text-brand-400' },
+  purple:  { ring: 'border-purple-500/30',  chip: 'bg-purple-500/20 text-purple-400',   bar: 'bg-purple-500',  text: 'text-purple-400' },
+  cyan:    { ring: 'border-cyan-500/30',    chip: 'bg-cyan-500/20 text-cyan-400',       bar: 'bg-cyan-500',    text: 'text-cyan-400' },
+  emerald: { ring: 'border-emerald-500/30', chip: 'bg-emerald-500/20 text-emerald-400', bar: 'bg-emerald-500', text: 'text-emerald-400' }
+};
+
+let factoryTimer = null;
+
+function renderFactory() {
+  document.getElementById('agent-grid').innerHTML = AGENTS.map(a => {
+    const c = COLOR[a.color];
+    return '<div class="glass-panel rounded-xl border ' + c.ring + ' p-6 relative overflow-hidden">' +
+      '<div class="absolute top-4 right-4"><span id="ag-dot-' + a.id + '" class="block w-2 h-2 rounded-full ' + c.bar + ' pulse-dot"></span></div>' +
+      '<div class="w-12 h-12 rounded-xl ' + c.chip + ' flex items-center justify-center text-xl mb-4"><i class="fa-solid ' + a.icon + '"></i></div>' +
+      '<h3 class="text-white font-semibold text-lg mb-1">' + a.name + '</h3>' +
+      '<p class="text-xs text-gray-400 mb-5">' + a.desc + '</p>' +
+      '<div class="w-full bg-dark-900 rounded-full h-1.5 mb-2 overflow-hidden"><div id="ag-bar-' + a.id + '" class="' + c.bar + ' h-1.5 rounded-full transition-all duration-200" style="width:0%"></div></div>' +
+      '<div class="flex justify-between text-[11px]"><span class="text-gray-500" id="ag-task-' + a.id + '">Queued</span><span class="' + c.text + ' font-mono" id="ag-pct-' + a.id + '">0%</span></div>' +
+    '</div>';
+  }).join('');
+}
+
+function factoryLog(msg, tone) {
+  const box = document.getElementById('factory-log');
+  const line = document.createElement('div');
+  line.className = 'log-line ' + (tone === 'ok' ? 'text-emerald-400' : tone === 'warn' ? 'text-amber-400' : 'text-gray-400');
+  const t = new Date().toLocaleTimeString('en-US', { hour12: false });
+  line.innerHTML = '<span class="text-gray-600">' + t + '</span> ' + msg;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+function startFactory() {
+  clearInterval(factoryTimer);
+  renderFactory();
+  document.getElementById('factory-log').innerHTML = '';
+  document.getElementById('btn-preview').disabled = true;
+  document.getElementById('factory-caption').textContent = 'Agents are drafting assets…';
+  state.factoryRunning = true;
+  state.factoryDone = false;
+
+  const queue = state.pages.filter(p => p.approved);
+  factoryLog('Factory boot · ' + queue.length + ' approved URLs in queue');
+  queue.slice(0, 3).forEach(p => factoryLog('Allocated <span class="text-brand-300">' + esc(p.url) + '</span> → ' + (p.type === 'blog' ? 'Blog Silo Agent' : 'Landing Page Agent')));
+  if (queue.length > 3) factoryLog('… +' + (queue.length - 3) + ' more URLs allocated');
+
+  const progress = {}, done = {};
+  AGENTS.forEach(a => { progress[a.id] = 0; done[a.id] = false; });
+
+  const TASKS = {
+    lp: ['Analyzing SERP competitors', 'Drafting hero + USP block', 'Writing service sections', 'Injecting CTAs', 'Compiling HTML'],
+    blog: ['Outlining articles', 'Researching entities', 'Writing body copy', 'Adding internal links', 'Proofing'],
+    schema: ['Building LocalBusiness JSON-LD', 'Generating title tags', 'Writing meta descriptions', 'Validating schema'],
+    link: ['Reading silo map', 'Scoring anchor relevance', 'Writing link graph', 'Verifying no orphans']
+  };
+
+  factoryTimer = setInterval(() => {
+    let total = 0;
+    AGENTS.forEach(a => {
+      if (!done[a.id]) {
+        progress[a.id] = Math.min(100, progress[a.id] + a.speed * (0.6 + Math.random()));
+        const list = TASKS[a.id];
+        const idx = Math.min(list.length - 1, Math.floor(progress[a.id] / (100 / list.length)));
+        document.getElementById('ag-task-' + a.id).textContent = list[idx];
+        if (progress[a.id] >= 100) {
+          done[a.id] = true;
+          document.getElementById('ag-task-' + a.id).textContent = 'Complete';
+          document.getElementById('ag-task-' + a.id).className = 'text-emerald-400';
+          document.getElementById('ag-dot-' + a.id).classList.remove('pulse-dot');
+          document.getElementById('ag-dot-' + a.id).className = 'block w-2 h-2 rounded-full bg-emerald-400';
+          factoryLog(a.name.replace('&amp;', '&') + ' finished', 'ok');
+        }
+      }
+      document.getElementById('ag-bar-' + a.id).style.width = progress[a.id] + '%';
+      document.getElementById('ag-pct-' + a.id).textContent = Math.round(progress[a.id]) + '%';
+      total += progress[a.id];
+    });
+
+    document.getElementById('factory-total').textContent = Math.round(total / AGENTS.length);
+
+    if (AGENTS.every(a => done[a.id])) {
+      clearInterval(factoryTimer);
+      state.factoryRunning = false;
+      state.factoryDone = true;
+      factoryLog('All agents idle · ' + queue.length + ' assets written', 'ok');
+      document.getElementById('factory-caption').textContent =
+        'Landing page HTML generated successfully using Aivast CRO guidelines.';
+      document.getElementById('btn-preview').disabled = false;
+      document.getElementById('nav-output-btn').classList.add('ring-1', 'ring-brand-500/40');
+      markStage('view-factory');
+      toast('Factory complete', queue.length + ' assets generated and ready for review.', 'success');
+    }
+  }, 140);
+}
+
+/* ═════════ 9. VIEW 5 — IFRAME INJECTION ═════════ */
+function rawLanding() {
+  const tpl = document.getElementById('raw-html');
+  const holder = tpl.content.querySelector('#raw-html-source');
+  // Un-escape the closing script tags that had to be neutered for safe storage
+  return holder.textContent.replace(/<\\\/script>/g, '<\/script>');
+}
+
+function injectLandingPage(notify) {
+  const frame = document.getElementById('html-preview-frame');
+  frame.removeAttribute('srcdoc');
+  frame.srcdoc = rawLanding();
+  if (notify) toast('Preview reloaded', 'Generated HTML re-injected into the sandboxed frame.', 'info');
+}
+
+function exportHTML() {
+  download(new Blob([rawLanding()], { type: 'text/html;charset=utf-8;' }), 'water-damage-restoration-lafayette.html');
+  toast('HTML exported', 'Full landing page written to disk, ready to deploy.', 'success');
+}
+
+function download(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+
+/* ═════════ 10. ROUTING ═════════ */
+const VIEW_META = {
+  'view-onboarding': ['Campaign Configuration', 'Define constraints &amp; launch agents'],
+  'view-silo':       ['Silo Architect', 'Review the proposed structural hierarchy'],
+  'view-mapping':    ['Keyword Matrix', 'Data approval gate — 1 focus + 3 secondary per URL'],
+  'view-factory':    ['Content Factory Live', 'Agents executing tasks in parallel'],
+  'view-output':     ['Generated CRO Landing Page', 'Review the final HTML asset']
+};
+
+function switchView(viewId) {
+  if (!VIEW_META[viewId]) return;
+  document.querySelectorAll('.app-view').forEach(el => el.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+
+  document.getElementById('header-title').textContent = VIEW_META[viewId][0];
+  document.getElementById('header-subtitle').innerHTML = VIEW_META[viewId][1];
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    const on = btn.dataset.view === viewId;
+    btn.className = 'nav-btn w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ' +
+      (on ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-gray-400 hover:bg-dark-700 hover:text-gray-200 border border-transparent');
+  });
+
+  document.querySelector('main > div').scrollTop = 0;
+  closeSidebar();
+
+  if (viewId === 'view-factory' && !state.factoryRunning && !state.factoryDone) startFactory();
+  if (viewId === 'view-output') {
+    const target = state.pages.find(p => p.approved && p.type === 'service') || state.pages[0];
+    if (target) {
+      document.getElementById('output-target').textContent = target.url;
+      document.getElementById('preview-url').textContent = state.domain + target.url;
+    }
+    injectLandingPage(false);
+    markStage('view-output');
+  }
+}
+
+function markStage(viewId) {
+  const btn = document.querySelector('.nav-btn[data-view="' + viewId + '"]');
+  if (btn) btn.querySelector('.stage-tick').classList.remove('opacity-0');
+}
+
+/* ═════════ 11. STAGE ACTIONS ═════════ */
+function runDiscovery() {
+  const pairs = parseMatrix(document.getElementById('in-prompt').value);
+  if (!pairs.length) {
+    toast('No matrix detected', 'Add at least one "- Location Service" line to the master prompt.', 'error');
+    return;
+  }
+  buildCampaign();
+  markStage('view-onboarding');
+  processing('Crawling site & building architecture…', [
+    'GET /robots.txt · 200',
+    'Crawling sitemap.xml · ' + (EXISTING.length + 2) + ' URLs found',
+    'Parsing master prompt · ' + pairs.length + ' pairs',
+    'Clustering intent by silo',
+    'Architecture ready'
+  ], () => switchView('view-silo'));
+}
+
+function runKeywordMap() {
+  markStage('view-silo');
+  processing('Querying APIs & building keyword matrix…', [
+    'Authenticating with SERP provider',
+    'Pulling volume for ' + state.pages.length + ' focus keywords',
+    'Scoring keyword difficulty',
+    'Assigning ' + (state.pages.length * 3) + ' secondary keywords',
+    'Matrix compiled'
+  ], () => switchView('view-mapping'));
+}
+
+function runFactory() {
+  if (!state.pages.length) { toast('Nothing queued', 'Run the discovery audit first.', 'error'); return; }
+  if (!approvedCount()) {
+    toast('Approval required', 'Approve at least one row before dispatching the agents — use "Approve all" to send everything.', 'error');
+    return;
+  }
+  markStage('view-mapping');
+  state.factoryDone = false;
+  processing('Dispatching content & design agents…', [
+    'Spinning up 4 agent workers',
+    'Loading brand + CRO guidelines',
+    'Sharding ' + approvedCount() + ' approved URLs',
+    'Agents online'
+  ], () => switchView('view-factory'));
+}
+
+function openOutput() { switchView('view-output'); }
+
+function loadSample() {
+  document.getElementById('in-prompt').value =
+`Package: Custom Enterprise
+Limits: Target 12 URLs max. 4 keywords per URL (1 Focus, 3 Secondary).
+
+Strategy: Generate hyper-local service pages based on the following matrix:
+- Lafayette Water Damage
+- Lafayette Mold Remediation
+- Lafayette Storm Damage
+- Broussard Commercial Contracting
+- Youngsville Water Damage
+- Youngsville Mold Remediation
+- Scott Water Damage
+- Abbeville Water Damage
+- Abbeville Sewage Cleanup
+- New Iberia Water Damage
+- New Iberia Fire Damage
+- Carencro Mold Remediation`;
+  document.getElementById('in-max').value = 12;
+  document.getElementById('in-geo').value = 'Lafayette, Broussard, Youngsville, Scott, Abbeville, New Iberia, Carencro';
+  updateParseHint();
+  toast('Sample loaded', '12 Location × Service pairs across 6 service lines.', 'info');
+}
+
+function resetCampaign() {
+  clearInterval(factoryTimer);
+  state.factoryRunning = false;
+  state.factoryDone = false;
+  state.pages.forEach(p => p.approved = false);
+  document.querySelectorAll('.stage-tick').forEach(t => t.classList.add('opacity-0'));
+  document.getElementById('nav-output-btn').classList.remove('ring-1', 'ring-brand-500/40');
+  buildCampaign();
+  switchView('view-onboarding');
+  toast('Pipeline reset', 'Approvals cleared and agents returned to idle.', 'info');
+}
+
+/* ═════════ 12. PROCESSING OVERLAY ═════════ */
+function processing(message, steps, done) {
+  const overlay = document.getElementById('processing-overlay');
+  const log = document.getElementById('processing-log');
+  const bar = document.getElementById('processing-bar');
+
+  document.getElementById('processing-text').textContent = message;
+  log.innerHTML = '';
+  bar.style.width = '0%';
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+
+  const per = 1800 / steps.length;
+  steps.forEach((s, i) => {
+    setTimeout(() => {
+      log.innerHTML = '<div class="log-line">&gt; ' + s + '</div>' + (i > 0 ? '<div class="opacity-40">&gt; ' + steps[i - 1] + '</div>' : '');
+      bar.style.width = Math.round(((i + 1) / steps.length) * 100) + '%';
+    }, per * i);
+  });
+
+  setTimeout(() => {
+    overlay.classList.add('hidden');
+    overlay.classList.remove('flex');
+    done();
+  }, 1900);
+}
+
+/* ═════════ 13. TOASTS ═════════ */
+const TOAST_STYLE = {
+  success: { icon: 'fa-circle-check', color: 'text-emerald-400', border: 'border-emerald-500/30' },
+  error:   { icon: 'fa-triangle-exclamation', color: 'text-red-400', border: 'border-red-500/30' },
+  info:    { icon: 'fa-circle-info', color: 'text-brand-400', border: 'border-brand-500/30' }
+};
+
+function toast(title, msg, type) {
+  const s = TOAST_STYLE[type] || TOAST_STYLE.info;
+  const el = document.createElement('div');
+  el.className = 'glass-panel toast-enter rounded-lg border ' + s.border + ' px-4 py-3 flex items-start gap-3 shadow-2xl';
+  el.innerHTML =
+    '<i class="fa-solid ' + s.icon + ' ' + s.color + ' mt-0.5"></i>' +
+    '<div class="min-w-0"><div class="text-sm font-semibold text-white">' + esc(title) + '</div>' +
+    '<div class="text-xs text-gray-400 leading-relaxed break-words">' + esc(msg) + '</div></div>' +
+    '<button class="ml-auto text-gray-600 hover:text-gray-300 text-xs"><i class="fa-solid fa-xmark"></i></button>';
+
+  const kill = () => {
+    el.classList.remove('toast-enter');
+    el.classList.add('toast-exit');
+    setTimeout(() => el.remove(), 300);
+  };
+  el.querySelector('button').onclick = kill;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(kill, 4200);
+}
+
+/* ═════════ 14. SIDEBAR / MISC ═════════ */
+function syncSidebar() {
+  document.getElementById('side-domain').textContent = state.domain;
+  document.getElementById('side-pages').textContent = state.pages.length;
+  document.getElementById('side-approved').textContent = approvedCount();
+  const pct = state.pages.length ? (approvedCount() / state.pages.length) * 100 : 0;
+  document.getElementById('side-progress').style.width = pct + '%';
+}
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.remove('-translate-x-full');
+  document.getElementById('sidebar-backdrop').classList.remove('hidden');
+}
+function closeSidebar() {
+  if (window.innerWidth >= 768) return;
+  document.getElementById('sidebar').classList.add('-translate-x-full');
+  document.getElementById('sidebar-backdrop').classList.add('hidden');
+}
+
+/* ═════════ 15. BOOT ═════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  const bootLogs = document.getElementById('boot-logs');
+  const seq = ['INIT core…', 'LOADING agent pool…', 'MOUNTING SERP adapters…', 'SYSTEM READY.'];
+  let delay = 0;
+  seq.forEach(l => {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'log-line';
+      p.textContent = '> ' + l;
+      bootLogs.appendChild(p);
+    }, delay);
+    delay += 380;
+  });
+  setTimeout(() => {
+    const bs = document.getElementById('boot-screen');
+    bs.style.opacity = '0';
+    setTimeout(() => bs.style.display = 'none', 750);
+  }, delay + 450);
+
+  // Nav wiring
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+  document.getElementById('sidebar-toggle').addEventListener('click', openSidebar);
+  document.getElementById('sidebar-backdrop').addEventListener('click', closeSidebar);
+
+  // Viewport toggles
+  document.querySelectorAll('.vp-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.vp-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('preview-shell').style.maxWidth = b.dataset.vp;
+  }));
+
+  document.getElementById('in-prompt').addEventListener('input', updateParseHint);
+
+  updateParseHint();
+  buildCampaign();
+  switchView('view-onboarding');
+});
+</script>
+</body>
+</html>
