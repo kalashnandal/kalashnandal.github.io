@@ -18,31 +18,58 @@ never-again/
 
 ## Setup
 
-1. **Get a Google Maps API key** — <https://console.cloud.google.com/google/maps-apis>
-   Enable these two APIs on the project:
-   - **Maps JavaScript API**
-   - **Places API (New)**
-   The app also uses the Geocoding service exposed through the Maps JS SDK for
-   reverse-geocoding dropped pins; enable **Geocoding API** if you want that path.
+The API key is already in `index.html` and the app is wired up. What follows is
+the state it's in and what to change if you move it.
 
-2. **Paste the key** into `index.html`, replacing `YOUR_GOOGLE_MAPS_API_KEY` in
-   the loader `<script>`.
+### Current key configuration
 
-3. **Restrict the key** (Cloud console → Credentials → your key):
-   - Application restriction: *HTTP referrers*, e.g. `https://yourname.github.io/*`
-   - API restriction: only the APIs listed above.
-   The key ships in client-side JS and is publicly visible — referrer
-   restriction is what keeps it from being used elsewhere. Set a billing quota
-   cap too.
+The key in `index.html` is restricted to the HTTP referrer
+`https://kalashnandal.co.in/*`. Verified working against it:
 
-4. *(Optional)* **Create a Map ID** (Cloud console → Maps → Map management,
-   type: JavaScript) and set `CONFIG.MAP_ID` in `app.js`. The default
-   `DEMO_MAP_ID` renders fine but is unstyled and meant for development. A Map
-   ID is required for Advanced Markers, which is what draws the 💀 pins.
+| API | State |
+| --- | --- |
+| Maps JavaScript API | enabled ✅ |
+| Places API (New) | enabled ✅ |
+| Geocoding API | untested — see below |
 
-5. **Serve over HTTPS.** Geolocation, notifications and service workers all
-   require a secure context. GitHub Pages gives you that; `localhost` also
-   counts for local testing.
+Requests from `*.github.io`, `localhost`, and anywhere else are rejected with
+`API_KEY_HTTP_REFERRER_BLOCKED`. That's deliberate and it's what makes it
+acceptable to commit the key to a public repo.
+
+**Geocoding** is only used for one path: tapping empty map to drop a pin, which
+reverse-geocodes the coordinate into a street name. If the Geocoding API isn't
+enabled on the project that call fails softly — the pin keeps the label
+"Dropped pin" and its lat/lng, and everything else works. Enable **Geocoding
+API** in the Cloud console if you want real names on dropped pins.
+
+### Two things worth doing
+
+1. **Set a billing quota cap.** Referrer restriction stops a browser on another
+   origin, but `Referer` is just a request header and any non-browser client can
+   forge it. A daily quota cap is what actually bounds your exposure.
+
+2. **Add `http://localhost:*/*` as an allowed referrer** if you want to run the
+   app locally — right now local testing gets a blocked-referrer error and a
+   blank map.
+
+### If you move the app to a different domain
+
+Add that origin to the key's referrer list (Cloud console → Credentials → the
+key → Application restrictions → Website restrictions). Nothing in the code
+needs to change.
+
+### Optional: your own Map ID
+
+`CONFIG.MAP_ID` in `app.js` is `DEMO_MAP_ID`, which renders fine but is unstyled
+and meant for development. Create your own (Cloud console → Maps → Map
+management, type: JavaScript) for custom map styling. A Map ID is required
+either way — it's what enables Advanced Markers, which is what draws the 💀
+pins.
+
+### HTTPS is required
+
+Geolocation, notifications and service workers all need a secure context.
+GitHub Pages gives you that; `localhost` also counts.
 
 ## How it works
 
