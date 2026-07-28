@@ -187,6 +187,17 @@ if (window.tailwind) tailwind.config = {
       <!-- ═══════ VIEW 1 — CAMPAIGN CONFIGURATION ═══════ -->
       <div id="view-onboarding" class="app-view active space-y-6">
 
+        <div class="glass-panel rounded-xl p-5">
+          <div class="flex items-center justify-between gap-4 mb-4">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-plug text-brand-400"></i>
+              <h2 class="text-sm font-semibold text-white">Data Sources</h2>
+            </div>
+            <span class="text-[11px] text-gray-500">Credentials live in <code class="text-brand-300">API_CONFIG</code> at the top of the script</span>
+          </div>
+          <div id="api-status" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2"></div>
+        </div>
+
         <div class="glass-panel rounded-xl p-6">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
             <div class="flex items-center gap-3">
@@ -1080,7 +1091,181 @@ const EXISTING = [
   { path: 'services/roofing.html', label: 'roofing.html' }
 ];
 
-/* ═════════ 2. STATE ═════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   2. API CONFIGURATION  ←  PASTE CREDENTIALS HERE
+
+   Every field below is intentionally blank. While a section is blank the
+   dashboard runs that stage in SIMULATION mode using the local model, so
+   the prototype stays fully clickable. Fill a section in and that stage
+   starts calling the real service instead.
+
+   ⚠ SECURITY: this file is a static page — anything written here ships to
+   the browser and is readable by anyone who views source. For production,
+   leave the secret fields blank, set `proxyBase` to your own backend, and
+   hold the real keys there. The client then calls your endpoints and never
+   touches a vendor key. The per-vendor fields below are for local testing
+   only.
+   ═══════════════════════════════════════════════════════════════════ */
+const API_CONFIG = {
+
+  /* Your backend that holds the real credentials and proxies vendor calls.
+     e.g. 'https://api.yourdomain.com/seo-agent'  */
+  proxyBase: '',
+
+  /* ── STAGE 1-2 · Site discovery / crawl ──────────────────────────────
+     Finds the pages that already exist so the silo builds on reality.
+     Recommended: Google Search Console (free, first-party, also gives
+     current impressions + rankings). Crawler covers pages GSC can't see. */
+  searchConsole: {
+    siteUrl: '',            // 'sc-domain:aivastconstruction.com'
+    clientId: '',           // Google Cloud OAuth client
+    clientSecret: '',
+    refreshToken: ''
+  },
+  crawler: {
+    provider: 'firecrawl',  // 'firecrawl' | 'scrapingbee' | 'custom'
+    apiKey: ''
+  },
+
+  /* ── STAGE 3 · Keyword volume + difficulty + SERP ────────────────────
+     Recommended: DataForSEO — one vendor covers volume, KD, SERP and
+     competitor data at roughly $0.05 per 1k keywords.
+     Alternatives: 'semrush' (apiKey), 'ahrefs' (apiKey, enterprise). */
+  keywords: {
+    provider: 'dataforseo', // 'dataforseo' | 'semrush' | 'ahrefs'
+    login: '',              // DataForSEO uses login+password (basic auth)
+    password: '',
+    apiKey: '',             // used instead by semrush / ahrefs
+    locationCode: 1022546,  // DataForSEO code for Lafayette, Louisiana
+    languageCode: 'en'
+  },
+
+  /* ── STAGE 4 · Content generation ────────────────────────────────────
+     Claude writes the copy and the HTML. Keep this key server-side. */
+  llm: {
+    provider: 'anthropic',
+    apiKey: '',             // sk-ant-...
+    model: 'claude-opus-5'
+  },
+
+  /* ── STAGE 4 · Local business facts ──────────────────────────────────
+     Real NAP, hours, service areas and review counts for the LocalBusiness
+     schema and trust blocks — instead of the placeholders in the template. */
+  businessProfile: {
+    accountId: '',
+    locationId: '',
+    apiKey: ''
+  },
+
+  /* ── STAGE 5 · Publishing ────────────────────────────────────────────
+     aivastconstruction.com looks like WordPress (/wp-content/ in asset
+     URLs), so a WP application password is the shortest path to live.  */
+  cms: {
+    provider: 'wordpress',  // 'wordpress' | 'webflow' | 'shopify' | 'github'
+    baseUrl: '',            // 'https://aivastconstruction.com'
+    username: '',
+    appPassword: ''
+  },
+
+  /* ── POST-LAUNCH · Measurement (optional) ────────────────────────────── */
+  analytics: { ga4PropertyId: '', serviceAccountJson: '' },
+  pagespeed: { apiKey: '' },   // free Google API key, powers the View 5 score
+  indexing:  { googleServiceAccountJson: '', indexNowKey: '' }
+};
+
+/* Which stages are wired for live data. A stage goes live when its own
+   credentials are present, or when a proxyBase is set (backend holds them). */
+function isLive(section) {
+  if (API_CONFIG.proxyBase) return true;
+  const c = API_CONFIG[section] || {};
+  switch (section) {
+    case 'searchConsole':   return !!(c.siteUrl && c.refreshToken);
+    case 'crawler':         return !!c.apiKey;
+    case 'keywords':        return !!((c.login && c.password) || c.apiKey);
+    case 'llm':             return !!c.apiKey;
+    case 'businessProfile': return !!(c.locationId && c.apiKey);
+    case 'cms':             return !!(c.baseUrl && c.appPassword);
+    case 'analytics':       return !!c.ga4PropertyId;
+    case 'pagespeed':       return !!c.apiKey;
+    default:                return false;
+  }
+}
+
+/* All vendor traffic goes through the proxy. Direct browser calls to these
+   APIs would leak keys and be blocked by CORS anyway. */
+async function apiCall(path, payload) {
+  if (!API_CONFIG.proxyBase) throw new Error('no proxyBase configured');
+  const res = await fetch(API_CONFIG.proxyBase.replace(/\/$/, '') + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(path + ' → HTTP ' + res.status);
+  return res.json();
+}
+
+/* ═════════ 2b. DATA ADAPTERS ═════════
+   Each adapter returns live data when its stage is configured and falls
+   back to the local simulation otherwise, so the demo never breaks. */
+
+/* → GET existing URLs. Live shape: { urls: [{ path, label }] } */
+async function apiGetExistingUrls(domain) {
+  if (!isLive('searchConsole') && !isLive('crawler')) return { live: false, urls: EXISTING };
+  try {
+    const r = await apiCall('/discovery/crawl', { domain, siteUrl: API_CONFIG.searchConsole.siteUrl });
+    return { live: true, urls: r.urls || EXISTING };
+  } catch (e) {
+    console.warn('[discovery] falling back to simulation:', e.message);
+    return { live: false, urls: EXISTING, error: e.message };
+  }
+}
+
+/* → Keyword metrics. Live shape: { metrics: { "<keyword>": { vol, kd } } }
+   Overwrites the hash-derived placeholder numbers on each page. */
+async function apiEnrichKeywords(pages) {
+  if (!isLive('keywords')) return { live: false };
+  try {
+    const terms = [];
+    pages.forEach(p => { terms.push(p.focus); p.secondary.forEach(s => terms.push(s)); });
+    const r = await apiCall('/keywords/metrics', {
+      keywords: terms,
+      locationCode: API_CONFIG.keywords.locationCode,
+      languageCode: API_CONFIG.keywords.languageCode
+    });
+    pages.forEach(p => {
+      const m = r.metrics && r.metrics[p.focus];
+      if (m) { p.vol = m.vol; p.kd = m.kd; }
+    });
+    return { live: true };
+  } catch (e) {
+    console.warn('[keywords] falling back to simulation:', e.message);
+    return { live: false, error: e.message };
+  }
+}
+
+/* → Content generation. Live shape: { html, wordCount, score } */
+async function apiGenerateContent(page) {
+  if (!isLive('llm')) return { live: false, html: null };
+  try {
+    const r = await apiCall('/content/generate', {
+      url: page.url, focusKeyword: page.focus, secondary: page.secondary,
+      brief: page.suggestion, model: API_CONFIG.llm.model,
+      business: API_CONFIG.businessProfile.locationId || null
+    });
+    return { live: true, html: r.html, wordCount: r.wordCount, score: r.score };
+  } catch (e) {
+    console.warn('[content] falling back to the stored sample page:', e.message);
+    return { live: false, html: null, error: e.message };
+  }
+}
+
+/* → Publish. Live shape: { id, link, status } */
+async function apiPublishPage(page, html) {
+  if (!isLive('cms')) throw new Error('No CMS configured — add API_CONFIG.cms credentials to publish.');
+  return apiCall('/cms/publish', { url: page.url, html, provider: API_CONFIG.cms.provider });
+}
+
+/* ═════════ 2c. STATE ═════════ */
 const state = {
   domain: 'aivastconstruction.com',
   targetUrl: 'https://aivastconstruction.com',
@@ -1088,6 +1273,8 @@ const state = {
   blogCount: 2,
   geo: [],
   pages: [],
+  existing: EXISTING,
+  generatedHTML: null,
   truncated: 0,
   factoryRunning: false,
   factoryDone: false
@@ -1227,13 +1414,13 @@ function renderSilo() {
              '<i class="fa-solid fa-globe text-brand-400"></i>' + esc(state.domain) + '/</div>' +
              '<div class="tree-children">';
 
-  EXISTING.filter(e => !e.path.includes('/')).forEach(e => {
+  state.existing.filter(e => !e.path.includes('/')).forEach(e => {
     html += '<div class="tree-item">' + nodeHTML('fa-file-code', e.label, 'existing', false) + '</div>';
   });
 
   // services/ pillar
   html += '<div class="tree-item">' + nodeHTML('fa-folder-open', 'services/', 'pillar', false) + '<div class="tree-children">';
-  EXISTING.filter(e => e.path.startsWith('services/')).forEach(e => {
+  state.existing.filter(e => e.path.startsWith('services/')).forEach(e => {
     html += '<div class="tree-item">' + nodeHTML('fa-file-code', e.label, 'existing', false) + '</div>';
   });
   Object.keys(groups).forEach(key => {
@@ -1256,7 +1443,7 @@ function renderSilo() {
   html += '</div></div></div>';
 
   document.getElementById('silo-tree').innerHTML = html;
-  document.getElementById('stat-crawled').textContent = EXISTING.length + 2;
+  document.getElementById('stat-crawled').textContent = state.existing.length + 2;
   document.getElementById('stat-proposed').textContent = state.pages.length;
   document.getElementById('stat-proposed-split').textContent =
     svcPages.length + ' service · ' + blogPages.length + ' blog';
@@ -1397,6 +1584,22 @@ function startFactory() {
 
   const queue = state.pages.filter(p => p.approved);
   factoryLog('Factory boot · ' + queue.length + ' approved URLs in queue');
+  factoryLog(isLive('llm')
+    ? 'Content engine: ' + API_CONFIG.llm.model + ' (live)'
+    : 'Content engine: simulation — add API_CONFIG.llm.apiKey to generate for real', isLive('llm') ? 'ok' : 'warn');
+
+  // Live generation runs alongside the progress animation; the stored sample
+  // page is used as the preview whenever the LLM stage isn't configured.
+  state.generatedHTML = null;
+  const primary = queue.find(p => p.type === 'service') || queue[0];
+  if (primary && isLive('llm')) {
+    apiGenerateContent(primary).then(r => {
+      if (r.html) {
+        state.generatedHTML = r.html;
+        factoryLog('Landing page HTML received · ' + (r.wordCount || '?') + ' words', 'ok');
+      }
+    });
+  }
   queue.slice(0, 3).forEach(p => factoryLog('Allocated <span class="text-brand-300">' + esc(p.url) + '</span> → ' + (p.type === 'blog' ? 'Blog Silo Agent' : 'Landing Page Agent')));
   if (queue.length > 3) factoryLog('… +' + (queue.length - 3) + ' more URLs allocated');
 
@@ -1451,6 +1654,9 @@ function startFactory() {
 
 /* ═════════ 9. VIEW 5 — IFRAME INJECTION ═════════ */
 function rawLanding() {
+  // Live output from the content agent wins; otherwise fall back to the
+  // sample page stored in the template.
+  if (state.generatedHTML) return state.generatedHTML;
   const tpl = document.getElementById('raw-html');
   const holder = tpl.content.querySelector('#raw-html-source');
   // Un-escape the closing script tags that had to be neutered for safe storage
@@ -1522,32 +1728,43 @@ function markStage(viewId) {
 }
 
 /* ═════════ 11. STAGE ACTIONS ═════════ */
-function runDiscovery() {
+async function runDiscovery() {
   const pairs = parseMatrix(document.getElementById('in-prompt').value);
   if (!pairs.length) {
     toast('No matrix detected', 'Add at least one "- Location Service" line to the master prompt.', 'error');
     return;
   }
-  buildCampaign();
   markStage('view-onboarding');
-  processing('Crawling site & building architecture…', [
+  await processing('Crawling site & building architecture…', [
     'GET /robots.txt · 200',
-    'Crawling sitemap.xml · ' + (EXISTING.length + 2) + ' URLs found',
+    isLive('searchConsole') ? 'Search Console · pulling indexed URLs' : 'Crawling sitemap.xml',
     'Parsing master prompt · ' + pairs.length + ' pairs',
     'Clustering intent by silo',
     'Architecture ready'
-  ], () => switchView('view-silo'));
+  ], async () => {
+    const crawl = await apiGetExistingUrls(state.domain);
+    state.existing = crawl.urls;
+    buildCampaign();
+    if (crawl.error) toast('Crawl unavailable', 'Using simulated site structure — ' + crawl.error, 'info');
+  });
+  switchView('view-silo');
 }
 
-function runKeywordMap() {
+async function runKeywordMap() {
   markStage('view-silo');
-  processing('Querying APIs & building keyword matrix…', [
-    'Authenticating with SERP provider',
+  const r = await processing('Querying APIs & building keyword matrix…', [
+    isLive('keywords') ? 'Authenticating with ' + API_CONFIG.keywords.provider : 'Loading simulated keyword set',
     'Pulling volume for ' + state.pages.length + ' focus keywords',
     'Scoring keyword difficulty',
     'Assigning ' + (state.pages.length * 3) + ' secondary keywords',
     'Matrix compiled'
-  ], () => switchView('view-mapping'));
+  ], async () => {
+    const res = await apiEnrichKeywords(state.pages);
+    renderMatrix();
+    return res;
+  });
+  switchView('view-mapping');
+  if (r && r.live) toast('Live keyword data', 'Volume and KD pulled from ' + API_CONFIG.keywords.provider + '.', 'success');
 }
 
 function runFactory() {
@@ -1560,10 +1777,10 @@ function runFactory() {
   state.factoryDone = false;
   processing('Dispatching content & design agents…', [
     'Spinning up 4 agent workers',
-    'Loading brand + CRO guidelines',
+    isLive('llm') ? 'Connecting to ' + API_CONFIG.llm.model : 'Loading brand + CRO guidelines',
     'Sharding ' + approvedCount() + ' approved URLs',
     'Agents online'
-  ], () => switchView('view-factory'));
+  ]).then(() => switchView('view-factory'));
 }
 
 function openOutput() { switchView('view-output'); }
@@ -1605,7 +1822,9 @@ function resetCampaign() {
 }
 
 /* ═════════ 12. PROCESSING OVERLAY ═════════ */
-function processing(message, steps, done) {
+/* Runs `work` (which may hit real APIs) behind the overlay, and holds the
+   overlay for at least the animation so simulated runs still feel real. */
+async function processing(message, steps, work) {
   const overlay = document.getElementById('processing-overlay');
   const log = document.getElementById('processing-log');
   const bar = document.getElementById('processing-bar');
@@ -1617,18 +1836,27 @@ function processing(message, steps, done) {
   overlay.classList.add('flex');
 
   const per = 1800 / steps.length;
-  steps.forEach((s, i) => {
-    setTimeout(() => {
-      log.innerHTML = '<div class="log-line">&gt; ' + s + '</div>' + (i > 0 ? '<div class="opacity-40">&gt; ' + steps[i - 1] + '</div>' : '');
-      bar.style.width = Math.round(((i + 1) / steps.length) * 100) + '%';
-    }, per * i);
-  });
+  const timers = steps.map((s, i) => setTimeout(() => {
+    log.innerHTML = '<div class="log-line">&gt; ' + s + '</div>' + (i > 0 ? '<div class="opacity-40">&gt; ' + steps[i - 1] + '</div>' : '');
+    bar.style.width = Math.round(((i + 1) / steps.length) * 100) + '%';
+  }, per * i));
 
-  setTimeout(() => {
+  let result = null;
+  try {
+    [result] = await Promise.all([
+      work ? work() : Promise.resolve(null),
+      new Promise(r => setTimeout(r, 1900))
+    ]);
+  } catch (e) {
+    console.error('[pipeline]', e);
+    toast('Stage failed', e.message, 'error');
+  } finally {
+    timers.forEach(clearTimeout);
+    bar.style.width = '100%';
     overlay.classList.add('hidden');
     overlay.classList.remove('flex');
-    done();
-  }, 1900);
+  }
+  return result;
 }
 
 /* ═════════ 13. TOASTS ═════════ */
@@ -1659,6 +1887,26 @@ function toast(title, msg, type) {
 }
 
 /* ═════════ 14. SIDEBAR / MISC ═════════ */
+const API_PANEL = [
+  { key: 'searchConsole',   label: 'Search Console', icon: 'fa-magnifying-glass-chart' },
+  { key: 'crawler',         label: 'Crawler',        icon: 'fa-spider' },
+  { key: 'keywords',        label: 'Keyword Data',   icon: 'fa-chart-simple' },
+  { key: 'llm',             label: 'Content LLM',    icon: 'fa-brain' },
+  { key: 'businessProfile', label: 'Business Profile', icon: 'fa-store' },
+  { key: 'cms',             label: 'CMS Publish',    icon: 'fa-upload' }
+];
+
+function renderApiStatus() {
+  document.getElementById('api-status').innerHTML = API_PANEL.map(a => {
+    const live = isLive(a.key);
+    return '<div class="rounded-lg border px-3 py-2.5 flex items-center gap-2.5 ' +
+      (live ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-dark-700 bg-dark-900/60') + '">' +
+      '<i class="fa-solid ' + a.icon + ' ' + (live ? 'text-emerald-400' : 'text-gray-600') + ' text-sm"></i>' +
+      '<div class="min-w-0"><div class="text-[11px] font-medium text-gray-300 truncate">' + a.label + '</div>' +
+      '<div class="text-[10px] ' + (live ? 'text-emerald-400' : 'text-gray-500') + '">' + (live ? 'Live' : 'Simulated') + '</div></div></div>';
+  }).join('');
+}
+
 function syncSidebar() {
   document.getElementById('side-domain').textContent = state.domain;
   document.getElementById('side-pages').textContent = state.pages.length;
@@ -1712,6 +1960,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('in-prompt').addEventListener('input', updateParseHint);
 
   updateParseHint();
+  renderApiStatus();
   buildCampaign();
   switchView('view-onboarding');
 });
