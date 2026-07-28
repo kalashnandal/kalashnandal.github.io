@@ -1667,6 +1667,7 @@
         window.__morph = 0;
         function calcA(){
             anchors = anchorSel.map(function(s){ var e=$(s); return e ? e.offsetTop : 0; });
+            calcH();
         }
         /* V4: the legacy anchor cache is recomputed when GSAP re-measures the page
            (the pinned prologue injects ~300vh of spacer). Exposed, not rewritten. */
@@ -1680,9 +1681,15 @@
             }
             return Math.min(4, Math.max(0, p));
         }
+        /* document.scrollHeight is a forced synchronous layout, and this handler
+           runs on every scroll frame. Cached alongside the anchor offsets and
+           refreshed from the same places, so the progress bar costs a division
+           instead of a reflow. */
+        var docH = 0;
+        function calcH(){ docH = document.documentElement.scrollHeight - window.innerHeight; }
         function onScroll(){
             var y=window.scrollY;
-            var h=document.documentElement.scrollHeight - window.innerHeight;
+            var h=docH;
             if(bar) bar.style.width = (h>0 ? (y/h*100) : 0) + '%';
             if(topBtn) topBtn.classList.toggle('vis', y>300);
             if(hdr){
@@ -2454,15 +2461,36 @@
                both in the same frame the header flickered on the way out
                depending on which trigger happened to run last. Deriving it from
                scrollY instead makes the answer the same no matter who asks. */
+            /* The prologue's geometry is READ ONCE per refresh, not per frame.
+
+               syncChrome runs on every ScrollTrigger update — twice a frame
+               while the handoff overlaps the master — and it used to read
+               pro.offsetTop and pro.offsetHeight on each call. Those are
+               forced synchronous layouts, landing in the middle of a frame in
+               which GSAP has just written transforms to forty-odd elements.
+               Write, read, write, read: the browser has to flush layout again
+               for every read, and the frame collapses into a 150-270ms long
+               task. It was the single biggest cost in the whole prologue, far
+               past anything the blur was doing, and it was introduced by the
+               chrome-flicker fix that made this function read scroll position
+               in the first place.
+
+               The value can only change when the pin re-measures, so it is
+               cached on refresh and simply read here. */
+            var proBottom = 0;
+            function measurePro(){
+                if(pro) proBottom = pro.offsetTop + pro.offsetHeight;
+            }
+            measurePro();
             function syncChrome(){
                 if(!pro) return;
-                var handoffMid = pro.offsetTop + pro.offsetHeight - window.innerHeight * 0.5;
-                var inside = window.scrollY < handoffMid;
+                var y = window.scrollY;
+                var inside = y < proBottom - window.innerHeight * 0.5;
                 document.body.classList.toggle('pro-active', inside);
                 /* Neither the camera nor the ambient loops should run once the
                    prologue has left the screen: past the handoff every one of
                    those writes is a style recalc for pixels nobody can see. */
-                var onScreen = window.scrollY < pro.offsetTop + pro.offsetHeight;
+                var onScreen = y < proBottom;
                 if(cam) cam.live(onScreen);
                 if(!onScreen) setAmbient(-1, -1);
                 return inside;
@@ -2510,7 +2538,7 @@
                     setAmbient(Math.max(0, Math.floor(t)), Math.min(N-1, Math.ceil(t)));
                 },
                 onEnterBack:  syncChrome,
-                onRefresh:    syncChrome
+                onRefresh:    function(){ measurePro(); syncChrome(); }
             });
 
             /* ---- 2f. Handoff: scene 3 -> hero, as one snap ---------------
@@ -2544,7 +2572,7 @@
                     inertia: false
                 },
                 onUpdate:    syncChrome,
-                onRefresh:   syncChrome,
+                onRefresh:   function(){ measurePro(); syncChrome(); },
                 onLeave:     syncChrome,
                 onEnterBack: syncChrome,
                 onLeaveBack: syncChrome
@@ -2879,9 +2907,17 @@
         if(!cv || !window.THREE) return;
         var RM  = !!window.__RM;
         var MOB = window.matchMedia('(max-width:768px)').matches;
-        var N   = MOB ? 14000 : 28000;
+        /* The particle budget is fill-rate, not vertex count: 28k additively
+           blended sprites of up to 30px is millions of blended fragments a
+           frame, and additive blending cannot early-out. The light tier gets a
+           third of them. */
+        var LITE = document.documentElement.classList.contains('fx-lite');
+        var N   = MOB ? 9000 : (LITE ? 10000 : 22000);
         var renderer = new THREE.WebGLRenderer({canvas:cv, alpha:true, antialias:false, powerPreference:'high-performance'});
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, MOB?1.5:2));
+        /* Every step of pixel ratio squares the fragment count. A particle field
+           is diffuse by nature and gains almost nothing from 2x, so this is the
+           cheapest large saving available on any HiDPI display. */
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, MOB?1.25:(LITE?1.25:1.5)));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setClearColor(0x000000, 0);
         var scene = new THREE.Scene();
@@ -3057,8 +3093,14 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             if(RM) draw();
         }, {passive:true});
+        /* Time only advances while we are actually drawing, so pausing does not
+           teleport the field forward — it resumes exactly where it stopped. */
+        var elapsed = 0, lastT = performance.now();
         function draw(){
-            var tt=(performance.now()-t0)/1000;
+            var now = performance.now();
+            elapsed += Math.min(0.05, (now - lastT) / 1000);   /* clamp: no jump after a pause */
+            lastT = now;
+            var tt = elapsed;
             U.uTime.value = RM ? 3 : tt;
             pr += ((window.__morph||0) - pr) * 0.055;
             U.uProg.value = pr;
@@ -3078,7 +3120,33 @@
             draw();
             window.addEventListener('scroll', function(){ requestAnimationFrame(draw); }, {passive:true});
         }else{
-            (function loop(){ draw(); requestAnimationFrame(loop); })();
+            /* Draw only when the canvas can actually be seen.
+
+               #gl is a fixed, full-screen, additively blended WebGL layer at
+               z-index 0. The prologue sits above it at z-index 4 and is fully
+               opaque, so for the entire intro this canvas was rendering
+               millions of blended fragments a frame that were then painted
+               over — invisible, and free of charge to nobody. A browser will
+               not skip an occluded WebGL canvas; it has no way to know.
+
+               The main thread was already idle at 97% during the intro, so the
+               remaining cost was never JS — it was fill rate, and this was the
+               largest full-screen consumer left in the page. Also stops when
+               the tab is hidden, which it never did before. */
+            var glVisible = true;
+            function glCanRun(){
+                return !document.hidden && !document.body.classList.contains('pro-active');
+            }
+            (function loop(){
+                var run = glCanRun();
+                if(run){
+                    if(!glVisible){ lastT = performance.now(); glVisible = true; }
+                    draw();
+                }else{
+                    glVisible = false;
+                }
+                requestAnimationFrame(loop);
+            })();
         }
     };
     </script>
