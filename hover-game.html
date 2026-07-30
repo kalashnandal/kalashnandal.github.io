@@ -1,0 +1,900 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Racer - Multiplayer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #050510; overflow: hidden;
+            font-family: 'Orbitron', sans-serif; touch-action: none;
+            user-select: none; -webkit-user-select: none;
+        }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 10;
+        }
+        .pointer-events-auto { pointer-events: auto; }
+        
+        /* Neon Text Utilities */
+        .neon-text-cyan { color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #0ff, 0 0 40px #0ff; }
+        .neon-text-pink { color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #f0f, 0 0 40px #f0f; }
+        .neon-text-yellow { color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff0, 0 0 40px #ff0; }
+        .neon-text-red { color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #f00, 0 0 40px #f00; }
+        
+        /* Neon Buttons */
+        .neon-btn {
+            background: rgba(0, 20, 20, 0.6); color: #fff; border: 2px solid #0ff;
+            box-shadow: 0 0 10px #0ff, inset 0 0 10px #0ff; transition: all 0.2s ease-in-out;
+            text-shadow: 0 0 5px #fff, 0 0 10px #0ff; backdrop-filter: blur(4px);
+        }
+        .neon-btn:hover:not(:disabled), .neon-btn:active:not(:disabled) {
+            background: rgba(0, 255, 255, 0.2); box-shadow: 0 0 20px #0ff, inset 0 0 20px #0ff; transform: scale(1.05);
+        }
+        .neon-btn:disabled { border-color: #555; box-shadow: none; color: #777; cursor: not-allowed; }
+        .neon-btn-pink { border-color: #f0f; box-shadow: 0 0 10px #f0f, inset 0 0 10px #f0f; text-shadow: 0 0 5px #fff, 0 0 10px #f0f; }
+        .neon-btn-pink:hover:not(:disabled) { background: rgba(255, 0, 255, 0.2); box-shadow: 0 0 20px #f0f, inset 0 0 20px #f0f; }
+        
+        /* Effects */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px; pointer-events: none; z-index: 20; opacity: 0.6;
+        }
+        .vignette {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            box-shadow: 0 0 150px rgba(0,0,0,0.9) inset; pointer-events: none; z-index: 15;
+        }
+        .hidden { display: none !important; }
+        
+        /* Mobile Controls */
+        .mobile-controls {
+            position: absolute; bottom: 20px; width: 100%; px-4;
+            display: flex; justify-content: space-between; z-index: 25;
+            pointer-events: none;
+        }
+        .control-btn {
+            width: 70px; height: 70px; background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.5); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: rgba(0, 255, 255, 0.8); font-size: 24px; font-weight: bold;
+            pointer-events: auto; backdrop-filter: blur(5px); transition: background 0.1s;
+        }
+        .control-btn:active { background: rgba(0, 255, 255, 0.4); box-shadow: 0 0 15px #0ff; }
+        .control-btn.btn-gas { width: 90px; height: 90px; border-color: rgba(255, 0, 255, 0.5); color: rgba(255, 0, 255, 0.8); background: rgba(255, 0, 255, 0.1); }
+        .control-btn.btn-gas:active { background: rgba(255, 0, 255, 0.4); box-shadow: 0 0 15px #f0f; }
+        
+        @media (min-width: 768px) { .mobile-controls { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="ui-layer">
+        <!-- Main Menu -->
+        <div id="menu-screen" class="flex flex-col items-center pointer-events-auto bg-black/60 p-8 rounded-3xl backdrop-blur-md border border-cyan-500/30">
+            <h1 class="text-5xl md:text-7xl font-black mb-2 neon-text-cyan tracking-wider text-center italic">NEON</h1>
+            <h1 class="text-5xl md:text-7xl font-black mb-8 neon-text-pink tracking-wider text-center italic">RACER</h1>
+            <p class="text-gray-400 mb-8 text-sm md:text-base tracking-widest uppercase text-center">
+                Desktop: Arrows to Drive<br>Mobile: Touch Controls
+            </p>
+            
+            <div class="flex flex-col gap-4 w-full">
+                <button id="btn-solo" class="neon-btn px-8 py-3 rounded-full text-xl font-bold uppercase tracking-widest cursor-pointer w-full">
+                    Practice Run
+                </button>
+                <button id="btn-host" class="neon-btn neon-btn-pink px-8 py-3 rounded-full text-xl font-bold uppercase tracking-widest cursor-pointer w-full">
+                    Host Race
+                </button>
+            </div>
+        </div>
+
+        <!-- Multiplayer Lobby -->
+        <div id="lobby-screen" class="hidden flex flex-col items-center pointer-events-auto bg-black/80 p-8 rounded-3xl backdrop-blur-md border border-pink-500/50">
+            <h2 class="text-3xl font-black mb-6 neon-text-pink tracking-wider">PIT STOP</h2>
+            
+            <div id="lobby-host-ui" class="flex flex-col items-center w-full">
+                <p class="text-gray-300 mb-2 uppercase tracking-widest text-sm">Send this link to a rival:</p>
+                <div class="flex items-center gap-2 mb-6 w-full">
+                    <input type="text" id="invite-link" readonly class="bg-gray-900 text-cyan-400 px-4 py-2 rounded-lg border border-cyan-500/50 w-full outline-none text-sm font-mono">
+                    <button id="btn-copy" class="neon-btn px-4 py-2 rounded-lg text-sm font-bold cursor-pointer whitespace-nowrap">Copy</button>
+                </div>
+                <div id="lobby-status" class="text-yellow-400 mb-6 animate-pulse tracking-widest uppercase text-center">Waiting for challenger...</div>
+                <button id="btn-start-multi" disabled class="neon-btn neon-btn-pink px-8 py-3 rounded-full text-xl font-bold uppercase tracking-widest w-full">
+                    Start Engines
+                </button>
+            </div>
+            
+            <div id="lobby-guest-ui" class="hidden flex flex-col items-center w-full">
+                <p class="text-cyan-400 mb-6 uppercase tracking-widest animate-pulse text-center">Warming up tires...<br><span class="text-sm text-gray-400">Waiting for Host to start</span></p>
+            </div>
+            
+            <button id="btn-leave" class="mt-6 text-gray-500 hover:text-white uppercase tracking-widest text-sm transition-colors">Cancel / Leave</button>
+        </div>
+
+        <!-- In-Game HUD -->
+        <div id="hud-screen" class="hidden absolute top-4 w-full flex justify-between px-6 pointer-events-none">
+            <div class="flex flex-col w-1/3">
+                <div class="text-cyan-400 text-xs tracking-widest uppercase mb-1">SPEED</div>
+                <div class="text-white text-2xl md:text-3xl font-bold neon-text-cyan">
+                    <span id="speed-display">0</span> <span class="text-sm text-gray-300">KM/H</span>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="w-1/3 flex flex-col items-center justify-start mt-2">
+                <div class="w-full h-3 bg-gray-900 rounded-full border border-gray-700 relative overflow-hidden">
+                    <div id="progress-bar-p1" class="absolute top-0 left-0 h-full bg-cyan-400 shadow-[0_0_10px_#0ff] z-10" style="width: 0%;"></div>
+                    <div id="progress-bar-p2" class="absolute top-0 left-0 h-full bg-pink-500 shadow-[0_0_10px_#f0f] opacity-70 z-0" style="width: 0%;"></div>
+                </div>
+                <div class="flex justify-between w-full mt-1 text-[10px] text-gray-400 uppercase tracking-widest">
+                    <span>Start</span>
+                    <span>Finish</span>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-end w-1/3">
+                <div id="hud-p2-container" class="hidden flex flex-col items-end">
+                    <div class="text-pink-400 text-xs tracking-widest uppercase mb-1">OPPONENT</div>
+                    <div id="opp-status" class="text-white text-sm font-bold neon-text-pink">
+                        RACING
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameover-screen" class="hidden flex flex-col items-center pointer-events-auto bg-black/80 w-full h-full justify-center backdrop-blur-sm z-30">
+            <h2 id="go-title" class="text-5xl md:text-7xl font-black mb-2 text-white tracking-wider text-center uppercase">RACE OVER</h2>
+            <p id="go-subtitle" class="text-2xl mb-8 text-cyan-400 tracking-widest uppercase font-bold text-center"></p>
+            
+            <div class="flex flex-col items-center bg-gray-900/80 p-6 md:p-8 rounded-2xl border border-cyan-500/50 mb-8 w-80 max-w-full">
+                <div class="w-full flex justify-between items-center border-b border-gray-700 pb-3 mb-3">
+                     <span class="text-cyan-400 uppercase tracking-widest text-sm">YOU</span>
+                     <span id="final-time-p1" class="text-xl font-bold text-white">00:00.00</span>
+                </div>
+                <div id="go-multi-stats" class="hidden w-full flex justify-between items-center pb-2">
+                     <span class="text-pink-400 uppercase tracking-widest text-sm">RIVAL</span>
+                     <span id="final-time-p2" class="text-xl font-bold text-gray-400">DNF</span>
+                </div>
+            </div>
+            
+            <button id="btn-restart" class="neon-btn px-8 py-3 rounded-full text-xl font-bold uppercase tracking-widest cursor-pointer mb-4">
+                Play Again
+            </button>
+            <button id="btn-menu" class="text-gray-500 hover:text-white uppercase tracking-widest text-sm transition-colors">
+                Main Menu
+            </button>
+        </div>
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="hidden absolute bottom-10 bg-cyan-900/80 border border-cyan-400 text-white px-6 py-3 rounded-full backdrop-blur-sm transition-opacity duration-300 z-50">
+            Copied to clipboard!
+        </div>
+    </div>
+    
+    <!-- Mobile On-Screen Controls -->
+    <div id="mobile-controls" class="mobile-controls hidden px-6 pb-6">
+        <div class="flex gap-4">
+            <div id="btn-left" class="control-btn">&lt;</div>
+            <div id="btn-right" class="control-btn">&gt;</div>
+        </div>
+        <div>
+            <div id="btn-gas" class="control-btn btn-gas">GAS</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Variables
+        let app, db, auth;
+        let userId = null;
+        let isMultiplayer = false;
+        let isHost = false;
+        let currentRoomId = null;
+        let unsubscribeRoom = null;
+        let syncInterval = null;
+        
+        const appId = 'neon-racing-v1'; // Distinct app ID for racing
+        
+        // Using the user's provided config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbaDDMDmZd3YkgvToahSf-cQcu1M6nxdM",
+            authDomain: "hover-game-efe44.firebaseapp.com",
+            projectId: "hover-game-efe44",
+            storageBucket: "hover-game-efe44.firebasestorage.app",
+            messagingSenderId: "506500861618",
+            appId: "1:506500861618:web:9290201367e97b79a643ab",
+            measurementId: "G-GLNYST2RTF"
+        };
+
+        // Initialize Firebase
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        signInAnonymously(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                checkUrlForRoom();
+            }
+        });
+
+        // DOM Elements
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const screens = {
+            menu: document.getElementById('menu-screen'),
+            lobby: document.getElementById('lobby-screen'),
+            hud: document.getElementById('hud-screen'),
+            gameover: document.getElementById('gameover-screen')
+        };
+        
+        const uiElements = {
+            speed: document.getElementById('speed-display'),
+            progP1: document.getElementById('progress-bar-p1'),
+            progP2: document.getElementById('progress-bar-p2'),
+            oppStatus: document.getElementById('opp-status'),
+            goTitle: document.getElementById('go-title'),
+            goSubtitle: document.getElementById('go-subtitle'),
+            timeP1: document.getElementById('final-time-p1'),
+            timeP2: document.getElementById('final-time-p2'),
+            mobileControls: document.getElementById('mobile-controls')
+        };
+
+        // Game Constants & State
+        const FINISH_LINE_Y = 15000;
+        let cw = window.innerWidth;
+        let ch = window.innerHeight;
+        let gameState = 'MENU'; // MENU, LOBBY, PLAYING, FINISHED, GAMEOVER
+        let currentSeed = 12345;
+        let raceStartTime = 0;
+        let gameLoopId;
+        
+        // Input state
+        const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false };
+
+        // Seeded RNG
+        function mulberry32(a) {
+            return function() {
+                var t = a += 0x6D2B79F5;
+                t = Math.imul(t ^ t >>> 15, t | 1);
+                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            }
+        }
+        let prng = Math.random;
+
+        // Formatting Helper
+        function formatTime(ms) {
+            if(ms === 0 || !ms) return "DNF";
+            let totalSeconds = Math.floor(ms / 1000);
+            let minutes = Math.floor(totalSeconds / 60);
+            let seconds = totalSeconds % 60;
+            let milliseconds = Math.floor((ms % 1000) / 10);
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
+        }
+
+        class Car {
+            constructor(isOpponent = false) {
+                this.isOpponent = isOpponent;
+                this.reset();
+            }
+
+            reset() {
+                this.width = Math.min(40, cw * 0.08);
+                this.height = this.width * 2;
+                
+                // Track boundaries
+                this.minX = cw * 0.2;
+                this.maxX = cw * 0.8;
+                
+                // Start position
+                this.x = this.isOpponent ? this.maxX - (this.width*1.5) : this.minX + (this.width*1.5);
+                this.y = 0; // Absolute track progress
+                
+                this.speed = 0;
+                this.maxSpeed = 35;
+                this.acceleration = 0.5;
+                this.friction = 0.2;
+                this.steering = cw * 0.01; // Pixels per frame steering
+                
+                this.color = this.isOpponent ? '#f0f' : '#0ff';
+                this.isCrashed = false;
+                this.crashTimer = 0;
+                this.finished = false;
+                this.finishTime = 0;
+                
+                // Networking interpolation
+                this.targetX = this.x;
+                this.targetY = this.y;
+            }
+
+            update(keys) {
+                if(this.finished) {
+                    this.speed *= 0.95; // Coast past finish line
+                    this.y += this.speed;
+                    return;
+                }
+
+                if (this.isCrashed) {
+                    this.speed *= 0.9;
+                    this.crashTimer--;
+                    if(this.crashTimer <= 0) this.isCrashed = false;
+                } else if (!this.isOpponent) {
+                    // Local Input Handling
+                    if (keys.ArrowUp) {
+                        this.speed += this.acceleration;
+                    } else if (keys.ArrowDown) {
+                        this.speed -= this.acceleration * 1.5; // Braking
+                    } else {
+                        this.speed -= this.friction; // Coasting
+                    }
+
+                    if (keys.ArrowLeft) this.x -= this.steering * (this.speed / this.maxSpeed + 0.2);
+                    if (keys.ArrowRight) this.x += this.steering * (this.speed / this.maxSpeed + 0.2);
+
+                    // Cap speed
+                    this.speed = Math.max(0, Math.min(this.speed, this.maxSpeed));
+                    
+                    // Boundaries
+                    this.x = Math.max(this.minX + this.width/2, Math.min(this.maxX - this.width/2, this.x));
+                }
+
+                if (this.isOpponent) {
+                    // Interpolate network updates
+                    this.x += (this.targetX - this.x) * 0.2;
+                    this.y += (this.targetY - this.y) * 0.2;
+                    
+                    // Estimate opponent speed for display/wheels turning effect
+                    this.speed = (this.targetY - this.y) * 0.5; 
+                } else {
+                    this.y += this.speed;
+                }
+                
+                // Check local finish
+                if(!this.isOpponent && this.y >= FINISH_LINE_Y && !this.finished) {
+                    this.finished = true;
+                    this.finishTime = Date.now() - raceStartTime;
+                    if(isMultiplayer) updateNetworkState(true);
+                    checkGameOver();
+                }
+            }
+
+            crash() {
+                if(this.isCrashed || this.finished) return;
+                this.isCrashed = true;
+                this.crashTimer = 60; // 1 second crash penalty
+                this.speed = this.speed * 0.3; // lose 70% speed
+            }
+
+            draw(localPlayerY) {
+                // Calculate Y relative to local player. 
+                // We want the local player fixed at 70% down the screen.
+                const screenY = ch * 0.75 - (this.y - localPlayerY);
+                
+                // Don't draw if way off screen
+                if(screenY < -this.height || screenY > ch + this.height) return;
+
+                ctx.save();
+                ctx.translate(this.x, screenY);
+                
+                // Crash spin effect
+                if(this.isCrashed) {
+                    ctx.rotate((this.crashTimer * 0.5) % (Math.PI * 2));
+                    ctx.globalAlpha = (Math.floor(this.crashTimer / 4) % 2 === 0) ? 0.5 : 1.0;
+                } else {
+                    ctx.globalAlpha = this.isOpponent ? 0.8 : 1.0;
+                }
+
+                // Draw Car Body
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = '#111';
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+
+                // Wedge shape
+                ctx.beginPath();
+                ctx.moveTo(0, -this.height/2); // nose
+                ctx.lineTo(this.width/2, this.height/2); // right rear
+                ctx.lineTo(-this.width/2, this.height/2); // left rear
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Thruster
+                if(this.speed > 5 && !this.isCrashed) {
+                    ctx.shadowColor = '#0ff';
+                    ctx.fillStyle = '#0ff';
+                    ctx.beginPath();
+                    ctx.arc(0, this.height/2 + 5, (this.speed / this.maxSpeed) * 8 + Math.random()*2, 0, Math.PI*2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        class Traffic {
+            constructor(yOffset) {
+                this.width = Math.min(50, cw * 0.1);
+                this.height = this.width * 1.5;
+                this.y = yOffset;
+                
+                const minX = cw * 0.2 + this.width/2;
+                const maxX = cw * 0.8 - this.width/2;
+                this.x = minX + prng() * (maxX - minX);
+                
+                this.color = '#ff0'; // Yellow traffic
+            }
+
+            draw(localPlayerY) {
+                const screenY = ch * 0.75 - (this.y - localPlayerY);
+                if(screenY < -this.height || screenY > ch + this.height) return;
+
+                ctx.save();
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = '#220';
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+
+                ctx.fillRect(this.x - this.width/2, screenY - this.height/2, this.width, this.height);
+                ctx.strokeRect(this.x - this.width/2, screenY - this.height/2, this.width, this.height);
+                ctx.restore();
+            }
+
+            checkCollision(p) {
+                if(p.isCrashed) return false;
+                
+                // Box collision
+                const pL = p.x - p.width/2;
+                const pR = p.x + p.width/2;
+                const pT = p.y - p.height/2;
+                const pB = p.y + p.height/2;
+                
+                const tL = this.x - this.width/2;
+                const tR = this.x + this.width/2;
+                const tT = this.y - this.height/2;
+                const tB = this.y + this.height/2;
+
+                return (pR > tL && pL < tR && pB > tT && pT < tB);
+            }
+        }
+
+        // Setup Game Objects
+        const player = new Car();
+        const opponent = new Car(true);
+        let obstacles = [];
+
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.add('hidden'));
+            if(screens[screenName]) screens[screenName].classList.remove('hidden');
+            
+            // Manage mobile controls visibility
+            if(screenName === 'hud' && isTouchDevice()) {
+                uiElements.mobileControls.classList.remove('hidden');
+            } else {
+                uiElements.mobileControls.classList.add('hidden');
+            }
+        }
+        
+        function isTouchDevice() {
+            return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+        }
+
+        function checkUrlForRoom() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const room = urlParams.get('room');
+            if (room && userId) joinRoom(room);
+        }
+
+        async function createRoom() {
+            if (!userId) return;
+            currentRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            isHost = true;
+            isMultiplayer = true;
+            
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
+            await setDoc(roomRef, {
+                host: userId,
+                guest: null,
+                status: 'waiting',
+                seed: Math.floor(Math.random() * 1000000),
+                p1: { x: 0, y: 0, finished: false, time: 0 },
+                p2: { x: 0, y: 0, finished: false, time: 0 }
+            });
+
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?room=' + currentRoomId;
+            window.history.pushState({path:newUrl},'',newUrl);
+            
+            document.getElementById('invite-link').value = newUrl;
+            document.getElementById('lobby-host-ui').classList.remove('hidden');
+            document.getElementById('lobby-guest-ui').classList.add('hidden');
+            
+            gameState = 'LOBBY';
+            switchScreen('lobby');
+            listenToRoom();
+        }
+
+        async function joinRoom(roomId) {
+            if (!userId) return;
+            currentRoomId = roomId;
+            isHost = false;
+            isMultiplayer = true;
+            
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
+            const docSnap = await getDoc(roomRef);
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if(data.host !== userId) await updateDoc(roomRef, { guest: userId });
+                else isHost = true;
+                
+                document.getElementById('lobby-host-ui').classList.add('hidden');
+                document.getElementById('lobby-guest-ui').classList.remove('hidden');
+                gameState = 'LOBBY';
+                switchScreen('lobby');
+                listenToRoom();
+            } else {
+                alert("Room not found or expired.");
+                leaveRoom();
+            }
+        }
+
+        function listenToRoom() {
+            if(!currentRoomId || !userId) return;
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
+            
+            unsubscribeRoom = onSnapshot(roomRef, (docSnap) => {
+                if(!docSnap.exists()) { leaveRoom(); return; }
+                const data = docSnap.data();
+                
+                if (gameState === 'LOBBY') {
+                    if (isHost && data.guest) {
+                        document.getElementById('lobby-status').innerText = "Rival Connected!";
+                        document.getElementById('lobby-status').className = "text-green-400 mb-6 font-bold uppercase tracking-widest text-center";
+                        document.getElementById('btn-start-multi').disabled = false;
+                    }
+                    if (!isHost && data.status === 'playing') {
+                        currentSeed = data.seed;
+                        startMatch();
+                    }
+                }
+                
+                if (gameState === 'PLAYING' || gameState === 'FINISHED') {
+                    const oppData = isHost ? data.p2 : data.p1;
+                    
+                    if (oppData) {
+                        opponent.targetX = oppData.x || opponent.x;
+                        opponent.targetY = oppData.y || opponent.y;
+                        if(oppData.finished && !opponent.finished) {
+                            opponent.finished = true;
+                            opponent.finishTime = oppData.time;
+                            uiElements.oppStatus.innerText = "FINISHED";
+                            uiElements.oppStatus.classList.replace('neon-text-pink', 'text-gray-400');
+                            checkGameOver();
+                        }
+                    }
+                    
+                    // Host restarting game
+                    if(!isHost && data.status === 'playing' && gameState === 'GAMEOVER') {
+                        currentSeed = data.seed;
+                        startMatch();
+                    }
+                }
+            }, (err) => console.error(err));
+        }
+
+        async function updateNetworkState(isFinished = false) {
+            if(!isMultiplayer || !currentRoomId || !userId) return;
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
+            
+            const pKey = isHost ? 'p1' : 'p2';
+            const payload = {
+                [`${pKey}.x`]: player.x,
+                [`${pKey}.y`]: player.y
+            };
+            
+            if(isFinished) {
+                payload[`${pKey}.finished`] = true;
+                payload[`${pKey}.time`] = player.finishTime;
+            }
+            
+            try { await updateDoc(roomRef, payload); } catch(e){}
+        }
+
+        async function hostStartGame() {
+            if(!isHost || !currentRoomId) return;
+            currentSeed = Math.floor(Math.random() * 1000000);
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
+            await updateDoc(roomRef, { 
+                status: 'playing', seed: currentSeed,
+                p1: { x: cw * 0.3, y: 0, finished: false, time: 0 },
+                p2: { x: cw * 0.7, y: 0, finished: false, time: 0 }
+            });
+            startMatch();
+        }
+
+        function leaveRoom() {
+            if(unsubscribeRoom) unsubscribeRoom();
+            if(syncInterval) clearInterval(syncInterval);
+            isMultiplayer = false;
+            currentRoomId = null;
+            window.history.pushState({}, '', window.location.pathname);
+            switchScreen('menu');
+            gameState = 'MENU';
+        }
+
+        function generateTrack() {
+            obstacles = [];
+            prng = mulberry32(currentSeed);
+            
+            // Generate traffic up to the finish line
+            let currentY = 1000; // Start traffic ahead of players
+            while(currentY < FINISH_LINE_Y - 500) {
+                obstacles.push(new Traffic(currentY));
+                
+                // Gap between cars gets smaller (harder) further down the track
+                let gap = 500 + prng() * 1000;
+                currentY += gap;
+            }
+        }
+
+        function startMatch() {
+            player.reset();
+            if(isMultiplayer) opponent.reset();
+            
+            generateTrack();
+            
+            gameState = 'PLAYING';
+            raceStartTime = Date.now();
+            
+            // Reset UI
+            uiElements.progP1.style.width = '0%';
+            uiElements.progP2.style.width = '0%';
+            uiElements.oppStatus.innerText = "RACING";
+            uiElements.oppStatus.className = "text-white text-sm font-bold neon-text-pink";
+            
+            if(isMultiplayer) {
+                document.getElementById('hud-p2-container').classList.remove('hidden');
+                player.x = isHost ? cw * 0.3 : cw * 0.7;
+                opponent.x = isHost ? cw * 0.7 : cw * 0.3;
+                opponent.targetX = opponent.x;
+            } else {
+                document.getElementById('hud-p2-container').classList.add('hidden');
+                player.x = cw * 0.5;
+            }
+            
+            switchScreen('hud');
+            
+            if(syncInterval) clearInterval(syncInterval);
+            if(isMultiplayer) syncInterval = setInterval(() => updateNetworkState(false), 100);
+            
+            if(!gameLoopId) requestAnimationFrame(gameLoop);
+        }
+
+        function drawTrack() {
+            // Background
+            let bgGradient = ctx.createLinearGradient(0, 0, 0, ch);
+            bgGradient.addColorStop(0, '#0a001a'); bgGradient.addColorStop(1, '#020005');
+            ctx.fillStyle = bgGradient; ctx.fillRect(0, 0, cw, ch);
+
+            // Track boundaries
+            const minX = cw * 0.2;
+            const maxX = cw * 0.8;
+            
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#0ff';
+            
+            // Edges
+            ctx.beginPath();
+            ctx.moveTo(minX, 0); ctx.lineTo(minX, ch);
+            ctx.moveTo(maxX, 0); ctx.lineTo(maxX, ch);
+            ctx.stroke();
+            
+            // Center dash lines - scrolling based on player Y
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([40, 40]);
+            ctx.lineDashOffset = -player.y;
+            
+            ctx.beginPath();
+            ctx.moveTo(cw * 0.5, 0); ctx.lineTo(cw * 0.5, ch);
+            ctx.stroke();
+            
+            // Draw Finish Line
+            if(FINISH_LINE_Y - player.y < ch) {
+                const finishScreenY = ch * 0.75 - (FINISH_LINE_Y - player.y);
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#fff';
+                for(let i=minX; i<maxX; i+=20) {
+                    ctx.fillRect(i, finishScreenY, 10, 10);
+                    ctx.fillRect(i+10, finishScreenY+10, 10, 10);
+                }
+            }
+            
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            if(gameState !== 'PLAYING' && gameState !== 'FINISHED' && gameState !== 'GAMEOVER') {
+                gameLoopId = requestAnimationFrame(gameLoop);
+                return;
+            }
+            
+            ctx.clearRect(0, 0, cw, ch);
+            drawTrack();
+
+            if(gameState === 'PLAYING' || gameState === 'FINISHED') {
+                player.update(keys);
+                if(isMultiplayer) opponent.update(keys);
+                
+                // Collision check (only for local player)
+                if(!player.finished && !player.isCrashed) {
+                    for(let obs of obstacles) {
+                        if(Math.abs(obs.y - player.y) < 1000) { // Only check nearby
+                            if(obs.checkCollision(player)) {
+                                player.crash();
+                                document.body.style.transform = `translate(${(Math.random()-0.5)*10}px, ${(Math.random()-0.5)*10}px)`;
+                                setTimeout(() => document.body.style.transform = 'none', 50);
+                            }
+                        }
+                    }
+                }
+                
+                // HUD Updates
+                uiElements.speed.innerText = Math.floor(player.speed * 8); // Fake km/h
+                uiElements.progP1.style.width = `${Math.min(100, (player.y / FINISH_LINE_Y) * 100)}%`;
+                if(isMultiplayer) {
+                    uiElements.progP2.style.width = `${Math.min(100, (opponent.y / FINISH_LINE_Y) * 100)}%`;
+                }
+            }
+
+            // Draw objects (z-sorting not strictly needed as cars are small, but draw obstacles first)
+            obstacles.forEach(obs => obs.draw(player.y));
+            if(isMultiplayer) opponent.draw(player.y);
+            player.draw(player.y); // Draw local player last so it's on top
+
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function checkGameOver() {
+            if(!isMultiplayer && player.finished) {
+                gameState = 'GAMEOVER';
+                showGameOverScreen();
+                return;
+            }
+            
+            if(isMultiplayer && player.finished && opponent.finished) {
+                gameState = 'GAMEOVER';
+                showGameOverScreen();
+            } else if (isMultiplayer && player.finished) {
+                gameState = 'FINISHED'; // Wait for opponent
+                uiElements.goSubtitle.innerText = "WAITING FOR OPPONENT...";
+                uiElements.goSubtitle.className = "text-lg mb-8 text-yellow-400 tracking-widest uppercase font-bold text-center animate-pulse";
+                switchScreen('gameover');
+                document.getElementById('btn-restart').classList.add('hidden');
+                document.getElementById('go-multi-stats').classList.remove('hidden');
+                uiElements.timeP1.innerText = formatTime(player.finishTime);
+            }
+        }
+
+        function showGameOverScreen() {
+            switchScreen('gameover');
+            document.getElementById('btn-restart').classList.remove('hidden');
+            uiElements.timeP1.innerText = formatTime(player.finishTime);
+            
+            if(isMultiplayer) {
+                document.getElementById('go-multi-stats').classList.remove('hidden');
+                uiElements.timeP2.innerText = formatTime(opponent.finishTime);
+                
+                const p1Win = player.finishTime < opponent.finishTime;
+                
+                if(p1Win) {
+                    uiElements.goSubtitle.innerText = "YOU WON!";
+                    uiElements.goSubtitle.className = "text-3xl mb-8 text-cyan-400 tracking-widest uppercase font-black text-center";
+                    uiElements.timeP1.classList.add('text-cyan-400');
+                    uiElements.timeP2.classList.remove('text-cyan-400');
+                } else {
+                    uiElements.goSubtitle.innerText = "YOU LOST";
+                    uiElements.goSubtitle.className = "text-3xl mb-8 text-pink-500 tracking-widest uppercase font-black text-center";
+                    uiElements.timeP2.classList.add('text-cyan-400');
+                    uiElements.timeP1.classList.remove('text-cyan-400');
+                }
+                
+                document.getElementById('btn-restart').innerText = isHost ? "Rematch" : "Waiting for Host...";
+                document.getElementById('btn-restart').disabled = !isHost;
+                
+                if(isHost) {
+                     const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
+                     updateDoc(roomRef, { status: 'gameover' });
+                }
+            } else {
+                document.getElementById('go-multi-stats').classList.add('hidden');
+                uiElements.goSubtitle.innerText = "TRACK CLEARED";
+                uiElements.goSubtitle.className = "text-2xl mb-8 text-cyan-400 tracking-widest uppercase font-bold text-center";
+                document.getElementById('btn-restart').innerText = "Play Again";
+                document.getElementById('btn-restart').disabled = false;
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            cw = canvas.width; ch = canvas.height;
+            if(player) { player.minX = cw*0.2; player.maxX = cw*0.8; player.width = Math.min(40, cw * 0.08); player.height = player.width * 2; }
+            if(opponent) { opponent.minX = cw*0.2; opponent.maxX = cw*0.8; opponent.width = Math.min(40, cw * 0.08); opponent.height = opponent.width * 2; }
+        });
+        window.dispatchEvent(new Event('resize'));
+
+        // Keyboard Input
+        document.addEventListener('keydown', (e) => {
+            if(keys.hasOwnProperty(e.code)) keys[e.code] = true;
+            if(e.code === 'Space' || e.code === 'KeyW') keys.ArrowUp = true;
+            if(e.code === 'KeyA') keys.ArrowLeft = true;
+            if(e.code === 'KeyD') keys.ArrowRight = true;
+            if(e.code === 'KeyS') keys.ArrowDown = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            if(keys.hasOwnProperty(e.code)) keys[e.code] = false;
+            if(e.code === 'Space' || e.code === 'KeyW') keys.ArrowUp = false;
+            if(e.code === 'KeyA') keys.ArrowLeft = false;
+            if(e.code === 'KeyD') keys.ArrowRight = false;
+            if(e.code === 'KeyS') keys.ArrowDown = false;
+        });
+
+        // Touch Input
+        const addTouch = (elemId, keyMap) => {
+            const el = document.getElementById(elemId);
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); keyMap.forEach(k => keys[k] = true); });
+            el.addEventListener('touchend', (e) => { e.preventDefault(); keyMap.forEach(k => keys[k] = false); });
+        };
+        addTouch('btn-left', ['ArrowLeft']);
+        addTouch('btn-right', ['ArrowRight']);
+        addTouch('btn-gas', ['ArrowUp']);
+
+        // UI Buttons
+        document.getElementById('btn-solo').addEventListener('click', () => { isMultiplayer = false; startMatch(); });
+        document.getElementById('btn-host').addEventListener('click', () => { gameState = 'LOBBY'; createRoom(); });
+        
+        document.getElementById('btn-copy').addEventListener('click', () => {
+            const copyText = document.getElementById('invite-link');
+            copyText.select(); document.execCommand('copy');
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2000);
+        });
+
+        document.getElementById('btn-start-multi').addEventListener('click', hostStartGame);
+        document.getElementById('btn-leave').addEventListener('click', leaveRoom);
+        document.getElementById('btn-menu').addEventListener('click', leaveRoom);
+        
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            if(isMultiplayer && isHost) hostStartGame();
+            else if (!isMultiplayer) startMatch();
+        });
+
+        // Start render loop for menus
+        gameLoopId = requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
