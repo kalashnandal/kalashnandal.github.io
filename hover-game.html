@@ -242,7 +242,9 @@
         highscoreDisplay.innerText = highScore;
 
         // Engine variables
-        let cw, ch, scale;
+        let cw = window.innerWidth;
+        let ch = window.innerHeight;
+        let scale;
         let frameCount = 0;
         let gameSpeed = 1;
         let difficultyMultiplier = 1;
@@ -465,7 +467,7 @@
                 host: userId,
                 guest: null,
                 status: 'waiting',
-                seed: Math.random(),
+                seed: Math.floor(Math.random() * 1000000),
                 p1: { y: 0, score: 0, dead: false },
                 p2: { y: 0, score: 0, dead: false }
             });
@@ -499,6 +501,7 @@
                     isHost = true; // Rejoining own room
                 }
                 
+                gameState = 'LOBBY';
                 document.getElementById('lobby-host-ui').classList.add('hidden');
                 document.getElementById('lobby-guest-ui').classList.remove('hidden');
                 switchScreen('lobby');
@@ -572,7 +575,7 @@
 
         async function hostStartGame() {
             if(!isHost || !currentRoomId) return;
-            currentSeed = Math.random();
+            currentSeed = Math.floor(Math.random() * 1000000);
             const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', currentRoomId);
             await updateDoc(roomRef, { 
                 status: 'playing', 
