@@ -249,6 +249,7 @@
         let gameSpeed = 1;
         let difficultyMultiplier = 1;
         let currentSeed = Math.random();
+        let nextSpawnFrame = 0;
 
         // Seeded RNG for synchronized multiplayer obstacles
         function mulberry32(a) {
@@ -366,14 +367,19 @@
                 this.width = Math.max(40, Math.min(80, cw * 0.05));
                 this.x = cw + this.width;
                 
-                let gapBase = ch * 0.3;
-                let gapMin = player.size * 5;
-                this.gap = Math.max(gapMin, gapBase - (difficultyMultiplier * 10));
+                // Base gap on percentage of screen height for cross-device sync
+                let gapBaseRatio = 0.35;
+                let gapMinRatio = 0.15;
                 
-                let minHeight = ch * 0.1;
-                let maxHeight = ch * 0.9 - this.gap;
-                // Use PRNG for identical obstacles in multiplayer
-                this.topHeight = prng() * (maxHeight - minHeight) + minHeight;
+                // Difficulty increases as time goes on, completely synced for both players
+                let timeDiff = (frameCount / 3000); 
+                this.gapRatio = Math.max(gapMinRatio, gapBaseRatio - timeDiff);
+                
+                // Center of the gap (between 25% and 75% of screen height)
+                let gapCenterRatio = prng() * 0.5 + 0.25;
+                
+                this.topRatio = gapCenterRatio - (this.gapRatio / 2);
+                this.bottomRatio = gapCenterRatio + (this.gapRatio / 2);
                 
                 this.passed = false;
                 this.color = '#f0f';
@@ -384,27 +390,32 @@
                 ctx.shadowBlur = 15; ctx.shadowColor = this.color;
                 ctx.fillStyle = '#111'; ctx.strokeStyle = this.color; ctx.lineWidth = 2;
 
-                ctx.beginPath(); ctx.rect(this.x, 0, this.width, this.topHeight);
+                let topH = this.topRatio * ch;
+                let bottomY = this.bottomRatio * ch;
+
+                ctx.beginPath(); ctx.rect(this.x, 0, this.width, topH);
                 ctx.fill(); ctx.stroke();
 
                 ctx.beginPath();
-                let bottomY = this.topHeight + this.gap;
                 ctx.rect(this.x, bottomY, this.width, ch - bottomY);
                 ctx.fill(); ctx.stroke();
 
                 ctx.fillStyle = this.color;
-                ctx.fillRect(this.x - 5, this.topHeight - 10, this.width + 10, 10);
+                ctx.fillRect(this.x - 5, topH - 10, this.width + 10, 10);
                 ctx.fillRect(this.x - 5, bottomY, this.width + 10, 10);
                 ctx.restore();
             }
             checkCollision(p) {
                 if(p.isDead) return false;
+                let topH = this.topRatio * ch;
+                let bottomY = this.bottomRatio * ch;
+                
                 let pL = p.x - p.size + 5, pR = p.x + p.size - 5;
                 let pT = p.y - p.size + 5, pB = p.y + p.size - 5;
                 let oL = this.x, oR = this.x + this.width;
                 
                 if (pR > oL && pL < oR) {
-                    if (pT < this.topHeight || pB > this.topHeight + this.gap) return true;
+                    if (pT < topH || pB > bottomY) return true;
                 }
                 return false;
             }
@@ -605,6 +616,7 @@
             particles = [];
             score = 0;
             frameCount = 0;
+            nextSpawnFrame = 60; // Spawn first obstacle gracefully
             difficultyMultiplier = 1;
             scoreDisplay.innerText = score;
             if(isMultiplayer) p2ScoreDisplay.innerText = 0;
@@ -733,13 +745,16 @@
 
             if (gameState === 'PLAYING') {
                 frameCount++;
-                if(!player.isDead || (isMultiplayer && !opponent.isDead)) {
-                    difficultyMultiplier = 1 + (Math.max(score, opponent.score) * 0.02);
-                }
+                
+                // Difficulty tied STRICTLY to time so host and guest never drift apart
+                difficultyMultiplier = 1 + (frameCount * 0.0003);
 
-                // Obstacle generation (driven by PRNG to sync)
-                let spawnRate = Math.max(60, 120 - Math.floor(Math.max(score, opponent.score) * 2));
-                if (frameCount % spawnRate === 0) obstacles.push(new Obstacle());
+                // Deterministic obstacle generation
+                if (frameCount >= nextSpawnFrame) {
+                    obstacles.push(new Obstacle());
+                    let spawnRate = Math.max(50, 120 - Math.floor(frameCount * 0.015));
+                    nextSpawnFrame = frameCount + spawnRate;
+                }
 
                 player.update();
                 if(isMultiplayer) opponent.update();
