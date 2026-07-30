@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Niharika's personalised vegetarian fat-loss dashboard — 300+ Indian meal options, recipes, macros, micros and a 5-day training split.">
+<meta name="theme-color" content="#1f1235">
+<title>Niharika's Diet Dashboard</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --ink:#1f1235; --ink-2:#4a3b63; --ink-3:#7c6c96;
+  --line:#eae3f2; --line-2:#f4eff9;
+  --bg:#fbf8fc; --card:#ffffff;
+  --rose:#e0567f; --rose-d:#c33c66; --rose-l:#fdeef3;
+  --plum:#6d3f9e; --plum-l:#f3edfb;
+  --teal:#12857f; --teal-l:#e6f6f4;
+  --amber:#b8730c; --amber-l:#fdf3e2;
+  --blue:#2b6cb0; --blue-l:#eaf2fb;
+  --green:#2f855a; --green-l:#e8f6ee;
+  --red:#c53030;
+  --r-s:10px; --r-m:16px; --r-l:22px; --r-xl:30px;
+  --sh-s:0 1px 2px rgba(31,18,53,.05), 0 2px 8px rgba(31,18,53,.04);
+  --sh-m:0 4px 12px rgba(31,18,53,.06), 0 16px 32px -16px rgba(31,18,53,.14);
+  --sh-l:0 24px 60px -20px rgba(31,18,53,.28);
+  --sans:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --serif:'Fraunces', Georgia, serif;
+  --maxw:1220px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; font-family:var(--sans); color:var(--ink); background:var(--bg);
+  -webkit-font-smoothing:antialiased; line-height:1.5; overflow-x:hidden;
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(760px 420px at 88% -8%, #f7e4ee 0%, transparent 62%),
+    radial-gradient(620px 420px at 4% 8%, #ece3fb 0%, transparent 60%),
+    radial-gradient(700px 500px at 60% 108%, #e4f4f2 0%, transparent 62%);
+}
+h1,h2,h3,h4{margin:0; line-height:1.18; letter-spacing:-.02em}
+p{margin:0}
+button{font-family:inherit; cursor:pointer; border:0; background:none; color:inherit}
+select{font-family:inherit}
+a{color:var(--plum)}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 18px}
+.serif{font-family:var(--serif)}
+.mono-num{font-variant-numeric:tabular-nums}
+
+/* ============ QUOTE BAR ============ */
+#quotebar{
+  position:sticky; top:0; z-index:60;
+  background:linear-gradient(100deg,#1f1235,#3b1f52 45%,#6d2b52);
+  color:#fff; box-shadow:0 2px 14px rgba(31,18,53,.28);
+}
+#quotebar .qrow{
+  max-width:var(--maxw); margin:0 auto; padding:9px 16px;
+  display:flex; align-items:center; gap:12px; min-height:42px;
+}
+#qspark{font-size:15px; flex:none; animation:tw 3.2s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.65;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
+#qtext{
+  flex:1; font-size:13.5px; font-weight:600; letter-spacing:.005em;
+  transition:opacity .45s ease, transform .45s ease; opacity:1;
+}
+#qtext.out{opacity:0; transform:translateY(-6px)}
+#qnext{
+  flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center;
+  background:rgba(255,255,255,.14); color:#fff; font-size:12px; transition:.2s;
+}
+#qnext:hover{background:rgba(255,255,255,.3); transform:rotate(90deg)}
+#qcount{flex:none; font-size:10.5px; font-weight:700; letter-spacing:.09em; opacity:.5; text-transform:uppercase}
+@media(max-width:700px){#qcount{display:none} #qtext{font-size:12.5px}}
+
+/* ============ HEADER ============ */
+header.top{padding:20px 0 6px}
+.top-row{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.brand-group{display:flex; align-items:center; gap:13px; min-width:0}
+.brandmark{
+  width:44px; height:44px; border-radius:14px; flex:none; display:grid; place-items:center;
+  background:linear-gradient(145deg,var(--rose),var(--plum)); color:#fff;
+  font-family:var(--serif); font-weight:900; font-size:20px; box-shadow:var(--sh-m);
+}
+.top-title{font-size:20px; font-weight:800}
+.top-sub{font-size:12px; color:var(--ink-3); font-weight:600; margin-top:1px}
+.top-actions{margin-left:auto; display:flex; gap:9px; flex-wrap:wrap}
+@media(max-width:700px){
+  .top-actions{margin-left:0; width:100%}
+  .top-actions .btn{flex:1; justify-content:center; padding:10px 8px}
+  .top-title{font-size:18px}
+  .top-sub{font-size:11px}
+}
+.btn{
+  display:inline-flex; align-items:center; gap:7px; padding:10px 16px; border-radius:999px;
+  font-size:13px; font-weight:700; transition:transform .15s, box-shadow .2s, background .2s;
+  white-space:nowrap;
+}
+.btn:active{transform:scale(.96)}
+.btn-dark{background:var(--ink); color:#fff; box-shadow:var(--sh-m)}
+.btn-dark:hover{background:#31204d}
+.btn-rose{background:linear-gradient(135deg,var(--rose),var(--rose-d)); color:#fff; box-shadow:0 8px 20px -8px rgba(224,86,127,.7)}
+.btn-rose:hover{filter:brightness(1.06)}
+.btn-ghost{background:#fff; color:var(--ink); border:1.5px solid var(--line); box-shadow:var(--sh-s)}
+.btn-ghost:hover{border-color:var(--rose); color:var(--rose-d)}
+.btn-sm{padding:7px 13px; font-size:12px}
+
+/* ============ TABS ============ */
+.tabs{
+  display:flex; gap:4px; margin:18px 0 22px; padding:5px;
+  background:#fff; border:1px solid var(--line); border-radius:999px;
+  box-shadow:var(--sh-s); overflow-x:auto; scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:1; min-width:max-content; padding:10px 17px; border-radius:999px;
+  font-size:13px; font-weight:700; color:var(--ink-3); transition:.2s; white-space:nowrap;
+}
+.tab:hover{color:var(--ink)}
+.tab.on{background:var(--ink); color:#fff; box-shadow:var(--sh-m)}
+.panel{display:none; animation:fade .35s ease}
+.panel.on{display:block}
+@keyframes fade{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+
+/* ============ CARDS ============ */
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r-l); box-shadow:var(--sh-s)}
+.pad{padding:20px}
+.eyebrow{
+  font-size:10.5px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3);
+}
+
+/* ============ HERO ============ */
+.hero{
+  position:relative; border-radius:var(--r-xl); overflow:hidden; margin-bottom:16px;
+  background:linear-gradient(115deg,#241540 0%,#3d2059 38%,#7a2f57 100%);
+  box-shadow:var(--sh-l); color:#fff; min-height:300px; display:flex;
+}
+.hero-copy{position:relative; z-index:3; padding:32px 30px; max-width:600px}
+.hero-badge{
+  display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px;
+  background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.2);
+  font-size:10.5px; font-weight:800; letter-spacing:.11em; text-transform:uppercase;
+}
+.hero h2{font-family:var(--serif); font-size:clamp(30px,5.4vw,46px); font-weight:900; margin:14px 0 10px}
+.hero h2 em{font-style:normal; background:linear-gradient(100deg,#ffd9e6,#ffb3c9 60%,#e3c9ff); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+.hero p.lede{font-size:14.5px; color:rgba(255,255,255,.84); max-width:470px; font-weight:500}
+.hero-chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:18px}
+.hchip{
+  display:inline-flex; align-items:center; gap:7px; padding:8px 13px; border-radius:12px;
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16);
+  font-size:12px; font-weight:600; backdrop-filter:blur(6px);
+}
+.hero{min-height:340px}
+.hero-photo{
+  position:absolute; inset:0 0 0 auto; width:50%; z-index:1;
+  -webkit-mask-image:linear-gradient(to left,#000 52%,transparent 99%);
+  mask-image:linear-gradient(to left,#000 52%,transparent 99%);
+}
+.hero-photo img{width:100%; height:100%; object-fit:cover; object-position:48% 41%; display:block}
+.hero::after{
+  content:''; position:absolute; inset:0; z-index:2; pointer-events:none;
+  background:linear-gradient(90deg,rgba(36,21,64,.94) 0%,rgba(36,21,64,.6) 44%,rgba(36,21,64,.12) 72%,transparent 100%);
+}
+@media(max-width:820px){
+  .hero{flex-direction:column; min-height:0}
+  .hero-photo{
+    position:relative; inset:auto; width:100%; height:230px; order:-1; flex:none;
+    -webkit-mask-image:none; mask-image:none;
+  }
+  .hero-photo img{object-position:48% 52%}
+  .hero-photo::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg,rgba(36,21,64,.25) 0%,rgba(36,21,64,.1) 45%,rgba(45,26,74,.85) 88%,#2d1a4a 100%);
+  }
+  .hero::after{display:none}
+  .hero-copy{padding:6px 22px 26px; max-width:none}
+  .hero h2{font-size:clamp(26px,7.4vw,34px)}
+}
+
+/* ============ STAT STRIP ============ */
+.stat-strip{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:24px}
+.stat{background:#fff; border:1px solid var(--line); border-radius:var(--r-m); padding:15px 16px; box-shadow:var(--sh-s)}
+.stat .k{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.stat .v{font-family:var(--serif); font-size:26px; font-weight:900; margin-top:5px; font-variant-numeric:tabular-nums}
+.stat .n{font-size:11.5px; color:var(--ink-3); font-weight:600; margin-top:2px}
+.stat.rose .v{color:var(--rose-d)} .stat.plum .v{color:var(--plum)}
+.stat.teal .v{color:var(--teal)} .stat.amber .v{color:var(--amber)} .stat.blue .v{color:var(--blue)}
+
+/* ============ SECTION HEAD ============ */
+.sec-head{display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap; margin:0 0 16px}
+.sec-head h3{font-family:var(--serif); font-size:24px; font-weight:900}
+.sec-head p{font-size:13px; color:var(--ink-3); font-weight:600; margin-top:4px}
+.sec-head .right{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+
+/* ============ MEAL CARDS ============ */
+.meal-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(322px,1fr)); gap:16px; margin-bottom:26px}
+.meal{
+  background:#fff; border:1px solid var(--line); border-radius:var(--r-l); padding:17px;
+  box-shadow:var(--sh-s); display:flex; flex-direction:column; position:relative;
+  transition:box-shadow .25s, transform .25s, border-color .25s;
+}
+.meal:hover{box-shadow:var(--sh-m); transform:translateY(-3px); border-color:#e0d3f0}
+.meal-top{display:flex; align-items:center; gap:11px; margin-bottom:13px}
+.slot-ico{
+  width:42px; height:42px; border-radius:13px; flex:none; display:grid; place-items:center; font-size:20px;
+  border:1px solid var(--line);
+}
+.meal-top .st{font-size:14.5px; font-weight:800}
+.meal-top .sm{font-size:11px; font-weight:700; color:var(--ink-3); margin-top:1px; letter-spacing:.02em}
+.meal-name{font-family:var(--serif); font-size:19px; font-weight:700; margin-bottom:6px; letter-spacing:-.01em}
+.meal-sub{font-size:12.5px; color:var(--ink-2); font-weight:500; line-height:1.5; flex:1; min-height:38px}
+.meal-tags{display:flex; flex-wrap:wrap; gap:5px; margin-top:10px}
+.tag{
+  font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+  padding:4px 8px; border-radius:7px; background:var(--line-2); color:var(--ink-2);
+}
+.tag.hp{background:var(--rose-l); color:var(--rose-d)}
+.tag.ghar{background:var(--amber-l); color:var(--amber)}
+.tag.quick{background:var(--teal-l); color:var(--teal)}
+.tag.tiffin{background:var(--blue-l); color:var(--blue)}
+.tag.nocook{background:var(--plum-l); color:var(--plum)}
+.macro-row{display:flex; gap:6px; margin-top:12px}
+.mm{flex:1; text-align:center; padding:7px 4px; border-radius:10px; background:var(--line-2)}
+.mm b{display:block; font-size:13.5px; font-weight:800; font-variant-numeric:tabular-nums}
+.mm span{font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3)}
+.meal-foot{display:flex; gap:8px; margin-top:13px; padding-top:13px; border-top:1px dashed var(--line)}
+.meal-foot .kcal{
+  font-size:12.5px; font-weight:800; padding:8px 12px; border-radius:10px;
+  background:var(--ink); color:#fff; font-variant-numeric:tabular-nums;
+}
+.meal-foot .wt{font-size:12.5px; font-weight:700; padding:8px 11px; border-radius:10px; background:var(--line-2); color:var(--ink-2)}
+.meal-foot .grow{flex:1}
+.icon-btn{
+  width:38px; height:38px; border-radius:11px; display:grid; place-items:center; font-size:15px;
+  background:#fff; border:1.5px solid var(--line); transition:.18s;
+}
+.icon-btn:hover{border-color:var(--rose); background:var(--rose-l)}
+
+/* ============ TOTALS ============ */
+.totals{display:grid; grid-template-columns:1.05fr 1fr; gap:16px; margin-bottom:26px}
+@media(max-width:900px){.totals{grid-template-columns:1fr}}
+.ring-wrap{display:flex; align-items:center; gap:22px; flex-wrap:wrap}
+.ring{
+  --p:0; --c:var(--rose); width:132px; height:132px; border-radius:50%; flex:none; position:relative;
+  background:conic-gradient(var(--c) calc(var(--p)*1%), var(--line-2) 0);
+  transition:--p .6s;
+}
+.ring::after{
+  content:''; position:absolute; inset:11px; border-radius:50%; background:#fff; box-shadow:inset 0 2px 8px rgba(31,18,53,.06);
+}
+.ring-in{position:absolute; inset:0; display:grid; place-content:center; text-align:center; z-index:2}
+.ring-in b{font-family:var(--serif); font-size:27px; font-weight:900; font-variant-numeric:tabular-nums; line-height:1}
+.ring-in span{font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-top:3px}
+.mbars{flex:1; min-width:190px; display:flex; flex-direction:column; gap:11px}
+.mbar .lab{display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:5px}
+.mbar .lab span:last-child{color:var(--ink-3); font-variant-numeric:tabular-nums}
+.track{height:9px; border-radius:99px; background:var(--line-2); overflow:hidden}
+.fill{height:100%; border-radius:99px; transition:width .5s ease, background .3s}
+.micro-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(158px,1fr)); gap:13px 16px}
+.micro .lab{display:flex; justify-content:space-between; align-items:baseline; font-size:11.5px; font-weight:700; margin-bottom:4px; gap:6px}
+.micro .lab em{font-style:normal; font-size:10.5px; color:var(--ink-3); font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap}
+.micro .track{height:7px}
+.legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; font-size:11px; font-weight:700; color:var(--ink-3)}
+.legend i{width:9px; height:9px; border-radius:3px; display:inline-block; margin-right:5px}
+
+/* ============ MODAL ============ */
+.ovl{
+  position:fixed; inset:0; z-index:200; background:rgba(31,18,53,.5); backdrop-filter:blur(5px);
+  display:none; align-items:flex-end; justify-content:center; padding:0;
+}
+.ovl.on{display:flex; animation:fade .25s}
+@media(min-width:760px){.ovl{align-items:center; padding:28px}}
+.sheet{
+  background:#fff; width:100%; max-width:820px; max-height:92vh; overflow:hidden;
+  border-radius:24px 24px 0 0; box-shadow:var(--sh-l); display:flex; flex-direction:column;
+  animation:up .3s cubic-bezier(.2,.9,.3,1);
+}
+@media(min-width:760px){.sheet{border-radius:26px}}
+@keyframes up{from{transform:translateY(28px); opacity:.6}to{transform:none; opacity:1}}
+.sheet-head{padding:18px 20px; border-bottom:1px solid var(--line); display:flex; align-items:flex-start; gap:12px}
+.sheet-head h4{font-family:var(--serif); font-size:21px; font-weight:900}
+.sheet-head .eyebrow{margin-bottom:4px}
+.sheet-body{padding:20px; overflow-y:auto; -webkit-overflow-scrolling:touch}
+.x-btn{width:36px; height:36px; border-radius:11px; background:var(--line-2); display:grid; place-items:center; font-size:16px; flex:none; margin-left:auto}
+.x-btn:hover{background:var(--rose-l); color:var(--rose-d)}
+.pickbar{display:flex; gap:8px; padding:13px 20px; border-bottom:1px solid var(--line); flex-wrap:wrap; align-items:center}
+.pickbar input{
+  flex:1; min-width:160px; padding:10px 14px; border-radius:11px; border:1.5px solid var(--line);
+  font-family:inherit; font-size:13px; font-weight:600; outline:none; color:var(--ink);
+}
+.pickbar input:focus{border-color:var(--rose)}
+.fchip{padding:7px 12px; border-radius:999px; font-size:11.5px; font-weight:700; background:var(--line-2); color:var(--ink-2); transition:.18s}
+.fchip:hover{background:var(--line)}
+.fchip.on{background:var(--ink); color:#fff}
+.opt-list{display:grid; gap:9px}
+.opt{
+  display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:14px;
+  border:1.5px solid var(--line); background:#fff; text-align:left; width:100%; transition:.18s;
+}
+.opt:hover{border-color:var(--rose); background:var(--rose-l)}
+.opt.sel{border-color:var(--ink); background:var(--line-2)}
+.opt .on-name{font-size:14px; font-weight:800}
+.opt .on-sub{font-size:11.5px; color:var(--ink-3); font-weight:600; margin-top:2px; line-height:1.4}
+.opt .on-k{
+  margin-left:auto; flex:none; text-align:right; font-size:12px; font-weight:800;
+  font-variant-numeric:tabular-nums; color:var(--ink-2);
+}
+.opt .on-k em{display:block; font-style:normal; font-size:10.5px; color:var(--rose-d); font-weight:800; margin-top:2px}
+.recipe-hero{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px}
+.rstat{flex:1; min-width:86px; background:var(--line-2); border-radius:13px; padding:11px 13px}
+.rstat b{display:block; font-family:var(--serif); font-size:20px; font-weight:900; font-variant-numeric:tabular-nums}
+.rstat span{font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
+.sub-h{font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--rose-d); margin:20px 0 10px; display:flex; align-items:center; gap:8px}
+.sub-h::after{content:''; flex:1; height:1px; background:var(--line)}
+table.ing{width:100%; border-collapse:collapse; font-size:13px}
+table.ing td{padding:8px 4px; border-bottom:1px solid var(--line-2)}
+table.ing td:last-child{text-align:right; font-weight:700; color:var(--ink-2); font-variant-numeric:tabular-nums; white-space:nowrap}
+table.ing tr:last-child td{border-bottom:0}
+ol.steps{margin:0; padding-left:0; list-style:none; counter-reset:s; display:grid; gap:10px}
+ol.steps li{counter-increment:s; display:flex; gap:11px; font-size:13.5px; color:var(--ink-2); line-height:1.55}
+ol.steps li::before{
+  content:counter(s); flex:none; width:23px; height:23px; border-radius:50%;
+  background:var(--ink); color:#fff; font-size:11.5px; font-weight:800;
+  display:grid; place-items:center; margin-top:1px;
+}
+.nut-table{width:100%; border-collapse:collapse; font-size:12.5px}
+.nut-table th{text-align:left; font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); padding:0 6px 7px; font-weight:800}
+.nut-table th:not(:first-child), .nut-table td:not(:first-child){text-align:right}
+.nut-table td{padding:7px 6px; border-top:1px solid var(--line-2); font-variant-numeric:tabular-nums}
+.nut-table td:first-child{font-weight:700}
+.nut-table td.pc{color:var(--ink-3); font-weight:700}
+.note{
+  background:var(--amber-l); border:1px solid #f5e0b8; border-radius:14px; padding:13px 15px;
+  font-size:12.5px; color:#6b4708; font-weight:600; line-height:1.55;
+}
+.note.info{background:var(--blue-l); border-color:#cfe1f5; color:#1c4a7a}
+.note.ok{background:var(--green-l); border-color:#c7e8d5; color:#1f5c3d}
+
+/* ============ NUMBERS PANEL ============ */
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+.bmi-scale{margin:18px 0 8px}
+.bmi-bar{height:14px; border-radius:99px; display:flex; overflow:hidden; box-shadow:inset 0 1px 3px rgba(0,0,0,.08)}
+.bmi-bar div{height:100%}
+.bmi-ticks{display:flex; margin-top:7px; font-size:10.5px; font-weight:700; color:var(--ink-3)}
+.bmi-pin{position:relative; height:24px}
+.bmi-pin span{
+  position:absolute; transform:translateX(-50%); font-size:11px; font-weight:800; color:var(--ink);
+  background:#fff; border:1.5px solid var(--ink); padding:2px 8px; border-radius:99px; white-space:nowrap;
+  box-shadow:var(--sh-s);
+}
+.bmi-pin span::after{
+  content:''; position:absolute; left:50%; top:-9px; transform:translateX(-50%);
+  border:5px solid transparent; border-bottom-color:var(--ink);
+}
+.calc-row{display:flex; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px dashed var(--line); font-size:13.5px}
+.calc-row:last-child{border-bottom:0}
+.calc-row .l{font-weight:600; color:var(--ink-2)}
+.calc-row .l em{display:block; font-style:normal; font-size:11.5px; color:var(--ink-3); margin-top:2px}
+.calc-row .r{font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap}
+.calc-row.big{border-top:2px solid var(--ink); border-bottom:0; margin-top:6px; padding-top:14px}
+.calc-row.big .r{font-family:var(--serif); font-size:22px; color:var(--rose-d)}
+.tl{display:grid; gap:0; margin-top:6px}
+.tl-item{display:flex; gap:14px; padding-bottom:16px; position:relative}
+.tl-item:not(:last-child)::before{content:''; position:absolute; left:11px; top:26px; bottom:0; width:2px; background:var(--line)}
+.tl-dot{
+  width:24px; height:24px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:var(--rose-l); color:var(--rose-d); font-size:11px; font-weight:800; border:2px solid #fff;
+  box-shadow:0 0 0 1.5px var(--rose-l);
+}
+.tl-item b{font-size:14px; font-weight:800}
+.tl-item p{font-size:12.5px; color:var(--ink-3); font-weight:600; margin-top:2px}
+
+/* ============ WEEK / BROWSE ============ */
+.week-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(196px,1fr)); gap:13px}
+.day{background:#fff; border:1px solid var(--line); border-radius:var(--r-m); overflow:hidden; box-shadow:var(--sh-s)}
+.day-h{padding:11px 14px; background:linear-gradient(135deg,var(--ink),#432a63); color:#fff}
+.day-h b{font-size:13.5px; font-weight:800}
+.day-h span{display:block; font-size:10.5px; opacity:.7; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-top:1px}
+.day-body{padding:6px 14px 12px}
+.dm{padding:9px 0; border-bottom:1px dashed var(--line-2); font-size:12px}
+.dm:last-child{border-bottom:0}
+.dm .dl{font-size:9.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+.dm .dn{font-weight:700; color:var(--ink); margin-top:2px; line-height:1.35}
+.dm .dk{font-size:11px; color:var(--rose-d); font-weight:800; font-variant-numeric:tabular-nums}
+.day-f{padding:10px 14px; background:var(--line-2); font-size:12px; font-weight:800; display:flex; justify-content:space-between}
+.browse-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(255px,1fr)); gap:12px}
+.bcard{
+  background:#fff; border:1px solid var(--line); border-radius:var(--r-m); padding:14px; text-align:left;
+  box-shadow:var(--sh-s); transition:.2s; display:flex; flex-direction:column; gap:6px;
+}
+.bcard:hover{transform:translateY(-2px); box-shadow:var(--sh-m); border-color:#e0d3f0}
+.bcard .bn{font-size:14px; font-weight:800; line-height:1.3}
+.bcard .bs{font-size:11.5px; color:var(--ink-3); font-weight:600; line-height:1.45; flex:1}
+.bcard .bf{display:flex; gap:6px; align-items:center; font-size:11px; font-weight:800; color:var(--ink-2); flex-wrap:wrap}
+.bcard .bf .k{background:var(--ink); color:#fff; padding:3px 8px; border-radius:7px}
+.bcard .bf .p{background:var(--rose-l); color:var(--rose-d); padding:3px 8px; border-radius:7px}
+.bcard .bf .s{background:var(--line-2); padding:3px 8px; border-radius:7px}
+
+/* ============ WORKOUT ============ */
+.w-day{background:#fff; border:1px solid var(--line); border-radius:var(--r-l); overflow:hidden; box-shadow:var(--sh-s); margin-bottom:14px}
+.w-head{display:flex; align-items:center; gap:13px; padding:16px 18px; width:100%; text-align:left}
+.w-head:hover{background:var(--line-2)}
+.w-num{
+  width:44px; height:44px; border-radius:13px; flex:none; display:grid; place-items:center;
+  font-family:var(--serif); font-size:17px; font-weight:900; color:#fff;
+}
+.w-head .wt-1{font-size:15.5px; font-weight:800}
+.w-head .wt-2{font-size:11.5px; font-weight:700; color:var(--ink-3); margin-top:2px}
+.w-chev{margin-left:auto; font-size:13px; color:var(--ink-3); transition:transform .25s}
+.w-day.open .w-chev{transform:rotate(180deg)}
+.w-body{display:none; padding:0 18px 18px}
+.w-day.open .w-body{display:block}
+table.ex{width:100%; border-collapse:collapse; font-size:13px}
+table.ex th{
+  text-align:left; font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  padding:9px 8px; font-weight:800; border-bottom:1.5px solid var(--line);
+}
+table.ex td{padding:10px 8px; border-bottom:1px solid var(--line-2); vertical-align:top}
+table.ex td:first-child{font-weight:700}
+table.ex .sets{white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:700; color:var(--ink-2)}
+table.ex .cue{font-size:11.5px; color:var(--ink-3); font-weight:500}
+@media(max-width:640px){
+  table.ex thead{display:none}
+  table.ex tr{display:block; padding:11px 0; border-bottom:1px solid var(--line-2)}
+  table.ex td{display:block; border:0; padding:1px 0}
+  table.ex td:first-child{font-size:14px}
+}
+.split-pills{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px}
+.spill{padding:8px 14px; border-radius:999px; font-size:12px; font-weight:700; background:#fff; border:1px solid var(--line); box-shadow:var(--sh-s)}
+
+/* ============ STICKY FOOTER TRACKER ============ */
+#tracker{
+  position:fixed; left:0; right:0; bottom:0; z-index:70;
+  background:rgba(255,255,255,.9); backdrop-filter:blur(16px) saturate(160%);
+  border-top:1px solid var(--line); box-shadow:0 -12px 34px -18px rgba(31,18,53,.34);
+  padding:11px 0 calc(11px + env(safe-area-inset-bottom));
+}
+#tracker .trow{max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:16px}
+#tracker .tnum{font-family:var(--serif); font-size:26px; font-weight:900; line-height:1; font-variant-numeric:tabular-nums}
+#tracker .tlab{font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-bottom:3px}
+#tracker .tmid{flex:1; min-width:60px}
+#tracker .tmid .top{display:flex; justify-content:space-between; font-size:11px; font-weight:700; margin-bottom:5px; color:var(--ink-2)}
+#tracker .tp{display:flex; gap:9px}
+#tracker .tp .c{text-align:center}
+#tracker .tp .c b{display:block; font-size:14px; font-weight:800; font-variant-numeric:tabular-nums}
+#tracker .tp .c span{font-size:9px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
+@media(max-width:640px){#tracker .tp .c:nth-child(n+4){display:none}}
+body{padding-bottom:104px}
+footer.foot{padding:26px 0 20px; text-align:center; font-size:11.5px; color:var(--ink-3); font-weight:600; line-height:1.7}
+
+/* ============ PRINT ============ */
+.print-only{display:none}
+@media print{
+  @page{margin:13mm}
+  body{background:#fff; padding:0; font-size:11px}
+  body::before, #quotebar, #tracker, .tabs, .top-actions, .no-print, .hero-photo, .icon-btn{display:none !important}
+  .print-only{display:block}
+  .panel{display:block !important; break-before:page}
+  .panel:first-of-type{break-before:auto}
+  .card,.meal,.day,.w-day,.stat{box-shadow:none !important; border:1px solid #ddd !important; break-inside:avoid}
+  .hero{background:#fff !important; color:#000 !important; box-shadow:none; border:1px solid #ddd; min-height:0}
+  .hero::after{display:none}
+  .hero h2 em{-webkit-text-fill-color:#c33c66}
+  .hero p.lede{color:#333 !important; background:transparent !important}
+  .hero-badge, .hchip{color:#333 !important; background:#f6f6f6 !important; border-color:#ddd !important}
+  .stat-strip{grid-template-columns:repeat(5,1fr); gap:8px}
+  .stat .v{font-size:19px}
+  .totals{grid-template-columns:1fr 1fr}
+  .meal-grid{grid-template-columns:1fr 1fr}
+  .w-body{display:block !important}
+  .print-recipe{display:block !important; margin-top:9px; padding-top:9px; border-top:1px dashed #ccc; font-size:10px; color:#333}
+  a[href]::after{content:''}
+}
+.print-recipe{display:none}
+</style>
+</head>
+<body>
+
+<!-- ===== QUOTE BAR ===== -->
+<div id="quotebar">
+  <div class="qrow">
+    <span id="qspark">✨</span>
+    <span id="qtext">Loading your daily dose of fire…</span>
+    <span id="qcount"></span>
+    <button id="qnext" title="Next quote" aria-label="Next quote">›</button>
+  </div>
+</div>
+
+<header class="top wrap">
+  <div class="top-row">
+    <div class="brand-group">
+      <div class="brandmark">N</div>
+      <div>
+        <h1 class="top-title">Niharika's Diet Dashboard</h1>
+        <div class="top-sub">Vegetarian fat-loss plan · Chandigarh kitchen · 9–6 desk + 2 h commute</div>
+      </div>
+    </div>
+    <div class="top-actions no-print">
+      <button class="btn btn-ghost btn-sm" onclick="openGrocery()">🧺 Grocery list</button>
+      <button class="btn btn-ghost btn-sm" onclick="surpriseMe()">🎲 Surprise me</button>
+      <button class="btn btn-dark btn-sm" onclick="openExport()">⬇︎ Export plan</button>
+    </div>
+  </div>
+
+  <nav class="tabs no-print" id="tabs"></nav>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ TODAY ============ -->
+  <section class="panel on" id="p-today">
+
+    <div class="hero">
+      <div class="hero-photo">
+        <img src="e5f5c96d-36f3-4666-93f7-bc17a72f5f2a.jpeg" alt="Niharika"
+             onerror="this.onerror=null;this.src='https://kalashnandal.co.in/e5f5c96d-36f3-4666-93f7-bc17a72f5f2a.jpeg'">
+      </div>
+      <div class="hero-copy">
+        <span class="hero-badge">◆ Built only for Niharika</span>
+        <h2>Strong beats <em>skinny</em>. Every single time.</h2>
+        <p class="lede">A 1,500 kcal vegetarian day designed around your real life — tiffin that survives a 1-hour drive, a snack for the car, and a dinner that's ready in 15 minutes when you walk in at 7:30.</p>
+        <div class="hero-chips">
+          <span class="hchip">🚗 Commute-proof snacks</span>
+          <span class="hchip">🥗 100% vegetarian</span>
+          <span class="hchip">💪 <span id="heroProtein">112 g</span> protein target</span>
+          <span class="hchip">🍽️ 300+ meal options</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-strip" id="statStrip"></div>
+
+    <div class="sec-head">
+      <div>
+        <h3>Today's plate</h3>
+        <p>Tap any card to swap between <b id="perSlotCount">50</b> options in the same calorie band — or open the recipe.</p>
+      </div>
+      <div class="right no-print">
+        <button class="btn btn-ghost btn-sm" onclick="gharKaKhana()">🏠 Ghar ka khana day</button>
+        <button class="btn btn-ghost btn-sm" onclick="maxProteinDay()">💪 Max protein</button>
+        <button class="btn btn-rose btn-sm" onclick="randomizeDay()">⚖️ Build a balanced day</button>
+      </div>
+    </div>
+
+    <div class="meal-grid" id="mealGrid"></div>
+
+    <div class="totals">
+      <div class="card pad">
+        <div class="eyebrow">Energy &amp; macros</div>
+        <h3 class="serif" style="font-size:20px; margin:5px 0 16px">Where today lands</h3>
+        <div class="ring-wrap">
+          <div class="ring" id="calRing" style="--p:0">
+            <div class="ring-in"><b id="ringKcal">0</b><span>of 1500 kcal</span></div>
+          </div>
+          <div class="mbars" id="macroBars"></div>
+        </div>
+        <div id="calVerdict" style="margin-top:16px"></div>
+      </div>
+      <div class="card pad">
+        <div class="eyebrow">Micronutrients</div>
+        <h3 class="serif" style="font-size:20px; margin:5px 0 16px">Vitamins &amp; minerals today</h3>
+        <div class="micro-grid" id="microGrid"></div>
+        <div class="legend">
+          <span><i style="background:var(--green)"></i>On target</span>
+          <span><i style="background:var(--amber)"></i>50–90%</span>
+          <span><i style="background:var(--red)"></i>Under 50%</span>
+          <span><i style="background:var(--blue)"></i>Above target</span>
+          <span>⌈max⌉ = ceiling, stay under it</span>
+        </div>
+        <div class="note info" style="margin-top:14px;font-size:11.5px">
+          Two honest caveats. <b>Iron:</b> the 29 mg target is ICMR's figure for Indian women and it deliberately assumes poor absorption from plant food — so 60–70% here is not the same as being deficient. Squeezing lemon or amla over your dal does more than chasing the number. <b>Vitamin D ☀️:</b> a vegetarian diet essentially cannot supply it. That bar stays low by design — 15 minutes of morning sun and a tested supplement is the only real fix.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NUMBERS ============ -->
+  <section class="panel" id="p-numbers"></section>
+
+  <!-- ============ WEEK ============ -->
+  <section class="panel" id="p-week">
+    <div class="sec-head">
+      <div>
+        <h3>Your week, pre-decided</h3>
+        <p>Monday to Sunday, auto-built so no two days repeat. Sunday keeps one relaxed meal.</p>
+      </div>
+      <div class="right no-print">
+        <button class="btn btn-ghost btn-sm" onclick="buildWeek(true)">🔄 New week</button>
+        <button class="btn btn-dark btn-sm" onclick="window.print()">🖨️ Print week</button>
+      </div>
+    </div>
+    <div class="week-grid" id="weekGrid"></div>
+  </section>
+
+  <!-- ============ TRAIN ============ -->
+  <section class="panel" id="p-train"></section>
+
+  <!-- ============ BROWSE ============ -->
+  <section class="panel" id="p-browse">
+    <div class="sec-head">
+      <div>
+        <h3>The whole cookbook</h3>
+        <p><b id="browseCount">0</b> vegetarian options with weights, ingredients, recipes and full nutrition.</p>
+      </div>
+    </div>
+    <div class="card pad no-print" style="margin-bottom:16px">
+      <div class="pickbar" style="padding:0; border:0">
+        <input id="browseSearch" placeholder="Search paneer, dal, poha, oats…" oninput="renderBrowse()">
+        <div id="browseFilters" style="display:flex; gap:7px; flex-wrap:wrap"></div>
+      </div>
+    </div>
+    <div class="browse-grid" id="browseGrid"></div>
+    <div style="text-align:center; margin-top:20px" class="no-print">
+      <button class="btn btn-ghost" id="browseMore" onclick="browseLimit+=60; renderBrowse(true)">Show more</button>
+    </div>
+  </section>
+
+  <!-- ============ HOW TO USE ============ -->
+  <section class="panel" id="p-guide"></section>
+
+</main>
+
+<footer class="foot wrap">
+  <p><b>Niharika's Diet Dashboard</b> · calories and nutrition computed from per-ingredient values (IFCT/USDA-style reference data), so treat them as close estimates, not lab results.</p>
+  <p style="margin-top:6px">Educational planning tool — not medical advice. Check with a doctor or dietitian before starting, especially if there's any thyroid, PCOS, anaemia or blood-sugar history.</p>
+</footer>
+
+<!-- ===== TRACKER ===== -->
+<div id="tracker" class="no-print">
+  <div class="trow">
+    <div>
+      <div class="tlab">Today</div>
+      <div class="tnum" id="trkKcal">0</div>
+    </div>
+    <div class="tmid">
+      <div class="top"><span>Target 1,500 kcal</span><span id="trkDelta"></span></div>
+      <div class="track" style="height:11px"><div class="fill" id="trkFill" style="width:0%; background:linear-gradient(90deg,var(--rose),var(--plum))"></div></div>
+    </div>
+    <div class="tp" id="trkMacros"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="ovl" id="ovl" onclick="if(event.target===this) closeSheet()">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script id="nn-data">
+/* =====================================================================
+   NIHARIKA'S DIET DASHBOARD — DATA LAYER
+   Every calorie / macro / micro on this page is COMPUTED from the
+   per-ingredient table below, so the recipe and the numbers can never
+   drift apart. Nothing is hand-typed twice.
+   ===================================================================== */
+
+/* ---------- 1. HER PROFILE ---------- */
+const P = {
+  name:'Niharika', city:'Chandigarh',
+  ht:166, wt:67, sex:'F',
+  trainDays:'4–5 / week', sleep:'5–6 h',
+  work:'9–6 desk job', commute:'1 h each way',
+  goalWt:60, kcal:1500, kcalLo:1400, kcalHi:1600
+};
+
+/* ---------- 2. 100+ MOTIVATION QUOTES ---------- */
+const QUOTES = [
+"Consistency is what turns average into unstoppable. Keep showing up. ✨",
+"Niharika, a 9-to-6 and a 2-hour drive did not stop you today. Respect. 🚗",
+"You are not on a diet. You are building a body that keeps up with your ambition.",
+"The tiffin you packed last night is today's discipline. Well played. 🍱",
+"Fat loss is 90% boring repetition. Boring is where the results live.",
+"5 hours of sleep is survival. 7 is progress. Tonight, close the laptop early. 🌙",
+"Every 1,500 kcal day is a deposit. The scale is just the bank statement. 🏦",
+"Nobody is coming to do this for you — and honestly, you don't need them to. 💪",
+"Hungry at 4 PM? That's a snack you forgot to pack, not a lack of willpower.",
+"Strong beats skinny. Every single time.",
+"You've survived worse Mondays than this workout.",
+"Protein first. Everything else negotiates later. 🥛",
+"Drink the water. Half your 'hunger' is thirst wearing a costume. 💧",
+"Niharika, 60 kg is not a fantasy. It's arithmetic plus patience. 🎯",
+"Progress is not linear. Neither is traffic on the highway. Keep driving.",
+"Small disciplines, repeated daily, beat heroic weekend efforts.",
+"Your future self is watching what you order right now.",
+"Don't reward a good workout with a bad dinner.",
+"The best time to prep tomorrow's meal is while tonight's is cooking.",
+"Dal, sabzi, roti, curd. The plan was never complicated — just consistent. 🍛",
+"A 30-minute workout is 2% of your day. You can spare 2%.",
+"Missing one meal plan is a typo. Missing a week is a rewrite. Fix it today.",
+"You do not need motivation. You need your gym bag in the car. 🎒",
+"Cravings peak for 10 minutes. Outlast them and they lose. ⏱️",
+"Sleep is the cheapest fat-loss supplement you're not taking. 😴",
+"Being tired and doing it anyway is the whole skill.",
+"Chew slower. Your brain needs 20 minutes to notice you're full.",
+"Weigh the paneer. Guessing is how 1,500 becomes 2,100. ⚖️",
+"That extra roti feels small tonight and heavy on Sunday.",
+"Niharika, you're not starting over. You're continuing with better data. 📈",
+"Fibre is your appetite's off-switch. Fill the plate with vegetables first. 🥦",
+"Some days you win the gym. Some days you win the kitchen. Win something.",
+"Discipline is remembering what you actually want.",
+"Nothing tastes as good as walking up a flight of stairs without gasping.",
+"Two litres of water before evening. Non-negotiable. 🚰",
+"Your worst workout still beats the one you skipped.",
+"Stop weighing yourself daily and start photographing yourself monthly. 📸",
+"Sugar is not a reward. Rest is. Sleep is. A hot shower is.",
+"You were tired last week too — and you still did it.",
+"The commute is 2 hours of not eating badly. Use it. 🎧",
+"One bad meal doesn't undo a week. One bad week undoes a month.",
+"Discipline now, options later.",
+"Curd, cucumber, roasted chana — three things that never sabotage you. 🥒",
+"Track it or guess it. Only one of those works.",
+"You don't have to feel like it. You just have to start.",
+"Fat loss loves boredom. Be boringly excellent. 🔁",
+"Niharika, your body is running on 5 hours of sleep and still showing up. Fuel it well.",
+"Rest days build the muscle. Take them properly — don't 'kind of' rest.",
+"Skip the lift, lose the muscle. Keep the lift, keep the shape.",
+"Say no once at 9 PM instead of apologising all day Sunday.",
+"Strength training is the reason you'll look toned at 60 kg, not just lighter. 🏋️",
+"You can't out-train a badly planned lunch.",
+"Prep on Sunday so Wednesday can't defeat you. 📦",
+"Every glass of water, every 10,000 steps, every early night. It adds up.",
+"Being 'good' 80% of the time forever beats 100% for two weeks.",
+"You are allowed to be proud of yourself today.",
+"Roasted chana in the bag beats samosa at the counter. Always. 🎒",
+"Sweat is just your body agreeing with you.",
+"Slow progress is still the fastest route that actually works.",
+"The tiffin box is a promise you make to yourself at 10 PM.",
+"Niharika, you are stronger than a 4 PM sugar craving.",
+"Don't negotiate with a plan you made when you were thinking clearly.",
+"Your knees will thank you for every kilo. 🦵",
+"Move at your desk. Every hour. Even 60 seconds counts.",
+"Sitting for 9 hours is the real opponent, not carbohydrates. 🪑",
+"The scale is one number on one morning. Look at the trend, not the tantrum.",
+"Never eat standing in front of an open fridge. Plate it. Sit down.",
+"Salad first, then sabzi, then roti. Same food, better order. 🥗",
+"You're not depriving yourself. You're prioritising yourself.",
+"Weekend eating decides Monday's weight.",
+"Wake up 20 minutes earlier and the whole day stops chasing you. ⏰",
+"You'll never regret the workout you finished.",
+"Set the bag by the door. Discipline loves geography.",
+"Ten deep breaths before dinner. Eat calm, digest better. 🧘",
+"Muscle is the only outfit you wear every day. Invest in it.",
+"Niharika, this plan bends. It does not break. Adjust and continue.",
+"Fewer decisions, better outcomes. That's why the plan exists.",
+"Some days protein is paneer. Some days it's dal. Just hit the number.",
+"Tea without sugar is an acquired taste. Acquire it. ☕",
+"The 1-hour drive home is not an excuse to arrive starving. Snack at 6.",
+"You are 4 months away from a completely different body composition. 📅",
+"Nobody regrets sleeping early. Everybody regrets scrolling till 1 AM. 📱",
+"Sabzi is not a side dish. Make it half the plate. 🥕",
+"You already know what to do. Go do the obvious thing.",
+"Stop looking for a shortcut and start looking at your dinner plate.",
+"Ghee is not the enemy. A tablespoon of it is. 🧈",
+"A litre of water when you wake up. Watch your energy change. 💦",
+"Nobody notices your first 3 kg. Everybody notices your seventh.",
+"The best exercise is the one you'll still be doing in 5 years.",
+"You are not behind. You're exactly where consistency will find you.",
+"Two workouts a week beats zero. Do the imperfect version.",
+"Niharika, that stubborn last 500 g is testing your patience, not your plan.",
+"Eat like you respect the person you're becoming.",
+"Hunger before dinner is normal. Panic before dinner is poor planning.",
+"Keep sprouts washed and ready. Future-you is lazy — plan for her. 🌱",
+"Your metabolism likes muscle, protein and sleep. Give it all three.",
+"Cook once, eat twice. That's not laziness, that's strategy. 🍲",
+"The plan works on the days you don't feel like it. That's the point.",
+"Progress photos in the same light, same time, same clothes. Trust them. 📷",
+"You're building a habit, not serving a sentence.",
+"Discipline is just self-respect with a schedule.",
+"Say it out loud: 60 kg, strong shoulders, no afternoon crash. 🎯",
+"You have done hard things before. This is not the hardest.",
+"Niharika, one plate at a time. That's all today asks of you. 🍽️",
+"Sleep 7 hours and your cravings drop by half. That's biology, not willpower.",
+"Almonds in the glove box. Regret in the drive-through. Choose. 🚙",
+"Weigh yourself on Wednesday. Weekends lie. 📉",
+"When you're too tired to cook, khichdi exists. No excuses.",
+"Show up ugly. Show up tired. Just show up.",
+"Every single meal is a fresh vote for the body you want. 🗳️",
+"You don't need a perfect week. You need a good next meal."
+];
+
+/* ---------- 3. INGREDIENT NUTRITION TABLE (per 100 g / 100 ml) ----------
+   [kcal, protein g, carb g, fibre g, fat g,
+    iron mg, calcium mg, magnesium mg, potassium mg, sodium mg,
+    zinc mg, vitC mg, vitA mcgRAE, folate mcg, B12 mcg, vitD mcg]        */
+const F = {
+/* grains, flours, breads */
+atta:        ['Whole-wheat atta',      [341,12.1,64.7,11.0,1.7,  4.0, 39,138,315,  2, 2.8,  0,  0, 30,0,0]],
+rice:        ['Basmati rice (raw)',    [356, 7.9,78.0, 0.8,0.5,  1.0, 10, 25,110,  5, 1.2,  0,  0,  8,0,0]],
+brownrice:   ['Brown rice (raw)',      [356, 8.5,76.0, 3.5,2.0,  1.5, 10,110,250,  5, 2.0,  0,  0, 20,0,0]],
+poha:        ['Poha (flattened rice)', [346, 6.6,77.0, 2.5,1.2,  8.0, 20, 60,150,  5, 1.2,  0,  0, 10,0,0]],
+suji:        ['Suji / rava',           [348,11.0,73.0, 3.5,1.0,  3.0, 20, 45,120,  2, 1.0,  0,  0, 25,0,0]],
+oats:        ['Rolled oats',           [389,13.2,66.0,10.6,6.9,  4.3, 54,177,429,  2, 3.6,  0,  0, 32,0,0]],
+dalia:       ['Dalia (broken wheat)',  [342,12.0,69.0,11.0,1.5,  3.8, 35,130,300,  2, 2.6,  0,  0, 28,0,0]],
+ragi:        ['Ragi flour',            [328, 7.3,72.0,11.5,1.3,  3.9,344,137,408, 11, 2.3,  0,  0, 18,0,0]],
+bajra:       ['Bajra flour',           [348,11.0,67.0,11.0,5.0,  8.0, 42,137,307,  5, 3.1,  0,  0, 36,0,0]],
+jowar:       ['Jowar flour',           [349,10.0,72.0, 9.7,1.7,  4.0, 25,171,350,  7, 2.0,  0,  0, 20,0,0]],
+quinoa:      ['Quinoa (raw)',          [368,14.0,64.0, 7.0,6.0,  4.6, 47,197,563,  5, 3.1,  0,  0,184,0,0]],
+besan:       ['Besan (gram flour)',    [387,22.0,58.0,10.8,6.7,  4.6, 57,166,846, 64, 2.8,  0,  0,437,0,0]],
+sattu:       ['Sattu',                 [380,20.0,60.0,11.0,5.0,  5.0, 60,160,800, 50, 2.8,  0,  0,300,0,0]],
+semiya:      ['Vermicelli / semiya',   [350,11.0,72.0, 2.0,1.0,  2.0, 20, 40,110,  3, 1.0,  0,  0, 15,0,0]],
+brownbread:  ['Brown / multigrain bread',[250,9.0,45.0, 5.0,3.5,  2.5, 90, 60,150,450, 1.2, 0,  0, 40,0,0]],
+pav:         ['Multigrain pav',        [270, 9.0,48.0, 4.0,4.0,  2.5, 80, 60,160,430, 1.2,  0,  0, 35,0,0]],
+murmura:     ['Murmura (puffed rice)', [375, 6.0,83.0, 1.5,0.8,  2.0, 15, 25, 60,  5, 0.8,  0,  0,  6,0,0]],
+makhana:     ['Makhana (fox nuts)',    [347, 9.7,77.0, 7.6,0.1,  1.4, 60,210,500, 10, 1.4,  0,  0, 30,0,0]],
+khakhra:     ['Khakhra',               [400,12.0,62.0, 8.0,10.0, 3.5, 40,120,280,600, 2.2,  0,  0, 25,0,0]],
+idlibatter:  ['Idli batter',           [130, 4.0,26.0, 1.2,0.4,  1.2, 15, 30, 80,200, 0.7,  0,  0, 15,0,0]],
+dosabatter:  ['Dosa batter',           [135, 4.0,27.0, 1.3,0.5,  1.2, 15, 30, 80,200, 0.7,  0,  0, 15,0,0]],
+ricecake:    ['Puffed rice cake',      [387, 8.0,81.0, 3.0,3.0,  1.5, 15, 40, 90,300, 1.0,  0,  0, 10,0,0]],
+wwpasta:     ['Whole-wheat pasta (raw)',[348,13.0,71.0, 9.0,1.5,  3.6, 40,140,250, 8, 2.4,  0,  0, 30,0,0]],
+cornflour:   ['Corn / makki flour',    [361, 9.0,74.0, 7.0,3.9,  2.7,  7,127,315,  5, 1.7,  0, 11, 25,0,0]],
+/* pulses & soya (raw dry weights) */
+moongdal:    ['Moong dal',             [348,24.0,59.0,16.0,1.2,  4.4, 75,190,1150,30, 2.7,  0,  0,625,0,0]],
+moongwhole:  ['Whole moong',           [334,24.0,56.0,16.0,1.2,  6.7,124,190,1246,15, 2.7,  4,  0,625,0,0]],
+masoor:      ['Masoor dal',            [343,25.0,60.0,11.0,1.1,  7.5, 69, 80,955, 10, 3.3,  0,  0,479,0,0]],
+chanadal:    ['Chana dal',             [360,20.0,60.0,15.0,5.3,  5.3, 56,140,800, 40, 2.8,  0,  0,437,0,0]],
+toordal:     ['Toor / arhar dal',      [335,22.0,57.0,15.0,1.7,  5.2, 73,183,1392,17, 2.8,  0,  0,456,0,0]],
+uraddal:     ['Urad dal',              [341,25.0,59.0,18.0,1.6,  7.6,138,267,983, 38, 3.4,  0,  0,216,0,0]],
+rajma:       ['Rajma',                 [337,24.0,60.0,25.0,1.1,  8.2,143,140,1406,24, 2.8,  4,  0,394,0,0]],
+kabuli:      ['Kabuli chana',          [364,19.0,61.0,17.0,6.0,  6.2,105,115,875, 24, 3.4,  4,  3,557,0,0]],
+kalachana:   ['Kala chana',            [360,20.0,60.0,18.0,5.0,  8.0,200,120,900, 25, 3.2,  4,  0,480,0,0]],
+lobia:       ['Lobia (black-eyed peas)',[336,24.0,60.0,11.0,1.3,  8.3,110,184,1112,16, 3.4, 1.5,1,633,0,0]],
+soya:        ['Soya chunks / granules',[345,52.0,33.0,13.0,0.5, 20.0,350,290,1200, 3, 4.0,  0,  0,300,0,0]],
+sprouts:     ['Moong sprouts',         [ 30, 3.0, 6.0, 1.8,0.2,  0.9, 13, 21,149,  6, 0.4, 13,  0, 61,0,0]],
+peas:        ['Green peas',            [ 81, 5.4,14.0, 5.0,0.4,  1.5, 25, 33,244,  5, 1.2, 40, 38, 65,0,0]],
+edamame:     ['Edamame',               [121,12.0, 9.0, 5.0,5.0,  2.3, 63, 64,436,  6, 1.4,  6, 15,311,0,0]],
+roastchana:  ['Roasted chana',         [369,22.0,58.0,16.0,5.5,  6.0,120,130,850, 30, 3.2,  0,  0,300,0,0]],
+/* dairy & protein */
+paneer:      ['Paneer (toned milk)',   [265,18.0, 3.0, 0.0,20.0, 0.4,480, 25,120, 20, 1.5,  0,140, 10,0.9,0.3]],
+paneerlf:    ['Low-fat paneer',        [180,20.0, 4.0, 0.0,9.0,  0.4,500, 25,130, 25, 1.6,  0, 80, 10,0.9,0.2]],
+tofu:        ['Tofu',                  [145,15.0, 4.0, 1.0,9.0,  2.7,350, 58,120, 12, 1.6,  0,  0, 19,0,0]],
+milk:        ['Toned milk',            [ 58, 3.2, 4.7, 0.0,3.0,  0.1,125, 12,140, 45, 0.4,  1, 35,  5,0.4,0.1]],
+skimmilk:    ['Skim / double-toned milk',[35,3.4, 5.0, 0.0,0.1,  0.1,125, 12,150, 50, 0.4,  1,  5,  5,0.4,0.0]],
+curd:        ['Curd (toned)',          [ 60, 3.5, 4.5, 0.0,3.0,  0.1,150, 14,150, 45, 0.5,  1, 25,  7,0.4,0.05]],
+hungcurd:    ['Hung curd / Greek yoghurt',[60,10.0,3.6,0.0,0.4,  0.1,110, 11,141, 36, 0.5,  0,  2,  7,0.75,0]],
+buttermilk:  ['Chaas / buttermilk',    [ 20, 1.2, 2.5, 0.0,0.5,  0.1, 60,  8, 80,150, 0.2,  0,  5,  3,0.15,0]],
+whey:        ['Whey protein powder',   [380,78.0, 8.0, 1.0,4.0,  1.0,500, 60,500,300, 3.0,  0,  0, 20,2.5,0]],
+almondmilk:  ['Unsweetened almond milk',[15, 0.6, 0.6, 0.3,1.2,  0.3,120,  7, 60, 60, 0.1,  0,  0,  1,0.5,0.6]],
+cheese:      ['Cheese cube / slice',   [320,20.0, 2.0, 0.0,25.0, 0.2,700, 28, 98,650, 2.8,  0,220, 18,1.1,0.4]],
+/* nuts, seeds, fats */
+almond:      ['Almonds',               [597,20.0,20.0,12.0,54.0, 3.7,228,268,733,  1, 3.1,  0,  0, 44,0,0]],
+walnut:      ['Walnuts',               [654,15.0,14.0, 7.0,65.0, 2.9, 98,158,441,  2, 3.1, 1.3, 0, 98,0,0]],
+cashew:      ['Cashews',               [553,18.0,30.0, 3.0,44.0, 6.7, 37,292,660, 12, 5.8, 0.5, 0, 25,0,0]],
+peanut:      ['Peanuts',               [567,26.0,16.0, 8.0,49.0, 4.6, 92,168,705, 18, 3.3,  0,  0,240,0,0]],
+pb:          ['Peanut butter',         [588,25.0,20.0, 6.0,50.0, 1.9, 43,154,649,417, 2.9,  0,  0, 87,0,0]],
+chia:        ['Chia seeds',            [486,17.0,42.0,34.0,31.0, 7.7,631,335,407, 16, 4.6, 1.6, 0, 49,0,0]],
+flax:        ['Flax seeds',            [534,18.0,29.0,27.0,42.0, 5.7,255,392,813, 30, 4.3, 0.6, 0, 87,0,0]],
+pumpkinseed: ['Pumpkin seeds',         [559,30.0,11.0, 6.0,49.0, 8.8, 46,592,809,  7, 7.8, 1.9, 0, 58,0,0]],
+sunflowerseed:['Sunflower seeds',      [584,21.0,20.0, 9.0,51.0, 5.3, 78,325,645,  9, 5.0, 1.4, 0,227,0,0]],
+til:         ['Til / sesame seeds',    [573,18.0,23.0,12.0,50.0,14.6,975,351,468, 11, 7.8,  0,  0, 97,0,0]],
+ghee:        ['Ghee',                  [900, 0.0, 0.0, 0.0,100.0,0.0,  0,  0,  0,  0, 0.0,  0,840,  0,0,1.5]],
+oil:         ['Mustard / rice-bran oil',[900,0.0, 0.0, 0.0,100.0,0.0,  0,  0,  0,  0, 0.0,  0,  0,  0,0,0]],
+oliveoil:    ['Olive oil',             [900, 0.0, 0.0, 0.0,100.0,0.6,  1,  0,  1,  2, 0.0,  0,  0,  0,0,0]],
+coconut:     ['Fresh coconut',         [354, 3.3,15.0, 9.0,33.0, 2.4, 14, 32,356, 20, 1.1, 3.3, 0, 26,0,0]],
+/* vegetables */
+palak:       ['Palak / spinach',       [ 23, 2.9, 3.6, 2.2,0.4,  2.7, 99, 79,558, 79, 0.5, 28,469,194,0,0]],
+methileaves: ['Methi leaves',          [ 49, 4.4, 6.0, 1.1,0.9,  6.5,395, 67,300, 76, 1.0, 52,300, 57,0,0]],
+sarson:      ['Sarson (mustard greens)',[27, 2.9, 4.7, 3.2,0.4,  1.6,115, 32,384, 20, 0.2, 70,380,187,0,0]],
+tomato:      ['Tomato',                [ 18, 0.9, 3.9, 1.2,0.2,  0.3, 10, 11,237,  5, 0.2, 14, 42, 15,0,0]],
+onion:       ['Onion',                 [ 40, 1.1, 9.0, 1.7,0.1,  0.2, 23, 10,146,  4, 0.2,  7,  0, 19,0,0]],
+cucumber:    ['Cucumber',              [ 15, 0.7, 3.6, 0.5,0.1,  0.3, 16, 13,147,  2, 0.2,2.8,  5,  7,0,0]],
+carrot:      ['Carrot',                [ 41, 0.9,10.0, 2.8,0.2,  0.3, 33, 12,320, 69, 0.2,5.9,835, 19,0,0]],
+capsicum:    ['Capsicum / shimla mirch',[ 26,1.0, 6.0, 2.0,0.3,  0.4, 10, 12,211,  4, 0.1, 80,157, 10,0,0]],
+cabbage:     ['Cabbage / patta gobhi', [ 25, 1.3, 5.8, 2.5,0.1,  0.5, 40, 12,170, 18, 0.2, 36,  5, 43,0,0]],
+gobhi:       ['Cauliflower',           [ 25, 1.9, 5.0, 2.0,0.3,  0.4, 22, 15,299, 30, 0.3, 48,  0, 57,0,0]],
+lauki:       ['Lauki / ghiya',         [ 14, 0.6, 3.4, 0.5,0.02, 0.2, 26, 11,150,  2, 0.7, 10,  0,  6,0,0]],
+tinda:       ['Tinda / parwal',        [ 20, 1.0, 4.0, 1.5,0.2,  0.5, 30, 15,180,  3, 0.3, 12,  8, 12,0,0]],
+turai:       ['Turai / ridge gourd',   [ 20, 1.2, 4.4, 1.1,0.2,  0.4, 20, 14,139,  3, 0.4, 12, 10, 10,0,0]],
+bhindi:      ['Bhindi / okra',         [ 33, 1.9, 7.0, 3.2,0.2,  0.6, 82, 57,299,  7, 0.6, 23, 36, 60,0,0]],
+baingan:     ['Baingan / brinjal',     [ 25, 1.0, 6.0, 3.0,0.2,  0.2,  9, 14,229,  2, 0.2,  2,  1, 22,0,0]],
+mushroom:    ['Mushrooms',             [ 22, 3.1, 3.3, 1.0,0.3,  0.5,  3,  9,318,  5, 0.5,  2,  0, 17,0,0.4]],
+broccoli:    ['Broccoli',              [ 34, 2.8, 7.0, 2.6,0.4,  0.7, 47, 21,316, 33, 0.4, 89, 31, 63,0,0]],
+beans:       ['French beans',          [ 31, 1.8, 7.0, 3.4,0.2,  1.0, 37, 25,211,  6, 0.2, 12, 35, 33,0,0]],
+zucchini:    ['Zucchini',              [ 17, 1.2, 3.1, 1.0,0.3,  0.4, 16, 18,261,  8, 0.3, 18, 10, 24,0,0]],
+kaddu:       ['Kaddu / pumpkin',       [ 26, 1.0, 6.5, 0.5,0.1,  0.8, 21, 12,340,  1, 0.3,  9,426, 16,0,0]],
+potato:      ['Potato',                [ 97, 2.0,22.0, 1.6,0.1,  0.8, 10, 23,425,  6, 0.3, 20,  0, 15,0,0]],
+sweetpotato: ['Shakarkandi',           [ 86, 1.6,20.0, 3.0,0.1,  0.6, 30, 25,337, 55, 0.3,2.4,709, 11,0,0]],
+arbi:        ['Arbi / colocasia',      [112, 1.5,26.0, 4.1,0.2,  0.6, 43, 33,591, 11, 0.2,4.5,  0, 22,0,0]],
+mooli:       ['Mooli / radish',        [ 16, 0.7, 3.4, 1.6,0.1,  0.3, 25, 10,233, 39, 0.3, 15,  0, 25,0,0]],
+beetroot:    ['Beetroot',              [ 43, 1.6,10.0, 2.8,0.2,  0.8, 16, 23,325, 78, 0.4,4.9,  0,109,0,0]],
+lettuce:     ['Lettuce / salad leaves',[ 15, 1.4, 2.9, 1.3,0.2,  0.9, 36, 13,194, 28, 0.2,9.2,370, 38,0,0]],
+corn:        ['Sweet corn',            [ 86, 3.2,19.0, 2.7,1.2,  0.5,  2, 37,270, 15, 0.5,6.8, 11, 42,0,0]],
+sarsonoil:   ['—',                     [900, 0.0, 0.0, 0.0,100.0,0.0,  0,  0,  0,  0, 0.0,  0,  0,  0,0,0]],
+/* aromatics, herbs, condiments */
+garlic:      ['Garlic',                [149, 6.4,33.0, 2.1,0.5,  1.7,181, 25,401, 17, 1.2, 31,  0,  3,0,0]],
+ginger:      ['Ginger',                [ 80, 1.8,18.0, 2.0,0.8,  0.6, 16, 43,415, 13, 0.3,  5,  0, 11,0,0]],
+chilli:      ['Green chilli',          [ 40, 2.0, 9.0, 1.5,0.2,  1.0, 18, 25,340,  7, 0.3,143, 59, 23,0,0]],
+dhania:      ['Coriander leaves',      [ 23, 2.1, 3.7, 2.8,0.5,  1.8, 67, 26,521, 46, 0.5, 27,337, 62,0,0]],
+pudina:      ['Mint leaves',           [ 44, 3.3, 8.0, 6.8,0.7,  5.1,199, 63,569, 31, 1.1, 32,212,114,0,0]],
+kadipatta:   ['Curry leaves',          [108, 6.0,19.0, 6.4,1.0,  0.9,830, 44,600, 15, 0.2, 40,410, 93,0,0]],
+lemon:       ['Lemon juice',           [ 22, 0.4, 7.0, 0.3,0.2,  0.1,  6,  6,103,  1, 0.05,39,  0, 10,0,0]],
+masala:      ['Everyday masala mix',   [300,12.0,50.0,25.0,10.0,20.0,300,200,1500,50, 3.0, 10,100, 50,0,0]],
+salt:        ['Salt',                  [  0, 0.0, 0.0, 0.0,0.0,  0.0, 24,  1,  8,38758,0.0, 0, 0,  0,0,0]],
+soysauce:    ['Soy sauce',             [ 53, 8.0, 5.0, 0.8,0.6,  1.9, 20, 40,180,5493,0.4,  0,  0, 18,0,0]],
+vinegar:     ['Apple cider vinegar',   [ 21, 0.0, 0.9, 0.0,0.0,  0.2,  7,  5, 73,  5, 0.0,  0,  0,  0,0,0]],
+hummus:      ['Hummus',                [166, 7.9,14.0, 6.0,9.6,  2.4, 38, 71,228,379, 1.6,  0,  0, 83,0,0]],
+jaggery:     ['Gur / jaggery',         [383, 0.4,98.0, 0.0,0.1, 11.0, 80, 70,1050,30, 0.5,  0,  0,  0,0,0]],
+honey:       ['Honey',                 [304, 0.3,82.0, 0.2,0.0,  0.4,  6,  2, 52,  4, 0.2,0.5,  0,  2,0,0]],
+darkchoc:    ['Dark chocolate 85%',    [600,10.0,30.0,12.0,50.0,11.9, 73,228,715, 20, 3.3,  0,  2, 15,0,0]],
+proteinbar:  ['Protein bar',           [380,25.0,40.0, 6.0,12.0, 4.0,150, 80,300,220, 3.0,  0,  0, 30,1.0,0]],
+/* fruit */
+apple:       ['Apple',                 [ 52, 0.3,14.0, 2.4,0.2,  0.1,  6,  5,107,  1, 0.04,4.6, 3,  3,0,0]],
+banana:      ['Banana',                [ 89, 1.1,23.0, 2.6,0.3,  0.3,  5, 27,358,  1, 0.15,8.7, 3, 20,0,0]],
+papaya:      ['Papaya',                [ 43, 0.5,11.0, 1.7,0.3,  0.25,20, 21,182,  8, 0.08, 61,47, 37,0,0]],
+guava:       ['Guava / amrood',        [ 68, 2.6,14.0, 5.4,1.0,  0.3, 18, 22,417,  2, 0.23,228,31, 49,0,0]],
+orange:      ['Orange / mosambi',      [ 47, 0.9,12.0, 2.4,0.1,  0.1, 40, 10,181,  0, 0.07, 53,11, 30,0,0]],
+watermelon:  ['Watermelon',            [ 30, 0.6, 7.6, 0.4,0.15, 0.24, 7, 10,112,  1, 0.1,  8,28,  3,0,0]],
+muskmelon:   ['Muskmelon / kharbooja', [ 34, 0.8, 8.0, 0.9,0.2,  0.2,  9, 12,267, 16, 0.18,37,169,21,0,0]],
+pear:        ['Pear / nashpati',       [ 57, 0.4,15.0, 3.1,0.1,  0.2,  9,  7,116,  1, 0.1,4.3,  1, 7,0,0]],
+kiwi:        ['Kiwi',                  [ 61, 1.1,15.0, 3.0,0.5,  0.3, 34, 17,312,  3, 0.14,93,  4,25,0,0]],
+pomegranate: ['Pomegranate / anaar',   [ 83, 1.7,19.0, 4.0,1.2,  0.3, 10, 12,236,  3, 0.35,10,  0,38,0,0]],
+grapes:      ['Grapes',                [ 69, 0.7,18.0, 0.9,0.2,  0.4, 10,  7,191,  2, 0.07,3.2, 3, 2,0,0]],
+berries:     ['Strawberries / berries',[ 32, 0.7, 7.7, 2.0,0.3,  0.4, 16, 13,153,  1, 0.14,59,  1,24,0,0]],
+mango:       ['Mango',                 [ 60, 0.8,15.0, 1.6,0.4,  0.16,11, 10,168,  1, 0.09,36, 54,43,0,0]],
+chikoo:      ['Chikoo',                [ 83, 0.4,20.0, 5.3,1.1,  0.8, 21, 12,193, 12, 0.1, 15,  3,14,0,0]],
+dates:       ['Khajoor / dates',       [282, 2.5,75.0, 8.0,0.4,  1.0, 39, 43,656,  2, 0.3,  0,  0,19,0,0]],
+raisins:     ['Kishmish / raisins',    [299, 3.1,79.0, 3.7,0.5,  1.9, 50, 32,749, 11, 0.2,2.3,  0, 5,0,0]],
+amla:        ['Amla',                  [ 44, 0.5,10.0, 4.3,0.1,  1.2, 25, 10,200,  5, 0.1,600,  0, 6,0,0]],
+coconutwater:['Coconut water',         [ 19, 0.7, 3.7, 1.1,0.2,  0.3, 24, 25,250,105, 0.1,2.4,  0, 3,0,0]],
+/* drinks / infusions (per 100 ml of the finished drink) */
+water:       ['Water',                 [  0, 0.0, 0.0, 0.0,0.0,  0.0,  2,  1,  1,  2, 0.0,  0,  0, 0,0,0]],
+greentea:    ['Green tea (brewed)',    [  1, 0.0, 0.2, 0.0,0.0,  0.02, 1,  1, 18,  1, 0.01,0.3, 0, 5,0,0]],
+blackcoffee: ['Black coffee (brewed)', [  2, 0.1, 0.3, 0.0,0.0,  0.01, 2,  3, 49,  2, 0.02, 0,  0, 1,0,0]],
+teainfusion: ['Herbal infusion',       [  1, 0.0, 0.2, 0.0,0.0,  0.02, 2,  2, 20,  1, 0.01,0.5, 0, 3,0,0]],
+jeera:       ['Jeera / cumin seeds',   [375,18.0,44.0,10.5,22.0,66.4,931,366,1788,168,4.8, 7.7,64,10,0,0]],
+methiseed:   ['Methi seeds',           [323,23.0,58.0,25.0,6.4, 33.5,176,191,770, 67, 2.5,  3,  1,57,0,0]],
+saunf:       ['Saunf / fennel seeds',  [345,15.8,52.0,39.8,14.9,18.5,1196,385,1694,88,3.7, 21, 7, 0,0,0]],
+ajwain:      ['Ajwain',                [305,16.0,43.0,39.0,25.0,31.0,1525,300,1400,10,5.0, 21, 0, 0,0,0]],
+dhaniaseed:  ['Coriander seeds',       [298,12.4,55.0,41.9,17.8,16.3,709,330,1267,35,4.7, 21, 0, 0,0,0]],
+haldi:       ['Haldi / turmeric',      [312, 9.7,67.0,22.7,3.2, 55.0,168,208,2080,27,4.5,0.7, 0,20,0,0]],
+cinnamon:    ['Dalchini / cinnamon',   [247, 4.0,81.0,53.1,1.2,  8.3,1002,60,431, 10,1.8,3.8,15, 6,0,0]],
+elaichi:     ['Elaichi / cardamom',    [311,10.8,68.0,28.0,6.7, 14.0,383,229,1119,18,7.5, 21, 0, 0,0,0]],
+tulsi:       ['Tulsi leaves',          [ 23, 3.2, 2.7, 1.6,0.6,  3.2,177, 64,295,  4, 0.8,18,264,68,0,0]],
+sabja:       ['Sabja / basil seeds',   [442,20.0,42.0,40.0,25.0,7.7,1500,300,500, 20,4.0,  0,  0,40,0,0]],
+isabgol:     ['Isabgol husk',          [200, 2.0,88.0,80.0,0.5,  1.0, 60, 30,300, 30,0.5,  0,  0, 0,0,0]],
+triphala:    ['Triphala powder',       [280, 5.0,60.0,30.0,1.0,  6.0,150, 80,400, 20,1.0, 80,  0, 0,0,0]],
+aloevera:    ['Aloe vera juice',       [  8, 0.0, 1.7, 0.4,0.1,  0.1, 10,  4, 40,  8,0.05, 4,  0, 0,0,0]],
+kalanamak:   ['Kala namak',            [  0, 0.0, 0.0, 0.0,0.0,  0.0, 20,  1,  8,36000,0.0,0, 0,  0,0,0]],
+pepper:      ['Black pepper',          [251,10.4,64.0,25.3,3.3,  9.7,443,171,1329,20,1.2, 21,15,10,0,0]]
+};
+
+/* ---------- 4. TARGETS (ICMR-NIN 2020 style, adult Indian woman) ---------- */
+const NUTS = [
+  {k:'protein', n:'Protein',   u:'g',  t:112,  i:1},
+  {k:'carb',    n:'Carbs',     u:'g',  t:160,  i:2},
+  {k:'fat',     n:'Fat',       u:'g',  t:45,   i:4},
+  {k:'fibre',   n:'Fibre',     u:'g',  t:30,   i:3}
+];
+const MICROS = [
+  {k:'iron',      n:'Iron',        u:'mg',  t:29,   i:5,  w:'Low iron = the 4 PM crash. Pair with lemon/amla.'},
+  {k:'calcium',   n:'Calcium',     u:'mg',  t:1000, i:6,  w:'Curd, paneer, ragi, til.'},
+  {k:'magnesium', n:'Magnesium',   u:'mg',  t:370,  i:7,  w:'Helps sleep quality — important on 5–6 h nights.'},
+  {k:'potassium', n:'Potassium',   u:'mg',  t:3500, i:8,  w:'Balances sodium, reduces bloating.'},
+  {k:'sodium',    n:'Sodium',      u:'mg',  t:2000, i:9,  w:'This one is a CEILING, not a goal.', cap:true},
+  {k:'zinc',      n:'Zinc',        u:'mg',  t:13.2, i:10, w:'Skin, hair, immunity.'},
+  {k:'vitc',      n:'Vitamin C',   u:'mg',  t:65,   i:11, w:'Doubles iron absorption from dal.'},
+  {k:'vita',      n:'Vitamin A',   u:'mcg', t:840,  i:12, w:'Carrot, palak, kaddu, papaya.'},
+  {k:'folate',    n:'Folate',      u:'mcg', t:220,  i:13, w:'Dals and greens have you covered.'},
+  {k:'b12',       n:'Vitamin B12', u:'mcg', t:2.2,  i:14, w:'Veg diets run low — dairy daily, supplement if tested low.'},
+  {k:'vitd',      n:'Vitamin D',   u:'mcg', t:15,   i:15, sun:true, w:'No vegetarian diet delivers this. 15 min of sun + a tested supplement.'}
+];
+
+/* ---------- 5. MEAL LIBRARY ----------
+   [ name , ingredients , recipe steps (;; separated) , tags , prep minutes ]
+   Ingredients: "key:grams" joined by "|".  The key marked with * is the
+   "flex" staple — the build script fine-tunes only that amount so every
+   option in a slot lands inside the same calorie band.
+   Tags: ghar = everyday North-Indian household food · quick = 10 min or less
+         tiffin = survives the 1-hour drive · nocook = zero cooking
+   ------------------------------------------------------------------- */
+const RAW = {
+
+/* ============ 6:15 AM — MORNING DRINK (5–35 kcal) ============ */
+wakeup:[
+['Warm Lemon Water','water*:250|lemon:10','Boil and cool water to sipping temperature.;;Squeeze in half a lemon and drink before anything else.','quick nocook',2],
+['Jeera Water','water*:250|jeera:3','Boil water with cumin seeds for 3 minutes.;;Strain into a glass and sip warm.','ghar quick',5],
+['Methi Seed Water','water*:250|methiseed:4','Soak fenugreek seeds in a glass of water overnight.;;Strain in the morning and drink; chew the seeds if you can.','ghar nocook',1],
+['Ajwain Water','water*:250|ajwain:2','Boil water with carom seeds for 2 minutes.;;Strain and sip warm — good on a bloated morning.','ghar quick',4],
+['Saunf (Fennel) Water','water*:250|saunf:3','Soak fennel seeds overnight or boil 3 minutes.;;Strain and drink warm or at room temperature.','ghar quick',4],
+['Dhania Seed Water','water*:250|dhaniaseed:3','Boil coriander seeds in water for 3 minutes.;;Strain, cool slightly and sip.','ghar quick',5],
+['Cinnamon Water','water*:250|cinnamon:2','Boil water with a small piece of Ceylon dalchini.;;Steep 5 minutes, strain and drink warm.','quick',6],
+['Haldi–Pepper Water','water*:250|haldi:2|pepper:0.3','Warm water with a pinch of turmeric and black pepper.;;Stir well and drink immediately — pepper makes the curcumin usable.','ghar quick',3],
+['Tulsi–Ginger Kadha','water*:250|tulsi:3|ginger:3','Boil crushed ginger and tulsi leaves in water for 4 minutes.;;Strain and sip hot.','ghar quick',6],
+['Green Tea','greentea*:250','Heat water to about 80°C — not a rolling boil.;;Steep the green tea for 2–3 minutes and remove the leaves so it does not turn bitter.','quick',4],
+['Green Tea with Lemon','greentea*:250|lemon:8','Brew green tea for 2–3 minutes at 80°C.;;Add lemon juice after removing the leaves.','quick',4],
+['Black Coffee','blackcoffee*:200','Brew a cup of black coffee, no sugar, no milk.;;Best 30–45 minutes before your workout on gym days.','quick',3],
+['Black Coffee with Cinnamon','blackcoffee*:200|cinnamon:1','Brew black coffee and stir in a pinch of cinnamon.;;Sip slowly; it takes the edge off the bitterness without sugar.','quick',3],
+['Amla Juice Shot','water*:200|amla:30','Blend fresh amla with a little water, or use 30 ml pure amla juice.;;Dilute in warm water and drink — a huge vitamin C hit that helps iron absorption all day.','ghar nocook',3],
+['Apple Cider Vinegar Water','water*:250|vinegar:15','Add 1 tbsp ACV (with the mother) to a glass of warm water.;;Drink through a straw to protect your teeth, then rinse your mouth.','quick nocook',2],
+['Aloe Vera Water','water*:200|aloevera:30','Stir 2 tbsp aloe vera juice into warm water.;;Drink on an empty stomach.','nocook',2],
+['Chia Seed Water','water*:250|chia:5','Soak 1 tsp chia in water for 20 minutes until gel-like.;;Stir and drink — the fibre keeps you full till breakfast.','quick nocook',20],
+['Sabja Seed Water','water*:250|sabja:5','Soak basil seeds 15 minutes until they bloom.;;Stir well and drink; very cooling in Chandigarh summers.','quick nocook',15],
+['Isabgol Water','water*:250|isabgol:5','Stir 1 tsp isabgol husk into a glass of water.;;Drink immediately before it thickens, then follow with more water.','quick nocook',1],
+['Triphala Water','water*:200|triphala:3','Stir 1 tsp triphala powder into warm water.;;Drink and follow with plain water — takes a week to get used to the taste.','nocook',2],
+['Elaichi Water','water*:250|elaichi:2','Crush 2 green cardamoms and boil in water 3 minutes.;;Strain and sip warm.','ghar quick',5],
+['Mint–Lemon Water','water*:250|pudina:5|lemon:8','Crush a few mint leaves into warm water.;;Add lemon juice, rest 2 minutes and drink.','quick nocook',3],
+['Two Glasses Plain Warm Water','water*:500','Fill 2 glasses of warm water the night before if mornings are rushed.;;Drink both within 10 minutes of waking — this alone fixes half the morning sluggishness.','quick nocook',1],
+['Ginger–Lemon–Honey Water','water*:250|ginger:3|lemon:8|honey:5','Boil crushed ginger in water for 3 minutes and cool slightly.;;Add lemon and honey only once it stops steaming, so the honey is not overheated.','ghar quick',6],
+['Triple-Seed Digestive Water','water*:250|jeera:2|ajwain:1|saunf:1','Boil jeera, ajwain and saunf together for 3 minutes.;;Strain and sip warm — the classic Punjabi fix for a heavy previous night.','ghar quick',5],
+['Coriander–Mint Detox Water','water*:250|dhania:5|pudina:5|lemon:5','Blend coriander and mint leaves with water and strain.;;Add lemon and drink fresh.','quick nocook',5],
+['Lauki Juice Shot','lauki*:120|water:100|pudina:3','Peel and blend fresh bottle gourd with mint and water.;;Strain and drink immediately — taste a drop first; discard if bitter at all.','ghar nocook',6],
+['Cucumber–Mint Cooler','cucumber*:110|water:150|pudina:4','Blend cucumber with mint and water.;;Strain lightly and drink chilled.','quick nocook',5],
+['Amla–Haldi Shot','water*:200|amla:25|haldi:1','Blend amla with turmeric and a little water.;;Dilute and drink in one go, then rinse your mouth.','nocook',4],
+['Tulsi–Elaichi Tea','teainfusion*:250|tulsi:2|elaichi:1','Boil water with tulsi leaves and a crushed cardamom.;;Steep 4 minutes and strain.','ghar quick',6],
+['Fennel–Mint Tea','teainfusion*:250|saunf:2|pudina:3','Boil fennel seeds, drop in mint leaves and turn off the heat.;;Cover, steep 5 minutes and strain.','quick',6],
+['Ginger–Haldi Kadha','water*:250|ginger:4|haldi:2|pepper:0.3','Boil grated ginger, turmeric and pepper in water for 5 minutes.;;Strain and sip hot — perfect on a cold Chandigarh morning.','ghar',7],
+['Cinnamon–Methi Water','water*:250|cinnamon:1|methiseed:3','Soak methi seeds overnight with a small piece of cinnamon.;;Strain and drink warm in the morning.','nocook',1],
+['Lemon–Chia Cooler','water*:250|lemon:10|chia:4','Soak chia 20 minutes, then add lemon juice.;;Stir and drink; keeps you full through the commute.','quick nocook',20],
+['Flax Water','water*:250|flax:4','Stir 1 tsp coarsely ground flax into warm water.;;Drink right away — good for omega-3 and regularity.','quick nocook',2],
+['Green Tea with Tulsi','greentea*:250|tulsi:2','Brew green tea at 80°C with 3–4 tulsi leaves.;;Steep 3 minutes and strain.','quick',5],
+['Amla–Lemon Water','water*:250|amla:20|lemon:5','Blend amla with water, strain into a glass.;;Add lemon and drink — vitamin C twice over.','nocook',4],
+['Immunity Kadha','water*:250|tulsi:2|ginger:3|haldi:1|elaichi:0.5|pepper:0.2','Boil all ingredients together for 5–6 minutes.;;Strain and sip hot; excellent in the winter months.','ghar',8],
+['Kala Namak Lemon Water','water*:250|kalanamak:1|lemon:8','Warm water with a pinch of black salt.;;Add lemon juice, stir and drink.','ghar quick nocook',2],
+['Beetroot–Amla Shot','beetroot*:45|amla:15|water:150','Blend raw beetroot and amla with water.;;Strain well and drink — natural nitrates before a workout day.','nocook',6],
+['Lauki–Pudina Juice','lauki*:90|pudina:3|water:150|kalanamak:1','Blend peeled lauki with mint, water and black salt.;;Strain and drink fresh; never store it.','ghar nocook',6],
+['Sabja–Lemon Water','water*:250|sabja:4|lemon:8','Soak basil seeds 15 minutes.;;Add lemon juice, stir and drink.','quick nocook',15],
+['Jeera–Haldi Water','water*:250|jeera:2|haldi:1','Boil cumin and turmeric in water for 3 minutes.;;Strain and sip warm.','ghar quick',5],
+['Dhania–Saunf Cooler','water*:250|dhaniaseed:2|saunf:2','Soak coriander and fennel seeds overnight.;;Strain and drink at room temperature.','ghar nocook',1],
+['Green Tea with Ginger','greentea*:250|ginger:3','Boil water with crushed ginger, cool 1 minute, add green tea.;;Steep 3 minutes and strain.','quick',6],
+['Amla–Ginger Juice','water*:200|amla:25|ginger:2','Blend amla and ginger with water.;;Strain and drink; sharp but excellent for digestion.','nocook',5],
+['Ajwain–Saunf Digestive','water*:250|ajwain:1.5|saunf:2','Boil ajwain and saunf together for 3 minutes.;;Strain and sip slowly.','ghar quick',5],
+['Isabgol–Lemon Water','water*:250|isabgol:4|lemon:8','Stir isabgol and lemon juice into water.;;Drink immediately and follow with a plain glass of water.','quick nocook',1],
+['Cucumber–Amla Detox','cucumber*:90|amla:15|water:150|pudina:3','Blend cucumber, amla and mint with water.;;Strain and drink chilled.','nocook',6],
+['Warm Water with Ghee (Ayurvedic)','water*:250|ghee:1','Stir 1/4 tsp ghee into a glass of warm water.;;Drink on an empty stomach — traditional remedy for dry mornings and stiff joints.','ghar quick',2]
+],
+
+/* ============ 7:45 AM — BREAKFAST (~350 kcal) ============ */
+breakfast:[
+['Moong Dal Chilla with Paneer','moongdal*:50|paneerlf:40|palak:30|onion:20|chilli:3|oil:4|masala:2|salt:1|curd:80','Soak moong dal 3 hours, grind with green chilli and ginger to a pouring batter.;;Spread thin on a hot non-stick tawa with 1/2 tsp oil.;;Scatter crumbled paneer and chopped palak, fold over and cook 2 minutes per side.;;Serve with a small bowl of curd.','ghar hp',20],
+['Besan Chilla with Curd','besan*:60|onion:25|tomato:30|dhania:5|oil:4|masala:2|salt:1|curd:100','Whisk besan with water, salt, ajwain and masala into a thin batter — rest 10 minutes.;;Stir in chopped onion, tomato and coriander.;;Cook two thin chillas on a tawa with 1/2 tsp oil each.;;Eat hot with curd.','ghar quick',15],
+['Poha with Peanuts','poha*:60|peanut:12|onion:25|peas:20|carrot:20|oil:4|kadipatta:1|lemon:5|salt:1|haldi:0.5','Rinse poha in a colander until just soft, never soaking — drain fully.;;Temper mustard seeds, curry leaves and peanuts in oil, add onion, peas and carrot.;;Add haldi, salt and the drained poha; toss gently on low heat 3 minutes.;;Finish with lemon juice.','ghar quick',15],
+['Vegetable Upma','suji*:63|onion:25|carrot:25|beans:25|peas:20|oil:4|kadipatta:1|salt:1|curd:80','Dry-roast suji until it smells nutty; keep aside.;;Temper mustard seeds and curry leaves, sauté onion and the vegetables 3 minutes.;;Add 2.5 times water, salt, bring to boil, then rain in the suji while stirring.;;Cover 3 minutes. Serve with curd.','ghar quick',18],
+['Overnight Oats with Apple','oats*:51|milk:150|chia:6|apple:60|cinnamon:1','Mix oats, chia, milk and cinnamon in a jar.;;Refrigerate overnight.;;Top with grated apple in the morning — zero effort on a rushed day.','quick nocook tiffin',5],
+['Masala Oats with Paneer','oats*:59|onion:20|tomato:30|peas:25|carrot:20|oil:3|masala:2|paneerlf:25','Sauté onion, tomato, peas and carrot in oil with masala.;;Add oats and 1.5 cups water; simmer 4 minutes until thick.;;Stir in crumbled paneer at the end so it stays soft.','quick hp',12],
+['Paneer Bhurji with Roti','paneerlf*:101|onion:25|tomato:35|capsicum:25|oil:4|masala:2|atta:30|dhania:5','Sauté onion until soft, add tomato and capsicum, cook till the tomato collapses.;;Add masala, then crumbled paneer; toss just 2 minutes — overcooking makes it rubbery.;;Serve with one hot phulka.','ghar hp',15],
+['Tofu Bhurji on Toast','tofu*:117|onion:25|tomato:30|capsicum:20|oil:3|brownbread:50|masala:2|haldi:0.5','Crumble tofu and squeeze out excess water in a cloth.;;Sauté onion, tomato, capsicum with haldi and masala, add tofu, cook 3 minutes.;;Pile onto toasted multigrain bread.','quick hp',12],
+['Sattu Paratha with Curd','atta*:40|sattu:25|onion:20|dhania:5|oil:4|curd:100|salt:1|ajwain:0.5','Mix sattu with chopped onion, coriander, ajwain, salt and a few drops of water.;;Stuff into a rolled atta ball and roll out gently.;;Cook on a tawa with 1/2 tsp oil until both sides are spotted.;;Serve with curd.','ghar hp',20],
+['Methi Thepla with Curd','atta*:54|methileaves:30|besan:10|oil:5|curd:100|masala:2|salt:1','Knead atta and besan with chopped methi, masala, salt and 1 tsp curd.;;Roll thin theplas and cook with a few drops of oil each side.;;They stay soft for hours — good for the tiffin too.','ghar tiffin',20],
+['Palak Paneer Paratha','atta*:57|palak:50|paneerlf:25|oil:5|curd:80|masala:2|salt:1','Blanch and chop palak, mix with grated paneer and masala.;;Stuff into the dough, roll carefully, cook on a tawa with minimal oil.;;Serve with curd.','ghar hp',22],
+['Mooli Paratha with Curd','atta*:67|mooli:60|oil:5|curd:100|dhania:5|masala:2|salt:1','Grate mooli, salt it, rest 10 minutes and squeeze out all the water — this is the whole trick.;;Mix with coriander and masala, stuff, roll and cook with minimal oil.;;Serve with curd.','ghar',22],
+['Gobhi Paratha with Curd','atta*:65|gobhi:60|oil:5|curd:100|masala:2|dhania:5|salt:1','Grate cauliflower fine, mix with masala and coriander (do not salt until just before stuffing).;;Stuff, roll gently and cook on a hot tawa with a few drops of oil.;;Serve with curd.','ghar',22],
+['Idli with Sambar','idlibatter*:181|toordal:20|lauki:40|tomato:25|oil:3|masala:3|kadipatta:1','Steam idlis in a greased stand for 10–12 minutes.;;Pressure-cook toor dal with lauki and tomato, mash and add sambar masala and tamarind water.;;Temper with mustard seeds and curry leaves; pour over the idlis.','quick',25],
+['Plain Dosa with Sambar','dosabatter*:168|toordal:18|carrot:30|tomato:25|oil:4|masala:3|kadipatta:1','Spread the batter thin on a very hot tawa; drizzle 1/2 tsp oil around the edges.;;Cook until crisp and fold — no need to flip a thin dosa.;;Serve with vegetable sambar.','quick',20],
+['Ragi Dosa with Coconut Chutney','ragi*:57|dosabatter:60|coconut:12|dhania:8|oil:4|chilli:3|salt:1','Mix ragi flour into the dosa batter with water to a pouring consistency.;;Cook thin dosas with a few drops of oil.;;Blend coconut, coriander and green chilli with a splash of water for chutney.','',18],
+['Moong Dal Cheela Wrap','moongdal*:65|paneerlf:35|capsicum:25|onion:20|oil:4|pudina:5|dhania:5|masala:2','Grind soaked moong dal into a batter and spread one large thin cheela.;;Spread mint-coriander chutney, add paneer, capsicum and onion.;;Roll tight and wrap in foil — travels beautifully.','hp tiffin',20],
+['Quinoa Upma','quinoa*:70|onion:20|carrot:25|peas:25|beans:20|oil:4|lemon:5|kadipatta:1|salt:1','Rinse quinoa well and cook in 1:2 water until the germ pops out; fluff and cool.;;Temper mustard seeds and curry leaves, sauté onion and vegetables.;;Fold in quinoa, salt and lemon juice.','tiffin',20],
+['Vermicelli Upma','semiya*:65|carrot:25|peas:20|beans:20|onion:20|oil:4|peanut:8|kadipatta:1|salt:1','Dry-roast the vermicelli until light golden.;;Temper mustard seeds, curry leaves and peanuts; sauté onion and vegetables.;;Add 1.5 cups water and salt, boil, add vermicelli, cover 4 minutes.','ghar quick',16],
+['Namkeen Dalia','dalia*:70|carrot:25|peas:25|beans:20|onion:20|oil:6.5|masala:2|salt:1','Dry-roast dalia 2 minutes.;;Sauté onion and vegetables with masala in a pressure cooker.;;Add dalia, salt and 3 times water; cook 2 whistles.','ghar tiffin',20],
+['Sweet Milk Dalia','dalia*:58|skimmilk:200|jaggery:8|almond:8|elaichi:0.5','Roast dalia lightly, then simmer in milk with cardamom until soft, about 12 minutes.;;Turn off the heat, stir in grated jaggery (never boil jaggery in milk).;;Top with slivered almonds.','ghar',18],
+['Ragi Porridge','ragi*:63|skimmilk:200|jaggery:6|almond:8|elaichi:0.5','Mix ragi flour with a little cold water into a lump-free slurry.;;Add to simmering milk, stirring constantly for 5–6 minutes until glossy.;;Sweeten off the heat with jaggery, top with almonds.','',15],
+['Whey Banana Smoothie','whey*:35|banana:97|skimmilk:150|pb:8|chia:4','Blend everything with 3–4 ice cubes until smooth.;;Drink within 10 minutes. Fastest 350 kcal breakfast on this list.','quick hp',4],
+['Paneer Mint Sandwich','brownbread*:70|paneerlf:90|pudina:6|dhania:6|cucumber:30|tomato:25|kalanamak:1','Blend mint, coriander, a little lemon and black salt into a thick chutney.;;Mash paneer into the chutney.;;Spread between two slices with cucumber and tomato; grill or eat cold.','quick hp tiffin',10],
+['Chana Chaat Bowl','kabuli*:70|onion:40|tomato:78|cucumber:260|lemon:6|dhania:5|masala:2|kalanamak:1','Soak chickpeas overnight and pressure-cook with salt for 4 whistles (or use Sunday-prepped ones).;;Toss with chopped onion, tomato, cucumber, lemon and chaat masala.;;Keep the chana ready in the fridge on weekends — this becomes a 3-minute breakfast.','hp tiffin nocook',6],
+['Sprouts Poha','poha*:70|sprouts:60|onion:20|peas:15|oil:7|lemon:5|masala:2|haldi:0.5','Rinse and drain the poha.;;Temper, sauté onion, peas and moong sprouts 3 minutes.;;Fold in poha, haldi and salt, cover 2 minutes, finish with lemon.','ghar quick hp',14],
+['Sprouts & Paneer Protein Bowl','sprouts*:200|paneerlf:120|cucumber:50|tomato:40|lemon:6|oliveoil:4|masala:2|dhania:5','Steam the sprouts 4 minutes so they are easier on the stomach.;;Toss warm with paneer cubes, cucumber, tomato, lemon, olive oil and chaat masala.;;Eat straight away or pack it — it holds well.','hp tiffin quick',10],
+['Besan Dhokla','besan*:70|curd:40|oil:3|til:3|kadipatta:1|chilli:3|salt:1|dhania:5','Whisk besan, curd, salt and water into a smooth batter; rest 15 minutes.;;Add fruit salt, pour into a greased tin and steam 12 minutes.;;Temper mustard seeds, til, curry leaves and chilli in oil and pour over; garnish with coriander.','tiffin',30],
+['Multigrain Toast with PB & Banana','brownbread*:70|pb:20|banana:60','Toast the bread.;;Spread peanut butter and layer banana slices.;;Sprinkle cinnamon if you like. Done in 4 minutes.','quick',5],
+['Muesli Bowl with Curd & Berries','oats*:50|hungcurd:100|berries:50|almond:8|chia:4|honey:4','Dry-roast the oats with the almonds until fragrant, then cool.;;Layer with hung curd, berries, chia and a drizzle of honey.;;Assemble the night before if the morning is tight.','quick nocook hp',8],
+['Soya Kheema Pav','soya*:40|pav:50|onion:25|tomato:30|peas:20|oil:4|masala:3|dhania:5','Soak soya granules in hot water 10 minutes, then squeeze completely dry.;;Sauté onion, tomato, peas with masala, add the granules and cook dry 5 minutes.;;Toast the pav lightly and serve alongside.','hp',18],
+['Aloo–Palak Paratha','atta*:59|potato:50|palak:40|oil:4|curd:80|masala:2|salt:1','Boil and mash the potato with finely chopped blanched palak and masala.;;Stuff, roll and cook on a tawa with minimal oil.;;Serve with curd — the palak keeps it from being just carbs.','ghar',22],
+['Rava Idli with Chutney','suji*:70|curd:40|carrot:20|coconut:8|dhania:6|oil:3|til:2|kadipatta:1','Mix roasted suji with curd, grated carrot and salt; rest 15 minutes.;;Add fruit salt and steam in idli moulds 12 minutes.;;Blend coconut, coriander and chilli for chutney.','',30],
+['Vegetable Uttapam','dosabatter*:200|onion:25|tomato:25|capsicum:20|oil:6.5|dhania:5','Pour a thick round of batter on a medium tawa — do not spread thin.;;Press chopped onion, tomato, capsicum and coriander on top.;;Drizzle oil around the edge, cover and cook 3 minutes, then flip for 1 minute.','ghar',15],
+['Paneer Paratha','atta*:50|paneerlf:50|dhania:5|oil:5|curd:60|masala:2|chilli:2','Mash paneer with coriander, green chilli and masala — salt it only at the last moment.;;Stuff into the dough and roll gently so it does not tear.;;Cook on a hot tawa with 1 tsp oil total.','ghar hp',20],
+['Tofu Scramble Bowl','tofu*:130|mushroom:40|capsicum:25|onion:20|oliveoil:4|masala:2|brownbread:38|haldi:0.5','Crumble and drain tofu well.;;Sauté onion, mushroom and capsicum on high heat, add haldi, masala and tofu.;;Cook 3 minutes and serve with a slice of toast.','quick hp',12],
+['Chia Pudding with Mango','chia*:15|skimmilk:250|mango:208|almond:6|honey:5','Whisk chia into milk with honey and refrigerate overnight.;;Stir once after 20 minutes so it does not clump at the bottom.;;Top with mango cubes and almonds in the morning.','nocook tiffin',5],
+['Besan Toast','brownbread*:66|besan:25|onion:20|dhania:5|oil:4|masala:2|curd:60','Make a thick besan batter with onion, coriander, masala and salt.;;Dip bread slices, coat both sides and pan-fry on low with a few drops of oil.;;Serve with curd instead of ketchup.','ghar quick',12],
+['Masala Poha with Curd','poha*:70|onion:20|tomato:25|oil:3|curd:100|lemon:5|masala:2|haldi:0.5','Rinse and drain poha.;;Sauté onion and tomato, add haldi and masala, fold in the poha.;;Serve with a bowl of curd — the protein makes it hold till lunch.','ghar quick',12],
+['Makki Roti with Sarson Saag','cornflour*:70|sarson:80|palak:40|ghee:4|onion:20|masala:2|salt:1','Pressure-cook sarson and palak, then blend coarsely and simmer to thicken.;;Temper with onion and masala; finish with 1 tsp ghee.;;Pat out a makki roti with wet palms and cook on a hot tawa.','ghar',30],
+['Ragi Idli with Sambar','ragi*:40|idlibatter:100|toordal:15|lauki:30|oil:3|masala:2|kadipatta:1','Stir ragi flour into the idli batter and steam 12 minutes.;;Make a quick sambar with toor dal, lauki and sambar masala.;;Temper and serve hot.','',25],
+['Oats Chilla','oats*:50|besan:15|onion:20|tomato:25|capsicum:20|oil:4|curd:60|masala:2','Grind oats coarsely and mix with besan, masala, salt and water into a batter.;;Stir in the chopped vegetables and rest 10 minutes.;;Cook 2 chillas with a few drops of oil; serve with curd.','quick',15],
+['Pesarattu (Sprout Dosa)','moongwhole*:70|onion:25|chilli:3|ginger:3|oil:7.5|dhania:5|curd:60','Soak whole moong overnight and grind with ginger and chilli into a dosa batter.;;Spread on a hot tawa, press chopped onion on top.;;Cook until crisp with a few drops of oil; serve with curd.','hp',20],
+['Fruit & Nut Curd Bowl','hungcurd*:220|apple:120|papaya:60|walnut:15|chia:4|honey:4','Whisk hung curd smooth.;;Fold in chopped apple, papaya, walnuts and chia.;;Drizzle a little honey. No cooking, no gas, no excuses.','nocook quick hp',6],
+['Kala Chana Sundal','kalachana*:70|coconut:15.5|kadipatta:1|oil:3|lemon:5|masala:2|onion:20','Pressure-cook soaked kala chana for 5 whistles and drain.;;Temper mustard seeds and curry leaves, add onion and the chana.;;Toss with grated coconut, lemon and a pinch of masala.','hp tiffin',15],
+['Bajra Roti with Curd & Gur','bajra*:67|curd:100|jaggery:8|ghee:3','Knead bajra flour with hot water and pat out a roti with your palms.;;Cook on a hot tawa, pressing lightly; smear 1/2 tsp ghee.;;Eat with curd and a small piece of gur — an old Punjabi winter breakfast.','ghar',18],
+['Jowar Upma','jowar*:70|onion:20|carrot:25|peas:20|oil:4|kadipatta:1|peanut:6|salt:1','Dry-roast jowar flour or use cooked jowar grains.;;Temper mustard, curry leaves, peanuts; sauté onion and vegetables.;;Add water, salt and the jowar; cook covered 5 minutes.','',18],
+['Peanut Butter Oats','oats*:46|skimmilk:180|pb:12|banana:40|cinnamon:1','Simmer oats in milk 4 minutes with cinnamon.;;Stir in peanut butter off the heat.;;Top with banana slices.','quick',8],
+['Hummus Veg Sandwich','brownbread*:70|hummus:70|cucumber:104|tomato:78|lettuce:20|capsicum:52|pepper:0.3','Spread hummus thickly on both slices.;;Layer cucumber, tomato, lettuce and capsicum; season with pepper.;;Wrap in butter paper for the drive.','quick nocook tiffin',7],
+['Paneer-Stuffed Besan Chilla','besan*:49|paneerlf:40|onion:20|dhania:5|oil:4|curd:60|masala:2','Make a thin besan batter and pour onto a hot tawa.;;Scatter crumbled paneer, onion and coriander on one half, fold over.;;Cook 2 minutes each side and serve with curd.','ghar hp',15]
+],
+
+/* ============ 11:30 AM — DESK SNACK (~145 kcal) ============ */
+midmorning:[
+['Roasted Makhana','makhana*:36|ghee:2|masala:1','Dry-roast makhana on low heat 6–7 minutes until crisp — they should snap, not bend.;;Toss with 1/2 tsp ghee and chaat masala.;;Make a week"s batch on Sunday and keep in an airtight jar at your desk.','ghar quick tiffin',10],
+['Papaya Bowl','papaya*:335|lemon:5','Cube ripe papaya and squeeze lemon over it.;;Carry in a steel box — the best thing you can do for morning digestion.','nocook quick tiffin',4],
+['Chaas with Roasted Chana','buttermilk*:250|roastchana:22|jeera:1|kalanamak:1|pudina:3','Whisk curd with 3 times water, roasted jeera powder, black salt and crushed mint.;;Sip alongside a small katori of roasted chana.','ghar quick nocook',5],
+['Roasted Chana','roastchana*:38|masala:1','Keep a jar of bhuna chana in your desk drawer.;;Toss a handful with a pinch of chaat masala. Fibre and protein for under 150 kcal.','ghar nocook quick tiffin',1],
+['Apple with Almonds','apple*:141|almond:12','Slice one apple.;;Eat with 10 soaked, peeled almonds — soak them overnight for easier digestion.','nocook quick tiffin',3],
+['Guava with Kala Namak','guava*:200|kalanamak:1','Cut guava into wedges and sprinkle black salt.;;More vitamin C than an orange and more fibre than most fruit.','ghar nocook quick tiffin',3],
+['Soaked Almonds & Walnuts','almond*:15|walnut:8','Soak almonds overnight, peel in the morning.;;Eat with 2 walnut halves — good fats for hormones and hair.','nocook quick tiffin',2],
+['Watermelon Bowl','watermelon*:420|pumpkinseed:4|pudina:3','Cube chilled watermelon and toss with torn mint and a few pumpkin seeds.;;Huge volume, very few calories — perfect for a Chandigarh summer morning.','nocook quick',4],
+['Orange with Peanuts','orange*:150|peanut:12','Peel an orange.;;Pair with a small handful of roasted peanuts so the sugar does not spike alone.','nocook quick tiffin',3],
+['Cucumber–Carrot Sticks with Hummus','cucumber*:260|carrot:60|hummus:45','Cut cucumber and carrot into batons the night before and refrigerate in water.;;Carry hummus in a small box and dip.','nocook quick tiffin',6],
+['Sprouts Chaat','sprouts*:180|peanut:12|lemon:5|masala:2|onion:20|tomato:25','Steam sprouts 4 minutes and cool.;;Toss with onion, tomato, peanuts, lemon and chaat masala.','hp tiffin quick',8],
+['Boiled Peanuts','peanut*:25|salt:1|kalanamak:1','Boil raw peanuts with salt for 15 minutes (or pressure-cook 2 whistles).;;Eat warm — far more filling than the roasted version.','ghar tiffin',18],
+['Murmura Chaat','murmura*:26|peanut:6|onion:15|tomato:20|lemon:4|masala:1|dhania:4','Dry-roast murmura for crispness.;;Just before eating, toss with chopped onion, tomato, peanuts, lemon and masala.;;Carry the wet and dry parts separately so it does not go soggy.','ghar quick nocook',6],
+['Kiwi with Pumpkin Seeds','kiwi*:150|pumpkinseed:8','Peel and slice two kiwis.;;Sprinkle pumpkin seeds — magnesium for better sleep tonight.','nocook quick',3],
+['Pear with Walnuts','pear*:150|walnut:8','Slice a nashpati.;;Eat with 2–3 walnut halves.','nocook quick tiffin',3],
+['Grapes with Cheese Cube','grapes*:141|cheese:15','Wash a small bowl of grapes.;;Eat with one cheese cube for protein and calcium.','nocook quick',2],
+['Papaya with Chia','papaya*:247|chia:8','Soak chia in 3 tbsp water for 15 minutes.;;Stir into cubed papaya. Keeps you full right up to lunch.','nocook quick tiffin',5],
+['Banana with Peanut Butter','banana*:80|pb:12','Slice a banana and spread peanut butter on the pieces.;;A good option on gym-evening days.','nocook quick',3],
+['Curd with Flax','curd*:170|flax:8|kalanamak:1','Whisk curd smooth with black salt.;;Stir in coarsely ground flax seeds.','ghar nocook quick',3],
+['Hung Curd with Berries','hungcurd*:189|berries:60|honey:4','Hang curd in a muslin cloth for 2 hours (or use Greek yoghurt).;;Top with berries and a small drizzle of honey.','nocook hp quick',5],
+['Chaas with Khakhra','buttermilk*:285|khakhra:22','Whisk thin buttermilk with jeera and black salt.;;Eat with one plain khakhra.','ghar quick nocook tiffin',4],
+['Coconut Water with Almonds','coconutwater*:300|almond:14.5','Drink fresh coconut water.;;Eat 10 almonds alongside — electrolytes plus fat so it is not just sugar.','nocook quick',2],
+['Pomegranate Bowl','pomegranate*:174|lemon:3|kalanamak:1','Deseed one anaar (do it the night before).;;Sprinkle black salt and lemon.','nocook quick tiffin',5],
+['Muskmelon Bowl','muskmelon*:400','Cube chilled kharbooja.;;Very high water content — great on days you know you will not drink enough.','nocook quick',4],
+['Chana–Murmura Mix','roastchana*:14|murmura:15|peanut:6|masala:1','Mix roasted chana, murmura and peanuts in a jar.;;Add masala and shake. A desk-drawer staple.','ghar nocook quick tiffin',3],
+['Sweet Potato Chaat','sweetpotato*:159|lemon:5|masala:2|dhania:4','Boil or pressure-cook shakarkandi, peel and cube.;;Toss with lemon, chaat masala and coriander. Boil on Sunday, use for 3 days.','ghar tiffin',15],
+['Makhana with Almonds','makhana*:23|almond:8|ghee:2','Roast makhana in 1/2 tsp ghee until crisp.;;Mix with almonds and a pinch of salt.','ghar quick tiffin',8],
+['Amla–Guava Salad','guava*:200|amla:30|kalanamak:1','Chop guava and amla into small pieces.;;Sprinkle black salt — a vitamin C bomb that helps you absorb iron from lunch.','nocook quick tiffin',5],
+['Chikoo with Curd','chikoo*:102|curd:100','Peel and slice one chikoo.;;Mix into a small bowl of curd.','ghar nocook quick',3],
+['Mango Bowl','mango*:240|pudina:2','Cube one small ripe mango.;;Eat it in season and without guilt — just keep it to this portion.','nocook quick',4],
+['Cucumber Raita','curd*:218|cucumber:60|jeera:1|kalanamak:1|pudina:3','Whisk curd, grate in cucumber.;;Add roasted jeera powder, black salt and mint.','ghar nocook quick',5],
+['Beetroot–Carrot Salad','beetroot*:120|carrot:80|lemon:5|peanut:10|masala:1','Grate raw beetroot and carrot.;;Toss with lemon, crushed peanuts and a pinch of masala.','nocook quick tiffin',6],
+['Corn Chaat','corn*:145|onion:20|tomato:25|lemon:5|masala:2|dhania:4','Boil or steam sweet corn kernels.;;Toss warm with onion, tomato, lemon and chaat masala.','tiffin',12],
+['Til–Gur Bite','til*:12|jaggery:12|almond:5','Dry-roast til, melt jaggery lightly and mix.;;Press into small bites and cool. Two bites only — iron and calcium in winter.','ghar',15],
+['Dates with Walnuts','dates*:28|walnut:10','Slit 3 dates and press a walnut piece inside each.;;Eat slowly with water. Good pre-workout on evening gym days.','nocook quick tiffin',2],
+['Green Apple with Peanut Butter','apple*:166|pb:10','Slice a green apple into rings.;;Spread a thin layer of peanut butter on each.','nocook quick',3],
+['Mixed Fruit Chaat','apple*:134|banana:50|papaya:70|kalanamak:1|lemon:4','Chop whatever fruit is in the house.;;Toss with lemon and black salt just before eating.','ghar nocook quick',5],
+['Seed Mix (Sunflower & Pumpkin)','sunflowerseed*:12|pumpkinseed:12','Dry-roast both seeds lightly and store in a jar.;;One small palmful is the portion — seeds are calorie-dense.','nocook quick tiffin',5],
+['Tofu Cubes with Pepper','tofu*:99|pepper:0.3|salt:0.5|lemon:4','Cube firm tofu and toss with pepper, salt and lemon.;;Eat cold — no cooking needed if the tofu is fresh.','nocook quick hp tiffin',3],
+['Raw Paneer Cubes','paneerlf*:80|pepper:0.3|kalanamak:1|dhania:3','Cube fresh low-fat paneer.;;Sprinkle black salt, pepper and coriander. The simplest high-protein snack there is.','ghar nocook quick hp tiffin',2],
+['Savoury Sattu Drink','sattu*:37|water:250|lemon:5|kalanamak:1|jeera:1','Whisk sattu into cold water without lumps.;;Add lemon, black salt and roasted jeera powder.','ghar nocook quick hp',4],
+['Light Whey Shake','whey*:24|skimmilk:160|cinnamon:1','Shake whey with cold milk and a pinch of cinnamon.;;Useful on days breakfast was low on protein.','quick nocook hp',2],
+['Roasted Edamame','edamame*:119|salt:1|pepper:0.2','Boil frozen edamame 4 minutes, drain and pat dry.;;Toss with salt and pepper, roast in a pan 3 minutes.','hp quick',10],
+['Khakhra with Curd','khakhra*:20|curd:100','Break one khakhra into a bowl of curd.;;Add black salt and jeera powder.','ghar quick nocook',3],
+['Sprouted Moong with Coconut','sprouts*:200|coconut:24|lemon:5|masala:1|dhania:4','Steam sprouts 4 minutes.;;Toss with fresh grated coconut, lemon and coriander.','hp tiffin quick',8],
+['Berries with Almonds','berries*:200|almond:13.5','Wash strawberries or any seasonal berries.;;Eat with 10 almonds.','nocook quick',3],
+['Roasted Chana Sundal','roastchana*:25|coconut:8|kadipatta:1|oil:2|masala:1','Temper mustard seeds and curry leaves in 1/2 tsp oil.;;Toss in roasted chana and grated coconut for a minute.','hp quick tiffin',6],
+['Papaya–Orange Bowl','papaya*:206|orange:120','Cube papaya and segment an orange.;;Mix and carry chilled.','nocook quick tiffin',5],
+['Pudina Chaas with Makhana','buttermilk*:300|makhana:23|pudina:3|jeera:1','Blend buttermilk with mint, jeera and black salt.;;Sip with a small bowl of roasted makhana.','ghar quick',6],
+['Rice Cake with Peanut Butter','ricecake*:20|pb:12','Spread peanut butter on 2 puffed rice cakes.;;Quick, crunchy and easy to keep in a desk drawer.','nocook quick tiffin',2]
+],
+
+/* ============ 1:30 PM — LUNCH / TIFFIN (~455 kcal) ============ */
+lunch:[
+['Roti, Dal & Palak Sabzi','atta*:60|toordal:35|palak:100|onion:25|tomato:35|oil:6|masala:3|cucumber:60|salt:1','Pressure-cook toor dal with haldi and salt for 3 whistles; temper with jeera, onion and tomato.;;Sauté chopped palak with garlic and masala until the water dries.;;Roll 2 phulkas. Pack dal and sabzi in separate compartments with cucumber on the side.','ghar tiffin',35],
+['Rajma Chawal with Salad','rajma*:62|rice:45|onion:25|tomato:40|oil:5|masala:3|cucumber:60|dhania:5|ginger:4','Soak rajma overnight, pressure-cook 6–7 whistles until completely soft.;;Make a masala of onion, tomato, ginger and garlic; add rajma with its water and simmer 15 minutes to thicken.;;Serve with steamed rice and a big kachumber salad.','ghar tiffin',45],
+['Chole with Roti & Kachumber','kabuli*:61|atta:45|onion:25|tomato:40|oil:5|masala:3|cucumber:50|dhania:5','Pressure-cook soaked chana with a tea bag for colour, 5 whistles.;;Cook onion-tomato masala with chole masala, add the chana and simmer 10 minutes, mashing a few for thickness.;;Serve with 2 phulkas and kachumber.','ghar tiffin hp',40],
+['Palak Paneer with Roti','paneerlf*:107|palak:150|atta:45|onion:20|tomato:30|oil:5|masala:3|garlic:5','Blanch palak 2 minutes, shock in cold water and blend — this keeps it green.;;Sauté garlic, onion, tomato and masala, add the purée and simmer 5 minutes.;;Add paneer cubes at the very end. No cream.','ghar hp tiffin',30],
+['Matar Paneer with Roti','paneerlf*:100|peas:60|atta:45|tomato:40|onion:20|oil:5|masala:3|ginger:4','Make a smooth onion-tomato-ginger masala and cook until the oil separates.;;Add peas with a splash of water, cover and cook 6 minutes.;;Fold in paneer, turn off the heat immediately.','ghar hp tiffin',30],
+['Soya Chunk Pulao with Raita','soya*:40|rice:45|carrot:30|peas:30|beans:25|oil:5|curd:80|masala:3|onion:20','Boil soya chunks 5 minutes, squeeze dry — this removes the raw smell.;;Sauté whole spices, onion and vegetables, add rice, soya, salt and 1.5x water; cook till done.;;Serve with cucumber raita.','hp tiffin',35],
+['Quinoa Moong Khichdi with Curd','quinoa*:63|moongdal:25|carrot:30|peas:25|ghee:5|curd:80|masala:2|jeera:1','Rinse quinoa and moong dal well.;;Pressure-cook with vegetables, haldi, salt and 3x water for 2 whistles.;;Finish with 1 tsp ghee and serve with curd.','tiffin hp',25],
+['Tofu Bhurji with 2 Roti','tofu*:130|atta:50|onion:25|tomato:35|capsicum:25|oil:5|masala:3|haldi:0.5','Crumble tofu and squeeze out the water thoroughly.;;Sauté onion, tomato, capsicum with haldi and masala, add tofu and cook dry 4 minutes.;;Pack with 2 phulkas.','hp tiffin',20],
+['Lauki Chana Dal with Roti & Curd','chanadal*:49|lauki:150|atta:45|oil:5|curd:80|masala:3|jeera:1','Pressure-cook chana dal with cubed lauki, haldi and salt for 3 whistles.;;Temper with jeera, hing and a chopped tomato; simmer 5 minutes.;;Serve with a phulka and curd.','ghar tiffin',30],
+['Bhindi Masala, Dal & Roti','bhindi*:300|masoor:25|atta:58|oil:6|onion:20|masala:3|salt:1','Wipe bhindi dry and cut — never wash after cutting or it turns slimy.;;Sauté on high heat with onion, masala and a pinch of amchur, uncovered.;;Serve with masoor dal and 2 phulkas.','ghar tiffin',30],
+['Baingan Bharta with Roti & Curd','baingan*:450|atta:61|onion:25|tomato:40|oil:6|curd:80|masala:3|dhania:5','Roast the brinjal directly on the flame until the skin chars and it collapses.;;Peel, mash, and cook into onion-tomato masala for 8 minutes.;;Finish with coriander; serve with 2 phulkas and curd.','ghar',35],
+['Kala Chana Chaat with Roti','kalachana*:70|atta:49|onion:25|tomato:35|cucumber:50|lemon:6|masala:3|dhania:5','Pressure-cook soaked kala chana 5 whistles with salt.;;Toss warm with onion, tomato, cucumber, lemon and chaat masala.;;Eat with one phulka — this is a very high-iron lunch.','hp tiffin',25],
+['Lobia Curry with Rice','lobia*:70|rice:40|onion:25|tomato:40|oil:5|masala:3|cucumber:50','Pressure-cook soaked lobia 4 whistles.;;Cook onion-tomato masala, add lobia and simmer 10 minutes.;;Serve with rice and salad.','ghar tiffin',30],
+['Panchmel Dal with Brown Rice','toordal*:34|chanadal:15|masoor:15|brownrice:45|oil:5|onion:20|tomato:30|masala:3|cucumber:50','Mix three dals, rinse and pressure-cook with haldi and salt, 4 whistles.;;Temper with jeera, hing, onion and tomato.;;Serve with brown rice and salad.','ghar tiffin',35],
+['Paneer Roti Wrap','paneerlf*:104|atta:50|capsicum:30|onion:25|pudina:6|dhania:6|oil:5|curd:40|masala:2','Toss paneer, capsicum and onion on a hot pan with masala, 4 minutes.;;Spread mint-coriander chutney on 2 phulkas, fill and roll tight.;;Wrap in foil — the single best tiffin on this list for a long drive.','hp tiffin quick',20],
+['Gobhi Matar, Dal & Roti','gobhi*:320|peas:30|moongdal:25|atta:58|oil:6|masala:3|jeera:1','Sauté cauliflower florets and peas on high heat with jeera and masala, uncovered so they stay firm.;;Pressure-cook moong dal and temper.;;Serve with 2 phulkas.','ghar tiffin',30],
+['Aloo Gobhi, Dal & Roti','potato*:110|gobhi:100|toordal:25|atta:54|oil:5|masala:3|dhania:5','Cube potato small so it cooks with the gobhi; sauté both with haldi and masala on medium heat.;;Keep the potato portion modest — it is there for taste, not bulk.;;Serve with dal and 2 phulkas.','ghar tiffin',30],
+['Sarson Saag with Makki Roti','sarson*:300|palak:60|cornflour:70|ghee:8|onion:20|masala:3|garlic:5','Pressure-cook sarson and palak with green chilli and garlic, 4 whistles.;;Blend coarsely, then simmer with a spoon of makki flour to thicken.;;Temper with garlic and 1 tsp ghee; serve with one makki roti.','ghar',45],
+['Punjabi Kadhi with Rice','besan*:44|curd:120|rice:40|oil:5|masala:3|onion:20|cucumber:50|methiseed:0.5','Whisk besan into sour curd with haldi and water until completely smooth.;;Simmer on low for 25 minutes, stirring often — the long cook is what makes kadhi taste right.;;Temper with jeera, methi dana and red chilli; serve with a small portion of rice.','ghar',40],
+['Rajma with Roti','rajma*:68|atta:45|onion:25|tomato:40|oil:5|masala:3|dhania:5','Pressure-cook soaked rajma until soft enough to mash between your fingers.;;Simmer in onion-tomato masala 15 minutes.;;Serve with 2 phulkas instead of rice for fewer carbs.','ghar tiffin',45],
+['Dal Palak with Rice','moongdal*:63|palak:120|rice:40|oil:5|tomato:30|masala:3|garlic:5','Pressure-cook moong dal with chopped palak, tomato, haldi and salt.;;Temper with jeera and garlic.;;Serve with a small portion of rice.','ghar tiffin',25],
+['Paneer Bhurji with 2 Roti','paneerlf*:115|atta:50|onion:25|tomato:35|capsicum:25|oil:5|masala:3|dhania:5','Sauté onion, tomato, capsicum with masala.;;Add crumbled paneer, toss 2 minutes only.;;Pack with 2 phulkas.','ghar hp tiffin quick',20],
+['Veg Pulao with Curd','rice*:70|carrot:35|peas:35|beans:30|capsicum:25|oil:5|curd:142|masala:3|onion:20','Sauté whole garam masala, onion and vegetables in oil.;;Add soaked rice, salt and 1.5x water; cook covered until done and rest 5 minutes.;;Serve with a bowl of curd — the curd is what makes this a balanced meal.','ghar tiffin',30],
+['Tinda Sabzi, Dal & Roti','tinda*:300|masoor:25|atta:67|oil:6|masala:3|dhania:5','Cube tinda and cook with onion, tomato and masala, covered, 12 minutes.;;Pressure-cook masoor dal and temper with jeera.;;Serve with 2 phulkas.','ghar tiffin',30],
+['Turai Chana Dal with Roti','turai*:300|chanadal:30|atta:58|oil:5|masala:3|curd:60','Pressure-cook chana dal 3 whistles.;;Sauté cubed turai with onion and masala until soft, then mix in the dal and simmer 5 minutes.;;Serve with a phulka and curd.','ghar tiffin',30],
+['Mushroom Matar with Roti','mushroom*:260|peas:40|atta:79|onion:25|tomato:35|oil:6|masala:3|dhania:5','Sauté mushrooms alone on high heat first until their water evaporates.;;Add onion-tomato masala and peas, cook 6 minutes.;;Serve with 2 phulkas.','tiffin',25],
+['Cabbage Peas Sabzi, Dal & Roti','cabbage*:320|peas:35|toordal:25|atta:58|oil:6|masala:3|jeera:1','Sauté shredded cabbage and peas with jeera and haldi on high heat, uncovered, 8 minutes.;;Pressure-cook and temper toor dal.;;Serve with 2 phulkas.','ghar tiffin',25],
+['Kadhai Paneer with Roti','paneerlf*:118|capsicum:60|onion:30|tomato:40|atta:45|oil:5|masala:3|dhania:5','Crush coriander seeds and dried red chilli coarsely — that is the kadhai flavour.;;Sauté onion and capsicum on high heat so they stay crunchy, add tomato masala.;;Fold in paneer at the end; serve with 2 phulkas.','ghar hp tiffin',25],
+['Soya Keema with Roti','soya*:40|atta:64|onion:25|tomato:40|peas:25|oil:5|masala:3|cucumber:50','Soak soya granules in hot water 10 minutes and squeeze bone-dry.;;Cook onion-tomato masala well, add granules and peas, cook dry 6 minutes.;;Serve with 2 phulkas and salad.','hp tiffin',25],
+['Light Dal Makhani with Rice','uraddal*:56|rajma:10|rice:40|milk:40|oil:5|masala:3|onion:20|ginger:4','Pressure-cook urad dal and a spoon of rajma until completely soft, 7 whistles.;;Simmer with tomato masala and ginger for 20 minutes, mashing as you go.;;Finish with 2 tbsp milk instead of cream and 1 tsp ghee.','ghar',50],
+['Bajra Khichdi with Curd','bajra*:70|moongdal:25|carrot:30|ghee:5|curd:80|masala:2|jeera:1','Coarsely crush bajra and rinse; pressure-cook with moong dal, carrot, haldi, salt and 3.5x water for 3 whistles.;;Finish with 1 tsp ghee and a pinch of hing.;;Serve with curd — a proper Punjabi winter lunch.','ghar tiffin',30],
+['Veg Dalia Pulao','dalia*:70|carrot:35|peas:35|beans:30|oil:5|curd:169|masala:3|onion:20','Dry-roast dalia until fragrant.;;Sauté onion and vegetables, add dalia, salt and 3x water; pressure-cook 2 whistles.;;Serve with curd.','ghar tiffin',25],
+['Arbi Masala, Dal & Roti','arbi*:143|masoor:25|atta:45|oil:5|masala:3|ajwain:0.5','Boil arbi, peel and flatten lightly.;;Pan-roast with ajwain, amchur and masala until the edges crisp — keeps it from being slimy.;;Serve with masoor dal and 2 phulkas.','ghar',35],
+['Kaddu Sabzi, Dal & Roti','kaddu*:320|toordal:25|atta:58|oil:5|masala:3|curd:60|methiseed:0.5','Cook cubed pumpkin with methi dana, haldi, amchur and a pinch of jaggery until it collapses.;;Serve with toor dal, 2 phulkas and curd.','ghar tiffin',25],
+['Sambar Rice with Salad','toordal*:64|rice:45|lauki:60|carrot:30|tomato:30|oil:4|masala:3|cucumber:50|kadipatta:1','Pressure-cook toor dal with the vegetables.;;Add tamarind water, sambar powder and salt; simmer 8 minutes and temper with mustard and curry leaves.;;Serve over rice with cucumber on the side.','tiffin',30],
+['Curd Rice with Vegetables','rice*:70|curd:150|carrot:30|cucumber:40|oil:3|kadipatta:1|masala:2|peanut:8','Cook rice soft and cool it completely — hot rice splits the curd.;;Mix with whisked curd, grated carrot and cucumber.;;Temper mustard seeds, curry leaves and peanuts; pour over. Excellent on a hot day or an upset stomach.','tiffin',20],
+['Chana Palak with Roti','kabuli*:56|palak:120|atta:45|oil:5|onion:20|masala:3|garlic:5|lemon:5','Pressure-cook chickpeas until soft.;;Add blanched palak purée, garlic and masala; simmer 8 minutes.;;Squeeze lemon before eating — it makes the iron far more absorbable.','ghar hp tiffin',35],
+['Rajma Salad Bowl','rajma*:70|cucumber:80|tomato:50|onion:25|corn:104|lemon:6|oliveoil:8|masala:2|dhania:5','Use Sunday-cooked rajma, drained and cooled.;;Toss with cucumber, tomato, onion, corn, lemon, olive oil and chaat masala.;;No roti needed — high protein, high fibre, zero afternoon slump.','hp tiffin nocook',10],
+['Paneer Tikka Roti Roll','paneerlf*:113|atta:50|hungcurd:30|capsicum:30|onion:25|oil:4|masala:3|lemon:4','Marinate paneer, capsicum and onion in hung curd with masala and lemon for 20 minutes.;;Pan-roast on high heat until charred at the edges.;;Roll into 2 phulkas.','hp tiffin',30],
+['Methi Aloo, Dal & Roti','methileaves*:160|potato:60|masoor:25|atta:52|oil:5|masala:3','Chop methi, salt it and squeeze out the bitter water.;;Sauté with small potato cubes, haldi and masala until dry.;;Serve with masoor dal and 2 phulkas.','ghar tiffin',30],
+['Veg Fried Rice with Tofu','rice*:70|tofu:70|carrot:30|beans:30|capsicum:25|soysauce:8|oil:5|garlic:5','Use cold, day-old rice so the grains stay separate.;;Stir-fry garlic and vegetables on the highest flame, add cubed tofu, then rice and soy sauce.;;Toss 2 minutes and take it off — go easy on the soy sauce, it is very high in sodium.','hp quick tiffin',18],
+['Whole-wheat Pasta with Paneer','wwpasta*:70|paneerlf:50|tomato:80|capsicum:30|broccoli:50|oliveoil:6|garlic:5|masala:2','Boil pasta in salted water until just firm.;;Make a fresh tomato-garlic sauce, add broccoli and capsicum, cook 4 minutes.;;Toss in the pasta and paneer cubes.','tiffin',25],
+['Chole with Pudina Roti','kabuli*:63|atta:45|onion:25|tomato:35|oil:5|masala:3|pudina:5|dhania:5','Cook the chole as usual with chana masala.;;Knead the atta with chopped mint for the rotis.;;Top with sliced onion and lemon.','ghar hp tiffin',40],
+['Moong Dal Khichdi with Curd','moongdal*:51|rice:40|carrot:30|peas:25|ghee:5|curd:80|masala:2|jeera:1','Rinse rice and dal, pressure-cook with vegetables, haldi, salt and 3x water for 3 whistles.;;Finish with 1 tsp ghee and a pinch of hing.;;Serve with curd. The default meal for a tired day.','ghar tiffin quick',22],
+['Beetroot–Carrot Thepla with Curd','atta*:76|beetroot:50|carrot:40|besan:12|oil:5|curd:100|masala:2','Grate beetroot and carrot, knead into the atta with besan and masala — no water needed.;;Roll and cook theplas with a few drops of oil.;;Pack with curd; stays soft for 6 hours.','ghar tiffin',25],
+['Light Veg Biryani with Raita','rice*:64|soya:20|carrot:30|beans:30|peas:25|curd:80|oil:5|masala:4|onion:25','Par-boil rice with whole spices to 70%.;;Cook vegetables and soaked soya chunks in curd-based masala.;;Layer rice over the masala, cover tight and steam on low 12 minutes. Serve with raita.','tiffin',45],
+['Dahi Bhindi with Roti','bhindi*:300|curd:80|atta:70|oil:5|masala:3|jeera:1','Pan-roast the bhindi separately until it is no longer sticky.;;Whisk curd with besan and haldi, warm gently while stirring so it does not split.;;Fold in the bhindi and serve with 2 phulkas.','ghar tiffin',30],
+['Zucchini Paneer Sabzi with Roti','zucchini*:280|paneerlf:55|atta:68|oil:5|tomato:30|masala:3|garlic:5','Sauté sliced zucchini on high heat 4 minutes — it must not go watery.;;Add tomato, garlic and masala, then paneer cubes.;;Serve with 2 phulkas.','hp tiffin quick',20],
+['Dal Tadka with Jeera Rice','toordal*:65|rice:42|ghee:5|jeera:1|onion:20|tomato:30|cucumber:60|masala:3|garlic:5','Pressure-cook toor dal with haldi and salt until creamy.;;Make a tadka of ghee, jeera, garlic, onion, tomato and red chilli; pour over the dal.;;Serve with jeera rice and cucumber.','ghar tiffin',30],
+['Sprouts Pulao with Curd','sprouts*:200|rice:70|carrot:30|peas:25|oil:5|curd:80|masala:3|onion:20','Sauté onion, carrot, peas and moong sprouts with whole spices.;;Add rice, salt and 1.5x water; cook covered.;;Serve with curd — a big protein upgrade on plain pulao.','hp tiffin',30]
+],
+
+/* ============ 6:15 PM — COMMUTE / PRE-WORKOUT (~175 kcal) ============ */
+evening:[
+['Whey Shake in Water','whey*:32|skimmilk:130|water:150','Shake one scoop of whey with cold water and a splash of milk in the car-friendly shaker.;;Drink on the drive home or right after training.','quick nocook hp tiffin',2],
+['Whey with Banana','whey*:30|banana:70|water:250','Blend or shake whey with water.;;Eat the banana alongside — carbs plus protein, ideal right after weights.','quick nocook hp',3],
+['Protein Bar','proteinbar*:45','Keep one low-sugar protein bar in the glove box permanently.;;This is your insurance against a 7 PM samosa. Check the label: under 8 g sugar.','nocook quick hp tiffin',1],
+['Black Coffee with Banana','blackcoffee*:200|banana:120|almond:10','Brew black coffee, no sugar.;;Eat a banana and a few almonds 30 minutes before lifting — the caffeine plus carbs combination genuinely improves your session.','quick',4],
+['Roasted Chana with Chaas','roastchana*:36|buttermilk:200|jeera:1|kalanamak:1','Carry roasted chana in a pouch and buttermilk in a bottle.;;Sip and snack through the drive home.','ghar nocook quick hp tiffin',3],
+['Big Bowl of Roasted Makhana','makhana*:40|ghee:3|masala:1','Roast makhana in ghee until fully crisp.;;Season with chaat masala and pepper. Very high volume for the calories.','ghar quick tiffin',10],
+['Peanuts with Apple','peanut*:20|apple:120','Keep roasted peanuts in the car.;;Eat with an apple so you get fibre along with the fat.','nocook quick tiffin',2],
+['Apple Slices with Peanut Butter','apple*:156|pb:16','Slice the apple and spread peanut butter.;;Carry in a small box — filling enough to get you through the drive.','nocook quick tiffin',4],
+['Paneer Tikka Snack','paneerlf*:80|hungcurd:25|masala:2|lemon:4|capsicum:20','Marinate paneer cubes in hung curd, masala and lemon.;;Pan-roast or air-fry 6 minutes until charred at the edges.;;Perfect on gym days — protein right before training.','hp quick',12],
+['Sprouts Bhel','sprouts*:200|murmura:25|onion:20|tomato:25|lemon:5|masala:2|dhania:4','Steam sprouts and cool.;;Toss with murmura, onion, tomato, lemon and chaat masala just before eating.','hp quick ghar',8],
+['Mixed Nuts','almond*:12|walnut:8|cashew:8','Pre-portion nuts into small pouches on Sunday — the whole jar is a trap.;;One pouch per evening.','nocook quick tiffin',2],
+['Hung Curd with Berries','hungcurd*:220|berries:60|honey:5','Whisk hung curd smooth.;;Fold in berries and a little honey.','nocook quick hp',5],
+['Khakhra with Chaas','khakhra*:33|buttermilk:200|jeera:1','Eat one and a half khakhras with a glass of spiced buttermilk.;;Light, salty and very easy on a tired stomach.','ghar nocook quick',3],
+['Roasted Edamame','edamame*:144|salt:1|pepper:0.2','Boil frozen edamame 4 minutes and drain.;;Pan-roast with salt and pepper for 3 minutes.','hp quick',10],
+['Hummus with Cucumber & Carrot','hummus*:70|cucumber:80|carrot:114','Cut vegetable batons in the morning and keep them chilled.;;Dip into hummus during the drive.','nocook quick tiffin',5],
+['Sweet Potato Chaat','sweetpotato*:194|lemon:5|masala:2|dhania:4','Boil shakarkandi in advance, keep cubed in the fridge.;;Toss with lemon and chaat masala. Great pre-workout carb.','ghar tiffin',15],
+['Sattu Sharbat','sattu*:45|water:280|lemon:5|kalanamak:1|jeera:1','Whisk sattu into cold water till smooth.;;Add lemon, black salt and roasted jeera. Cooling, filling and 8 g of protein.','ghar nocook quick hp',4],
+['Tofu Tikka','tofu*:110|hungcurd:20|masala:2|lemon:4','Press tofu 10 minutes to remove water, then cube.;;Marinate in hung curd and masala, pan-roast until golden on all sides.','hp quick',15],
+['Boiled Chana Chaat','kabuli*:40|onion:20|tomato:25|lemon:5|masala:2|dhania:4','Use chickpeas cooked over the weekend.;;Toss with onion, tomato, lemon and chaat masala.','hp nocook quick tiffin',5],
+['Curd with Flax & Apple','curd*:168|flax:8|apple:60','Whisk curd, stir in ground flax.;;Add chopped apple and a pinch of cinnamon.','nocook quick',4],
+['Corn Chaat with Paneer','corn*:100|paneerlf:40|lemon:5|masala:2|dhania:4','Steam sweet corn.;;Toss warm with paneer cubes, lemon and chaat masala.','hp quick',12],
+['Peanut Murmura Mix','murmura*:25|peanut:15|masala:1','Dry-roast murmura and peanuts together.;;Season with masala and store in a jar.','ghar nocook quick tiffin',6],
+['Dates with Almonds','dates*:35|almond:12','Eat 3–4 dates with 10 almonds about 40 minutes before your workout.;;Fast carbs plus slow fat — good energy without heaviness.','nocook quick tiffin',1],
+['Banana with Peanut Butter','banana*:104|pb:14','Slice a banana and spread peanut butter over it.;;Straightforward pre-workout fuel.','nocook quick',3],
+['Toast with Hummus','brownbread*:40|hummus:40|cucumber:30|pepper:0.3','Toast one slice of multigrain bread.;;Spread hummus, top with cucumber and pepper.','quick nocook',5],
+['Iced Coffee Protein Shake','whey*:35|blackcoffee:200|skimmilk:80','Brew and cool the coffee.;;Shake with whey, milk and ice. Caffeine and protein in one glass before the gym.','quick nocook hp',4],
+['Chaas with Roasted Makhana','buttermilk*:300|makhana:32|jeera:1|pudina:3','Whisk buttermilk with mint, jeera and black salt.;;Eat with a bowl of roasted makhana.','ghar quick',6],
+['Rice Cake with PB & Banana','ricecake*:16|pb:12|banana:50','Spread peanut butter on 2 rice cakes.;;Top with banana slices.','nocook quick',3],
+['Paneer Bhurji Lettuce Cups','paneerlf*:70|lettuce:40|onion:15|tomato:25|oil:3|masala:2','Make a quick dry paneer bhurji.;;Spoon into lettuce leaves. High protein and almost no carbs before an evening workout.','hp quick',12],
+['Dry Bhel with Sprouts & Chana','murmura*:20|roastchana:20|sprouts:60|lemon:5|masala:2','Mix murmura, roasted chana and steamed sprouts.;;Add lemon and masala just before eating so it stays crunchy.','hp quick ghar',6],
+['Fruit & Curd Cup','curd*:150|papaya:100|banana:40','Whisk curd, fold in chopped papaya and banana.;;Light on the stomach after a long day of sitting.','ghar nocook quick',4],
+['Greek Yoghurt with Chia & Honey','hungcurd*:196|chia:8|honey:6','Soak chia 15 minutes.;;Fold into hung curd with a little honey.','nocook quick hp',5],
+['Soya Chunk Sundal','soya*:34|coconut:8|onion:20|lemon:5|kadipatta:1|oil:2','Boil soya chunks, squeeze dry and chop roughly.;;Temper mustard seeds and curry leaves, toss with coconut, onion and lemon.','hp quick',12],
+['Coconut Water with Peanuts','coconutwater*:300|peanut:21','Drink fresh coconut water on the way out of the gym.;;Eat peanuts alongside for protein and fat.','nocook quick',2],
+['Guava with Roasted Chana','guava*:150|roastchana:18|kalanamak:1','Cut guava into wedges with black salt.;;Eat with a small handful of roasted chana.','ghar nocook quick tiffin',3],
+['Cucumber–Paneer Salad','paneerlf*:70|cucumber:80|tomato:40|lemon:5|oliveoil:3|masala:1|dhania:4','Cube paneer, cucumber and tomato.;;Dress with lemon, a little olive oil and chaat masala.','hp nocook quick tiffin',6],
+['Dark Chocolate with Almonds','darkchoc*:17|almond:12','Two squares of 85% dark chocolate with 10 almonds.;;The planned treat that stops the unplanned one.','nocook quick',1],
+['Til–Gur Bite with Chaas','til*:15|jaggery:10|buttermilk:254','Roast til and bind with melted jaggery; press into a small bite.;;Eat with buttermilk — a winter classic.','ghar',15],
+['Oats–PB Energy Balls','oats*:16|pb:12|dates:15','Blend dates, roll into a paste with oats and peanut butter.;;Shape into 3 balls and refrigerate. Make 12 on Sunday for the whole week.','nocook tiffin',15],
+['Amla–Guava–Chana Plate','guava*:120|amla:25|roastchana:20|kalanamak:1','Chop guava and amla, sprinkle black salt.;;Eat with roasted chana. Vitamin C plus protein.','ghar nocook quick',5],
+['Masala Chai with Khakhra','milk*:150|water:100|khakhra:22','Brew tea with more water than milk and no sugar.;;Eat one khakhra with it instead of biscuits.','ghar quick',6],
+['Green Tea with Almonds','greentea*:250|almond:20|walnut:8','Brew green tea at 80°C for 3 minutes.;;Eat about 16 almonds and 2 walnut halves with it — enough fat to hold you till dinner.','nocook quick',4],
+['Pumpkin Seed & Raisin Mix','pumpkinseed*:15|raisins:15|almond:8','Mix seeds, raisins and almonds in a small pouch.;;Magnesium from the seeds helps you actually fall asleep tonight.','nocook quick tiffin',2],
+['Sprouted Moong Chaat with Coconut','sprouts*:200|coconut:18|peanut:8|lemon:5|masala:1|dhania:4','Steam sprouts 4 minutes.;;Toss with grated coconut, crushed peanuts, lemon, coriander and masala.','hp quick tiffin',8],
+['Cheese, Cucumber & Grapes','cheese*:25|cucumber:60|grapes:125','One cheese cube, cucumber slices and a small bunch of grapes.;;Assembles in one minute and travels well.','nocook quick tiffin',2],
+['Tofu Veg Stir-fry Snack','tofu*:73|capsicum:40|beans:40|soysauce:6|oliveoil:4|garlic:5','Stir-fry garlic, beans and capsicum on high heat 3 minutes.;;Add cubed tofu and a splash of soy sauce; toss 2 minutes.','hp quick',10],
+['Chana–Peanut Trail Mix','roastchana*:20|peanut:12|raisins:10','Mix roasted chana, peanuts and raisins.;;Portion into small pouches so the car does not become a buffet.','ghar nocook quick tiffin',3],
+['Sattu–Gur Ladoo','sattu*:27|jaggery:12|ghee:3','Warm sattu with ghee 2 minutes, mix in grated jaggery.;;Shape into 2 small ladoos and cool. Traditional, and genuinely good pre-workout food.','ghar',15],
+['Whey with Papaya','whey*:29|water:250|papaya:150','Shake whey with cold water.;;Eat cubed papaya alongside — protein plus enzymes for digestion.','nocook quick hp',3],
+['Single Moong Dal Chilla','moongdal*:40|onion:15|dhania:5|oil:3|pudina:5|chilli:2','Use batter kept ready in the fridge.;;Make one thin chilla with a few drops of oil, eat with mint chutney.','ghar quick hp',10]
+],
+
+/* ============ 8:45 PM — DINNER (~350 kcal) ============ */
+dinner:[
+['Paneer Tikka Salad','paneerlf*:120|lettuce:60|cucumber:70|tomato:50|capsicum:40|oliveoil:8|hungcurd:30|masala:2|lemon:5','Marinate paneer in hung curd, masala and lemon for 15 minutes.;;Char on a hot pan 5 minutes.;;Pile over a large bed of lettuce, cucumber, tomato and capsicum; dress with lemon and olive oil.','hp quick',20],
+['Moong Dal Chilla with Chutney','moongdal*:70|onion:20|palak:30|oil:4|dhania:8|pudina:6|masala:2|curd:60','Keep soaked-and-ground moong batter in the fridge — it lasts 2 days.;;Make 2 thin chillas with chopped onion and palak.;;Serve with mint-coriander chutney and a little curd.','ghar hp quick',15],
+['Masoor Dal with Roti & Salad','masoor*:46|atta:35|onion:20|tomato:35|oil:4|cucumber:70|masala:3|jeera:1','Pressure-cook masoor dal with haldi and salt, 3 whistles — masoor is the fastest dal there is.;;Temper with jeera, onion, tomato and hing.;;Serve with one phulka and a big cucumber salad.','ghar quick',20],
+['Lauki Sabzi with Roti & Curd','lauki*:180|atta:63|curd:100|oil:4|masala:3|jeera:1','Cube lauki and cook with jeera, tomato, haldi and masala, covered, 12 minutes — no extra water needed.;;Serve with one phulka and curd. The lightest dinner in the house.','ghar quick',20],
+['Clear Veg Soup with Paneer Tikka','paneerlf*:120|cabbage:60|carrot:50|beans:40|tomato:60|oliveoil:7|garlic:5|masala:2|pepper:0.3','Simmer chopped vegetables with garlic and pepper in water for 12 minutes; do not blend.;;Separately char marinated paneer on a pan.;;Eat the soup first, then the paneer — you will finish full on very few calories.','hp',25],
+['Soya Chunk Curry with Roti','soya*:40|atta:41|onion:20|tomato:40|oil:4|masala:3|cucumber:60|ginger:4','Boil soya chunks 5 minutes, squeeze dry.;;Simmer in onion-tomato-ginger masala 8 minutes.;;Serve with one phulka and salad.','hp quick',20],
+['Palak Tofu with Roti','tofu*:105|palak:150|atta:30|oil:4|masala:3|onion:20|garlic:5','Blanch and purée palak.;;Sauté garlic and onion, add the purée and masala, simmer 5 minutes.;;Add cubed tofu at the end; serve with one phulka.','hp quick',20],
+['Oats Veg Khichdi','oats*:45|moongdal:20|carrot:40|peas:30|ghee:4|masala:2|curd:60|jeera:1','Pressure-cook moong dal with the vegetables.;;Add oats and cook 4 more minutes on the stove — oats need no pressure.;;Finish with ghee and hing; serve with curd.','quick',18],
+['Moong Dal Khichdi with Curd','moongdal*:41|rice:25|carrot:30|ghee:4|curd:100|masala:2|jeera:1','Pressure-cook rice, moong dal, carrot, haldi and salt with 3.5x water, 3 whistles.;;Finish with ghee, jeera and hing.;;This is the meal for a 9 PM arrival with no energy left.','ghar quick',20],
+['Besan Chilla with Curd','besan*:60|onion:25|tomato:30|oil:4|curd:100|dhania:5|masala:2','Whisk besan with water, ajwain, masala and salt; rest 10 minutes.;;Cook 2 thin chillas with a few drops of oil.;;Serve with curd.','ghar quick',15],
+['Tomato Shorba with Paneer Cubes','paneerlf*:120|tomato:180|garlic:6|oliveoil:8|masala:2|dhania:5|pepper:0.3','Simmer tomatoes with garlic, pepper and a bay leaf 12 minutes, then blend and strain.;;Toss paneer cubes on a hot pan until spotted.;;Drop into the shorba with coriander.','hp quick',20],
+['Broccoli Paneer Stir-fry','paneerlf*:120|broccoli:120|capsicum:40|garlic:6|oliveoil:8|soysauce:6|pepper:0.3','Blanch broccoli 2 minutes and drain.;;Stir-fry garlic on high heat, add broccoli and capsicum 3 minutes.;;Add paneer, a splash of soy sauce and pepper; toss 1 minute.','hp quick',15],
+['Mushroom Masala with Roti','mushroom*:260|atta:57|onion:25|tomato:40|oil:4|masala:3|curd:60|dhania:5','Sauté mushrooms alone on high heat until their water dries.;;Add onion-tomato masala and cook 6 minutes.;;Serve with one phulka and curd.','quick',20],
+['Cabbage Soup with Tofu','tofu*:130|cabbage:120|carrot:50|tomato:50|oliveoil:8|garlic:5|masala:2|pepper:0.3','Simmer shredded cabbage, carrot and tomato with garlic 12 minutes.;;Pan-sear tofu cubes separately and add on top.;;Enormous volume, very light on calories.','hp',20],
+['Zucchini Noodles with Soya Keema','soya*:40|zucchini:280|tomato:350|garlic:6|oliveoil:8|masala:2|dhania:5','Spiralise or julienne zucchini; do not cook it more than 2 minutes.;;Cook soaked, squeezed soya granules in tomato-garlic masala until dry.;;Spoon over the zoodles.','hp quick',18],
+['Dal Palak Soup with Roti','moongdal*:49|palak:120|atta:30|ghee:4|masala:2|lemon:5|garlic:5','Pressure-cook moong dal with palak and garlic, then blend to a thick soup.;;Temper with ghee and jeera, finish with lemon.;;Serve with one phulka.','ghar quick',20],
+['Lauki Raita with Roti','curd*:250|lauki:100|atta:51|jeera:1|masala:2|dhania:5','Grate and steam lauki 5 minutes, then squeeze out the water.;;Whisk into curd with roasted jeera and black salt.;;Serve with one phulka — an old and very underrated summer dinner.','ghar quick',15],
+['Paneer Bhurji with Salad','paneerlf*:120|onion:25|tomato:50|capsicum:35|oil:8|cucumber:70|masala:2|dhania:5','Sauté onion, tomato and capsicum with masala.;;Add crumbled paneer, toss 2 minutes.;;Skip the roti tonight and eat it with a big cucumber-tomato salad.','hp quick',15],
+['Sprouts & Paneer Salad','sprouts*:200|paneerlf:120|cucumber:70|tomato:40|lemon:6|oliveoil:4|masala:2|dhania:5','Steam sprouts 4 minutes.;;Toss warm with paneer, cucumber, tomato, lemon and olive oil.','hp quick nocook',10],
+['Kerala Veg Stew with Appam-style Dosa','dosabatter*:116|lauki:80|carrot:50|beans:40|peas:30|coconut:15|skimmilk:100|oliveoil:4|kadipatta:1','Simmer the vegetables with ginger, green chilli and curry leaves in thin coconut milk (use skim milk plus grated coconut to keep it light).;;Cook one soft dosa.;;Very gentle on the stomach late at night.','',25],
+['Methi Thepla with Curd','atta*:52|methileaves:40|besan:10|oil:4|curd:120|masala:2','Knead atta and besan with chopped methi and masala.;;Cook 2 small theplas with minimal oil.;;Serve with a bowl of curd.','ghar quick',18],
+['Chana Salad Bowl','kabuli*:70|cucumber:80|tomato:50|onion:25|lemon:6|oliveoil:5|masala:2|dhania:5','Use weekend-cooked chickpeas.;;Toss with chopped vegetables, lemon, olive oil and chaat masala.;;Zero cooking on a late night.','hp nocook quick',8],
+['Tinda Sabzi, Dal & Roti','tinda*:300|masoor:25|atta:46|oil:4|masala:3|dhania:5','Cook cubed tinda with onion, tomato and masala, covered, 12 minutes.;;Serve with a small bowl of masoor dal and one phulka.','ghar',25],
+['Bhindi Fry with Curd & Roti','bhindi*:300|curd:100|atta:36|oil:5|masala:3','Cut dry bhindi and pan-roast uncovered on medium-high heat until the stickiness disappears.;;Season with amchur and masala.;;Serve with curd and one phulka.','ghar',22],
+['Dahi Paneer Salad','paneerlf*:120|hungcurd:179|cucumber:70|tomato:40|pudina:6|masala:2|kalanamak:1','Blend hung curd with mint, black salt and a little lemon into a dressing.;;Toss paneer, cucumber and tomato in it.;;Chill 10 minutes before eating.','hp nocook quick',10],
+['Rajma Salad','rajma*:70|cucumber:70|tomato:50|onion:25|lemon:6|oliveoil:8|masala:2|dhania:5','Use cooked rajma from the fridge.;;Toss with chopped vegetables, lemon and olive oil.','hp nocook quick',8],
+['Tofu Tikka with Sautéed Veg','tofu*:130|capsicum:60|onion:30|broccoli:120|oliveoil:8|hungcurd:25|masala:2','Press and cube tofu, marinate in hung curd and masala 15 minutes.;;Char on a hot pan.;;Sauté capsicum, onion and broccoli on high heat and serve alongside.','hp',22],
+['Palak Soup with Grilled Paneer','paneerlf*:120|palak:150|garlic:6|skimmilk:60|oliveoil:7|masala:2|pepper:0.3','Blanch palak, blend with garlic and a little water, then warm with 3 tbsp milk — never boil after adding milk.;;Grill paneer slices on a hot pan.;;Season the soup with pepper and float the paneer on top.','hp quick',18],
+['Turai Moong Dal with Roti','turai*:300|moongdal:40|atta:30|oil:4|masala:3|jeera:1','Pressure-cook moong dal with cubed turai, haldi and salt, 3 whistles.;;Temper with jeera and hing.;;Serve with one phulka.','ghar quick',20],
+['Kaddu Sabzi with Curd & Roti','kaddu*:320|curd:100|atta:47|oil:4|masala:3|methiseed:0.5','Cook pumpkin with methi dana, amchur, haldi and a pinch of jaggery until it collapses.;;Serve with curd and one phulka.','ghar quick',20],
+['Mixed Veg Sabzi with Roti','carrot*:120|beans:60|peas:40|gobhi:70|atta:51|oil:5|masala:3|jeera:1','Sauté all the vegetables together on high heat with jeera and masala, uncovered, so nothing goes mushy.;;Serve with one phulka.','ghar quick',20],
+['Sarson Saag with Makki Roti','sarson*:300|palak:60|cornflour:55|ghee:4|onion:20|masala:2|garlic:5','Pressure-cook the greens, blend coarsely and simmer with a spoon of makki flour.;;Temper with garlic and ghee.;;Serve with one small makki roti.','ghar',40],
+['Dal Tadka with Salad','toordal*:70|onion:25|tomato:40|ghee:7.5|cucumber:80|masala:3|dhania:5|garlic:5','Pressure-cook toor dal until creamy.;;Make a proper tadka with ghee, jeera, garlic, onion, tomato and red chilli.;;Skip the roti and eat it as a thick dal with a big salad.','ghar quick',20],
+['Light Vegetable Dalia','dalia*:60|carrot:40|peas:30|beans:30|oil:4|curd:80|masala:2|jeera:1','Roast dalia, then pressure-cook with the vegetables and 3x water, 2 whistles.;;Serve with curd.','ghar quick tiffin',20],
+['Paneer Palak Roti Roll','paneerlf*:96|palak:60|atta:35|oil:4|masala:2|pudina:5','Knead the atta with finely chopped palak.;;Fill the roti with dry paneer bhurji and mint chutney; roll tight.','hp quick',18],
+['Baingan Bharta with Roti','baingan*:450|atta:48|onion:25|tomato:40|oil:5|masala:3|dhania:5','Char the brinjal on an open flame until the skin blisters and it goes soft.;;Peel, mash and cook into onion-tomato masala 8 minutes.;;Serve with one phulka.','ghar',30],
+['Gobhi Matar with Curd & Roti','gobhi*:320|peas:35|curd:80|atta:41|oil:4|masala:3|jeera:1','Sauté cauliflower and peas on high heat with jeera and masala, uncovered.;;Serve with curd and one phulka.','ghar quick',20],
+['Cucumber Sprout Chaat with Paneer','sprouts*:200|paneerlf:115|cucumber:80|lemon:6|masala:2|peanut:8|dhania:4','Steam sprouts, cool.;;Toss with paneer, cucumber, crushed peanuts, lemon and masala.','hp nocook quick',10],
+['Tomato Soup with Toast & Paneer','tomato*:350|brownbread:69|oliveoil:4|garlic:6|paneerlf:35|masala:2|pepper:0.3','Simmer tomatoes with garlic and a bay leaf, blend and strain.;;Season with pepper and a swirl of olive oil.;;Serve with one toast triangle and grated paneer on top.','quick',20],
+['Vegetable Khichdi with Ghee','moongdal*:32|rice:28|lauki:60|carrot:30|ghee:5|masala:2|curd:80|jeera:1','Pressure-cook everything together with 4x water for 3 whistles.;;Finish with ghee, jeera and hing.;;Serve with curd.','ghar quick',20],
+['Dahi Lauki with Roti','lauki*:170|curd:100|atta:64|oil:4|masala:3|jeera:1','Cook cubed lauki until soft.;;Whisk curd with a little besan and haldi, warm gently while stirring, then fold in the lauki.;;Serve with one phulka.','ghar quick',22],
+['Chana Dal Lauki with Roti','chanadal*:50|lauki:140|atta:30|oil:4|masala:3|jeera:1','Pressure-cook chana dal with lauki, haldi and salt, 3 whistles.;;Temper with jeera and hing.;;Serve with one phulka.','ghar quick',25],
+['Bajra Roti with Cabbage Sabzi','bajra*:59|cabbage:100|peas:30|oil:5|masala:3|curd:60|jeera:1','Pat out one bajra roti with wet palms and cook on a hot tawa.;;Sauté cabbage and peas with jeera and masala.;;Serve with curd.','ghar',25],
+['Mushroom Tofu Stir-fry','tofu*:130|mushroom:260|capsicum:40|garlic:6|soysauce:6|oliveoil:8|pepper:0.3','Cook mushrooms alone on high heat first so they brown rather than steam.;;Add garlic, capsicum and tofu, toss 3 minutes.;;Finish with soy sauce and pepper.','hp quick',15],
+['Sambar with Small Rice','toordal*:54|rice:25|lauki:60|carrot:30|tomato:30|oil:4|masala:3|cucumber:60|kadipatta:1','Pressure-cook toor dal with the vegetables.;;Add tamarind water and sambar powder, simmer 8 minutes, temper with mustard and curry leaves.;;Serve with a small portion of rice.','quick',25],
+['Curd, Papaya & Roasted Chana','curd*:250|papaya:120|roastchana:40','Whisk curd, add cubed papaya.;;Eat with a small katori of roasted chana on the side.;;For nights you get home at 10 and cannot face the kitchen.','ghar nocook quick',5],
+['Paneer Stuffed Capsicum','paneerlf*:120|capsicum:100|onion:40|oliveoil:8|masala:2|dhania:5','Halve and deseed capsicums.;;Stuff with paneer bhurji made with onion and masala.;;Cover and cook on a tawa 10 minutes, or bake 15 minutes at 180°C.','hp',25],
+['Lentil Soup with Multigrain Toast','masoor*:57|tomato:60|carrot:40|garlic:6|brownbread:30|oliveoil:4|masala:2|pepper:0.3','Pressure-cook masoor with tomato, carrot and garlic, then blend to a thick soup.;;Season with pepper and olive oil.;;Serve with one toast.','quick',20],
+['Small Vegetable Uttapam','dosabatter*:196|onion:25|tomato:25|capsicum:20|oil:4|dhania:8|coconut:8','Pour a thick uttapam and press chopped vegetables on top.;;Cook covered 3 minutes, flip 1 minute.;;Serve with quick coconut-coriander chutney.','ghar quick',15],
+['Whey & Fruit Night Cap','whey*:35|skimmilk:250|papaya:245|chia:5','Blend whey with milk and soaked chia.;;Eat papaya alongside.;;For the nights you land home past 10 PM — never skip dinner entirely.','hp nocook quick',4]
+]
+};
+
+/* ---------- 6. MEAL SLOTS ---------- */
+const SLOTS = [
+  {id:'wakeup',    ico:'🌅', t:'Morning Ritual',       time:'6:15 AM',  tgt:15,  bg:'#fdf3e2', note:'Before anything else. Sets up digestion for the day.'},
+  {id:'breakfast', ico:'🥣', t:'Breakfast',            time:'7:45 AM',  tgt:350, bg:'#fdeef3', note:'Eat at home, sitting down. Protein here decides your 11 AM hunger.'},
+  {id:'midmorning',ico:'🍎', t:'Desk Snack',           time:'11:30 AM', tgt:145, bg:'#e8f6ee', note:'Keep it in your bag or drawer — never buy it from the canteen.'},
+  {id:'lunch',     ico:'🍱', t:'Lunch · Tiffin',       time:'1:30 PM',  tgt:455, bg:'#eaf2fb', note:'Packed the night before. Biggest meal of your day.'},
+  {id:'evening',   ico:'🚗', t:'Commute / Pre-Workout',time:'6:15 PM',  tgt:175, bg:'#f3edfb', note:'Eat this in the car or before the gym so you do not reach home starving.'},
+  {id:'dinner',    ico:'🌙', t:'Dinner',               time:'8:45 PM',  tgt:350, bg:'#e6f6f4', note:'Light, protein-forward, on the table within 20 minutes.'}
+];
+
+/* ---------- 7. 5-DAY TRAINING SPLIT ---------- */
+const TRAIN = [
+  {d:'Monday', t:'Lower Body — Glutes & Quads', s:'Strength · 50–55 min', c:'#e0567f', focus:'Heaviest day of the week. Do it while you are freshest.',
+   warm:'5 min bike or brisk treadmill walk + 10 bodyweight squats, 10 glute bridges, 20 leg swings each side.',
+   ex:[
+    ['Goblet Squat','4 × 8–10','90 s','Chest tall, knees track over toes, sit between your heels. Pause 1 s at the bottom.'],
+    ['Romanian Deadlift (dumbbell)','3 × 10','90 s','Push hips back, bar close to the thighs. You should feel it in the hamstrings, not the lower back.'],
+    ['Reverse Lunge','3 × 10 each leg','60 s','Step back, drop the back knee straight down. Front shin stays vertical.'],
+    ['Leg Press or Bulgarian Split Squat','3 × 12','60 s','Full range but never lock out hard. Slow on the way down.'],
+    ['Glute Bridge / Hip Thrust','3 × 15','60 s','Squeeze at the top for 2 s. Ribs down, do not arch the lower back.'],
+    ['Standing Calf Raise','3 × 15','45 s','Full stretch at the bottom, pause at the top.'],
+    ['Plank','3 × 40 s','45 s','Straight line from ear to ankle. Breathe.']
+   ]},
+  {d:'Tuesday', t:'Upper Body — Push', s:'Strength · 45–50 min', c:'#6d3f9e', focus:'Shoulders and chest. This is what visually shapes the upper body.',
+   warm:'5 min rower or arm cycle + band pull-aparts 2 × 15 + 10 wall push-ups.',
+   ex:[
+    ['Incline Dumbbell Press','4 × 8–10','90 s','Elbows at about 45°, not flared to 90°. Control the lowering.'],
+    ['Seated Shoulder Press','3 × 10','75 s','Press just in front of your forehead, do not arch the back.'],
+    ['Push-ups (knees or full)','3 × 10–12','60 s','Body in one line. Quality over count — stop 1 rep before form breaks.'],
+    ['Dumbbell Lateral Raise','3 × 12–15','45 s','Light weight, lead with the elbows, stop at shoulder height.'],
+    ['Cable / Band Triceps Pushdown','3 × 12','45 s','Elbows pinned to your sides, full squeeze at the bottom.'],
+    ['Chest Fly (machine or dumbbell)','3 × 12','45 s','Slight elbow bend, feel the stretch, do not bounce.'],
+    ['Dead Bug','3 × 10 each side','45 s','Lower back stays glued to the floor throughout.']
+   ]},
+  {d:'Wednesday', t:'Conditioning & Core', s:'Cardio + core · 35–40 min', c:'#12857f', focus:'Fat-loss support without hammering the legs before Thursday.',
+   warm:'5 min easy walk, rising incline every minute.',
+   ex:[
+    ['Incline Treadmill Walk','20 min · incline 8–10, speed 4.5–5 km/h','—','Sweaty but able to talk. This is the single best cardio for you — joint-friendly and repeatable.'],
+    ['Cycle Intervals (optional swap)','8 × 30 s hard / 90 s easy','—','Use this instead of the walk when you want it over faster.'],
+    ['Hanging or Lying Leg Raise','3 × 12','45 s','Lower slowly. Do not swing.'],
+    ['Russian Twist','3 × 20 total','45 s','Rotate from the ribs, not the arms.'],
+    ['Side Plank','3 × 30 s each side','30 s','Stack the hips, lift them high.'],
+    ['Bird Dog','2 × 10 each side','30 s','Slow and long — this is for the lower back you sit on all day.'],
+    ['Cat-Cow + Hip Flexor Stretch','5 min','—','Non-negotiable after 9 hours in a chair.']
+   ]},
+  {d:'Thursday', t:'Lower Body — Hamstrings & Glutes', s:'Strength · 50 min', c:'#b8730c', focus:'Posterior chain. This is what fixes desk-job posture.',
+   warm:'5 min bike + 10 glute bridges, 10 good mornings with an empty bar, 20 leg swings.',
+   ex:[
+    ['Hip Thrust (barbell or machine)','4 × 10','90 s','Chin tucked, drive through the heels, 2 s squeeze at the top.'],
+    ['Sumo / Trap-bar Deadlift','3 × 8','2 min','Wide stance, back flat, squeeze the glutes to stand up.'],
+    ['Seated or Lying Leg Curl','3 × 12','60 s','Slow negative — 3 seconds down.'],
+    ['Step-up (knee-height box)','3 × 10 each leg','60 s','Push through the top leg, do not spring off the bottom foot.'],
+    ['Cable Kickback / Band Abduction','3 × 15 each','45 s','Small range, constant tension, no swinging.'],
+    ['Suitcase Carry','3 × 30 m each side','45 s','Walk tall, resist leaning. Brilliant for the obliques.'],
+    ['Hollow Hold','3 × 30 s','45 s','Ribs down, low back pressed into the floor.']
+   ]},
+  {d:'Friday', t:'Upper Body — Pull + Core', s:'Strength · 45–50 min', c:'#2b6cb0', focus:'Back and biceps. Directly undoes 9 hours of hunching over a laptop.',
+   warm:'5 min rower + band pull-aparts 2 × 20 + 10 scapular shrugs.',
+   ex:[
+    ['Lat Pulldown or Assisted Pull-up','4 × 8–10','90 s','Pull the elbows down to your ribs, chest proud. Lead with the elbows, not the hands.'],
+    ['Seated Cable Row','3 × 10','75 s','Squeeze the shoulder blades together for a full second.'],
+    ['One-arm Dumbbell Row','3 × 10 each','60 s','Flat back, pull to the hip, no torso twist.'],
+    ['Face Pull','3 × 15','45 s','Pull to the forehead, elbows high. Do this one religiously.'],
+    ['Dumbbell Bicep Curl','3 × 12','45 s','Elbows still, no swinging at the shoulder.'],
+    ['Reverse Fly','3 × 15','45 s','Light weight, thumbs down, squeeze at the back.'],
+    ['Plank to Push-up Position','3 × 8 each side','45 s','Hips as still as possible.']
+   ]},
+  {d:'Saturday', t:'Optional — Long Walk & Mobility', s:'Recovery · 40–60 min', c:'#7c6c96', focus:'This is the 5th session only if the week went badly. Otherwise, walk and stretch.',
+   warm:'None needed — start walking at an easy pace.',
+   ex:[
+    ['Outdoor Walk (Sukhna or Rose Garden)','45–60 min','—','Target 8,000–10,000 steps. Sunlight before 10 AM also helps your vitamin D and your sleep.'],
+    ['Full-body Mobility Flow','10 min','—','Hips, thoracic spine, ankles, neck. Everything a chair stiffens.'],
+    ['Foam Roll: quads, glutes, calves','5 min','—','30 seconds per area, slow.'],
+    ['Deep Breathing / Yoga Nidra','10 min','—','On 5–6 hours of sleep this is not optional fluff — it measurably lowers cortisol.']
+   ]},
+  {d:'Sunday', t:'Full Rest + Meal Prep', s:'Prep day · 90 min in the kitchen', c:'#4a3b63', focus:'The day that makes the other six possible. No training.',
+   warm:'—',
+   ex:[
+    ['Soak & boil','chana, rajma, kala chana','—','Cook a big batch, cool completely, portion into boxes and refrigerate for 3 days or freeze for the week.'],
+    ['Sprout','moong / mixed beans','—','Soak Saturday night, tie in a wet cloth Sunday morning, ready by Monday.'],
+    ['Roast','makhana, chana, peanuts, murmura','—','One big batch into airtight jars. One jar goes to your office drawer, one to the car.'],
+    ['Chop & store','onion, tomato, cucumber, carrot batons','—','Airtight boxes with a paper towel inside to absorb moisture.'],
+    ['Grind & keep','moong dal chilla batter, mint-coriander chutney','—','Batter keeps 2 days, chutney keeps 5 days. These two make weekday dinners a 10-minute job.'],
+    ['Weigh in','Same time, empty stomach, after the loo','—','Record it once a week only. Wednesday mornings are the most honest.']
+   ]}
+];
+</script>
+
+<style>
+@media print{
+  body.pr-today .panel:not(#p-today){display:none !important}
+  body.pr-week  .panel:not(#p-week){display:none !important}
+  body.pr-train .panel:not(#p-train){display:none !important}
+  body.pr-today #p-today .panel-hide-print{display:none !important}
+}
+</style>
+
+<script>
+/* =====================================================================
+   APP LAYER — computation, rendering, interaction
+   ===================================================================== */
+
+/* ---------- nutrition engine ---------- */
+const NKEYS=['kcal','protein','carb','fibre','fat','iron','calcium','magnesium','potassium','sodium','zinc','vitc','vita','folate','b12','vitd'];
+
+function blank(){const o={};NKEYS.forEach(k=>o[k]=0);o.wt=0;return o}
+
+function parseIngs(str){
+  return str.split('|').map(part=>{
+    const [rawKey,g] = part.split(':');
+    const flex = rawKey.endsWith('*');
+    const key = flex ? rawKey.slice(0,-1) : rawKey;
+    return {key, g:parseFloat(g), flex, ok:!!F[key]};
+  }).filter(i=>{
+    if(!i.ok) console.warn('Unknown ingredient key:',i.key);
+    return i.ok;
+  });
+}
+
+function nutrition(ings){
+  const t = blank();
+  ings.forEach(i=>{
+    const v = F[i.key][1], f = i.g/100;
+    NKEYS.forEach((k,idx)=> t[k] += v[idx]*f);
+    t.wt += i.g;
+  });
+  NKEYS.forEach(k=> t[k] = Math.round(t[k]*10)/10);
+  t.kcal = Math.round(t.kcal);
+  t.wt = Math.round(t.wt);
+  return t;
+}
+
+/* ---------- build the meal library ---------- */
+const MEALS = {};
+SLOTS.forEach(s=>{
+  MEALS[s.id] = RAW[s.id].map((row,i)=>{
+    const ings = parseIngs(row[1]);
+    const n = nutrition(ings);
+    const tags = (row[3]||'').split(' ').filter(Boolean);
+    if(n.protein >= 15 && !tags.includes('hp')) tags.push('hp');
+    return {
+      id:s.id+'-'+i, slot:s.id, idx:i, name:row[0], ings, n,
+      steps:(row[2]||'').split(';;').filter(Boolean),
+      tags, mins:row[4]||10,
+      summary: ings.slice(0,4).map(x=>F[x.key][0].split(' /')[0].split(' (')[0]+' '+fmtG(x.g)).join(' · ')
+    };
+  });
+});
+
+function fmtG(g){ return g>=1000? (g/1000).toFixed(1)+' kg' : (Number.isInteger(g)? g : g.toFixed(1))+' g'; }
+const TOTAL_MEALS = SLOTS.reduce((a,s)=>a+MEALS[s.id].length,0);
+
+/* ---------- state ---------- */
+let sel = {};
+const LS='niharika-diet-v1';
+function loadState(){
+  let ok=false;
+  try{
+    const s = JSON.parse(localStorage.getItem(LS));
+    if(s && s.sel && SLOTS.every(x=> typeof s.sel[x.id]==='number' && MEALS[x.id][s.sel[x.id]])){ sel=s.sel; ok=true; }
+  }catch(e){}
+  if(!ok){ sel = buildDay(poolOf(), 250); saveState(); }
+}
+function saveState(){ try{ localStorage.setItem(LS, JSON.stringify({sel})); }catch(e){} }
+
+/* ---------- quotes ---------- */
+let qi = Math.floor(Math.random()*QUOTES.length);
+const qEl = document.getElementById('qtext');
+function showQuote(){
+  qEl.classList.add('out');
+  setTimeout(()=>{
+    qEl.textContent = QUOTES[qi];
+    document.getElementById('qcount').textContent = (qi+1)+' / '+QUOTES.length;
+    qEl.classList.remove('out');
+  },420);
+}
+function nextQuote(){ qi=(qi+1)%QUOTES.length; showQuote(); }
+document.getElementById('qnext').onclick = ()=>{ nextQuote(); resetQuoteTimer(); };
+let qTimer;
+function resetQuoteTimer(){ clearInterval(qTimer); qTimer=setInterval(nextQuote,7000); }
+
+/* ---------- tabs ---------- */
+const TABS=[
+  {id:'today',   label:'🍽️ Today'},
+  {id:'numbers', label:'📊 Your numbers'},
+  {id:'week',    label:'🗓️ 7-day plan'},
+  {id:'train',   label:'🏋️ Training'},
+  {id:'browse',  label:'📖 All meals'},
+  {id:'guide',   label:'💡 How to use it'}
+];
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = TABS.map((t,i)=>
+    `<button class="tab${i===0?' on':''}" data-t="${t.id}">${t.label}</button>`).join('');
+  document.querySelectorAll('.tab').forEach(b=> b.onclick=()=>go(b.dataset.t));
+}
+function go(id){
+  document.querySelectorAll('.tab').forEach(b=> b.classList.toggle('on', b.dataset.t===id));
+  document.querySelectorAll('.panel').forEach(p=> p.classList.toggle('on', p.id==='p-'+id));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='week' && !document.getElementById('weekGrid').children.length) buildWeek();
+  if(id==='browse') renderBrowse();
+}
+
+/* ---------- profile maths ---------- */
+const BMR = Math.round(10*P.wt + 6.25*P.ht - 5*29 - 161);
+const TDEE = Math.round(BMR*1.45);
+const BMI = P.wt/Math.pow(P.ht/100,2);
+const GOAL_BMI = P.goalWt/Math.pow(P.ht/100,2);
+const DEFICIT = TDEE - P.kcal;
+const WEEKS = Math.ceil((P.wt-P.goalWt)*7700/(DEFICIT*7));
+function bmiBand(b){
+  if(b<18.5) return ['Underweight','var(--blue)'];
+  if(b<23)   return ['Healthy','var(--green)'];
+  if(b<25)   return ['Upper-normal','var(--amber)'];
+  if(b<30)   return ['Overweight','#dd6b20'];
+  return ['Obese','var(--red)'];
+}
+
+function renderStats(){
+  const band = bmiBand(BMI);
+  const rows=[
+    ['Daily target','1,500','kcal · deficit '+DEFICIT+'/day','rose'],
+    ['Protein','112 g','1.7 g per kg body weight','plum'],
+    ['Current BMI',BMI.toFixed(1),band[0]+' · '+P.ht+' cm, '+P.wt+' kg','amber'],
+    ['Goal weight',P.goalWt+' kg','BMI '+GOAL_BMI.toFixed(1)+' · about '+WEEKS+' weeks','teal'],
+    ['Options per meal','50','× 6 slots = '+TOTAL_MEALS+' meals','blue']
+  ];
+  document.getElementById('statStrip').innerHTML = rows.map(r=>
+    `<div class="stat ${r[3]}"><div class="k">${r[0]}</div><div class="v">${r[1]}</div><div class="n">${r[2]}</div></div>`).join('');
+  document.getElementById('perSlotCount').textContent = MEALS.breakfast.length;
+  document.getElementById('browseCount').textContent = TOTAL_MEALS;
+}
+
+/* ---------- meal cards ---------- */
+function renderCards(){
+  document.getElementById('mealGrid').innerHTML = SLOTS.map(s=>{
+    const m = MEALS[s.id][sel[s.id]];
+    const opts = MEALS[s.id].map((o,i)=>
+      `<option value="${i}"${i===sel[s.id]?' selected':''}>${esc(o.name)} — ${o.n.kcal} kcal</option>`).join('');
+    return `<div class="meal">
+      <div class="meal-top">
+        <div class="slot-ico" style="background:${s.bg}">${s.ico}</div>
+        <div>
+          <div class="st">${s.t}</div>
+          <div class="sm">${s.time} · target ~${s.tgt} kcal</div>
+        </div>
+      </div>
+      <select class="no-print" style="width:100%;padding:9px 12px;border-radius:11px;border:1.5px solid var(--line);font-size:12px;font-weight:600;margin-bottom:12px;background:#fff"
+        onchange="pick('${s.id}', +this.value)">${opts}</select>
+      <div class="meal-name">${esc(m.name)}</div>
+      <div class="meal-sub">${esc(m.summary)}</div>
+      <div class="meal-tags">${tagHtml(m)}</div>
+      <div class="macro-row">
+        <div class="mm"><b>${Math.round(m.n.protein)}</b><span>Protein</span></div>
+        <div class="mm"><b>${Math.round(m.n.carb)}</b><span>Carbs</span></div>
+        <div class="mm"><b>${Math.round(m.n.fat)}</b><span>Fat</span></div>
+        <div class="mm"><b>${Math.round(m.n.fibre)}</b><span>Fibre</span></div>
+      </div>
+      <div class="print-recipe">
+        <b>Ingredients:</b> ${m.ings.map(i=>F[i.key][0]+' '+fmtG(i.g)).join(', ')}<br>
+        <b>Method:</b> ${m.steps.join(' ')}
+      </div>
+      <div class="meal-foot">
+        <span class="kcal">${m.n.kcal} kcal</span>
+        <span class="wt">${m.n.wt} g</span>
+        <span class="grow"></span>
+        <button class="icon-btn no-print" title="Choose from ${MEALS[s.id].length} options" onclick="openPicker('${s.id}')">🔄</button>
+        <button class="icon-btn no-print" title="Recipe &amp; full nutrition" onclick="openRecipe('${s.id}',${sel[s.id]})">📖</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+const TAGN={hp:'High protein',ghar:'Ghar ka khana',quick:'Under 15 min',tiffin:'Tiffin-friendly',nocook:'No cooking'};
+function tagHtml(m){
+  return m.tags.filter(t=>TAGN[t]).map(t=>`<span class="tag ${t}">${TAGN[t]}</span>`).join('')
+       + `<span class="tag">⏱ ${m.mins} min</span>`;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function pick(slot, idx){ sel[slot]=idx; saveState(); renderCards(); renderTotals(); }
+
+/* ---------- totals ---------- */
+function dayTotal(){
+  const t = blank();
+  SLOTS.forEach(s=>{ const n = MEALS[s.id][sel[s.id]].n; NKEYS.forEach(k=> t[k]+=n[k]); t.wt+=n.wt; });
+  NKEYS.forEach(k=> t[k]=Math.round(t[k]*10)/10); t.kcal=Math.round(t.kcal);
+  return t;
+}
+function barColor(pct, cap){
+  if(cap) return pct>100? 'var(--red)' : pct>85? 'var(--amber)' : 'var(--green)';
+  if(pct<50) return 'var(--red)';
+  if(pct<90) return 'var(--amber)';
+  if(pct<=115) return 'var(--green)';
+  return 'var(--blue)';
+}
+function renderTotals(){
+  const t = dayTotal();
+  const pct = Math.min(t.kcal/P.kcal*100, 130);
+  const ring = document.getElementById('calRing');
+  ring.style.setProperty('--p', Math.min(pct,100));
+  ring.style.setProperty('--c', t.kcal>P.kcalHi? 'var(--red)' : t.kcal<P.kcalLo? 'var(--blue)' : 'var(--green)');
+  document.getElementById('ringKcal').textContent = t.kcal.toLocaleString('en-IN');
+
+  document.getElementById('macroBars').innerHTML = NUTS.map(n=>{
+    const v=t[n.k], p=v/n.t*100;
+    return `<div class="mbar"><div class="lab"><span>${n.n}</span><span>${Math.round(v)} / ${n.t} ${n.u}</span></div>
+      <div class="track"><div class="fill" style="width:${Math.min(p,100)}%;background:${barColor(p)}"></div></div></div>`;
+  }).join('');
+
+  document.getElementById('microGrid').innerHTML = MICROS.map(n=>{
+    const v=t[n.k], p=v/n.t*100;
+    const val = v>=100? Math.round(v) : v.toFixed(1);
+    const col = n.sun? 'var(--ink-3)' : barColor(p,n.cap);
+    return `<div class="micro" title="${esc(n.w)}"><div class="lab"><span>${n.n}${n.cap?' ⌈max⌉':''}${n.sun?' ☀️':''}</span><em>${val}/${n.t} ${n.u}</em></div>
+      <div class="track"><div class="fill" style="width:${Math.min(p,100)}%;background:${col}"></div></div></div>`;
+  }).join('');
+
+  // verdict
+  const d = t.kcal - P.kcal;
+  let cls='ok', msg;
+  if(t.kcal < P.kcalLo){ cls='info'; msg=`<b>${Math.abs(d)} kcal under target.</b> Fine occasionally, but going too low on a 4–5 day training week will cost you muscle and sleep. Add a whey shake or a fruit-and-nut snack.`; }
+  else if(t.kcal > P.kcalHi){ cls=''; msg=`<b>${d} kcal over target.</b> Swap the lunch or dinner for a lighter option — or keep it and treat today as a planned higher day.`; }
+  else msg=`<b>Right in the zone.</b> At this intake you are running a ${TDEE-t.kcal} kcal deficit against your ~${TDEE.toLocaleString('en-IN')} kcal maintenance — roughly ${((TDEE-t.kcal)*7/7700).toFixed(2)} kg of fat a week.`;
+  if(t.protein < 95) msg += ` <br><br>⚠️ Protein is at ${Math.round(t.protein)} g — push it above 100 g by picking a paneer, soya, tofu or whey option in any slot.`;
+  document.getElementById('calVerdict').innerHTML = `<div class="note ${cls}">${msg}</div>`;
+
+  // tracker
+  document.getElementById('trkKcal').textContent = t.kcal.toLocaleString('en-IN');
+  document.getElementById('trkFill').style.width = Math.min(t.kcal/P.kcal*100,100)+'%';
+  document.getElementById('trkDelta').textContent = d===0? 'on target' : (d>0? '+'+d : d)+' kcal';
+  document.getElementById('trkMacros').innerHTML = [['protein','P'],['carb','C'],['fat','F'],['fibre','Fib']]
+    .map(([k,l])=>`<div class="c"><b>${Math.round(t[k])}</b><span>${l}</span></div>`).join('');
+}
+
+/* ---------- day builder ----------
+   Every option in a slot already sits inside the same calorie band, so the
+   interesting problem is not calories — it is hitting 112 g of protein and
+   the micronutrient targets on a vegetarian day. So instead of picking one
+   random combination, we sample a few hundred of them and keep the one with
+   the best overall nutrient coverage.                                      */
+const DAYW={protein:6,fibre:2,iron:2,calcium:1,magnesium:1,potassium:1.5,zinc:1.5,vitc:0.5,vita:1.5,folate:0.5,b12:1};
+const DAYT={protein:NUTS[0].t, fibre:NUTS[3].t};
+MICROS.forEach(x=>DAYT[x.k]=x.t);
+const NA_CAP = MICROS.find(x=>x.k==='sodium').t;
+
+function sumOf(picks){
+  const t=blank();
+  SLOTS.forEach(s=>{ const n=MEALS[s.id][picks[s.id]].n; NKEYS.forEach(k=>t[k]+=n[k]); t.wt+=n.wt; });
+  return t;
+}
+function dayScore(t){
+  let s=0;
+  for(const k in DAYW) s += DAYW[k]*Math.min(t[k]/DAYT[k], 1.15);
+  s -= Math.abs(t.kcal-P.kcal)/60;
+  if(t.sodium>NA_CAP) s -= 2;
+  return s;
+}
+function poolOf(filterFn){
+  const pool={};
+  SLOTS.forEach(s=>{
+    let p = MEALS[s.id].map((m,i)=>({m,i}));
+    if(filterFn){ const f=p.filter(x=>filterFn(x.m,s.id)); if(f.length) p=f; }
+    pool[s.id]=p.map(x=>x.i);
+  });
+  return pool;
+}
+function buildDay(pool, tries){
+  let best=null, bs=-1e9;
+  for(let n=0;n<tries;n++){
+    const picks={};
+    SLOTS.forEach(s=>{ const a=pool[s.id]; picks[s.id]=a[Math.floor(Math.random()*a.length)]; });
+    const sc=dayScore(sumOf(picks));
+    if(sc>bs){ bs=sc; best=picks; }
+  }
+  return best;
+}
+function apply(picks,msg){
+  sel=picks; saveState(); renderCards(); renderTotals(); go('today'); if(msg) toast(msg);
+}
+function randomizeDay(){ apply(buildDay(poolOf(),250), 'Balanced day built ✓'); }
+function surpriseMe(){ apply(buildDay(poolOf(),1), 'Pure luck — check the protein bar 🎲'); }
+function gharKaKhana(){ apply(buildDay(poolOf(m=>m.tags.includes('ghar')),200), 'Simple ghar ka khana day 🏠'); }
+function maxProteinDay(){
+  const pool=poolOf((m,id)=>{
+    const top=MEALS[id].slice().sort((a,b)=>b.n.protein-a.n.protein).slice(0,8).map(x=>x.name);
+    return top.includes(m.name);
+  });
+  apply(buildDay(pool,150), 'Highest-protein day 💪');
+}
+
+/* ---------- sheet / modal ---------- */
+const ovl=document.getElementById('ovl'), sheet=document.getElementById('sheet');
+function openSheet(html){ sheet.innerHTML=html; ovl.classList.add('on'); document.body.style.overflow='hidden'; }
+function closeSheet(){ ovl.classList.remove('on'); document.body.style.overflow=''; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); });
+
+let pickerSlot=null, pickerFilter='', pickerQ='';
+function openPicker(slotId){
+  pickerSlot=slotId; pickerFilter=''; pickerQ='';
+  const s=SLOTS.find(x=>x.id===slotId);
+  openSheet(`
+    <div class="sheet-head">
+      <div class="slot-ico" style="background:${s.bg}">${s.ico}</div>
+      <div><div class="eyebrow">${s.time} · target ~${s.tgt} kcal</div><h4>${s.t} — ${MEALS[slotId].length} options</h4></div>
+      <button class="x-btn" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="pickbar">
+      <input id="pq" placeholder="Search…" oninput="pickerQ=this.value; drawOpts()">
+      <div id="pf" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    </div>
+    <div class="sheet-body"><div class="opt-list" id="optList"></div></div>`);
+  document.getElementById('pf').innerHTML = ['','hp','ghar','quick','tiffin','nocook']
+    .map(f=>`<button class="fchip${f===''?' on':''}" data-f="${f}" onclick="setPF('${f}')">${f===''?'All':TAGN[f]}</button>`).join('');
+  drawOpts();
+}
+function setPF(f){
+  pickerFilter=f;
+  document.querySelectorAll('#pf .fchip').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  drawOpts();
+}
+function drawOpts(){
+  const q=pickerQ.toLowerCase();
+  const list = MEALS[pickerSlot].map((m,i)=>({m,i}))
+    .filter(({m})=> (!pickerFilter||m.tags.includes(pickerFilter)) &&
+      (!q || m.name.toLowerCase().includes(q) || m.summary.toLowerCase().includes(q)));
+  document.getElementById('optList').innerHTML = list.length? list.map(({m,i})=>`
+    <button class="opt${i===sel[pickerSlot]?' sel':''}" onclick="pick('${pickerSlot}',${i});closeSheet()">
+      <div style="flex:1">
+        <div class="on-name">${esc(m.name)}${i===sel[pickerSlot]?' ✓':''}</div>
+        <div class="on-sub">${esc(m.summary)} · ⏱ ${m.mins} min · ${m.n.wt} g</div>
+      </div>
+      <div class="on-k">${m.n.kcal} kcal<em>${Math.round(m.n.protein)} g protein</em></div>
+    </button>`).join('') : `<div class="note info">No option matches that. Clear the search or pick another filter.</div>`;
+}
+
+function openRecipe(slotId, idx){
+  const m = MEALS[slotId][idx], s = SLOTS.find(x=>x.id===slotId);
+  const rows = MICROS.map(n=>{
+    const v=m.n[n.k], p=Math.round(v/n.t*100);
+    return `<tr><td>${n.n}</td><td>${v>=100?Math.round(v):v.toFixed(1)} ${n.u}</td><td class="pc">${p}%</td></tr>`;
+  }).join('');
+  openSheet(`
+    <div class="sheet-head">
+      <div class="slot-ico" style="background:${s.bg}">${s.ico}</div>
+      <div><div class="eyebrow">${s.t} · ${s.time}</div><h4>${esc(m.name)}</h4></div>
+      <button class="x-btn" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="recipe-hero">
+        <div class="rstat"><b>${m.n.kcal}</b><span>kcal</span></div>
+        <div class="rstat"><b>${m.n.wt}</b><span>grams total</span></div>
+        <div class="rstat"><b>${Math.round(m.n.protein)}</b><span>g protein</span></div>
+        <div class="rstat"><b>${m.mins}</b><span>min prep</span></div>
+      </div>
+      <div class="meal-tags">${tagHtml(m)}</div>
+
+      <div class="sub-h">Ingredients &amp; weights</div>
+      <table class="ing">${m.ings.map(i=>`<tr><td>${F[i.key][0]}</td><td>${fmtG(i.g)}</td></tr>`).join('')}
+        <tr><td><b>Total plate weight</b></td><td><b>${m.n.wt} g</b></td></tr></table>
+
+      <div class="sub-h">How to make it</div>
+      <ol class="steps">${m.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
+
+      <div class="sub-h">Macros</div>
+      <table class="nut-table">
+        <tr><th>Nutrient</th><th>Amount</th><th>% of day's target</th></tr>
+        ${NUTS.map(n=>`<tr><td>${n.n}</td><td>${Math.round(m.n[n.k]*10)/10} ${n.u}</td><td class="pc">${Math.round(m.n[n.k]/n.t*100)}%</td></tr>`).join('')}
+      </table>
+
+      <div class="sub-h">Vitamins &amp; minerals</div>
+      <table class="nut-table">
+        <tr><th>Micronutrient</th><th>Amount</th><th>% of day's target</th></tr>
+        ${rows}
+      </table>
+
+      <div style="margin-top:18px" class="note info">${esc(s.note)}</div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-rose btn-sm" onclick="pick('${slotId}',${idx});closeSheet()">Use this for ${s.t.toLowerCase()}</button>
+        <button class="btn btn-ghost btn-sm" onclick="openPicker('${slotId}')">See all ${MEALS[slotId].length} options</button>
+      </div>
+    </div>`);
+}
+
+/* ---------- export ---------- */
+function planText(){
+  const t = dayTotal();
+  const L=[];
+  L.push("NIHARIKA'S DIET PLAN");
+  L.push('Generated '+new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}));
+  L.push('Target 1,500 kcal · 112 g protein · vegetarian');
+  L.push('='.repeat(56));
+  SLOTS.forEach(s=>{
+    const m = MEALS[s.id][sel[s.id]];
+    L.push('');
+    L.push(`${s.ico} ${s.t.toUpperCase()}  (${s.time})`);
+    L.push(`   ${m.name} — ${m.n.kcal} kcal · ${m.n.wt} g · ${Math.round(m.n.protein)} g protein`);
+    L.push('   Ingredients: '+m.ings.map(i=>F[i.key][0]+' '+fmtG(i.g)).join(', '));
+    m.steps.forEach((st,i)=> L.push(`   ${i+1}. ${st}`));
+  });
+  L.push('');
+  L.push('='.repeat(56));
+  L.push(`DAY TOTAL: ${t.kcal} kcal · ${Math.round(t.protein)} g protein · ${Math.round(t.carb)} g carbs · ${Math.round(t.fat)} g fat · ${Math.round(t.fibre)} g fibre`);
+  L.push('MICROS: '+MICROS.map(n=>`${n.n} ${n.k==='vitd'||n.k==='b12'? t[n.k].toFixed(1):Math.round(t[n.k])}${n.u} (${Math.round(t[n.k]/n.t*100)}%)`).join(' · '));
+  L.push('');
+  L.push('TRAINING WEEK');
+  TRAIN.forEach(d=>{
+    L.push('');
+    L.push(`${d.d} — ${d.t} (${d.s})`);
+    d.ex.forEach(e=> L.push(`   • ${e[0]} — ${e[1]}${e[2]!=='—'? ' · rest '+e[2]:''}`));
+  });
+  L.push('');
+  L.push('Estimates from per-ingredient reference values. Not medical advice.');
+  return L.join('\n');
+}
+function download(name, text){
+  const b = new Blob([text],{type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+function printAs(cls){
+  closeSheet();
+  document.body.classList.add(cls);
+  setTimeout(()=>{ window.print(); setTimeout(()=>document.body.classList.remove(cls),800); },220);
+}
+function openExport(){
+  openSheet(`
+    <div class="sheet-head">
+      <div class="slot-ico" style="background:var(--rose-l)">⬇︎</div>
+      <div><div class="eyebrow">Export</div><h4>Take the plan with you</h4></div>
+      <button class="x-btn" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="opt-list">
+        <button class="opt" onclick="printAs('pr-today')"><div style="flex:1"><div class="on-name">🖨️ Print today's plan (PDF)</div><div class="on-sub">Today's 6 meals with ingredients, recipes and totals. Choose "Save as PDF" in the print dialog.</div></div></button>
+        <button class="opt" onclick="printAs('pr-week')"><div style="flex:1"><div class="on-name">🗓️ Print the 7-day plan</div><div class="on-sub">One page with all seven days — stick it on the fridge.</div></div></button>
+        <button class="opt" onclick="printAs('pr-train')"><div style="flex:1"><div class="on-name">🏋️ Print the training split</div><div class="on-sub">All exercises, sets, reps and form cues for the gym.</div></div></button>
+        <button class="opt" onclick="download('niharika-diet-plan.txt', planText()); closeSheet()"><div style="flex:1"><div class="on-name">📄 Download as text file</div><div class="on-sub">Full day + recipes + training week. Easy to WhatsApp.</div></div></button>
+        <button class="opt" onclick="copyText(planText())"><div style="flex:1"><div class="on-name">📋 Copy plan to clipboard</div><div class="on-sub">Paste it into WhatsApp, Notes or an email.</div></div></button>
+      </div>
+      <div class="note info" style="margin-top:16px">Your selections are saved in this browser automatically — close the tab and today's plan will still be here.</div>
+    </div>`);
+}
+function copyText(txt){
+  navigator.clipboard?.writeText(txt).then(
+    ()=>{ toast('Copied to clipboard ✓'); closeSheet(); },
+    ()=>{ download('niharika-diet-plan.txt', txt); closeSheet(); }
+  );
+}
+function toast(msg){
+  const d=document.createElement('div');
+  d.textContent=msg;
+  d.style.cssText='position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:#1f1235;color:#fff;padding:12px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:300;box-shadow:var(--sh-l)';
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),2200);
+}
+
+/* ---------- grocery list ---------- */
+function openGrocery(){
+  const agg={};
+  SLOTS.forEach(s=> MEALS[s.id][sel[s.id]].ings.forEach(i=>{
+    if(i.key==='water') return;
+    agg[i.key]=(agg[i.key]||0)+i.g;
+  }));
+  const rows = Object.entries(agg).sort((a,b)=> F[a[0]][0].localeCompare(F[b[0]][0]))
+    .map(([k,g])=>`<tr><td>${F[k][0]}</td><td>${fmtG(Math.round(g*10)/10)}</td></tr>`).join('');
+  const txt = 'GROCERY LIST — today\'s plan\n\n'+Object.entries(agg).sort((a,b)=>F[a[0]][0].localeCompare(F[b[0]][0]))
+    .map(([k,g])=>'• '+F[k][0]+' — '+fmtG(Math.round(g*10)/10)).join('\n');
+  openSheet(`
+    <div class="sheet-head">
+      <div class="slot-ico" style="background:var(--teal-l)">🧺</div>
+      <div><div class="eyebrow">Shopping</div><h4>Everything today's plan needs</h4></div>
+      <button class="x-btn" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="note" style="margin-bottom:16px">Raw weights for one person, one day. Multiply by the number of days you are prepping — and buy dals, chana and rajma in bulk once a month.</div>
+      <table class="ing">${rows}</table>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-rose btn-sm" onclick="copyText(${JSON.stringify(txt).replace(/"/g,'&quot;')})">📋 Copy list</button>
+        <button class="btn btn-ghost btn-sm" onclick="download('grocery-list.txt', ${JSON.stringify(txt).replace(/"/g,'&quot;')})">⬇︎ Download</button>
+      </div>
+    </div>`);
+}
+
+/* ---------- 7-day plan ---------- */
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DAYNOTE=['Leg day — eat the carbs','Upper body','Cardio + core','Leg day','Upper body','Long walk','Rest &amp; prep'];
+let week=null;
+function buildWeek(reroll){
+  if(!week || reroll){
+    const used={}; SLOTS.forEach(s=> used[s.id]=new Set());
+    week = DAYS.map((d,di)=>{
+      // no slot repeats a meal across the week, and each day is nutrient-optimised
+      const pool = poolOf((m,id)=> !used[id].has(m.idx));
+      const day = buildDay(pool, 220);
+      SLOTS.forEach(s=> used[s.id].add(day[s.id]));
+      return day;
+    });
+  }
+  document.getElementById('weekGrid').innerHTML = week.map((day,di)=>{
+    let k=0,pr=0;
+    const body=SLOTS.map(s=>{
+      const m=MEALS[s.id][day[s.id]]; k+=m.n.kcal; pr+=m.n.protein;
+      return `<div class="dm"><div class="dl">${s.ico} ${s.t}</div><div class="dn">${esc(m.name)}</div><div class="dk">${m.n.kcal} kcal · ${Math.round(m.n.protein)} g P</div></div>`;
+    }).join('');
+    return `<div class="day">
+      <div class="day-h"><b>${DAYS[di]}</b><span>${DAYNOTE[di]}</span></div>
+      <div class="day-body">${body}</div>
+      <div class="day-f"><span>${k} kcal</span><span>${Math.round(pr)} g protein</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- browse all meals ---------- */
+let browseLimit=60, browseFilter='';
+function renderBrowse(keep){
+  if(!keep) browseLimit=60;
+  if(!document.getElementById('browseFilters').children.length){
+    document.getElementById('browseFilters').innerHTML=['','hp','ghar','quick','tiffin','nocook']
+      .map(f=>`<button class="fchip${f===''?' on':''}" data-b="${f}" onclick="setBF('${f}')">${f===''?'Everything':TAGN[f]}</button>`).join('');
+  }
+  const q=(document.getElementById('browseSearch').value||'').toLowerCase();
+  let all=[];
+  SLOTS.forEach(s=> MEALS[s.id].forEach((m,i)=> all.push({m,i,s})));
+  all=all.filter(({m})=> (!browseFilter||m.tags.includes(browseFilter)) &&
+    (!q||m.name.toLowerCase().includes(q)||m.summary.toLowerCase().includes(q)||m.steps.join(' ').toLowerCase().includes(q)));
+  document.getElementById('browseGrid').innerHTML = all.slice(0,browseLimit).map(({m,i,s})=>`
+    <button class="bcard" onclick="openRecipe('${s.id}',${i})">
+      <div class="bf"><span class="s">${s.ico} ${s.t}</span></div>
+      <div class="bn">${esc(m.name)}</div>
+      <div class="bs">${esc(m.summary)}</div>
+      <div class="bf"><span class="k">${m.n.kcal} kcal</span><span class="p">${Math.round(m.n.protein)} g protein</span><span class="s">${m.n.wt} g</span><span class="s">⏱ ${m.mins} min</span></div>
+    </button>`).join('') || '<div class="note info">Nothing matched. Try "paneer", "dal", "oats" or clear the filters.</div>';
+  const more=document.getElementById('browseMore');
+  more.style.display = all.length>browseLimit? 'inline-flex':'none';
+  more.textContent = `Show more (${all.length-browseLimit} left)`;
+}
+function setBF(f){
+  browseFilter=f;
+  document.querySelectorAll('#browseFilters .fchip').forEach(b=>b.classList.toggle('on',b.dataset.b===f));
+  renderBrowse();
+}
+
+/* ---------- numbers panel ---------- */
+function renderNumbers(){
+  const band=bmiBand(BMI), gband=bmiBand(GOAL_BMI);
+  const pos=x=>Math.max(2,Math.min(98,((x-15)/(35-15))*100));
+  document.getElementById('p-numbers').innerHTML=`
+    <div class="sec-head"><div><h3>Why 1,500 kcal — the actual arithmetic</h3>
+      <p>No app guesswork. These are the standard equations, run on your numbers.</p></div></div>
+
+    <div class="two-col" style="margin-bottom:16px">
+      <div class="card pad">
+        <div class="eyebrow">Step 1 · Energy</div>
+        <h3 class="serif" style="font-size:20px;margin:5px 0 14px">From BMR to your target</h3>
+        <div class="calc-row"><div class="l">Mifflin–St Jeor BMR<em>10×${P.wt} + 6.25×${P.ht} − 5×age − 161</em></div><div class="r">${BMR.toLocaleString('en-IN')} kcal</div></div>
+        <div class="calc-row"><div class="l">Activity factor<em>Desk job 9–6, ${P.trainDays} training, ~2 h sitting in the car</em></div><div class="r">× 1.45</div></div>
+        <div class="calc-row"><div class="l">Maintenance (TDEE)<em>What you burn on an average day</em></div><div class="r">${TDEE.toLocaleString('en-IN')} kcal</div></div>
+        <div class="calc-row"><div class="l">Planned deficit<em>${Math.round(DEFICIT/TDEE*100)}% below maintenance — aggressive enough to see change, gentle enough to keep muscle and your sanity</em></div><div class="r">− ${DEFICIT} kcal</div></div>
+        <div class="calc-row big"><div class="l"><b>Your daily target</b><em>Anything between ${P.kcalLo.toLocaleString('en-IN')} and ${P.kcalHi.toLocaleString('en-IN')} is a good day</em></div><div class="r">${P.kcal.toLocaleString('en-IN')} kcal</div></div>
+        <div class="note" style="margin-top:16px">Do not go below 1,300 kcal. On 5–6 hours of sleep and 4–5 gym sessions, a bigger deficit backfires — you lose muscle, your hair thins and the weight comes back the moment you eat normally.</div>
+      </div>
+
+      <div class="card pad">
+        <div class="eyebrow">Step 2 · Where you stand</div>
+        <h3 class="serif" style="font-size:20px;margin:5px 0 6px">BMI ${BMI.toFixed(1)} — ${band[0]}</h3>
+        <p style="font-size:13px;color:var(--ink-3);font-weight:600">${P.ht} cm · ${P.wt} kg. BMI ignores muscle, so treat it as a rough map, not a verdict — your waist measurement and how your clothes fit matter more.</p>
+        <div class="bmi-scale">
+          <div class="bmi-pin"><span style="left:${pos(BMI)}%">You · ${BMI.toFixed(1)}</span></div>
+          <div class="bmi-bar">
+            <div style="width:17.5%;background:#90cdf4"></div>
+            <div style="width:22.5%;background:#68d391"></div>
+            <div style="width:10%;background:#f6cf7b"></div>
+            <div style="width:25%;background:#f6ad55"></div>
+            <div style="width:25%;background:#fc8181"></div>
+          </div>
+          <div class="bmi-ticks"><span style="width:17.5%">15</span><span style="width:22.5%">18.5</span><span style="width:10%">23</span><span style="width:25%">25</span><span style="width:25%">30+</span></div>
+        </div>
+        <div class="calc-row" style="margin-top:14px"><div class="l">Healthy range for 166 cm<em>Indian cut-offs (BMI 18.5–23) are lower than Western ones</em></div><div class="r">51–63 kg</div></div>
+        <div class="calc-row"><div class="l">Goal weight<em>BMI ${GOAL_BMI.toFixed(1)} — ${gband[0]}</em></div><div class="r">${P.goalWt} kg</div></div>
+        <div class="calc-row"><div class="l">To lose<em>At ${DEFICIT} kcal/day ≈ ${(DEFICIT*7/7700).toFixed(2)} kg per week</em></div><div class="r">${(P.wt-P.goalWt).toFixed(1)} kg</div></div>
+        <div class="calc-row"><div class="l">Realistic finish line<em>Add a few weeks for plateaus, travel and periods — that is normal</em></div><div class="r">~${WEEKS} weeks</div></div>
+        <div class="note ok" style="margin-top:16px">Track two things alongside the scale: your <b>waist at the navel</b> (target under 80 cm — this predicts health far better than BMI does) and one <b>photo a month</b> in the same light and clothes. On a plan with this much strength training, there will be weeks where the scale sulks and the tape measure moves anyway. Believe the tape.</div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-bottom:16px">
+      <div class="card pad">
+        <div class="eyebrow">Step 3 · Macros</div>
+        <h3 class="serif" style="font-size:20px;margin:5px 0 14px">How the 1,500 is split</h3>
+        <div class="calc-row"><div class="l">Protein — ${NUTS[0].t} g<em>1.7 g per kg. High on purpose: it protects muscle in a deficit and keeps you full. Hardest number to hit on a veg diet — chase it first.</em></div><div class="r">${NUTS[0].t*4} kcal · 30%</div></div>
+        <div class="calc-row"><div class="l">Carbs — ${NUTS[1].t} g<em>Roti, rice, oats, fruit. Not the enemy; they fuel your lifting.</em></div><div class="r">${NUTS[1].t*4} kcal · 43%</div></div>
+        <div class="calc-row"><div class="l">Fat — ${NUTS[2].t} g<em>Ghee, nuts, seeds, paneer. Below 40 g and your hormones and skin suffer.</em></div><div class="r">${NUTS[2].t*9} kcal · 27%</div></div>
+        <div class="calc-row"><div class="l">Fibre — ${NUTS[3].t} g<em>The appetite control switch. Dals, sabzi, fruit with the skin on.</em></div><div class="r">target</div></div>
+        <div class="note ok" style="margin-top:14px">Protein sources that do the heavy lifting for you: paneer, tofu, soya chunks, whey, dals, sprouts, curd, sattu, roasted chana. Every high-protein option in this dashboard is tagged.</div>
+      </div>
+
+      <div class="card pad">
+        <div class="eyebrow">Step 4 · The things food alone will not fix</div>
+        <h3 class="serif" style="font-size:20px;margin:5px 0 14px">Your three real bottlenecks</h3>
+        <div class="tl">
+          <div class="tl-item"><div class="tl-dot">1</div><div><b>Sleep: 5–6 hours</b><p>This is the biggest brake on your results, bigger than any food swap. Short sleep raises ghrelin (hunger), lowers leptin (fullness) and pushes cortisol up — which is exactly the hormone that parks fat around the middle. Getting to 7 hours will do more than cutting another 100 kcal. Fixed lights-out time, no screens for the last 30 minutes, and magnesium-rich foods (pumpkin seeds, almonds, ragi) at dinner.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">2</div><div><b>9 hours of sitting + 2 hours of driving</b><p>Your NEAT — the calories you burn just existing — is very low. Stand for every phone call, take a 5-minute walk each hour, use the stairs, and get 6,000–8,000 steps outside the gym. This is worth 150–250 kcal a day, which is a whole snack.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">3</div><div><b>Vegetarian-diet blind spots</b><p>Get B12, vitamin D, ferritin and TSH tested once. Veg diets commonly run low on B12 and iron, and Indian women are very frequently low on vitamin D — all three feel exactly like "no energy" and "not losing weight". Fix them with a test and a supplement, not with a smaller lunch.</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card pad">
+      <div class="eyebrow">Timeline</div>
+      <h3 class="serif" style="font-size:20px;margin:5px 0 16px">What the next four months look like</h3>
+      <div class="two-col">
+        <div class="tl">
+          <div class="tl-item"><div class="tl-dot">W1</div><div><b>Weeks 1–2 · Get the system running</b><p>Expect 1–1.5 kg down, mostly water. Hit 1,500 kcal and 100 g protein on 5 of 7 days. Do not touch anything else.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">W3</div><div><b>Weeks 3–6 · Real fat loss begins</b><p>About 0.4–0.5 kg a week. Clothes loosen before the scale is impressive. Take photos on week 1 and week 6.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">W7</div><div><b>Weeks 7–10 · First plateau</b><p>Normal, not failure. Add 1,000 steps a day and audit portions honestly before touching calories.</p></div></div>
+        </div>
+        <div class="tl">
+          <div class="tl-item"><div class="tl-dot">W11</div><div><b>Weeks 11–14 · Shape changes</b><p>Around 63–64 kg with visibly better shoulders, arms and waist — that is the strength training paying out.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">W15</div><div><b>Weeks 15–16 · ~60 kg</b><p>Goal weight, BMI ${GOAL_BMI.toFixed(1)}, and a body that actually holds its shape.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">→</div><div><b>After that · Maintenance</b><p>Push calories back up to ~1,800–1,900 over 3–4 weeks, keep the lifting, keep the protein. This is the part most people skip, and it is why they regain.</p></div></div>
+        </div>
+      </div>
+      <div class="note info" style="margin-top:16px">Weigh once a week — Wednesday morning, empty stomach, after the loo, same clothes. Expect the scale to jump 1–2 kg around your period and in weeks with heavy travel or restaurant food. That is water, not fat. Judge by the 4-week trend line only.</div>
+    </div>`;
+}
+
+/* ---------- training panel ---------- */
+function renderTrain(){
+  document.getElementById('p-train').innerHTML=`
+    <div class="sec-head"><div><h3>Your 5-day training week</h3>
+      <p>Two lower-body days, two upper-body days, one conditioning day — plus an optional Saturday. Built to fit a 9–6 job and 5–6 hours of sleep.</p></div>
+      <div class="right no-print"><button class="btn btn-dark btn-sm" onclick="printAs('pr-train')">🖨️ Print for the gym</button></div></div>
+    <div class="split-pills">
+      <span class="spill">💪 Strength 4 days</span><span class="spill">🏃 Cardio 1–2 days</span>
+      <span class="spill">⏱️ 45–55 min per session</span><span class="spill">😴 Rest: Sunday, and Saturday if needed</span>
+      <span class="spill">📈 Add 1–2 kg the week a rep range feels easy</span>
+    </div>
+    ${TRAIN.map((d,i)=>`
+      <div class="w-day${i===0?' open':''}">
+        <button class="w-head" onclick="this.parentNode.classList.toggle('open')">
+          <div class="w-num" style="background:${d.c}">${d.d.slice(0,3)}</div>
+          <div><div class="wt-1">${d.t}</div><div class="wt-2">${d.s}</div></div>
+          <span class="w-chev">▾</span>
+        </button>
+        <div class="w-body">
+          <div class="note info" style="margin-bottom:14px"><b>Focus:</b> ${d.focus}${d.warm!=='—'?`<br><b>Warm-up:</b> ${d.warm}`:''}</div>
+          <table class="ex">
+            <thead><tr><th style="width:31%">Exercise</th><th style="width:19%">Sets × reps</th><th style="width:12%">Rest</th><th>Form cue</th></tr></thead>
+            <tbody>${d.ex.map(e=>`<tr><td>${e[0]}</td><td class="sets">${e[1]}</td><td class="sets">${e[2]}</td><td class="cue">${e[3]}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>`).join('')}
+    <div class="card pad" style="margin-top:8px">
+      <div class="eyebrow">Non-negotiables</div>
+      <h3 class="serif" style="font-size:20px;margin:5px 0 12px">Five rules that matter more than the exercise list</h3>
+      <div class="tl">
+        <div class="tl-item"><div class="tl-dot">1</div><div><b>Progressive overload, written down</b><p>Keep a note on your phone with weight × reps for every set. Beat last week by one rep or 1 kg. Without this you are just doing cardio with dumbbells.</p></div></div>
+        <div class="tl-item"><div class="tl-dot">2</div><div><b>Lift first, cardio after</b><p>If you only have 40 minutes, do the weights and cut the treadmill. Strength training is what keeps your muscle while you are eating in a deficit.</p></div></div>
+        <div class="tl-item"><div class="tl-dot">3</div><div><b>Protein within 2 hours of training</b><p>Whey in the car, or paneer/soya at dinner. The evening slot in this dashboard is built for exactly this.</p></div></div>
+        <div class="tl-item"><div class="tl-dot">4</div><div><b>Four sessions beats five badly</b><p>On a week with 5 hours of sleep a night, drop Saturday. Recovery is where the results are actually made.</p></div></div>
+        <div class="tl-item"><div class="tl-dot">5</div><div><b>Steps outside the gym</b><p>6,000–8,000 a day. Park further away, take a 10-minute walk after lunch, take calls standing. This quietly doubles your deficit.</p></div></div>
+      </div>
+    </div>`;
+}
+
+/* ---------- guide panel ---------- */
+function renderGuide(){
+  document.getElementById('p-guide').innerHTML=`
+    <div class="sec-head"><div><h3>How to actually use this</h3><p>Five minutes of setup, then it runs itself.</p></div></div>
+    <div class="two-col">
+      <div class="card pad">
+        <div class="eyebrow">The daily loop</div>
+        <h3 class="serif" style="font-size:20px;margin:5px 0 14px">Four steps, every night</h3>
+        <div class="tl">
+          <div class="tl-item"><div class="tl-dot">1</div><div><b>Open "Today" after dinner</b><p>Hit <b>🎲 Randomize day</b>, or tap 🔄 on any card to choose from all 50 options for that slot. Watch the bar at the bottom — anywhere between 1,400 and 1,600 kcal is a good day.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">2</div><div><b>Tap 📖 for the recipe</b><p>Exact gram weights, method, macros and micros. Nothing needs guessing.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">3</div><div><b>Hit 🧺 Grocery list</b><p>It totals every ingredient in today's plan so you know what to take out of the fridge tonight.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">4</div><div><b>Pack the tiffin before bed</b><p>Filter for <b>Tiffin-friendly</b> at lunch. Morning-you will not do this. Night-you must.</p></div></div>
+        </div>
+      </div>
+      <div class="card pad">
+        <div class="eyebrow">Rules of thumb</div>
+        <h3 class="serif" style="font-size:20px;margin:5px 0 14px">When life interferes</h3>
+        <div class="calc-row"><div class="l"><b>Wedding, party or restaurant dinner</b><em>Keep breakfast and lunch exactly as planned, use a no-cook high-protein evening snack, and eat what you like at dinner. One meal cannot undo a week.</em></div></div>
+        <div class="calc-row"><div class="l"><b>Home late and exhausted</b><em>Moong Dal Khichdi with Curd, or Curd–Papaya–Roasted Chana. Never skip dinner — you will eat twice as much at 11 PM.</em></div></div>
+        <div class="calc-row"><div class="l"><b>Period week</b><em>Scale up 1–2 kg, cravings up, energy down. Keep protein high, add iron-rich options (kala chana, palak, ragi, til), swap heavy leg days for walking. Do not diet harder.</em></div></div>
+        <div class="calc-row"><div class="l"><b>Ate out and overshot</b><em>Do nothing. No skipping breakfast, no double cardio. Just return to the plan at the next meal.</em></div></div>
+        <div class="calc-row"><div class="l"><b>Weekend</b><em>Use the 🏠 Ghar ka khana button — it fills the whole day with the simple everyday food the house already cooks.</em></div></div>
+      </div>
+    </div>
+    <div class="two-col" style="margin-top:16px">
+      <div class="card pad">
+        <div class="eyebrow">Water, tea &amp; the rest</div>
+        <h3 class="serif" style="font-size:20px;margin:5px 0 14px">Things not counted in the meal cards</h3>
+        <div class="calc-row"><div class="l">Water<em>Keep a 1-litre bottle at your desk and finish two of them. Add a third on gym days.</em></div><div class="r">2.5–3 L</div></div>
+        <div class="calc-row"><div class="l">Tea / coffee<em>Without sugar. With 100 ml toned milk, chai is about 60 kcal — two a day is fine, but count them.</em></div><div class="r">max 2–3</div></div>
+        <div class="calc-row"><div class="l">Salt<em>The sodium bar on the Today page is a ceiling. Pickle, papad, packaged snacks and soy sauce are where it hides.</em></div><div class="r">&lt; 5 g</div></div>
+        <div class="calc-row"><div class="l">Cooking oil<em>Already counted in each recipe. Household total should stay near 500 ml per person per month.</em></div><div class="r">3–4 tsp/day</div></div>
+        <div class="calc-row"><div class="l">Sugar<em>Not banned, just budgeted. Gur or honey where a recipe calls for it, nothing extra.</em></div><div class="r">&lt; 15 g</div></div>
+      </div>
+      <div class="card pad">
+        <div class="eyebrow">Honest limitations</div>
+        <h3 class="serif" style="font-size:20px;margin:5px 0 14px">What this tool is not</h3>
+        <div class="tl">
+          <div class="tl-item"><div class="tl-dot">i</div><div><b>The numbers are good estimates, not measurements</b><p>Every value is computed from standard per-100 g reference data for each ingredient. Real food varies — a "medium" roti, how much oil actually stays in the pan, how ripe the banana is. Expect ±10%. That is accurate enough for fat loss; it is not lab work.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">ii</div><div><b>No BMI report was used</b><p>This plan was built from height, weight, training frequency and sleep only. If you have a body-composition or blood report — especially thyroid, ferritin, B12, vitamin D, HbA1c or a PCOS diagnosis — those change the recommendation and should be reviewed with a doctor or dietitian.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">iii</div><div><b>It cannot see you</b><p>If you feel dizzy, your hair is shedding, your periods become irregular, or your sleep gets worse — eat more, not less, and get checked. Those are signals, not weaknesses.</p></div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ---------- init ---------- */
+loadState();
+renderTabs();
+renderStats();
+renderCards();
+renderTotals();
+renderNumbers();
+renderTrain();
+renderGuide();
+showQuote();
+resetQuoteTimer();
+document.getElementById('heroProtein').textContent = NUTS[0].t+' g';
+</script>
+</body>
+</html>
