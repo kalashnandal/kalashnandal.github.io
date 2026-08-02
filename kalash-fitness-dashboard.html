@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Kalash's personalised body-recomposition dashboard — 350 meal options with eggs and chicken, recipes, macros, micros and a wrist-safe 5-day training split.">
-<meta name="theme-color" content="#1f1235">
+<meta name="theme-color" content="#101012">
 <title>Kalash's Recomp Dashboard</title>
 <link rel="icon" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,20 +13,23 @@
 <style>
 /* ============ TOKENS ============ */
 :root{
-  --ink:#1f1235; --ink-2:#4a3b63; --ink-3:#7c6c96;
-  --line:#eae3f2; --line-2:#f4eff9;
-  --bg:#fbf8fc; --card:#ffffff;
-  --rose:#e0567f; --rose-d:#c33c66; --rose-l:#fdeef3;
-  --plum:#6d3f9e; --plum-l:#f3edfb;
-  --teal:#12857f; --teal-l:#e6f6f4;
-  --amber:#b8730c; --amber-l:#fdf3e2;
-  --blue:#2b6cb0; --blue-l:#eaf2fb;
-  --green:#2f855a; --green-l:#e8f6ee;
-  --red:#c53030;
+  --ink:#101012; --ink-2:#45454b; --ink-3:#83838c;
+  --line:#e7e7ea; --line-2:#f4f4f5;
+  --bg:#fafaf9; --card:#ffffff;
+  /* gold is the only chromatic colour in this system */
+  --rose:#c9a227; --rose-d:#8a6a12; --rose-l:#fbf6e6;
+  --plum:#1c1c20; --plum-l:#f3f3f5;
+  --teal:#5c5c64; --teal-l:#f1f1f2;
+  --amber:#a08a4a; --amber-l:#f8f3e6;
+  --blue:#83838c; --blue-l:#f2f2f3;
+  --green:#c9a227; --green-l:#fbf6e6;
+  --gold-bd:#ecdfb4;
+  --under:#cfcfd4; --over:#101012;
+  --red:#101012;
   --r-s:10px; --r-m:16px; --r-l:22px; --r-xl:30px;
-  --sh-s:0 1px 2px rgba(31,18,53,.05), 0 2px 8px rgba(31,18,53,.04);
-  --sh-m:0 4px 12px rgba(31,18,53,.06), 0 16px 32px -16px rgba(31,18,53,.14);
-  --sh-l:0 24px 60px -20px rgba(31,18,53,.28);
+  --sh-s:0 1px 2px rgba(16,16,18,.05), 0 2px 8px rgba(16,16,18,.04);
+  --sh-m:0 4px 12px rgba(16,16,18,.06), 0 16px 32px -16px rgba(16,16,18,.14);
+  --sh-l:0 24px 60px -20px rgba(16,16,18,.28);
   --sans:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --serif:'Fraunces', Georgia, serif;
   --maxw:1220px;
@@ -40,9 +43,9 @@ body{
 body::before{
   content:''; position:fixed; inset:0; z-index:-2; pointer-events:none;
   background:
-    radial-gradient(760px 420px at 88% -8%, #f7e4ee 0%, transparent 62%),
-    radial-gradient(620px 420px at 4% 8%, #ece3fb 0%, transparent 60%),
-    radial-gradient(700px 500px at 60% 108%, #e4f4f2 0%, transparent 62%);
+    radial-gradient(760px 420px at 88% -8%, #f6f0dd 0%, transparent 62%),
+    radial-gradient(620px 420px at 4% 8%, #f0f0ef 0%, transparent 60%),
+    radial-gradient(700px 500px at 60% 108%, #eceae4 0%, transparent 62%);
 }
 h1,h2,h3,h4{margin:0; line-height:1.18; letter-spacing:-.02em}
 p{margin:0}
@@ -56,14 +59,15 @@ a{color:var(--plum)}
 /* ============ QUOTE BAR ============ */
 #quotebar{
   position:sticky; top:0; z-index:60;
-  background:linear-gradient(100deg,#1f1235,#3b1f52 45%,#6d2b52);
-  color:#fff; box-shadow:0 2px 14px rgba(31,18,53,.28);
+  background:linear-gradient(100deg,#0b0b0c,#18181b 48%,#241f14);
+  border-bottom:1px solid rgba(201,162,39,.28);
+  color:#fff; box-shadow:0 2px 14px rgba(16,16,18,.28);
 }
 #quotebar .qrow{
   max-width:var(--maxw); margin:0 auto; padding:9px 16px;
   display:flex; align-items:center; gap:12px; min-height:42px;
 }
-#qspark{font-size:15px; flex:none; animation:tw 3.2s ease-in-out infinite}
+#qspark{font-size:15px; color:var(--rose); flex:none; animation:tw 3.2s ease-in-out infinite}
 @keyframes tw{0%,100%{opacity:.65;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
 #qtext{
   flex:1; font-size:13.5px; font-weight:600; letter-spacing:.005em;
@@ -84,7 +88,7 @@ header.top{padding:20px 0 6px}
 .brand-group{display:flex; align-items:center; gap:13px; min-width:0}
 .brandmark{
   width:44px; height:44px; border-radius:14px; flex:none; display:grid; place-items:center;
-  background:linear-gradient(145deg,var(--rose),var(--plum)); color:#fff;
+  background:linear-gradient(145deg,#26262b,#0d0d0f); color:var(--rose); border:1px solid rgba(201,162,39,.35);
   font-family:var(--serif); font-weight:900; font-size:20px; box-shadow:var(--sh-m);
 }
 .top-title{font-size:20px; font-weight:800}
@@ -103,11 +107,11 @@ header.top{padding:20px 0 6px}
 }
 .btn:active{transform:scale(.96)}
 .btn-dark{background:var(--ink); color:#fff; box-shadow:var(--sh-m)}
-.btn-dark:hover{background:#31204d}
-.btn-rose{background:linear-gradient(135deg,var(--rose),var(--rose-d)); color:#fff; box-shadow:0 8px 20px -8px rgba(224,86,127,.7)}
+.btn-dark:hover{background:#2a2a30}
+.btn-rose{background:linear-gradient(135deg,#d9b545,#b8901f); color:#101012; box-shadow:0 8px 20px -8px rgba(184,144,31,.6)}
 .btn-rose:hover{filter:brightness(1.06)}
 .btn-ghost{background:#fff; color:var(--ink); border:1.5px solid var(--line); box-shadow:var(--sh-s)}
-.btn-ghost:hover{border-color:var(--rose); color:var(--rose-d)}
+.btn-ghost:hover{border-color:var(--rose); color:var(--rose-d); background:var(--rose-l)}
 .btn-sm{padding:7px 13px; font-size:12px}
 
 /* ============ TABS ============ */
@@ -137,17 +141,17 @@ header.top{padding:20px 0 6px}
 /* ============ HERO ============ */
 .hero{
   position:relative; border-radius:var(--r-xl); overflow:hidden; margin-bottom:16px;
-  background:linear-gradient(115deg,#241540 0%,#3d2059 38%,#7a2f57 100%);
+  background:linear-gradient(115deg,#0d0d0f 0%,#1c1c20 42%,#2b2519 100%);
   box-shadow:var(--sh-l); color:#fff; min-height:300px; display:flex;
 }
 .hero-copy{position:relative; z-index:3; padding:32px 30px; max-width:600px}
 .hero-badge{
   display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px;
-  background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.2);
+  background:rgba(201,162,39,.16); border:1px solid rgba(201,162,39,.4); color:#f0dfa8;
   font-size:10.5px; font-weight:800; letter-spacing:.11em; text-transform:uppercase;
 }
 .hero h2{font-family:var(--serif); font-size:clamp(30px,5.4vw,46px); font-weight:900; margin:14px 0 10px}
-.hero h2 em{font-style:normal; background:linear-gradient(100deg,#ffd9e6,#ffb3c9 60%,#e3c9ff); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+.hero h2 em{font-style:normal; background:linear-gradient(100deg,#f6e3ad,#d9b545 55%,#a5842a); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
 .hero p.lede{font-size:14.5px; color:rgba(255,255,255,.84); max-width:470px; font-weight:500}
 .hero-chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:18px}
 .hchip{
@@ -164,7 +168,7 @@ header.top{padding:20px 0 6px}
 .hero-photo img{width:100%; height:100%; object-fit:cover; object-position:51% 26%; display:block}
 .hero::after{
   content:''; position:absolute; inset:0; z-index:2; pointer-events:none;
-  background:linear-gradient(90deg,rgba(36,21,64,.94) 0%,rgba(36,21,64,.6) 44%,rgba(36,21,64,.12) 72%,transparent 100%);
+  background:linear-gradient(90deg,rgba(11,11,12,.94) 0%,rgba(11,11,12,.62) 44%,rgba(11,11,12,.14) 72%,transparent 100%);
 }
 @media(max-width:820px){
   .hero{flex-direction:column; min-height:0}
@@ -175,7 +179,7 @@ header.top{padding:20px 0 6px}
   .hero-photo img{object-position:51% 24%}
   .hero-photo::after{
     content:''; position:absolute; inset:0;
-    background:linear-gradient(180deg,rgba(36,21,64,.25) 0%,rgba(36,21,64,.1) 45%,rgba(45,26,74,.85) 88%,#2d1a4a 100%);
+    background:linear-gradient(180deg,rgba(11,11,12,.25) 0%,rgba(11,11,12,.12) 45%,rgba(20,20,23,.86) 88%,#16161a 100%);
   }
   .hero::after{display:none}
   .hero-copy{padding:6px 22px 26px; max-width:none}
@@ -204,7 +208,7 @@ header.top{padding:20px 0 6px}
   box-shadow:var(--sh-s); display:flex; flex-direction:column; position:relative;
   transition:box-shadow .25s, transform .25s, border-color .25s;
 }
-.meal:hover{box-shadow:var(--sh-m); transform:translateY(-3px); border-color:#e0d3f0}
+.meal:hover{box-shadow:var(--sh-m); transform:translateY(-3px); border-color:var(--gold-bd)}
 .meal-top{display:flex; align-items:center; gap:11px; margin-bottom:13px}
 .slot-ico{
   width:42px; height:42px; border-radius:13px; flex:none; display:grid; place-items:center; font-size:20px;
@@ -219,7 +223,7 @@ header.top{padding:20px 0 6px}
   font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
   padding:4px 8px; border-radius:7px; background:var(--line-2); color:var(--ink-2);
 }
-.tag.hp{background:var(--rose-l); color:var(--rose-d)}
+.tag.hp{background:#f6ecc9; color:var(--rose-d)}
 .tag.ghar{background:var(--amber-l); color:var(--amber)}
 .tag.quick{background:var(--teal-l); color:var(--teal)}
 .tag.tiffin{background:var(--blue-l); color:var(--blue)}
@@ -251,7 +255,7 @@ header.top{padding:20px 0 6px}
   transition:--p .6s;
 }
 .ring::after{
-  content:''; position:absolute; inset:11px; border-radius:50%; background:#fff; box-shadow:inset 0 2px 8px rgba(31,18,53,.06);
+  content:''; position:absolute; inset:11px; border-radius:50%; background:#fff; box-shadow:inset 0 2px 8px rgba(16,16,18,.06);
 }
 .ring-in{position:absolute; inset:0; display:grid; place-content:center; text-align:center; z-index:2}
 .ring-in b{font-family:var(--serif); font-size:27px; font-weight:900; font-variant-numeric:tabular-nums; line-height:1}
@@ -270,7 +274,7 @@ header.top{padding:20px 0 6px}
 
 /* ============ MODAL ============ */
 .ovl{
-  position:fixed; inset:0; z-index:200; background:rgba(31,18,53,.5); backdrop-filter:blur(5px);
+  position:fixed; inset:0; z-index:200; background:rgba(16,16,18,.5); backdrop-filter:blur(5px);
   display:none; align-items:flex-end; justify-content:center; padding:0;
 }
 .ovl.on{display:flex; animation:fade .25s}
@@ -335,11 +339,11 @@ ol.steps li::before{
 .nut-table td:first-child{font-weight:700}
 .nut-table td.pc{color:var(--ink-3); font-weight:700}
 .note{
-  background:var(--amber-l); border:1px solid #f5e0b8; border-radius:14px; padding:13px 15px;
-  font-size:12.5px; color:#6b4708; font-weight:600; line-height:1.55;
+  background:var(--rose-l); border:1px solid var(--gold-bd); border-radius:14px; padding:13px 15px;
+  font-size:12.5px; color:#6b5410; font-weight:600; line-height:1.55;
 }
-.note.info{background:var(--blue-l); border-color:#cfe1f5; color:#1c4a7a}
-.note.ok{background:var(--green-l); border-color:#c7e8d5; color:#1f5c3d}
+.note.info{background:#f4f4f5; border-color:#e4e4e7; color:#3a3a41}
+.note.ok{background:#fff; border-color:var(--rose); color:#45454b}
 
 /* ============ NUMBERS PANEL ============ */
 .two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px}
@@ -379,7 +383,7 @@ ol.steps li::before{
 /* ============ WEEK / BROWSE ============ */
 .week-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(196px,1fr)); gap:13px}
 .day{background:#fff; border:1px solid var(--line); border-radius:var(--r-m); overflow:hidden; box-shadow:var(--sh-s)}
-.day-h{padding:11px 14px; background:linear-gradient(135deg,var(--ink),#432a63); color:#fff}
+.day-h{padding:11px 14px; background:linear-gradient(135deg,#101012,#2b2519); color:#fff}
 .day-h b{font-size:13.5px; font-weight:800}
 .day-h span{display:block; font-size:10.5px; opacity:.7; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-top:1px}
 .day-body{padding:6px 14px 12px}
@@ -394,7 +398,7 @@ ol.steps li::before{
   background:#fff; border:1px solid var(--line); border-radius:var(--r-m); padding:14px; text-align:left;
   box-shadow:var(--sh-s); transition:.2s; display:flex; flex-direction:column; gap:6px;
 }
-.bcard:hover{transform:translateY(-2px); box-shadow:var(--sh-m); border-color:#e0d3f0}
+.bcard:hover{transform:translateY(-2px); box-shadow:var(--sh-m); border-color:var(--gold-bd)}
 .bcard .bn{font-size:14px; font-weight:800; line-height:1.3}
 .bcard .bs{font-size:11.5px; color:var(--ink-3); font-weight:600; line-height:1.45; flex:1}
 .bcard .bf{display:flex; gap:6px; align-items:center; font-size:11px; font-weight:800; color:var(--ink-2); flex-wrap:wrap}
@@ -438,7 +442,7 @@ table.ex .cue{font-size:11.5px; color:var(--ink-3); font-weight:500}
 #tracker{
   position:fixed; left:0; right:0; bottom:0; z-index:70;
   background:rgba(255,255,255,.9); backdrop-filter:blur(16px) saturate(160%);
-  border-top:1px solid var(--line); box-shadow:0 -12px 34px -18px rgba(31,18,53,.34);
+  border-top:1px solid var(--line); box-shadow:0 -12px 34px -18px rgba(16,16,18,.34);
   padding:11px 0 calc(11px + env(safe-area-inset-bottom));
 }
 #tracker .trow{max-width:var(--maxw); margin:0 auto; padding:0 18px; display:flex; align-items:center; gap:16px}
@@ -474,7 +478,7 @@ footer.foot{padding:26px 0 20px; text-align:center; font-size:11.5px; color:var(
   .card,.meal,.day,.w-day,.stat{box-shadow:none !important; border:1px solid #ddd !important; break-inside:avoid}
   .hero{background:#fff !important; color:#000 !important; box-shadow:none; border:1px solid #ddd; min-height:0}
   .hero::after{display:none}
-  .hero h2 em{-webkit-text-fill-color:#c33c66}
+  .hero h2 em{-webkit-text-fill-color:#8a6a12}
   .hero p.lede{color:#333 !important; background:transparent !important}
   .hero-badge, .hchip{color:#333 !important; background:#f6f6f6 !important; border-color:#ddd !important}
   .stat-strip{grid-template-columns:repeat(5,1fr); gap:8px}
@@ -577,10 +581,10 @@ footer.foot{padding:26px 0 20px; text-align:center; font-size:11.5px; color:var(
         <h3 class="serif" style="font-size:20px; margin:5px 0 16px">Vitamins &amp; minerals today</h3>
         <div class="micro-grid" id="microGrid"></div>
         <div class="legend">
-          <span><i style="background:var(--green)"></i>On target</span>
+          <span><i style="background:var(--rose)"></i>On target</span>
           <span><i style="background:var(--amber)"></i>50–90%</span>
-          <span><i style="background:var(--red)"></i>Under 50%</span>
-          <span><i style="background:var(--blue)"></i>Above target</span>
+          <span><i style="background:var(--under)"></i>Under 50%</span>
+          <span><i style="background:var(--over)"></i>Above target</span>
           <span>⌈max⌉ = ceiling, stay under it</span>
         </div>
         <div class="note info" style="margin-top:14px;font-size:11.5px">
@@ -650,7 +654,7 @@ footer.foot{padding:26px 0 20px; text-align:center; font-size:11.5px; color:var(
     </div>
     <div class="tmid">
       <div class="top"><span class="trk-target">Target 2,100 kcal</span><span id="trkDelta"></span></div>
-      <div class="track" style="height:11px"><div class="fill" id="trkFill" style="width:0%; background:linear-gradient(90deg,var(--rose),var(--plum))"></div></div>
+      <div class="track" style="height:11px"><div class="fill" id="trkFill" style="width:0%; background:linear-gradient(90deg,#8a6a12,#d9b545)"></div></div>
     </div>
     <div class="tp" id="trkMacros"></div>
   </div>
@@ -826,18 +830,18 @@ const MICROS = [
 
 /* ---------- 5. THE DAY, BUILT AROUND TWO DRIVES AND AN 8 PM SESSION ---------- */
 const SLOTS = [
-  {id:'wakeup',     ico:'🌅', t:'Morning Ritual',    time:'6:45 AM',  tgt:20,  bg:'#fdf3e2', note:'Before anything else. One litre of water before you touch the coffee.'},
-  {id:'breakfast',  ico:'🍳', t:'Breakfast',         time:'7:45 AM',  tgt:450, bg:'#fdeef3', note:'Eat before the 9 AM drive, not in the car. This meal decides your 11 AM hunger.'},
-  {id:'carsnack',   ico:'🚗', t:'On the Road',       time:'10:30 AM', tgt:200, bg:'#eaf2fb', note:'Inside the 9-11 drive. One-handed, no mess, packed the night before.'},
-  {id:'lunch',      ico:'🍱', t:'Lunch',             time:'1:30 PM',  tgt:560, bg:'#e8f6ee', note:'Your biggest meal. Protein-led so the afternoon does not collapse.'},
-  {id:'evening',    ico:'💻', t:'Desk Snack',        time:'4:30 PM',  tgt:180, bg:'#f3edfb', note:'Stops you arriving at the gym starving at 8 PM.'},
-  {id:'preworkout', ico:'🏋️', t:'Car → Gym',         time:'6:30 PM',  tgt:200, bg:'#fdf3e2', note:'Eaten on the evening drive, 60-90 minutes before the first set.'},
-  {id:'dinner',     ico:'🌙', t:'Post-Workout Dinner',time:'9:45 PM', bg:'#e6f6f4', tgt:500, note:'Within an hour of finishing. The highest-protein meal of your day.'}
+  {id:'wakeup',     ico:'🌅', t:'Morning Ritual',    time:'6:45 AM',  tgt:20,  bg:'#faf5e4', note:'Before anything else. One litre of water before you touch the coffee.'},
+  {id:'breakfast',  ico:'🍳', t:'Breakfast',         time:'7:45 AM',  tgt:450, bg:'#f4f4f5', note:'Eat before the 9 AM drive, not in the car. This meal decides your 11 AM hunger.'},
+  {id:'carsnack',   ico:'🚗', t:'On the Road',       time:'10:30 AM', tgt:200, bg:'#ececed', note:'Inside the 9-11 drive. One-handed, no mess, packed the night before.'},
+  {id:'lunch',      ico:'🍱', t:'Lunch',             time:'1:30 PM',  tgt:560, bg:'#f8f2e0', note:'Your biggest meal. Protein-led so the afternoon does not collapse.'},
+  {id:'evening',    ico:'💻', t:'Desk Snack',        time:'4:30 PM',  tgt:180, bg:'#f2f2f4', note:'Stops you arriving at the gym starving at 8 PM.'},
+  {id:'preworkout', ico:'🏋️', t:'Car → Gym',         time:'6:30 PM',  tgt:200, bg:'#f6ecc9', note:'Eaten on the evening drive, 60-90 minutes before the first set.'},
+  {id:'dinner',     ico:'🌙', t:'Post-Workout Dinner',time:'9:45 PM', bg:'#e9e9ea', tgt:500, note:'Within an hour of finishing. The highest-protein meal of your day.'}
 ];
 
 /* ---------- 6. 5-DAY SPLIT, BUILT AROUND A POST-SURGICAL RIGHT WRIST ---------- */
 const TRAIN = [
-  {d:'Monday', t:'Lower Body — Quad Focus', s:'Strength · 50 min', c:'#e0567f',
+  {d:'Monday', t:'Lower Body — Quad Focus', s:'Strength · 50 min', c:'#c9a227',
    focus:'Legs carry half your muscle and burn the most. Start the week here. Zero wrist loading in this entire session.',
    warm:'5 min bike + 10 bodyweight squats, 10 glute bridges, 20 leg swings each side.',
    ex:[
@@ -849,7 +853,7 @@ const TRAIN = [
     ['Standing Calf Raise (machine)','3 × 15','45 s','Pad on the shoulders, not the hands. Full stretch at the bottom.'],
     ['Machine Crunch or Cable Crunch','3 × 15','45 s','Core work is for a strong midsection, not for burning belly fat. Different jobs.']
    ]},
-  {d:'Tuesday', t:'Upper Push — Machine Led', s:'Strength · 45 min', c:'#6d3f9e',
+  {d:'Tuesday', t:'Upper Push — Machine Led', s:'Strength · 45 min', c:'#101012',
    focus:'Chest and shoulders with no barbell and no palm loading. Machines and neutral-grip dumbbells only.',
    warm:'5 min rower or arm cycle + wrist circles and gentle flexor stretch + band pull-aparts 2 × 15.',
    ex:[
@@ -861,7 +865,7 @@ const TRAIN = [
     ['Overhead Cable Triceps Extension','2 × 12','45 s','Elbows in, slow stretch at the bottom.'],
     ['Forearm Plank','3 × 40 s','45 s','On your ELBOWS. Never a push-up plank on flat palms — that is direct wrist extension under load.']
    ]},
-  {d:'Wednesday', t:'Conditioning & Core', s:'Cardio + core · 40 min', c:'#12857f',
+  {d:'Wednesday', t:'Conditioning & Core', s:'Cardio + core · 40 min', c:'#5c5c64',
    focus:'The fat-loss engine, and a session your legs recover from before Thursday. This is also the day your abdominal fat number actually responds to.',
    warm:'5 min easy walk, raising the incline every minute.',
    ex:[
@@ -873,7 +877,7 @@ const TRAIN = [
     ['Dead Bug','3 × 10 each side','30 s','Lower back stays pressed into the floor throughout.'],
     ['Wrist Mobility & Stretch','5 min','—','Gentle, pain-free range only. Flexion, extension, rotations. Do this daily, not just on gym days.']
    ]},
-  {d:'Thursday', t:'Lower Body — Posterior Chain', s:'Strength · 50 min', c:'#b8730c',
+  {d:'Thursday', t:'Lower Body — Posterior Chain', s:'Strength · 50 min', c:'#8a6a12',
    focus:'Glutes and hamstrings — the muscles nine hours of sitting and four hours of driving switch off.',
    warm:'5 min bike + 10 glute bridges, 10 bodyweight good mornings, 20 leg swings.',
    ex:[
@@ -885,7 +889,7 @@ const TRAIN = [
     ['Back Extension (45°)','3 × 12','60 s','Bodyweight first. Squeeze the glutes at the top rather than hinging from the lower back.'],
     ['Seated Calf Raise','3 × 15','45 s','Pad on the knees. No hands needed.']
    ]},
-  {d:'Friday', t:'Upper Pull + Arms', s:'Strength · 45 min', c:'#2b6cb0', 
+  {d:'Friday', t:'Upper Pull + Arms', s:'Strength · 45 min', c:'#2a2a30', 
    focus:'Back and biceps — the direct antidote to four hours a day hunched over a steering wheel. Straps on everything heavy.',
    warm:'5 min rower + wrist mobility + band pull-aparts 2 × 20 + scapular shrugs.',
    ex:[
@@ -897,7 +901,7 @@ const TRAIN = [
     ['Cable Curl with rope','3 × 12','45 s','Rope again lets the wrist sit naturally.'],
     ['Rear Delt Machine','3 × 15','45 s','Forearms on the pads, light weight, squeeze at the back.']
    ]},
-  {d:'Saturday', t:'Optional — Steps & Mobility', s:'Recovery · 45–60 min', c:'#7c6c96',
+  {d:'Saturday', t:'Optional — Steps & Mobility', s:'Recovery · 45–60 min', c:'#a5a5ad',
    focus:'Only if the week went well and the wrist feels good. Otherwise walk and go home.',
    warm:'None needed — start walking easy.',
    ex:[
@@ -906,7 +910,7 @@ const TRAIN = [
     ['Wrist Rehab Work','10 min','—','Whatever your physio prescribed. Pain-free range, controlled, daily. This is what gets you back to heavier lifting later.'],
     ['Foam Roll: quads, glutes, calves, lats','8 min','—','30 seconds per area, slow.']
    ]},
-  {d:'Sunday', t:'Full Rest + Meal Prep', s:'Prep day · 90 min in the kitchen', c:'#4a3b63',
+  {d:'Sunday', t:'Full Rest + Meal Prep', s:'Prep day · 90 min in the kitchen', c:'#45454b',
    focus:'The day that makes the other six possible. No training at all.',
    warm:'—',
    ex:[
@@ -1458,17 +1462,17 @@ preworkout:[
 <style>
 .ate{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);
      font-size:12px;font-weight:800;background:#fff;color:var(--ink-3);transition:.18s}
-.ate:hover{border-color:var(--green);color:var(--green)}
-.ate.on{background:var(--green-l);border-color:#9ad3b4;color:var(--green)}
+.ate:hover{border-color:var(--rose);color:var(--rose-d)}
+.ate.on{background:var(--rose-l);border-color:var(--gold-bd);color:var(--rose-d)}
 .ate .box{width:16px;height:16px;border-radius:5px;border:2px solid currentColor;display:grid;place-items:center;font-size:9px;line-height:1}
-.meal.done{border-color:#bfe6d1;background:linear-gradient(180deg,#f5fbf8,#fff)}
-.meal.done .meal-name{color:var(--green)}
-.tag.chicken{background:#fdeceb;color:#b03a2e}
-.tag.egg{background:#fdf3e2;color:var(--amber)}
-.tag.veg{background:var(--green-l);color:var(--green)}
-.tag.car{background:var(--blue-l);color:var(--blue)}
+.meal.done{border-color:var(--gold-bd);background:linear-gradient(180deg,#fdfaef,#fff)}
+.meal.done .meal-name{color:var(--rose-d)}
+.tag.chicken{background:#101012;color:#f0dfa8}
+.tag.egg{background:var(--rose-l);color:var(--rose-d);border:1px solid var(--gold-bd)}
+.tag.veg{background:#fff;color:var(--ink-2);border:1px solid var(--line)}
+.tag.car{background:#ececed;color:var(--ink-2)}
 .hint{font-size:10.5px;color:var(--ink-3);font-weight:700;display:block;margin-top:1px}
-.tp .c.eat b{color:var(--green)}
+.tp .c.eat b{color:var(--rose-d)}
 @media print{
   .ate,.no-print{display:none !important}
   .meal.done{background:#fff}
@@ -1704,19 +1708,20 @@ function dayTotal(){
   NKEYS.forEach(k=> t[k]=Math.round(t[k]*10)/10); t.kcal=Math.round(t.kcal);
   return t;
 }
+/* monochrome-to-gold ramp: pale grey (low) -> tan -> gold (on target) -> black (over) */
 function barColor(pct, cap){
-  if(cap) return pct>100? 'var(--red)' : pct>85? 'var(--amber)' : 'var(--green)';
-  if(pct<50) return 'var(--red)';
+  if(cap) return pct>100? 'var(--over)' : pct>85? 'var(--amber)' : 'var(--rose)';
+  if(pct<50) return 'var(--under)';
   if(pct<90) return 'var(--amber)';
-  if(pct<=115) return 'var(--green)';
-  return 'var(--blue)';
+  if(pct<=115) return 'var(--rose)';
+  return 'var(--over)';
 }
 function renderTotals(){
   const t = dayTotal();
   const pct = Math.min(t.kcal/P.kcal*100, 130);
   const ring = document.getElementById('calRing');
   ring.style.setProperty('--p', Math.min(pct,100));
-  ring.style.setProperty('--c', t.kcal>P.kcalHi? 'var(--red)' : t.kcal<P.kcalLo? 'var(--blue)' : 'var(--green)');
+  ring.style.setProperty('--c', t.kcal>P.kcalHi? 'var(--over)' : t.kcal<P.kcalLo? 'var(--under)' : 'var(--rose)');
   document.getElementById('ringKcal').textContent = t.kcal.toLocaleString('en-IN');
 
   document.getElementById('macroBars').innerHTML = NUTS.map(n=>{
@@ -1728,7 +1733,7 @@ function renderTotals(){
   document.getElementById('microGrid').innerHTML = MICROS.map(n=>{
     const v=t[n.k], p=v/n.t*100;
     const val = v>=100? Math.round(v) : v.toFixed(1);
-    const col = n.sun? 'var(--ink-3)' : barColor(p,n.cap);
+    const col = n.sun? 'var(--under)' : barColor(p,n.cap);
     return `<div class="micro" title="${esc(n.w)}"><div class="lab"><span>${n.n}${n.cap?' ⌈max⌉':''}${n.sun?' ☀️':''}</span><em>${val}/${n.t} ${n.u}</em></div>
       <div class="track"><div class="fill" style="width:${Math.min(p,100)}%;background:${col}"></div></div></div>`;
   }).join('');
@@ -1977,7 +1982,7 @@ function copyText(txt){
 function toast(msg){
   const d=document.createElement('div');
   d.textContent=msg;
-  d.style.cssText='position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:#1f1235;color:#fff;padding:12px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:300;box-shadow:var(--sh-l)';
+  d.style.cssText='position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:#101012;color:#f0dfa8;padding:12px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:300;box-shadow:var(--sh-l)';
   document.body.appendChild(d);
   setTimeout(()=>d.remove(),2200);
 }
@@ -2095,10 +2100,10 @@ function renderNumbers(){
         <div class="bmi-scale">
           <div class="bmi-pin"><span style="left:${pos(P.bf)}%">You · ${P.bf}%</span></div>
           <div class="bmi-bar">
-            <div style="width:26.7%;background:#68d391"></div>
-            <div style="width:16.7%;background:#9ae6b4"></div>
-            <div style="width:23.3%;background:#f6ad55"></div>
-            <div style="width:33.3%;background:#fc8181"></div>
+            <div style="width:26.7%;background:#c9a227"></div>
+            <div style="width:16.7%;background:#e0cd91"></div>
+            <div style="width:23.3%;background:#b7b7be"></div>
+            <div style="width:33.3%;background:#2a2a30"></div>
           </div>
           <div class="bmi-ticks"><span style="width:26.7%">5%</span><span style="width:16.7%">13%</span><span style="width:23.3%">18%</span><span style="width:33.3%">25%+</span></div>
         </div>
