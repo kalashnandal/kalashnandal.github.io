@@ -1471,6 +1471,7 @@ preworkout:[
 .tag.egg{background:var(--rose-l);color:var(--rose-d);border:1px solid var(--gold-bd)}
 .tag.veg{background:#fff;color:var(--ink-2);border:1px solid var(--line)}
 .tag.car{background:#ececed;color:var(--ink-2)}
+.mfp-btn{font-family:var(--sans);font-size:9.5px;font-weight:900;letter-spacing:.04em}
 .hint{font-size:10.5px;color:var(--ink-3);font-weight:700;display:block;margin-top:1px}
 .tp .c.eat b{color:var(--rose-d)}
 @media print{
@@ -1531,6 +1532,7 @@ SLOTS.forEach(s=>{
       id:s.id+'-'+i, slot:s.id, idx:i, name:row[0], ings, n,
       steps:(row[2]||'').split(';;').filter(Boolean),
       tags, mins:row[4]||10,
+      mfpName: 'K · '+row[0],
       summary: ings.slice(0,4).map(x=>F[x.key][0].split(' /')[0].split(' (')[0]+' '+fmtG(x.g)).join(' · ')
     };
   });
@@ -1688,6 +1690,7 @@ function renderCards(){
         <span class="grow"></span>
         <button class="icon-btn no-print" title="Choose from ${MEALS[s.id].length} options" onclick="openPicker('${s.id}')">🔄</button>
         <button class="icon-btn no-print" title="Recipe &amp; full nutrition" onclick="openRecipe('${s.id}',${sel[s.id]})">📖</button>
+        <button class="icon-btn mfp-btn no-print" title="Add to MyFitnessPal" onclick="openMfp('${s.id}',${sel[s.id]})">MFP</button>
       </div>
     </div>`;
   }).join('');
@@ -1863,6 +1866,98 @@ function drawOpts(){
     </button>`).join('') : `<div class="note info">No option matches that. Clear the search or pick another filter.</div>`;
 }
 
+/* ---------- MyFitnessPal export ----------
+   MFP's API is private and closed to new applications, and its recipe-URL
+   importer is Premium-only. But "Create a Food" is still free, and we already
+   know each meal's exact totals — so every meal becomes ONE custom food.
+   Enter it once; after that it logs in two taps forever.
+   Vitamins are converted to % Daily Value because that is the unit MFP's
+   custom-food form asks for.                                              */
+const DV={vita:900, vitc:90, calcium:1300, iron:18};      // US label Daily Values
+const pdv=(v,k)=> Math.round(v/DV[k]*100);
+
+function mfpRows(m){
+  const n=m.n;
+  return [
+    ['Serving size',      '1 plate ('+n.wt+' g)', 1],
+    ['Servings per container','1', 1],
+    ['Calories',          Math.round(n.kcal), 1],
+    ['Total Fat',         Math.round(n.fat)+' g', 1],
+    ['Sodium',            Math.round(n.sodium)+' mg', 1],
+    ['Potassium',         Math.round(n.potassium)+' mg', 1],
+    ['Total Carbohydrate',Math.round(n.carb)+' g', 1],
+    ['Dietary Fiber',     Math.round(n.fibre)+' g', 1],
+    ['Protein',           Math.round(n.protein)+' g', 1],
+    ['Vitamin A',         pdv(n.vita,'vita')+' %', 1],
+    ['Vitamin C',         pdv(n.vitc,'vitc')+' %', 1],
+    ['Calcium',           pdv(n.calcium,'calcium')+' %', 1],
+    ['Iron',              pdv(n.iron,'iron')+' %', 1]
+  ];
+}
+function mfpText(m){
+  return 'MyFitnessPal — Create a Food\n' + m.mfpName + '\n' +
+    mfpRows(m).map(r=>'  '+r[0]+': '+r[1]).join('\n') +
+    '\n  (leave saturated fat, trans, cholesterol and sugars blank)';
+}
+function mfpAllText(){
+  return 'MYFITNESSPAL SETUP SHEET — enter each of these once under Create a Food\n' +
+    'Goals to set first: 2,100 kcal/day. On the free tier macros are set by\n' +
+    'percentage, so use Protein 32% / Carbs 41% / Fat 27% — that is 170 g / 215 g / 62 g.\n' +
+    '='.repeat(62) + '\n\n' +
+    SLOTS.map(sl=>{const m=MEALS[sl.id][sel[sl.id]];
+      return sl.ico+' '+sl.t.toUpperCase()+' ('+sl.time+')\n'+mfpText(m);}).join('\n\n') + '\n';
+}
+function openMfp(slotId, idx){
+  const m=MEALS[slotId][idx], sl=SLOTS.find(x=>x.id===slotId);
+  openSheet(`
+    <div class="sheet-head">
+      <div class="slot-ico" style="background:${sl.bg}">📲</div>
+      <div><div class="eyebrow">MyFitnessPal · create a food</div><h4>${esc(m.name)}</h4></div>
+      <button class="x-btn" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="note" style="margin-bottom:16px"><b>One-time setup, then two taps a day.</b>
+        In MFP go to <b>Diary → Add Food → Create a Food</b> and copy these in. MFP saves it to
+        your personal database, so from tomorrow you search <b>${esc(m.name)}</b> and log it.
+        You realistically eat 20–25 distinct meals, so this is one evening of setup, not 350.</div>
+      <table class="ing">
+        <tr><td><b>Description</b></td><td>${esc(m.mfpName)}</td></tr>
+        ${mfpRows(m).map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}
+      </table>
+      <div class="note info" style="margin-top:14px">Leave <b>saturated fat, trans fat, cholesterol and sugars</b> blank —
+        this dashboard does not track them, and MFP accepts a food without them. Vitamins are shown as
+        % Daily Value because that is the unit MFP's form uses.</div>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-rose btn-sm" onclick="copyText(mfpTextFor('${slotId}',${idx}))">📋 Copy this food</button>
+        <button class="btn btn-ghost btn-sm" onclick="openMfpSheet()">📄 All 7 of today's meals</button>
+      </div>
+    </div>`);
+}
+function mfpTextFor(slotId,idx){ return mfpText(MEALS[slotId][idx]); }
+function openMfpSheet(){
+  const txt=mfpAllText();
+  openSheet(`
+    <div class="sheet-head">
+      <div class="slot-ico" style="background:var(--rose-l)">📲</div>
+      <div><div class="eyebrow">MyFitnessPal</div><h4>Setup sheet — today's 7 meals</h4></div>
+      <button class="x-btn" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="note" style="margin-bottom:14px"><b>Set your goals first:</b> 2,100 kcal/day.
+        The free tier only lets you set macros by percentage, so use <b>Protein 32% · Carbs 41% · Fat 27%</b> —
+        that lands on 170 g / 215 g / 62 g.</div>
+      <pre style="white-space:pre-wrap;font-size:11.5px;line-height:1.6;background:var(--line-2);padding:14px;border-radius:12px;overflow-x:auto">${esc(txt)}</pre>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-rose btn-sm" onclick="copyText(mfpAllText())">📋 Copy the sheet</button>
+        <button class="btn btn-ghost btn-sm" onclick="download('myfitnesspal-setup.txt', mfpAllText())">⬇︎ Download</button>
+      </div>
+      <div class="note info" style="margin-top:14px">Why not an automatic sync? MFP's API is private and
+        closed to new applications, and its recipe-URL importer is now Premium. The only thing that would
+        push entries into your diary automatically is a script holding your MFP password — fragile, against
+        their terms, and not worth it. Entering 20-odd custom foods once is the honest workaround.</div>
+    </div>`);
+}
+
 function openRecipe(slotId, idx){
   const m = MEALS[slotId][idx], s = SLOTS.find(x=>x.id===slotId);
   const rows = MICROS.map(n=>{
@@ -1909,6 +2004,7 @@ function openRecipe(slotId, idx){
       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-rose btn-sm" onclick="pick('${slotId}',${idx});closeSheet()">Use this for ${s.t.toLowerCase()}</button>
         <button class="btn btn-ghost btn-sm" onclick="openPicker('${slotId}')">See all ${MEALS[slotId].length} options</button>
+        <button class="btn btn-ghost btn-sm" onclick="openMfp('${slotId}',${idx})">📲 Add to MyFitnessPal</button>
       </div>
     </div>`);
 }
@@ -1967,6 +2063,7 @@ function openExport(){
         <button class="opt" onclick="printAs('pr-today')"><div style="flex:1"><div class="on-name">🖨️ Print today's plan (PDF)</div><div class="on-sub">Today's 6 meals with ingredients, recipes and totals. Choose "Save as PDF" in the print dialog.</div></div></button>
         <button class="opt" onclick="printAs('pr-week')"><div style="flex:1"><div class="on-name">🗓️ Print the 7-day plan</div><div class="on-sub">One page with all seven days — stick it on the fridge.</div></div></button>
         <button class="opt" onclick="printAs('pr-train')"><div style="flex:1"><div class="on-name">🏋️ Print the training split</div><div class="on-sub">All exercises, sets, reps and form cues for the gym.</div></div></button>
+        <button class="opt" onclick="openMfpSheet()"><div style="flex:1"><div class="on-name">📲 MyFitnessPal setup sheet</div><div class="on-sub">Today's 7 meals as MFP custom foods — enter once, then log in two taps.</div></div></button>
         <button class="opt" onclick="download('kalash-plan.txt', planText()); closeSheet()"><div style="flex:1"><div class="on-name">📄 Download as text file</div><div class="on-sub">Full day + recipes + training week. Easy to WhatsApp.</div></div></button>
         <button class="opt" onclick="copyText(planText())"><div style="flex:1"><div class="on-name">📋 Copy plan to clipboard</div><div class="on-sub">Paste it into WhatsApp, Notes or an email.</div></div></button>
       </div>
@@ -2220,6 +2317,7 @@ function renderGuide(){
           <div class="tl-item"><div class="tl-dot">1</div><div><b>Pick tomorrow tonight</b><p>Hit <b>⚖️ Build a balanced day</b>, or tap 🔄 on any card to choose from all 50 options for that slot. Use <b>🍗 Chicken-led</b> when you have prepped meat and <b>🥗 Veg-only</b> when you have not.</p></div></div>
           <div class="tl-item"><div class="tl-dot">2</div><div><b>Tick meals off as you eat them</b><p>Hit <b>Had it</b> on each card. The bar at the bottom shows what you have actually eaten against what you planned — which is the number that tells you whether 4 PM will go badly. Ticks clear automatically at midnight.</p></div></div>
           <div class="tl-item"><div class="tl-dot">3</div><div><b>Pack the car and the tiffin before bed</b><p>Filter for <b>Car-friendly</b> for the 9 AM and 6 PM drives. Morning-you will not boil eggs. Night-you must.</p></div></div>
+          <div class="tl-item"><div class="tl-dot">M</div><div><b>Using MyFitnessPal too?</b><p>Tap <b>MFP</b> on any card. MFP's API is closed and its recipe importer is Premium, but <b>Create a Food</b> is still free — so each meal becomes one custom food you enter once and then log in two taps. Do your 20–25 regulars in one evening. Keep using MFP for the off-plan stuff (restaurants, someone's birthday) that this dashboard's ingredient table will never know about.</p></div></div>
           <div class="tl-item"><div class="tl-dot">4</div><div><b>Tap 📖 for the recipe</b><p>Exact gram weights, household equivalents, method, macros and micros. The grams are the authority — a "katori" is not a unit.</p></div></div>
         </div>
       </div>
