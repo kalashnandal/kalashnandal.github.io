@@ -106,6 +106,15 @@
         <div id="attnList"></div>
       </div>
 
+      <!-- The handover itself — the thing this dashboard exists to fix. -->
+      <div class="card pad handover" style="margin-bottom:14px">
+        <div class="sec-head" style="margin-bottom:14px">
+          <h2 style="font-size:15px">The handover</h2>
+          <span class="hint">How fast a lead gets from the LinkedIn team to Summit, and what's waiting.</span>
+        </div>
+        <div class="hand-grid" id="handoverCard"></div>
+      </div>
+
       <div class="card pad" style="margin-bottom:14px">
         <div class="sec-head" style="margin-bottom:14px">
           <h2 style="font-size:15px">Pipeline</h2>
@@ -262,6 +271,16 @@
 </aside>
 
 <div id="toasts"></div>
+
+<!-- Cal element-click embed. Buttons carrying data-cal-link open the booking
+     modal; app.js listens for the completed booking and updates the lead. The
+     buttons are real links underneath, so if this script is blocked the click
+     still opens the booking page in a new tab. -->
+<script type="text/javascript">
+  (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://cal.id/embed-link/embed.js", "init");
+  Cal("init", "default", {origin:"https://cal.id"});
+  Cal.ns["default"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#3b45a4"},"dark":{"cal-brand":"#fafafa"}},"hideEventTypeDetails":false,"layout":"month_view"});
+</script>
 
 <script type="module" src="app.js"></script>
 </body>

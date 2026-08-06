@@ -155,6 +155,37 @@ with `REVIEW_DAYS` (`0` = Sunday, so `[2,4]` is Tuesday and Thursday).
 
 ---
 
+## Booking discovery calls
+
+Every lead has a **Book discovery call** button in its detail panel. It opens
+the Summit Cal booking modal pre-filled with that lead's name and email, so
+nobody retypes them.
+
+When the booking completes the dashboard updates the lead itself: the stage
+moves to **Meeting Booked** (only ever forward — a booking never drags a lead
+back from Proposal), the date lands in **Discovery Call**, and a line goes into
+the activity trail. That is the reason for wiring the callback rather than just
+linking out: a call booked outside the dashboard is invisible to the review,
+which is the exact failure this whole thing exists to stop.
+
+The button is a real link to the booking page underneath its Cal attributes.
+If Cal's script is blocked by a network or fails to load, clicking it opens the
+booking page in a new tab instead of doing nothing — but note that the
+automatic stage update only happens through the modal, so a booking made via
+the fallback needs the stage set by hand.
+
+Change the event or turn the feature off in the `CAL` block in `config.js`:
+
+```js
+export const CAL = {
+  enabled: true,
+  link: "summit-sales-and-marketing/discovery-call",
+  ...
+};
+```
+
+---
+
 ## Copying and exporting
 
 There is deliberately no copy button, and copy / cut / right-click are

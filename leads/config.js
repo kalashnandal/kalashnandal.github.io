@@ -100,6 +100,37 @@ export const OPEN_STAGES = STAGES.filter((s) => !["won", "lost"].includes(s.key)
 export const STALE_DAYS = 7;
 
 /* ---------------------------------------------------------------------------
+   4b. CAL BOOKING
+   The "Book discovery call" button on a lead. Clicking it opens Cal's booking
+   modal, pre-filled with that lead's name and email so nobody retypes them.
+
+   When the booking completes, the dashboard moves the lead to Meeting Booked
+   and writes it to the activity trail by itself — the point of wiring this up
+   rather than just linking out is that a booked call stops being invisible to
+   the review.
+
+   The button is a real link underneath, pointing at the same booking page. If
+   Cal's script is blocked or fails to load, the click just opens that page in
+   a new tab instead of doing nothing.
+--------------------------------------------------------------------------- */
+export const CAL = {
+  enabled:   true,
+  origin:    "https://cal.id",
+  namespace: "default",
+  link:      "summit-sales-and-marketing/discovery-call",
+  layout:    "month_view",
+  brand:     "#3b45a4",   // matches --accent so the modal doesn't look bolted on
+};
+
+export const calUrl = (lead) => {
+  const u = new URL(`${CAL.origin}/${CAL.link}`);
+  const name = `${lead?.firstName || ""} ${lead?.lastName || ""}`.trim();
+  if (name) u.searchParams.set("name", name);
+  if (lead?.email) u.searchParams.set("email", lead.email);
+  return u.toString();
+};
+
+/* ---------------------------------------------------------------------------
    5. LEAD FIELDS
    type:     text | email | tel | url | date | number | textarea | select
    group:    which fieldset it sits in on the form
@@ -139,6 +170,8 @@ export const LEAD_FIELDS = [
 
   /* --- Handover & deal -------------------------------------------------- */
   { key: "sharedOn",      label: "Shared On",         type: "date",     group: "Handover", table: true, width: 14 },
+  { key: "callBookedFor", label: "Discovery Call",    type: "date",     group: "Handover", width: 16,
+    placeholder: "Set automatically when a call is booked" },
   { key: "salesOwner",    label: "Sales Owner",       type: "text",     group: "Handover", table: true, width: 20,
     placeholder: "Who at Summit owns this" },
   { key: "ghlUrl",        label: "GHL Record",        type: "url",      group: "Handover", width: 36,

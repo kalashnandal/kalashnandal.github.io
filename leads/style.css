@@ -223,6 +223,27 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
 .attn-title{font-size:15px; font-weight:800}
 .attn-sub{font-size:12.5px; color:var(--ink-3); font-weight:600; margin-top:2px}
 
+/* ============ HANDOVER ============
+   Four numbers about the gap between the two teams. Tone is carried by a left
+   rail plus the value's colour, and every cell keeps its text label, so the
+   state is never colour-only. */
+.hand-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(178px,1fr)); gap:12px}
+.hand{
+  padding:13px 15px; border-radius:var(--r-m); background:var(--line-2);
+  border-left:3px solid var(--line);
+}
+.hand .k{
+  font-size:10px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--ink-3); line-height:1.35;
+}
+.hand .v{font-size:26px; font-weight:800; line-height:1.1; margin-top:7px; letter-spacing:-.02em}
+.hand .d{font-size:11.5px; color:var(--ink-3); font-weight:600; margin-top:2px}
+.hand.warn{background:var(--warn-l); border-left-color:var(--warn)}
+.hand.warn .v{color:var(--warn)}
+.hand.warn .k,.hand.warn .d{color:#8a4c07}
+.hand.ok{background:var(--good-l); border-left-color:var(--good)}
+.hand.ok .v{color:var(--good)}
+
 /* ============ PIPELINE STRIP ============
    Stages read left to right the way a deal actually moves, each block carrying
    its own stage colour so depth tracks progress. Conversion between steps sits

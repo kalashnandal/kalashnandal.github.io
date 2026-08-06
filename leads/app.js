@@ -4,7 +4,7 @@
 
 import {
   LEAD_FIELDS, FIELD_GROUPS, STAGES, stage, OPEN_STAGES, STALE_DAYS,
-  STREAMS, ROLES, REVIEW_DAYS, field,
+  STREAMS, ROLES, REVIEW_DAYS, field, CAL, calUrl,
 } from "./config.js";
 import { openStore } from "./store.js";
 import { downloadXlsx } from "./xlsx.js";
@@ -107,6 +107,7 @@ const S = {
     client:        { q: "", status: "", owner: "", client: "", attn: false, sort: "createdAt", dir: -1 },
   },
   drawer: { leadId: null, mode: null, tab: "details" },
+  bookingFor: null,   // lead the Cal modal was opened for
   unsubActivity: null,
   drawerActivity: [],
 };
@@ -168,6 +169,7 @@ function installCopyGuard() {
 
   wireLogin();
   wireChrome();
+  wireCalBookings();
 })();
 
 /* ==========================================================================
@@ -420,6 +422,8 @@ function renderReview() {
     if (row) openDrawer(row.dataset.openlead);
   };
 
+  renderHandover(L);
+
   /* ---- created by team member ---- */
   const byWho = tally(L, (l) => l.createdByName || "Unknown");
   $("#byWhoChart").innerHTML = barChart(byWho);
@@ -447,6 +451,93 @@ function heroSentence(L, created, stale, meetings) {
   if (created) return `<b>${created}</b> new lead${created > 1 ? "s" : ""} logged since the last call.`;
   if (meetings) return `Nothing new since the last call, but <b>${meetings}</b> still in play.`;
   return "Nothing new since the last call.";
+}
+
+/* ---------------------------------------------------------------------------
+   THE HANDOVER
+   The original problem was a lead being dropped in the gap between the
+   LinkedIn team and Summit. These are the three numbers that make that gap
+   visible instead of anecdotal:
+
+     1. how long the team takes to hand a lead over,
+     2. how many are handed over and then sitting untouched,
+     3. how long the worst of those has been waiting.
+
+   Median, not mean — one forgotten lead from six weeks ago shouldn't drag the
+   headline number and make a healthy week look broken.
+--------------------------------------------------------------------------- */
+const median = (xs) => {
+  if (!xs.length) return null;
+  const s = [...xs].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
+};
+
+/* Local midnight for a value that may be a full timestamp (createdAt) or a
+   bare date string (sharedOn, which comes from a date input). Comparing the
+   two raw would make a same-day handover look negative — "2026-07-25" parses
+   as UTC midnight, before that morning's createdAt — and silently drop the
+   row from the median. */
+const dayStart = (v) => {
+  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v)) {
+    const [y, m, d] = v.split("-").map(Number);
+    return new Date(y, m - 1, d).getTime();
+  }
+  const d = new Date(v);
+  return isNaN(d) ? NaN : new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+};
+
+function renderHandover(L) {
+  const host = $("#handoverCard");
+  if (!host) return;
+
+  // Days from being logged to being handed over.
+  const lags = L.filter((l) => l.sharedOn && l.createdAt)
+    .map((l) => Math.round((dayStart(l.sharedOn) - dayStart(l.createdAt)) / DAY))
+    .filter((d) => Number.isFinite(d) && d >= 0);
+  const lag = median(lags);
+
+  // Handed over, but nobody at Summit has moved it on yet.
+  const waiting = L.filter((l) => l.status === "shared");
+  const waits = waiting.map((l) => daysSince(l.sharedOn || l.createdAt));
+  const worst = waits.length ? Math.max(...waits) : 0;
+
+  // Still sitting with the LinkedIn team, never handed over.
+  const unshared = L.filter((l) => l.status === "new");
+
+  const cells = [
+    {
+      k: "Median time to hand over",
+      v: lag === null ? "—" : lag === 0 ? "Same day" : `${lag}d`,
+      d: lags.length ? `across ${lags.length} handed-over lead${lags.length > 1 ? "s" : ""}` : "nothing handed over yet",
+      tone: lag !== null && lag <= 1 ? "ok" : "",
+    },
+    {
+      k: "Not handed over yet",
+      v: unshared.length,
+      d: unshared.length ? "still with the LinkedIn team" : "nothing queued up",
+      tone: unshared.length ? "" : "ok",
+    },
+    {
+      k: "With Summit, untouched",
+      v: waiting.length,
+      d: waiting.length ? "shared but not yet contacted" : "Summit has picked everything up",
+      tone: waiting.length ? "warn" : "ok",
+    },
+    {
+      k: "Longest wait",
+      v: worst ? `${worst}d` : "—",
+      d: worst ? "since it was shared" : "nothing waiting",
+      tone: worst >= STALE_DAYS ? "warn" : worst ? "" : "ok",
+    },
+  ];
+
+  host.innerHTML = cells.map((c) => `
+    <div class="hand ${c.tone || ""}">
+      <div class="k">${esc(c.k)}</div>
+      <div class="v num">${esc(String(c.v))}</div>
+      <div class="d">${esc(c.d)}</div>
+    </div>`).join("");
 }
 
 function winRateLabel(L) {
@@ -766,7 +857,8 @@ function renderDrawer() {
   /* ---- footer ---- */
   const canEdit = can.edit(S.me.role);
   $("#drFoot").innerHTML = `
-    ${canEdit ? `<button class="btn btn-sm btn-dark" id="drEdit">Edit lead</button>` : ""}
+    ${canEdit ? bookButton(lead) : ""}
+    ${canEdit ? `<button class="btn btn-sm btn-ghost" id="drEdit">Edit lead</button>` : ""}
     ${canEdit ? `<select class="inp" id="drStage" style="max-width:190px">
         ${STAGES.map((s) => `<option value="${s.key}"${lead.status === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
       </select>` : ""}
@@ -776,6 +868,9 @@ function renderDrawer() {
   if (canEdit) {
     $("#drEdit").addEventListener("click", () => { S.drawer.mode = "edit"; renderDrawer(); });
     $("#drStage").addEventListener("change", (e) => changeStage(lead, e.target.value));
+    // Remember which lead the booking modal was opened for, so the completed
+    // booking can be attached to the right record.
+    $("#drBook")?.addEventListener("click", () => { S.bookingFor = lead.id; });
   }
   if (can.remove(S.me.role)) {
     $("#drDel").addEventListener("click", async () => {
@@ -877,6 +972,87 @@ function wireCommentBox(lead) {
   $("#cmt").addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") post();
   });
+}
+
+/* ---------------------------------------------------------------------------
+   CAL BOOKING
+   The button is an ordinary link to the booking page carrying Cal's data
+   attributes. Cal's script intercepts the click and opens its modal; if that
+   script is blocked or slow, the link simply opens the page in a new tab. The
+   feature degrades instead of breaking.
+--------------------------------------------------------------------------- */
+function bookButton(lead) {
+  if (!CAL.enabled) return "";
+  const name = `${lead.firstName || ""} ${lead.lastName || ""}`.trim();
+  const cfg = JSON.stringify({
+    layout: CAL.layout,
+    ...(name ? { name } : {}),
+    ...(lead.email ? { email: lead.email } : {}),
+    ...(lead.company ? { notes: `${name || "Lead"} — ${lead.company}` } : {}),
+  });
+  const booked = lead.callBookedFor;
+  return `<a class="btn btn-sm ${booked ? "btn-ghost" : "btn-primary"}" id="drBook"
+      href="${esc(calUrl(lead))}" target="_blank" rel="noopener noreferrer"
+      data-cal-link="${esc(CAL.link)}"
+      data-cal-namespace="${esc(CAL.namespace)}"
+      data-cal-config='${esc(cfg)}'
+      title="${booked ? "Call booked for " + esc(fmtDate(booked)) + " — book another" : "Open the Summit discovery-call calendar"}">
+      ${booked ? "📅 " + esc(fmtDate(booked)) : "Book discovery call"}</a>`;
+}
+
+/* Cal fires this once a booking completes. Without it a booked call would be
+   invisible here, which is the gap this whole dashboard exists to close. */
+function wireCalBookings() {
+  if (!CAL.enabled || typeof window.Cal !== "function") return;
+  try {
+    window.Cal.ns?.[CAL.namespace]?.("on", {
+      action: "bookingSuccessful",
+      callback: (e) => onBookingSuccess(e?.detail?.data || {}),
+    });
+  } catch (ex) {
+    console.warn("Cal booking listener could not be attached.", ex);
+  }
+}
+
+async function onBookingSuccess(data) {
+  const lead = S.leads.find((l) => l.id === S.bookingFor);
+  S.bookingFor = null;
+  if (!lead) return;   // booked from somewhere else — nothing to attach it to
+
+  // Cal's payload shape varies by version; read defensively rather than assume.
+  const booking = data.booking || data;
+  const startsAt = booking.startTime || booking.start || data.date || null;
+  const when = startsAt ? new Date(startsAt) : null;
+  const valid = when && !isNaN(when);
+
+  const patch = { callBookedFor: valid ? when.toISOString().slice(0, 10) : "" };
+  const notes = [{
+    type: "comment",
+    text: valid
+      ? `Discovery call booked for ${when.toLocaleString()} via Cal.`
+      : "Discovery call booked via Cal.",
+  }];
+
+  // Only ever move a lead forward. A booking shouldn't drag a lead that's
+  // already at proposal back to meeting.
+  const order = STAGES.findIndex((s) => s.key === lead.status);
+  const meetingIdx = STAGES.findIndex((s) => s.key === "meeting");
+  if (order >= 0 && order < meetingIdx) {
+    patch.status = "meeting";
+    notes.push({
+      type: "stage",
+      text: `Stage moved: ${stage(lead.status).label} → Meeting Booked`,
+      from: lead.status, to: "meeting",
+    });
+  }
+
+  try {
+    await S.store.updateLead(lead, patch, notes);
+    toast(valid ? `Call booked — ${fmtDate(patch.callBookedFor)}. Lead updated.` : "Call booked. Lead updated.", "good");
+  } catch (ex) {
+    console.error(ex);
+    toast("Call was booked, but the lead couldn't be updated. Set the stage by hand.", "bad");
+  }
 }
 
 async function changeStage(lead, next) {
