@@ -1,0 +1,86 @@
+{
+  "_comment": [
+    "Composite indexes for the queries in store.js. Single-field indexes are",
+    "created automatically by Firestore and are not listed here.",
+    "Deploy with: firebase deploy --only firestore:indexes",
+    "",
+    "Each entry maps to one role's scoped query — see scopeClause() in store.js."
+  ],
+  "indexes": [
+    {
+      "_use": "leads, sales-partner user: where(stream) + orderBy(createdAt)",
+      "collectionGroup": "leads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "stream", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_use": "leads, client user: where(clientId in) + orderBy(createdAt)",
+      "collectionGroup": "leads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_use": "activity on one lead, staff: where(leadId) + orderBy(at)",
+      "collectionGroup": "activity",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "leadId", "order": "ASCENDING" },
+        { "fieldPath": "at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_use": "global activity feed, sales-partner user: where(stream) + orderBy(at)",
+      "collectionGroup": "activity",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "stream", "order": "ASCENDING" },
+        { "fieldPath": "at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_use": "activity on one lead, sales-partner user: where(stream) + where(leadId) + orderBy(at)",
+      "collectionGroup": "activity",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "stream", "order": "ASCENDING" },
+        { "fieldPath": "leadId", "order": "ASCENDING" },
+        { "fieldPath": "at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_use": "global activity feed, client user: where(clientId in) + orderBy(at)",
+      "collectionGroup": "activity",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_use": "activity on one lead, client user: where(clientId in) + where(leadId) + orderBy(at)",
+      "collectionGroup": "activity",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "leadId", "order": "ASCENDING" },
+        { "fieldPath": "at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_use": "export history, non-admin: where(by) + orderBy(at)",
+      "collectionGroup": "exports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "by", "order": "ASCENDING" },
+        { "fieldPath": "at", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
