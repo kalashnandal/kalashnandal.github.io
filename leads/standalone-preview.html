@@ -1996,19 +1996,18 @@ function renderReview() {
 
   const meetings = L.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
   const won = L.filter((l) => l.status === "won").length;
-  const waiting = L.filter((l) => l.status === "shared").length;
 
   $("#reviewLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
 
-  /* Every tile label carries its own timeframe — "new" on its own reads as
-     all-time at a glance. */
+  /* Plain counts. Every one of these is just "how many leads are in this
+     state" — nothing averaged, nothing derived. The label carries its own
+     timeframe, since "new" alone reads as all-time at a glance. */
   $("#statTiles").innerHTML = [
-    { k: "New since last call", v: newSince.length, d: `${L.length} all time` },
+    { k: "New since last call", v: newSince.length, d: `${L.length} leads all time` },
     { k: "Open pipeline", v: open.length, d: "not won or lost" },
-    { k: "With Summit, untouched", v: waiting, d: "shared, not yet contacted" },
-    { k: "In play", v: meetings, d: "meeting or proposal", cls: meetings ? "good" : "" },
-    { k: "Won", v: won, d: winRateLabel(L), cls: won ? "good" : "" },
-    { k: `Idle ${STALE_DAYS}d+`, v: stale.length, d: "needs chasing", cls: stale.length ? "alert" : "" },
+    { k: "Meetings booked", v: meetings, d: "meeting or proposal", cls: meetings ? "good" : "" },
+    { k: "Won", v: won, d: "closed and won", cls: won ? "good" : "" },
+    { k: "Needs attention", v: stale.length, d: `no activity in ${STALE_DAYS}+ days`, cls: stale.length ? "alert" : "" },
   ].map((t) => `
     <div class="stat ${t.cls || ""}">
       <div class="k" title="${esc(t.k)}">${esc(t.k)}</div>
