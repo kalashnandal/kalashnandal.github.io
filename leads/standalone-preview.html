@@ -1,0 +1,2544 @@
+<title>LinkedIn Leads · Internal Dashboard</title>
+<style>
+/* ============================================================================
+   LinkedIn Leads Dashboard
+   Tokens and component names follow kalash-fitness-dashboard.html so the two
+   read as one family: white / black / grey, gold as the only chromatic accent.
+   ========================================================================== */
+
+:root{
+  color-scheme:light;
+  --ink:#101012; --ink-2:#45454b; --ink-3:#83838c; --ink-4:#adadb5;
+  --line:#e7e7ea; --line-2:#f4f4f5;
+  --bg:#fafaf9; --card:#ffffff;
+
+  --gold:#c9a227; --gold-d:#8a6a12; --gold-l:#fbf6e6; --gold-bd:#ecdfb4;
+  --viz:#a8801a;                 /* single-series chart fill, 3.6:1 on white */
+
+  /* Reserved status colours. Every pill also carries its text label, so
+     colour is never the only signal. */
+  --good:#1a7f4b; --good-l:#e8f4ee; --good-bd:#bcdfcc;
+  --bad:#b3261e;  --bad-l:#fbecea;  --bad-bd:#f0c9c5;
+  --warn:#b4690e; --warn-l:#fdf1e4; --warn-bd:#f2d8b6;
+
+  --r-s:10px; --r-m:16px; --r-l:22px; --r-xl:30px;
+  --sh-s:0 1px 2px rgba(16,16,18,.05), 0 2px 8px rgba(16,16,18,.04);
+  --sh-m:0 4px 12px rgba(16,16,18,.06), 0 16px 32px -16px rgba(16,16,18,.14);
+  --sh-l:0 24px 60px -20px rgba(16,16,18,.28);
+
+  --sans:system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --serif:Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --maxw:1400px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; font-family:var(--sans); color:var(--ink); background:var(--bg);
+  -webkit-font-smoothing:antialiased; line-height:1.5; overflow-x:hidden;
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(760px 420px at 88% -8%, #f6f0dd 0%, transparent 62%),
+    radial-gradient(620px 420px at 4% 8%, #f0f0ef 0%, transparent 60%),
+    radial-gradient(700px 500px at 60% 108%, #eceae4 0%, transparent 62%);
+}
+h1,h2,h3,h4{margin:0; line-height:1.18; letter-spacing:-.02em}
+p{margin:0}
+button{font-family:inherit; cursor:pointer; border:0; background:none; color:inherit}
+input,select,textarea{font-family:inherit; font-size:14px; color:var(--ink)}
+a{color:var(--ink); text-underline-offset:2px}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 18px}
+.serif{font-family:var(--serif)}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3)}
+.hide{display:none !important}
+
+/* ---------------------------------------------------------------------------
+   COPY GUARD
+   Text in data surfaces is not selectable and the copy/cut/context menu is
+   suppressed. Form controls stay fully selectable so people can still edit and
+   paste. This is a deterrent that pushes everyone to the tracked export — it
+   is not a security boundary, and anyone determined can still read the DOM.
+--------------------------------------------------------------------------- */
+.noselect,.noselect *{
+  -webkit-user-select:none; -moz-user-select:none; user-select:none;
+  -webkit-touch-callout:none;
+}
+input,textarea,select,[contenteditable],.selectable,.selectable *{
+  -webkit-user-select:text !important; -moz-user-select:text !important; user-select:text !important;
+  -webkit-touch-callout:default;
+}
+
+/* ============ TOP BAR ============ */
+#topbar{
+  position:sticky; top:0; z-index:60;
+  background:linear-gradient(100deg,#0b0b0c,#18181b 48%,#241f14);
+  border-bottom:1px solid rgba(201,162,39,.28);
+  color:#fff; box-shadow:0 2px 14px rgba(16,16,18,.28);
+}
+.tb-row{
+  max-width:var(--maxw); margin:0 auto; padding:10px 18px;
+  display:flex; align-items:center; gap:14px; min-height:56px;
+}
+.brandmark{
+  width:38px; height:38px; border-radius:12px; flex:none; display:grid; place-items:center;
+  background:linear-gradient(145deg,#26262b,#0d0d0f); color:var(--gold);
+  border:1px solid rgba(201,162,39,.4);
+  font-family:var(--serif); font-weight:900; font-size:17px;
+}
+.tb-title{font-size:15px; font-weight:800; letter-spacing:-.01em}
+.tb-sub{font-size:11px; opacity:.55; font-weight:600; margin-top:1px}
+.tb-right{margin-left:auto; display:flex; align-items:center; gap:10px}
+.whoami{text-align:right; line-height:1.25}
+.whoami b{font-size:12.5px; font-weight:700; display:block}
+.whoami span{font-size:10.5px; opacity:.55; font-weight:600}
+.avatar{
+  width:34px; height:34px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:linear-gradient(135deg,#d9b545,#b8901f); color:#101012;
+  font-size:13px; font-weight:800;
+}
+.tb-out{
+  font-size:11px; font-weight:700; padding:6px 12px; border-radius:999px;
+  background:rgba(255,255,255,.13); color:#fff; transition:.2s;
+}
+.tb-out:hover{background:rgba(255,255,255,.26)}
+@media(max-width:640px){ .whoami{display:none} .tb-sub{display:none} }
+
+/* Demo-mode banner */
+#demobar{
+  background:var(--gold-l); border-bottom:1px solid var(--gold-bd); color:var(--gold-d);
+  font-size:12px; font-weight:700; text-align:center; padding:7px 16px;
+}
+
+/* ============ TABS ============ */
+.tabs{
+  display:flex; gap:4px; margin:20px 0 22px; padding:5px;
+  background:#fff; border:1px solid var(--line); border-radius:999px;
+  box-shadow:var(--sh-s); overflow-x:auto; scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:1; min-width:max-content; padding:10px 18px; border-radius:999px;
+  font-size:13px; font-weight:700; color:var(--ink-3); transition:.2s; white-space:nowrap;
+  display:inline-flex; align-items:center; gap:7px;
+}
+.tab:hover{color:var(--ink)}
+.tab.on{background:var(--ink); color:#fff; box-shadow:var(--sh-m)}
+.tab .cnt{
+  font-size:10.5px; font-weight:800; padding:1px 6px; border-radius:999px;
+  background:var(--line-2); color:var(--ink-3);
+}
+.tab.on .cnt{background:rgba(255,255,255,.2); color:#fff}
+.panel{display:none; animation:fade .3s ease}
+.panel.on{display:block}
+@keyframes fade{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+
+/* ============ BUTTONS ============ */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:10px 16px; border-radius:999px; font-size:13px; font-weight:700;
+  transition:transform .15s, box-shadow .2s, background .2s, border-color .2s;
+  white-space:nowrap;
+}
+.btn:active{transform:scale(.96)}
+.btn[disabled]{opacity:.45; pointer-events:none}
+.btn-dark{background:var(--ink); color:#fff; box-shadow:var(--sh-m)}
+.btn-dark:hover{background:#2a2a30}
+.btn-gold{background:linear-gradient(135deg,#d9b545,#b8901f); color:#101012; box-shadow:0 8px 20px -8px rgba(184,144,31,.6)}
+.btn-gold:hover{filter:brightness(1.06)}
+.btn-ghost{background:#fff; color:var(--ink); border:1.5px solid var(--line); box-shadow:var(--sh-s)}
+.btn-ghost:hover{border-color:var(--gold); color:var(--gold-d); background:var(--gold-l)}
+.btn-danger{background:#fff; color:var(--bad); border:1.5px solid var(--bad-bd)}
+.btn-danger:hover{background:var(--bad-l)}
+.btn-sm{padding:7px 13px; font-size:12px}
+.btn-xs{padding:5px 10px; font-size:11px; border-radius:8px}
+
+/* ============ CARDS ============ */
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r-l); box-shadow:var(--sh-s)}
+.pad{padding:20px}
+.eyebrow{font-size:10.5px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3)}
+.sec-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:14px}
+.sec-head h2{font-size:17px; font-weight:800}
+.sec-head .hint{font-size:12px; color:var(--ink-3); font-weight:500}
+
+/* ============ STAT TILES ============ */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px; margin-bottom:18px}
+.stat{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-m);
+  padding:15px 16px; box-shadow:var(--sh-s); position:relative; overflow:hidden;
+}
+.stat .k{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.stat .v{font-family:var(--serif); font-size:30px; font-weight:900; line-height:1.05; margin-top:6px; letter-spacing:-.02em}
+.stat .d{font-size:11.5px; color:var(--ink-3); font-weight:600; margin-top:3px}
+.stat.alert{border-color:var(--warn-bd); background:var(--warn-l)}
+.stat.alert .k,.stat.alert .d{color:var(--warn)}
+.stat.alert .v{color:var(--warn)}
+
+/* ============ CHARTS ============
+   Every chart here is single-series: bar length carries magnitude, so no
+   legend is needed and no categorical hue pair can collide. */
+/* min 420px keeps this to 3 columns on a laptop and 2 on a small screen —
+   below that the bar tracks get squeezed narrower than their labels. */
+.chart-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr)); gap:14px}
+.bars{display:flex; flex-direction:column; gap:9px; margin-top:4px}
+.bar-row{display:grid; grid-template-columns:minmax(84px,124px) 1fr auto; align-items:center; gap:11px}
+.bar-lab{font-size:12.5px; font-weight:600; color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bar-track{height:20px; background:var(--line-2); border-radius:5px; overflow:hidden; position:relative}
+.bar-fill{
+  height:100%; background:var(--viz);
+  border-radius:0 4px 4px 0;   /* rounded data end, square against the baseline */
+  min-width:2px; transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.bar-val{font-size:13px; font-weight:800; min-width:30px; text-align:right; font-variant-numeric:tabular-nums}
+.bar-row.is-zero .bar-val{color:var(--ink-4)}
+
+/* Funnel — an ordinal single-hue ramp, light to dark down the steps */
+.funnel{display:flex; flex-direction:column; gap:7px; margin-top:4px}
+.fn-row{display:grid; grid-template-columns:minmax(84px,124px) 1fr auto; align-items:center; gap:11px}
+.fn-track{height:26px; background:var(--line-2); border-radius:5px; overflow:hidden}
+.fn-fill{height:100%; border-radius:0 4px 4px 0; min-width:2px; transition:width .5s cubic-bezier(.4,0,.2,1)}
+.fn-meta{font-size:11.5px; font-weight:700; color:var(--ink-3); min-width:74px; text-align:right; font-variant-numeric:tabular-nums}
+.fn-meta b{color:var(--ink); font-size:13px}
+
+.empty-chart{font-size:12.5px; color:var(--ink-4); font-weight:600; padding:22px 0; text-align:center}
+
+/* ============ TOOLBAR / FILTERS ============ */
+.toolbar{
+  display:flex; gap:9px; flex-wrap:wrap; align-items:center;
+  background:#fff; border:1px solid var(--line); border-radius:var(--r-m);
+  padding:11px 13px; box-shadow:var(--sh-s); margin-bottom:14px;
+}
+.fld{display:flex; flex-direction:column; gap:4px}
+.fld label{font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.inp{
+  padding:8px 11px; border:1.5px solid var(--line); border-radius:9px; background:#fff;
+  font-size:13px; min-width:0; transition:border-color .2s;
+}
+.inp:focus{outline:none; border-color:var(--gold)}
+.inp::placeholder{color:var(--ink-4)}
+select.inp{cursor:pointer; padding-right:26px}
+textarea.inp{resize:vertical; min-height:74px; line-height:1.5}
+.search{flex:1 1 220px; min-width:180px}
+.toolbar .spacer{flex:1}
+
+/* ============ TABLE ============ */
+.tbl-wrap{
+  background:#fff; border:1px solid var(--line); border-radius:var(--r-m);
+  box-shadow:var(--sh-s); overflow:auto; max-height:min(70vh,720px);
+}
+table.leads{border-collapse:separate; border-spacing:0; width:100%; min-width:940px; font-size:13px}
+table.leads thead th{
+  position:sticky; top:0; z-index:2; background:#fff;
+  text-align:left; font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-3); padding:11px 12px; border-bottom:1.5px solid var(--line); white-space:nowrap;
+  cursor:pointer; user-select:none;
+}
+table.leads thead th:hover{color:var(--ink)}
+table.leads thead th .arw{opacity:.4; font-size:9px}
+table.leads tbody td{padding:11px 12px; border-bottom:1px solid var(--line-2); vertical-align:middle}
+table.leads tbody tr{cursor:pointer; transition:background .15s}
+table.leads tbody tr:hover{background:var(--gold-l)}
+table.leads tbody tr:last-child td{border-bottom:0}
+.cell-name{font-weight:700; white-space:nowrap}
+.cell-sub{font-size:11px; color:var(--ink-3); font-weight:600; margin-top:1px}
+.cell-dim{color:var(--ink-3)}
+.tbl-empty{padding:46px 20px; text-align:center; color:var(--ink-3)}
+.tbl-empty .big{font-size:15px; font-weight:700; color:var(--ink-2); margin-bottom:5px}
+
+/* ============ PILLS ============ */
+.pill{
+  display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px;
+  font-size:11px; font-weight:800; white-space:nowrap; letter-spacing:.01em;
+  border:1px solid transparent;
+}
+.pill .dot{width:6px; height:6px; border-radius:50%; background:currentColor; flex:none}
+.pill-neutral{background:var(--line-2); color:var(--ink-2); border-color:var(--line)}
+.pill-accent{background:var(--gold-l); color:var(--gold-d); border-color:var(--gold-bd)}
+.pill-good{background:var(--good-l); color:var(--good); border-color:var(--good-bd)}
+.pill-bad{background:var(--bad-l); color:var(--bad); border-color:var(--bad-bd)}
+.pill-warn{background:var(--warn-l); color:var(--warn); border-color:var(--warn-bd)}
+.pill-stream{background:#f2f2f3; color:var(--ink-2); border-color:var(--line); font-size:10.5px}
+
+/* ============ DRAWER ============ */
+.scrim{
+  position:fixed; inset:0; background:rgba(16,16,18,.42); backdrop-filter:blur(3px);
+  z-index:90; opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.scrim.on{opacity:1; pointer-events:auto}
+.drawer{
+  position:fixed; top:0; right:0; bottom:0; width:min(660px,100%);
+  background:var(--bg); z-index:100; box-shadow:var(--sh-l);
+  transform:translateX(100%); transition:transform .3s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column;
+}
+.drawer.on{transform:none}
+.dr-head{
+  padding:16px 20px; border-bottom:1px solid var(--line); background:#fff;
+  display:flex; align-items:flex-start; gap:12px; flex:none;
+}
+.dr-head h3{font-size:18px; font-weight:800}
+.dr-head .sub{font-size:12.5px; color:var(--ink-3); font-weight:600; margin-top:3px}
+.dr-close{
+  margin-left:auto; width:32px; height:32px; border-radius:50%; flex:none;
+  display:grid; place-items:center; background:var(--line-2); color:var(--ink-2);
+  font-size:17px; transition:.2s;
+}
+.dr-close:hover{background:var(--ink); color:#fff}
+.dr-body{flex:1; overflow-y:auto; padding:18px 20px 26px}
+.dr-foot{
+  padding:13px 20px; border-top:1px solid var(--line); background:#fff; flex:none;
+  display:flex; gap:9px; align-items:center;
+}
+.dr-tabs{display:flex; gap:3px; padding:4px; background:var(--line-2); border-radius:999px; margin-bottom:16px}
+.dr-tab{flex:1; padding:8px 12px; border-radius:999px; font-size:12.5px; font-weight:700; color:var(--ink-3); transition:.2s}
+.dr-tab.on{background:#fff; color:var(--ink); box-shadow:var(--sh-s)}
+
+/* Form */
+fieldset.grp{border:0; padding:0; margin:0 0 20px}
+fieldset.grp legend{
+  font-size:10.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); padding:0 0 9px;
+}
+.frm{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
+.frm .wide{grid-column:1/-1}
+.frm .fld label .req{color:var(--gold-d)}
+.err{border-color:var(--bad) !important}
+.err-msg{font-size:11px; color:var(--bad); font-weight:700; margin-top:3px}
+
+/* Read view */
+.kv{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:11px 16px}
+.kv .row{min-width:0}
+.kv .k{font-size:10px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+.kv .v{font-size:13.5px; font-weight:600; margin-top:2px; word-break:break-word}
+.kv .v.blank{color:var(--ink-4); font-weight:500}
+
+/* Activity feed */
+.feed{display:flex; flex-direction:column; gap:0; margin-top:6px}
+.fe{display:grid; grid-template-columns:26px 1fr; gap:11px; padding:11px 0; border-bottom:1px solid var(--line-2)}
+.fe:last-child{border-bottom:0}
+.fe-ic{
+  width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
+  background:var(--line-2); color:var(--ink-3); font-size:11px; flex:none;
+}
+.fe-ic.comment{background:var(--gold-l); color:var(--gold-d)}
+.fe-ic.stage{background:var(--ink); color:#fff}
+.fe-top{display:flex; gap:8px; align-items:baseline; flex-wrap:wrap}
+.fe-who{font-size:12.5px; font-weight:800}
+.fe-when{font-size:11px; color:var(--ink-4); font-weight:600}
+.fe-txt{font-size:13px; color:var(--ink-2); margin-top:2px; white-space:pre-wrap; word-break:break-word}
+.cbox{display:flex; gap:9px; align-items:flex-end; margin-top:14px}
+.cbox textarea{flex:1}
+
+/* ============ LOGIN ============ */
+#login{min-height:100dvh; display:grid; place-items:center; padding:24px}
+.login-card{width:min(420px,100%); background:#fff; border:1px solid var(--line); border-radius:var(--r-xl); box-shadow:var(--sh-l); padding:32px 30px}
+.login-card .brandmark{width:50px; height:50px; border-radius:16px; font-size:22px; margin-bottom:16px}
+.login-card h1{font-family:var(--serif); font-size:24px; font-weight:900; letter-spacing:-.02em}
+.login-card .tag{font-size:13px; color:var(--ink-3); font-weight:600; margin-top:6px; margin-bottom:22px}
+.login-card .fld{margin-bottom:13px}
+.login-card .btn{width:100%; margin-top:6px}
+.login-err{
+  background:var(--bad-l); border:1px solid var(--bad-bd); color:var(--bad);
+  font-size:12.5px; font-weight:700; padding:9px 12px; border-radius:9px; margin-bottom:13px;
+}
+.login-foot{font-size:11.5px; color:var(--ink-4); text-align:center; margin-top:16px; font-weight:600}
+.link-btn{font-size:12px; font-weight:700; color:var(--gold-d); text-decoration:underline}
+
+/* ============ TOAST ============ */
+#toasts{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none}
+.toast{
+  background:var(--ink); color:#fff; font-size:13px; font-weight:700;
+  padding:11px 18px; border-radius:999px; box-shadow:var(--sh-l);
+  animation:pop .3s cubic-bezier(.2,1.4,.4,1); max-width:min(90vw,460px); text-align:center;
+}
+.toast.warn{background:var(--warn)}
+.toast.bad{background:var(--bad)}
+.toast.good{background:var(--good)}
+@keyframes pop{from{opacity:0; transform:translateY(14px) scale(.94)}to{opacity:1; transform:none}}
+
+/* ============ ADMIN / LISTS ============ */
+.list{display:flex; flex-direction:column}
+.li{display:flex; align-items:center; gap:12px; padding:12px 2px; border-bottom:1px solid var(--line-2)}
+.li:last-child{border-bottom:0}
+.li .grow{flex:1; min-width:0}
+.li .t{font-size:13.5px; font-weight:700}
+.li .s{font-size:11.5px; color:var(--ink-3); font-weight:600; margin-top:1px}
+
+/* Export history rows */
+.exp-row{display:grid; grid-template-columns:34px 1fr auto; gap:12px; padding:13px 2px; border-bottom:1px solid var(--line-2); align-items:center}
+.exp-row:last-child{border-bottom:0}
+.exp-ic{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:var(--gold-l); color:var(--gold-d); font-size:14px}
+.exp-t{font-size:13.5px; font-weight:700}
+.exp-s{font-size:11.5px; color:var(--ink-3); font-weight:600; margin-top:2px}
+.exp-n{font-size:12px; font-weight:800; color:var(--ink-2); text-align:right; white-space:nowrap}
+
+@media(max-width:640px){
+  .drawer{width:100%}
+  .dr-body{padding:16px 16px 24px}
+  .stat .v{font-size:27px}
+  .toolbar{padding:10px}
+  .frm{grid-template-columns:1fr}
+}
+
+@media print{
+  #topbar,.tabs,.toolbar,.dr-foot{display:none}
+  body::before{display:none}
+}
+
+</style>
+
+<!-- ====================== LOGIN ====================== -->
+<section id="login" class="hide">
+  <div class="login-card">
+    <div class="brandmark">L</div>
+    <h1 class="serif">LinkedIn Leads</h1>
+    <p class="tag">Internal lead tracker for the operations and sales teams.</p>
+
+    <div id="loginErr" class="login-err hide"></div>
+
+    <form id="loginForm" autocomplete="on">
+      <div class="fld">
+        <label for="liEmail">Work email</label>
+        <input class="inp" type="email" id="liEmail" required autocomplete="username" placeholder="you@company.com">
+      </div>
+      <div class="fld">
+        <label for="liPass">Password</label>
+        <input class="inp" type="password" id="liPass" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="btn btn-dark" type="submit" id="liBtn">Sign in</button>
+    </form>
+
+    <p class="login-foot">
+      No account? Ask an admin to create one.<br>
+      <button class="link-btn" id="liForgot" type="button">Forgot your password?</button>
+    </p>
+  </div>
+</section>
+
+<!-- ====================== APP ====================== -->
+<div id="app" class="hide">
+
+  <div id="demobar" class="hide">
+    Preview build — sample leads, stored in this browser only. Nothing here is shared with anyone else.
+  </div>
+
+  <header id="topbar">
+    <div class="tb-row">
+      <div class="brandmark">L</div>
+      <div>
+        <div class="tb-title">LinkedIn Leads</div>
+        <div class="tb-sub">Operations → Sales handover tracker</div>
+      </div>
+      <div class="tb-right">
+        <div class="whoami">
+          <b id="meName">—</b>
+          <span id="meRole">—</span>
+        </div>
+        <div class="avatar" id="meAvatar">?</div>
+        <button class="tb-out" id="signOut">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap noselect">
+
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-tab="review">Review</button>
+      <button class="tab" data-tab="sales_partner">Sales Partner <span class="cnt" id="cntSales">0</span></button>
+      <button class="tab" data-tab="client">Clients <span class="cnt" id="cntClient">0</span></button>
+      <button class="tab" data-tab="activity">Activity</button>
+      <button class="tab" data-tab="exports">Export History</button>
+      <button class="tab" data-tab="admin" id="tabAdmin">Admin</button>
+    </nav>
+
+    <!-- ---------- REVIEW (the Tue/Thu call view) ---------- -->
+    <section class="panel on" data-panel="review">
+      <div class="sec-head">
+        <h2 class="serif">Review</h2>
+        <span class="hint" id="reviewHint">Since the last review call</span>
+        <div class="spacer" style="flex:1"></div>
+      </div>
+
+      <div class="stats" id="statTiles"></div>
+
+      <div class="card pad" style="margin-bottom:14px">
+        <div class="sec-head" style="margin-bottom:6px">
+          <h2 style="font-size:15px">Needs attention</h2>
+          <span class="hint" id="attnHint">Open leads with no activity — these are the ones that used to get dropped.</span>
+        </div>
+        <div id="attnList"></div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Pipeline</h2>
+            <span class="hint">Open leads by stage</span>
+          </div>
+          <div class="funnel" id="funnelChart"></div>
+        </div>
+
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Leads created by team member</h2>
+            <span class="hint" id="byWhoHint">All time</span>
+          </div>
+          <div class="bars" id="byWhoChart"></div>
+        </div>
+
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Leads by client</h2>
+            <span class="hint">Client delivery stream</span>
+          </div>
+          <div class="bars" id="byClientChart"></div>
+        </div>
+
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Leads created per week</h2>
+            <span class="hint">Last 8 weeks</span>
+          </div>
+          <div class="bars" id="byWeekChart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- LEAD STREAMS (one panel, reused) ---------- -->
+    <section class="panel" data-panel="sales_partner">
+      <div class="sec-head">
+        <h2 class="serif">Sales Partner (US)</h2>
+        <span class="hint">Leads handed to the US sales partner. Tracked here; worked in GHL.</span>
+      </div>
+      <div id="toolbar_sales_partner"></div>
+      <div id="table_sales_partner"></div>
+    </section>
+
+    <section class="panel" data-panel="client">
+      <div class="sec-head">
+        <h2 class="serif">Client Delivery</h2>
+        <span class="hint">Leads generated for the clients whose LinkedIn we run.</span>
+      </div>
+      <div id="toolbar_client"></div>
+      <div id="table_client"></div>
+    </section>
+
+    <!-- ---------- ACTIVITY ---------- -->
+    <section class="panel" data-panel="activity">
+      <div class="sec-head">
+        <h2 class="serif">Activity</h2>
+        <span class="hint">Every stage change and comment across all leads, newest first.</span>
+      </div>
+      <div class="card pad"><div class="feed" id="globalFeed"></div></div>
+    </section>
+
+    <!-- ---------- EXPORT HISTORY ---------- -->
+    <section class="panel" data-panel="exports">
+      <div class="sec-head">
+        <h2 class="serif">Export History</h2>
+        <span class="hint" id="expHint">Every download is recorded — who, when, which leads.</span>
+      </div>
+      <div class="card pad"><div id="expList"></div></div>
+    </section>
+
+    <!-- ---------- ADMIN ---------- -->
+    <section class="panel" data-panel="admin">
+      <div class="sec-head"><h2 class="serif">Admin</h2></div>
+
+      <div class="chart-grid">
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Clients</h2>
+            <span class="hint">Accounts we run LinkedIn for</span>
+          </div>
+          <div class="list" id="clientList"></div>
+          <div class="cbox" style="margin-top:14px">
+            <div class="fld" style="flex:1">
+              <label for="newClient">Add a client</label>
+              <input class="inp" id="newClient" placeholder="Client name">
+            </div>
+            <button class="btn btn-dark btn-sm" id="addClient">Add</button>
+          </div>
+        </div>
+
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">People</h2>
+            <span class="hint">Roles come from the <code>users</code> collection</span>
+          </div>
+          <div class="list" id="userList"></div>
+          <p class="muted" style="font-size:12px; margin-top:14px; line-height:1.6">
+            Logins are created in the Firebase console (Authentication → Users), then a matching
+            document is added to <code>users/{uid}</code> with a <code>role</code>.
+            Full steps are in <code>leads/README.md</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div style="height:60px"></div>
+</div>
+
+<!-- ====================== DRAWER ====================== -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="dr-head">
+    <div style="min-width:0">
+      <h3 id="drTitle">Lead</h3>
+      <div class="sub" id="drSub"></div>
+    </div>
+    <button class="dr-close" id="drClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="dr-body" id="drBody"></div>
+  <div class="dr-foot" id="drFoot"></div>
+</aside>
+
+<div id="toasts"></div>
+
+<script type="module">
+
+/* ===== config.js ===================================================== */
+/* ============================================================================
+   config.js — the single source of truth for the LinkedIn Leads dashboard.
+
+   Everything downstream (the add/edit form, the table columns, the Excel
+   export, the filters) is generated from LEAD_FIELDS and STAGES below. Add a
+   field here once and it shows up everywhere.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. FIREBASE
+   Replace the placeholder values with the config from:
+   Firebase console -> Project settings -> Your apps -> Web app -> SDK setup.
+
+   These values are NOT secrets — a web Firebase config is public by design.
+   Access is enforced by firestore.rules, not by hiding this object.
+
+   While apiKey is still "PASTE_...", the app runs in DEMO MODE: the same UI
+   backed by localStorage with seeded sample data, so you can walk the team
+   through it before the Firebase project exists.
+--------------------------------------------------------------------------- */
+const firebaseConfig = {
+  apiKey:            "PASTE_YOUR_API_KEY",
+  authDomain:        "PASTE_YOUR_PROJECT.firebaseapp.com",
+  projectId:         "PASTE_YOUR_PROJECT_ID",
+  storageBucket:     "PASTE_YOUR_PROJECT.appspot.com",
+  messagingSenderId: "PASTE_YOUR_SENDER_ID",
+  appId:             "PASTE_YOUR_APP_ID",
+};
+
+const isConfigured = () => !firebaseConfig.apiKey.startsWith("PASTE_");
+
+/* ---------------------------------------------------------------------------
+   2. ROLES
+   Set on each user's document in the `users` collection (see README).
+--------------------------------------------------------------------------- */
+const ROLES = {
+  admin:  { label: "Admin",            blurb: "Full access. Manages people, clients and sees every export." },
+  ops:    { label: "LinkedIn Team",    blurb: "Creates and edits leads, comments, exports." },
+  sales:  { label: "Sales Partner",    blurb: "Sees leads shared with sales. Updates stage, comments, exports." },
+  client: { label: "Client",           blurb: "Read-only, and only the leads for their own client account." },
+};
+
+/* ---------------------------------------------------------------------------
+   3. STREAMS — the two spreadsheets this dashboard replaces
+--------------------------------------------------------------------------- */
+const STREAMS = {
+  sales_partner: {
+    label: "Sales Partner (US)",
+    short: "Sales Partner",
+    blurb: "Leads our LinkedIn team hands to the US sales partner. These are the ones that used to get lost in WhatsApp.",
+    handoffLabel: "Shared with sales on",
+  },
+  client: {
+    label: "Client Delivery",
+    short: "Client",
+    blurb: "Leads generated for clients whose LinkedIn we run. One line per client, delivered and acknowledged.",
+    handoffLabel: "Delivered to client on",
+  },
+};
+
+/* ---------------------------------------------------------------------------
+   4. PIPELINE STAGES
+   Ordered. `funnel: true` means the stage counts as a step in the funnel chart
+   (won/lost/nurture are outcomes, not steps).
+
+   `tone` drives the status pill. Only won / lost / at-risk get a semantic
+   colour; every pill also carries its text label, so colour is never the only
+   signal.
+--------------------------------------------------------------------------- */
+const STAGES = [
+  { key: "new",       label: "New Lead",         tone: "neutral", funnel: true,  blurb: "Logged by the LinkedIn team. Not handed over yet." },
+  { key: "shared",    label: "Shared",           tone: "neutral", funnel: true,  blurb: "Handed to the sales partner / delivered to the client.", marksHandoff: true },
+  { key: "contacted", label: "Contacted",        tone: "neutral", funnel: true,  blurb: "Sales has made first contact." },
+  { key: "meeting",   label: "Meeting Booked",   tone: "accent",  funnel: true,  blurb: "A call is on the calendar." },
+  { key: "proposal",  label: "Proposal Sent",    tone: "accent",  funnel: true,  blurb: "Commercials are out." },
+  { key: "won",       label: "Won",              tone: "good",    funnel: false, blurb: "Closed. Revenue booked." },
+  { key: "lost",      label: "Lost",             tone: "bad",     funnel: false, blurb: "Dead. Reason required." },
+  { key: "nurture",   label: "Nurture / Later",  tone: "neutral", funnel: false, blurb: "Real, but not now. Revisit later." },
+];
+
+const stage = (key) => STAGES.find((s) => s.key === key) || STAGES[0];
+const OPEN_STAGES = STAGES.filter((s) => !["won", "lost"].includes(s.key)).map((s) => s.key);
+
+/* How many days a lead can sit in one stage with no activity before the
+   dashboard flags it. This is the number that answers "which lead got
+   dropped?" on the Tuesday/Thursday call. */
+const STALE_DAYS = 7;
+
+/* ---------------------------------------------------------------------------
+   5. LEAD FIELDS
+   type:     text | email | tel | url | date | number | textarea | select
+   group:    which fieldset it sits in on the form
+   table:    show as a column in the leads table
+   required: enforced on save
+   export:   included in the Excel export (defaults to true)
+--------------------------------------------------------------------------- */
+const LEAD_FIELDS = [
+  /* --- The person ------------------------------------------------------- */
+  { key: "firstName",     label: "First Name",        type: "text",     group: "Person",  required: true, table: true, width: 16 },
+  { key: "lastName",      label: "Last Name",         type: "text",     group: "Person",  table: true, width: 16 },
+  { key: "jobTitle",      label: "Job Title",         type: "text",     group: "Person",  table: true, width: 26 },
+  { key: "linkedinUrl",   label: "LinkedIn Profile",  type: "url",      group: "Person",  required: true, width: 40, placeholder: "https://linkedin.com/in/..." },
+  { key: "email",         label: "Email",             type: "email",    group: "Person",  table: true, width: 30 },
+  { key: "phone",         label: "Phone",             type: "tel",      group: "Person",  width: 18 },
+  { key: "whatsapp",      label: "WhatsApp",          type: "tel",      group: "Person",  width: 18 },
+  { key: "city",          label: "City",              type: "text",     group: "Person",  width: 16 },
+  { key: "country",       label: "Country",           type: "text",     group: "Person",  table: true, width: 16 },
+
+  /* --- The company ------------------------------------------------------ */
+  { key: "company",        label: "Company",          type: "text",     group: "Company", required: true, table: true, width: 26 },
+  { key: "companyWebsite", label: "Company Website",  type: "url",      group: "Company", width: 32 },
+  { key: "companyLinkedin",label: "Company LinkedIn", type: "url",      group: "Company", width: 36 },
+  { key: "industry",       label: "Industry",         type: "text",     group: "Company", table: true, width: 22 },
+  { key: "companySize",    label: "Company Size",     type: "select",   group: "Company", width: 14,
+    options: ["", "1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5000+"] },
+  { key: "revenue",        label: "Est. Revenue",     type: "text",     group: "Company", width: 16 },
+
+  /* --- Where it came from ----------------------------------------------- */
+  { key: "source",        label: "Source",            type: "select",   group: "Source",  table: true, width: 20,
+    options: ["LinkedIn Outreach", "LinkedIn Inbound", "Content / Post", "Referral", "Event", "Other"] },
+  { key: "campaign",      label: "Campaign",          type: "text",     group: "Source",  width: 22 },
+  { key: "connectedOn",   label: "Connected On",      type: "date",     group: "Source",  width: 14 },
+  { key: "repliedOn",     label: "Replied On",        type: "date",     group: "Source",  width: 14 },
+  { key: "intent",        label: "Intent",            type: "select",   group: "Source",  width: 14,
+    options: ["", "Hot", "Warm", "Cold"] },
+
+  /* --- Handover & deal -------------------------------------------------- */
+  { key: "sharedOn",      label: "Shared On",         type: "date",     group: "Handover", table: true, width: 14 },
+  { key: "salesOwner",    label: "Sales Owner",       type: "text",     group: "Handover", table: true, width: 20,
+    placeholder: "Who at the sales partner owns this" },
+  { key: "ghlUrl",        label: "GHL Record",        type: "url",      group: "Handover", width: 36,
+    placeholder: "Paste the GHL opportunity link" },
+  { key: "dealValue",     label: "Deal Value (USD)",  type: "number",   group: "Handover", width: 16 },
+  { key: "nextFollowUp",  label: "Next Follow-up",    type: "date",     group: "Handover", table: true, width: 16 },
+  { key: "lostReason",    label: "Lost Reason",       type: "text",     group: "Handover", width: 30 },
+  { key: "notes",         label: "Notes",             type: "textarea", group: "Handover", width: 50 },
+];
+
+const FIELD_GROUPS = ["Person", "Company", "Source", "Handover"];
+const field = (key) => LEAD_FIELDS.find((f) => f.key === key);
+
+/* ---------------------------------------------------------------------------
+   6. CHART COLOURS
+   The dashboard is monochrome + gold, so every chart is single-series and
+   magnitude is carried by bar length, not hue. These values were checked with
+   the palette validator against a white surface.
+--------------------------------------------------------------------------- */
+const VIZ = {
+  mark:     "#a8801a",  // single-series bar fill — 3.6:1 on white
+  ordinal:  ["#d4b455", "#c9a227", "#b8901f", "#a8801a", "#9a7415"], // funnel steps, light -> dark
+};
+
+/* Where the weekly review starts. The team reviews on Tuesday and Thursday, so
+   "since the last review" means since the most recent Tue or Thu that passed. */
+const REVIEW_DAYS = [2, 4]; // 0 = Sunday
+
+
+/* ===== xlsx.js ======================================================= */
+/* ============================================================================
+   xlsx.js — a minimal, dependency-free .xlsx writer.
+
+   Why not a library? This dashboard is a static page on GitHub Pages, and the
+   export is the one feature that absolutely has to work: it is the only
+   sanctioned way data leaves the system. Pulling a spreadsheet library off a
+   CDN at click time means the export breaks whenever an office network blocks
+   the CDN or the CDN has a bad day. Everything needed here is a flat grid of
+   strings and numbers, which is a small enough slice of OOXML to just write.
+
+   An .xlsx is a ZIP of XML parts. Entries are STORED (no compression) so no
+   deflate implementation is needed — the files are small and Excel does not
+   care.
+
+   Produces: bold frozen header row, column widths, an autofilter, real
+   numeric cells, and one tab per sheet.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   XML helpers
+--------------------------------------------------------------------------- */
+
+/* XML 1.0 forbids most control characters outright — they cannot be escaped,
+   only removed, and a stray one makes the whole file unopenable. */
+const stripBad = (s) => s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
+
+const xml = (s) =>
+  stripBad(String(s)).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[c]));
+
+/* 0 -> A, 25 -> Z, 26 -> AA … */
+function colName(i) {
+  let s = "";
+  for (i += 1; i > 0; i = Math.floor((i - 1) / 26)) {
+    s = String.fromCharCode(65 + ((i - 1) % 26)) + s;
+  }
+  return s;
+}
+
+/* ---------------------------------------------------------------------------
+   CRC32 — required by the ZIP container
+--------------------------------------------------------------------------- */
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(bytes) {
+  let c = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+/* ---------------------------------------------------------------------------
+   ZIP writer (STORED entries only)
+--------------------------------------------------------------------------- */
+function zip(files) {
+  const enc = new TextEncoder();
+  const parts = [];
+  const central = [];
+  let offset = 0;
+
+  // DOS time/date. Excel ignores these; a fixed timestamp keeps output stable.
+  const time = 0, date = ((2020 - 1980) << 9) | (1 << 5) | 1;
+
+  const u16 = (n) => [n & 0xff, (n >>> 8) & 0xff];
+  const u32 = (n) => [n & 0xff, (n >>> 8) & 0xff, (n >>> 16) & 0xff, (n >>> 24) & 0xff];
+
+  for (const { name, data } of files) {
+    const nameBytes = enc.encode(name);
+    const body = typeof data === "string" ? enc.encode(data) : data;
+    const crc = crc32(body);
+
+    const local = [
+      ...u32(0x04034b50), ...u16(20), ...u16(0), ...u16(0),
+      ...u16(time), ...u16(date),
+      ...u32(crc), ...u32(body.length), ...u32(body.length),
+      ...u16(nameBytes.length), ...u16(0),
+    ];
+    parts.push(new Uint8Array(local), nameBytes, body);
+
+    central.push([
+      ...u32(0x02014b50), ...u16(20), ...u16(20), ...u16(0), ...u16(0),
+      ...u16(time), ...u16(date),
+      ...u32(crc), ...u32(body.length), ...u32(body.length),
+      ...u16(nameBytes.length), ...u16(0), ...u16(0),
+      ...u16(0), ...u16(0), ...u32(0),
+      ...u32(offset),
+    ]);
+    central.push(nameBytes);
+
+    offset += local.length + nameBytes.length + body.length;
+  }
+
+  const cdParts = [];
+  let cdSize = 0;
+  for (const c of central) {
+    const arr = c instanceof Uint8Array ? c : new Uint8Array(c);
+    cdParts.push(arr);
+    cdSize += arr.length;
+  }
+
+  const end = new Uint8Array([
+    ...u32(0x06054b50), ...u16(0), ...u16(0),
+    ...u16(files.length), ...u16(files.length),
+    ...u32(cdSize), ...u32(offset), ...u16(0),
+  ]);
+
+  const total = offset + cdSize + end.length;
+  const out = new Uint8Array(total);
+  let p = 0;
+  for (const a of [...parts, ...cdParts, end]) { out.set(a, p); p += a.length; }
+  return out;
+}
+
+/* ---------------------------------------------------------------------------
+   Sheet XML
+--------------------------------------------------------------------------- */
+function sheetXml(aoa, cols) {
+  const rowCount = aoa.length;
+  const colCount = aoa.reduce((m, r) => Math.max(m, r.length), 0);
+  const dim = `A1:${colName(Math.max(colCount - 1, 0))}${Math.max(rowCount, 1)}`;
+
+  const colsXml = cols?.length
+    ? `<cols>${cols.map((w, i) =>
+        `<col min="${i + 1}" max="${i + 1}" width="${Number(w) || 14}" customWidth="1"/>`).join("")}</cols>`
+    : "";
+
+  const rows = aoa.map((row, r) => {
+    const cells = row.map((v, c) => {
+      const ref = `${colName(c)}${r + 1}`;
+      const style = r === 0 ? ' s="1"' : "";
+      if (v === null || v === undefined || v === "") return `<c r="${ref}"${style}/>`;
+      if (typeof v === "number" && Number.isFinite(v)) {
+        return `<c r="${ref}"${style}><v>${v}</v></c>`;
+      }
+      // Inline strings keep the file to one part per sheet — no shared string table.
+      return `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xml(v)}</t></is></c>`;
+    }).join("");
+    return `<row r="${r + 1}">${cells}</row>`;
+  }).join("");
+
+  // Freeze the header row, and put an autofilter on it when there is data.
+  const pane = rowCount > 1
+    ? `<sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A2" sqref="A2"/></sheetView>`
+    : `<sheetView workbookViewId="0"/>`;
+
+  const filter = rowCount > 1 && colCount > 0
+    ? `<autoFilter ref="A1:${colName(colCount - 1)}${rowCount}"/>`
+    : "";
+
+  /* Element order below follows the CT_Worksheet sequence — Excel rejects the
+     file if these are out of order. */
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="${dim}"/><sheetViews>${pane}</sheetViews><sheetFormatPr defaultRowHeight="15"/>${colsXml}<sheetData>${rows}</sheetData>${filter}</worksheet>`;
+}
+
+const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+
+/* Excel limits sheet names to 31 chars and forbids : \ / ? * [ ] */
+const safeSheetName = (n, i) =>
+  (String(n || `Sheet${i + 1}`).replace(/[:\\\/?*\[\]]/g, " ").slice(0, 31)) || `Sheet${i + 1}`;
+
+/* ---------------------------------------------------------------------------
+   PUBLIC API
+
+   sheets: [{ name, aoa, cols }]
+     aoa  — array of rows, each an array of strings / numbers. Row 0 is the
+            header and is styled bold and frozen.
+     cols — optional array of column widths (characters).
+--------------------------------------------------------------------------- */
+function buildXlsx(sheets) {
+  const names = sheets.map((s, i) => safeSheetName(s.name, i));
+
+  const files = [
+    {
+      name: "[Content_Types].xml",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${
+        sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")
+      }<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`,
+    },
+    {
+      name: "_rels/.rels",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
+    },
+    {
+      name: "xl/workbook.xml",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${
+        names.map((n, i) => `<sheet name="${xml(n)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")
+      }</sheets></workbook>`,
+    },
+    {
+      name: "xl/_rels/workbook.xml.rels",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${
+        sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")
+      }<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`,
+    },
+    { name: "xl/styles.xml", data: STYLES },
+    ...sheets.map((s, i) => ({
+      name: `xl/worksheets/sheet${i + 1}.xml`,
+      data: sheetXml(s.aoa || [], s.cols),
+    })),
+  ];
+
+  return zip(files);
+}
+
+/* Build the workbook and hand it to the browser as a download. */
+function downloadXlsx(sheets, filename) {
+  const bytes = buildXlsx(sheets);
+  const blob = new Blob([bytes], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+
+/* ===== store.js ====================================================== */
+/* ============================================================================
+   store.js — the only file that talks to a database.
+
+   Exposes one interface used by app.js. Behind it sit two implementations:
+
+     firebaseStore  real Firebase Auth + Firestore (once config.js is filled in)
+     demoStore      localStorage, seeded with sample rows, so the UI can be
+                    demoed to the team before the Firebase project exists
+
+   Both are live: every watch* function takes a callback, fires immediately
+   with current data, and re-fires on every change.
+
+   ── A note on the queries ────────────────────────────────────────────────
+   Firestore evaluates security rules against a query's POTENTIAL result set,
+   not the documents it happens to return. A rule like
+   `resource.data.stream == 'sales_partner'` therefore requires the query to
+   carry a matching `where` clause, or the whole request is rejected. So the
+   watch* functions below narrow their queries by role to exactly mirror
+   firestore.rules. Change one, change the other.
+
+   For the same reason `activity` documents carry a denormalised copy of the
+   parent lead's `stream` and `clientId`: it lets the rules authorise an
+   activity read without a get() on the lead (which would cost an extra
+   document read per entry).
+   ========================================================================== */
+
+
+
+const SDK = "https://www.gstatic.com/firebasejs/10.14.1";
+
+/* ==========================================================================
+   FIREBASE IMPLEMENTATION
+   ========================================================================== */
+async function firebaseStore() {
+  const [{ initializeApp }, auth, fs] = await Promise.all([
+    import(`${SDK}/firebase-app.js`),
+    import(`${SDK}/firebase-auth.js`),
+    import(`${SDK}/firebase-firestore.js`),
+  ]);
+
+  const app = initializeApp(firebaseConfig);
+  const A = auth.getAuth(app);
+  const D = fs.getFirestore(app);
+
+  const {
+    collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc,
+    onSnapshot, query, where, orderBy, limit, serverTimestamp,
+  } = fs;
+
+  /* Firestore Timestamps -> plain ISO strings the UI can sort and format. */
+  const norm = (snap) => {
+    const o = { id: snap.id, ...snap.data() };
+    for (const k of Object.keys(o)) {
+      if (o[k] && typeof o[k].toDate === "function") o[k] = o[k].toDate().toISOString();
+    }
+    return o;
+  };
+  const live = (q, cb) =>
+    onSnapshot(
+      q,
+      (snap) => cb(snap.docs.map(norm)),
+      (err) => { console.error("[firestore]", err); cb([], err); }
+    );
+
+  let profile = null;
+
+  /* The where() clause that makes a query provably safe for this user's role.
+     null means "no clause needed" (staff see everything);
+     false means "this user can see nothing". */
+  const scopeClause = () => {
+    const r = profile?.role;
+    if (r === "admin" || r === "ops") return null;
+    if (r === "sales") return where("stream", "==", "sales_partner");
+    if (r === "client") {
+      const ids = (profile.clientAccess || []).slice(0, 30);
+      return ids.length ? where("clientId", "in", ids) : false;
+    }
+    return false;
+  };
+
+  const scoped = (col, ...tail) => {
+    const clause = scopeClause();
+    if (clause === false) return false;
+    return clause
+      ? query(collection(D, col), clause, ...tail)
+      : query(collection(D, col), ...tail);
+  };
+
+  const store = {
+    mode: "firebase",
+
+    /* ---- auth ---------------------------------------------------------- */
+    onAuth(cb) {
+      return auth.onAuthStateChanged(A, async (user) => {
+        if (!user) { profile = null; return cb(null); }
+        // The users/{uid} document carries the role and client scoping. No
+        // document means the login exists but access hasn't been granted.
+        try {
+          const snap = await getDoc(doc(D, "users", user.uid));
+          profile = snap.exists()
+            ? { uid: user.uid, email: user.email, ...snap.data() }
+            : { uid: user.uid, email: user.email, name: user.email, role: null, pending: true };
+        } catch {
+          profile = { uid: user.uid, email: user.email, name: user.email, role: null, pending: true };
+        }
+        cb(profile);
+      });
+    },
+    signIn: (email, password) => auth.signInWithEmailAndPassword(A, email, password),
+    signOut: () => auth.signOut(A),
+    resetPassword: (email) => auth.sendPasswordResetEmail(A, email),
+    me: () => profile,
+
+    /* ---- leads --------------------------------------------------------- */
+    watchLeads(cb) {
+      const q = scoped("leads", orderBy("createdAt", "desc"));
+      if (!q) { cb([]); return () => {}; }
+      return live(q, cb);
+    },
+
+    async createLead(data) {
+      const ref = await addDoc(collection(D, "leads"), {
+        ...data,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        lastActivityAt: serverTimestamp(),
+        createdBy: profile.uid,
+        createdByName: profile.name || profile.email,
+      });
+      await store.logActivity(
+        { id: ref.id, stream: data.stream, clientId: data.clientId || "" },
+        { type: "created", text: `Lead created — ${data.firstName || ""} ${data.lastName || ""}`.trim() }
+      );
+      return ref.id;
+    },
+
+    async updateLead(lead, patch, activity) {
+      await updateDoc(doc(D, "leads", lead.id), {
+        ...patch,
+        updatedAt: serverTimestamp(),
+        lastActivityAt: serverTimestamp(),
+      });
+      // The patch may itself move the lead between streams/clients, so stamp
+      // activity with where the lead ends up, not where it started.
+      const ctx = {
+        id: lead.id,
+        stream: patch.stream ?? lead.stream,
+        clientId: patch.clientId ?? lead.clientId ?? "",
+      };
+      for (const a of activity || []) await store.logActivity(ctx, a);
+    },
+
+    deleteLead: (id) => deleteDoc(doc(D, "leads", id)),
+
+    /* ---- activity ------------------------------------------------------ */
+    logActivity(lead, entry) {
+      return addDoc(collection(D, "activity"), {
+        leadId: lead.id,
+        stream: lead.stream || "",
+        clientId: lead.clientId || "",
+        ...entry,
+        at: serverTimestamp(),
+        by: profile.uid,
+        byName: profile.name || profile.email,
+      });
+    },
+
+    watchActivity(leadId, cb) {
+      const q = scoped("activity", where("leadId", "==", leadId), orderBy("at", "desc"));
+      if (!q) { cb([]); return () => {}; }
+      return live(q, cb);
+    },
+
+    watchRecentActivity(cb, n = 120) {
+      const q = scoped("activity", orderBy("at", "desc"), limit(n));
+      if (!q) { cb([]); return () => {}; }
+      return live(q, cb);
+    },
+
+    /* ---- clients ------------------------------------------------------- */
+    watchClients: (cb) => live(query(collection(D, "clients"), orderBy("name")), cb),
+    saveClient: (id, data) =>
+      id
+        ? updateDoc(doc(D, "clients", id), data)
+        : addDoc(collection(D, "clients"), { ...data, createdAt: serverTimestamp() }),
+
+    /* ---- people -------------------------------------------------------- */
+    watchUsers: (cb) => live(query(collection(D, "users"), orderBy("name")), cb),
+    saveUser: (uid, data) => setDoc(doc(D, "users", uid), data, { merge: true }),
+
+    /* ---- export history ------------------------------------------------ */
+    logExport(rec) {
+      return addDoc(collection(D, "exports"), {
+        ...rec,
+        count: Number(rec.count) || 0,
+        at: serverTimestamp(),
+        by: profile.uid,
+        byName: profile.name || profile.email,
+        byEmail: profile.email,
+      });
+    },
+
+    watchExports(cb) {
+      const base = collection(D, "exports");
+      const q = profile?.role === "admin"
+        ? query(base, orderBy("at", "desc"), limit(300))
+        : query(base, where("by", "==", profile.uid), orderBy("at", "desc"), limit(300));
+      return live(q, cb);
+    },
+  };
+
+  return store;
+}
+
+/* ==========================================================================
+   DEMO IMPLEMENTATION — localStorage, same interface
+   ========================================================================== */
+function demoStore() {
+  const KEY = "linkedin-leads-demo-v1";
+  const listeners = new Set();
+
+  const blank = () => ({ leads: [], activity: [], clients: [], users: [], exports: [] });
+  const read = () => {
+    try { return { ...blank(), ...JSON.parse(localStorage.getItem(KEY) || "{}") }; }
+    catch { return blank(); }
+  };
+  const write = (db) => {
+    localStorage.setItem(KEY, JSON.stringify(db));
+    listeners.forEach((fn) => fn());
+  };
+  const uid = () => Math.random().toString(36).slice(2, 11);
+  const now = () => new Date().toISOString();
+
+  /* A watcher re-runs its selector whenever anything changes. */
+  const watch = (select, cb) => {
+    const run = () => cb(select(read()));
+    listeners.add(run);
+    run();
+    return () => listeners.delete(run);
+  };
+
+  const profile = { uid: "demo-user", email: "demo@local", name: "Demo User", role: "admin", demo: true };
+
+  seed();
+  function seed() {
+    if (localStorage.getItem(KEY + ":seeded")) return;
+    localStorage.setItem(KEY + ":seeded", "1");
+    const db = read();
+    if (db.leads.length) return;
+
+    const c1 = uid(), c2 = uid();
+    db.clients = [
+      { id: c1, name: "Northwind Capital", active: true, createdAt: now() },
+      { id: c2, name: "Beacon Health", active: true, createdAt: now() },
+    ];
+    const rows = [
+      ["Priya", "Menon", "VP Operations", "Aurora Logistics", "meeting", "sales_partner", "", 12],
+      ["Daniel", "Reyes", "Head of Growth", "Vertex Software", "shared", "sales_partner", "", 9],
+      ["Sarah", "Whitfield", "COO", "Lakeside Manufacturing", "contacted", "sales_partner", "", 21],
+      ["Tom", "Okafor", "Founder", "Bright Yard", "new", "sales_partner", "", 2],
+      ["Amara", "Singh", "CFO", "Helio Ventures", "won", "sales_partner", "", 40],
+      ["James", "Delaney", "Director of IT", "Corfield Group", "lost", "sales_partner", "", 33],
+      ["Nina", "Kowalski", "Marketing Lead", "Pinehurst Retail", "shared", "client", c1, 6],
+      ["Owen", "Baptiste", "Practice Manager", "Cedar Clinic", "new", "client", c2, 1],
+      ["Ravi", "Iyer", "Procurement Head", "Trellis Foods", "proposal", "client", c1, 15],
+    ];
+    const team = ["Aisha", "Rohit", "Meera"];
+    db.leads = rows.map(([f, l, t, co, st, stream, clientId, age], i) => {
+      const created = new Date(Date.now() - age * 864e5).toISOString();
+      const touched = new Date(Date.now() - Math.max(0, age - 4) * 864e5).toISOString();
+      return {
+        id: uid(),
+        firstName: f, lastName: l, jobTitle: t, company: co,
+        linkedinUrl: `https://linkedin.com/in/${f.toLowerCase()}-${l.toLowerCase()}`,
+        email: `${f.toLowerCase()}@${co.toLowerCase().replace(/\W/g, "")}.com`,
+        country: ["United States", "United Kingdom", "Canada"][i % 3],
+        industry: ["Logistics", "Software", "Manufacturing", "Retail", "Healthcare"][i % 5],
+        source: "LinkedIn Outreach",
+        status: st,
+        stream,
+        clientId,
+        sharedOn: st === "new" ? "" : created.slice(0, 10),
+        salesOwner: stream === "sales_partner" && st !== "new" ? "Mark Ellison" : "",
+        dealValue: st === "won" ? 18000 : st === "proposal" ? 24000 : "",
+        lostReason: st === "lost" ? "Went with an incumbent vendor" : "",
+        commentCount: 0,
+        createdAt: created,
+        updatedAt: touched,
+        lastActivityAt: touched,
+        createdBy: "demo-user",
+        createdByName: team[i % team.length],
+      };
+    });
+    db.activity = db.leads.map((ld) => ({
+      id: uid(), leadId: ld.id, stream: ld.stream, clientId: ld.clientId,
+      type: "created", text: `Lead created — ${ld.firstName} ${ld.lastName}`,
+      at: ld.createdAt, by: "demo-user", byName: ld.createdByName,
+    }));
+    write(db);
+  }
+
+  const store = {
+    mode: "demo",
+
+    onAuth(cb) { setTimeout(() => cb(profile), 0); return () => {}; },
+    signIn: async () => profile,
+    signOut: async () => { location.reload(); },
+    resetPassword: async () => {},
+    me: () => profile,
+
+    watchLeads: (cb) =>
+      watch((db) => [...db.leads].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")), cb),
+
+    async createLead(data) {
+      const db = read();
+      const id = uid();
+      db.leads.push({
+        ...data, id, commentCount: 0,
+        createdAt: now(), updatedAt: now(), lastActivityAt: now(),
+        createdBy: profile.uid, createdByName: profile.name,
+      });
+      db.activity.push({
+        id: uid(), leadId: id, stream: data.stream, clientId: data.clientId || "",
+        type: "created", text: `Lead created — ${data.firstName || ""} ${data.lastName || ""}`.trim(),
+        at: now(), by: profile.uid, byName: profile.name,
+      });
+      write(db);
+      return id;
+    },
+
+    async updateLead(lead, patch, activity) {
+      const db = read();
+      const i = db.leads.findIndex((l) => l.id === lead.id);
+      if (i < 0) return;
+      db.leads[i] = { ...db.leads[i], ...patch, updatedAt: now(), lastActivityAt: now() };
+      const stream = patch.stream ?? lead.stream;
+      const clientId = patch.clientId ?? lead.clientId ?? "";
+      for (const a of activity || []) {
+        db.activity.push({
+          id: uid(), leadId: lead.id, stream, clientId, ...a,
+          at: now(), by: profile.uid, byName: profile.name,
+        });
+      }
+      write(db);
+    },
+
+    async deleteLead(id) {
+      const db = read();
+      db.leads = db.leads.filter((l) => l.id !== id);
+      write(db);
+    },
+
+    async logActivity(lead, entry) {
+      const db = read();
+      db.activity.push({
+        id: uid(), leadId: lead.id, stream: lead.stream || "", clientId: lead.clientId || "",
+        ...entry, at: now(), by: profile.uid, byName: profile.name,
+      });
+      write(db);
+    },
+
+    watchActivity: (leadId, cb) =>
+      watch((db) => db.activity
+        .filter((a) => a.leadId === leadId)
+        .sort((a, b) => (b.at || "").localeCompare(a.at || "")), cb),
+
+    watchRecentActivity: (cb, n = 120) =>
+      watch((db) => [...db.activity]
+        .sort((a, b) => (b.at || "").localeCompare(a.at || ""))
+        .slice(0, n), cb),
+
+    watchClients: (cb) => watch((db) => [...db.clients].sort((a, b) => a.name.localeCompare(b.name)), cb),
+
+    async saveClient(id, data) {
+      const db = read();
+      if (id) {
+        const i = db.clients.findIndex((c) => c.id === id);
+        if (i >= 0) db.clients[i] = { ...db.clients[i], ...data };
+      } else db.clients.push({ id: uid(), ...data, createdAt: now() });
+      write(db);
+    },
+
+    watchUsers: (cb) => watch((db) => db.users, cb),
+
+    async saveUser(id, data) {
+      const db = read();
+      const i = db.users.findIndex((u) => u.id === id);
+      if (i >= 0) db.users[i] = { ...db.users[i], ...data };
+      else db.users.push({ id: id || uid(), ...data });
+      write(db);
+    },
+
+    async logExport(rec) {
+      const db = read();
+      db.exports.push({
+        id: uid(), ...rec, count: Number(rec.count) || 0,
+        at: now(), by: profile.uid, byName: profile.name, byEmail: profile.email,
+      });
+      write(db);
+    },
+
+    watchExports: (cb) =>
+      watch((db) => [...db.exports].sort((a, b) => (b.at || "").localeCompare(a.at || "")), cb),
+  };
+
+  return store;
+}
+
+/* ==========================================================================
+   PICKER
+   ========================================================================== */
+async function openStore() {
+  if (!isConfigured()) return demoStore();
+  try {
+    return await firebaseStore();
+  } catch (err) {
+    console.error("Firebase failed to start; falling back to demo mode.", err);
+    return demoStore();
+  }
+}
+
+
+/* ===== app.js ======================================================== */
+/* ============================================================================
+   app.js — UI and behaviour for the LinkedIn Leads dashboard.
+   ========================================================================== */
+
+
+
+
+
+/* ==========================================================================
+   TINY HELPERS
+   ========================================================================== */
+const $  = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+const esc = (v) =>
+  String(v ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const DAY = 864e5;
+const asDate = (v) => (v ? new Date(v) : null);
+const daysSince = (v) => (v ? Math.floor((Date.now() - new Date(v)) / DAY) : Infinity);
+
+const fmtDate = (v) => {
+  const d = asDate(v);
+  if (!d || isNaN(d)) return "";
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+};
+const fmtWhen = (v) => {
+  const d = asDate(v);
+  if (!d || isNaN(d)) return "";
+  const mins = Math.round((Date.now() - d) / 6e4);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1440) return `${Math.round(mins / 60)}h ago`;
+  const days = Math.round(mins / 1440);
+  if (days < 7) return `${days}d ago`;
+  return fmtDate(v);
+};
+const fullName = (l) => `${l.firstName || ""} ${l.lastName || ""}`.trim() || "(no name)";
+const initials = (s) =>
+  (s || "?").split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+
+function toast(msg, kind = "") {
+  const t = document.createElement("div");
+  t.className = `toast ${kind}`;
+  t.textContent = msg;
+  $("#toasts").appendChild(t);
+  setTimeout(() => {
+    t.style.transition = "opacity .3s, transform .3s";
+    t.style.opacity = "0";
+    t.style.transform = "translateY(8px)";
+    setTimeout(() => t.remove(), 320);
+  }, 3200);
+}
+
+/* The most recent Tuesday or Thursday boundary — "since the last review call". */
+function lastReviewStart() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 8; i++) {
+    if (REVIEW_DAYS.includes(d.getDay()) && d.getTime() < Date.now()) return d;
+    d.setDate(d.getDate() - 1);
+  }
+  return d;
+}
+
+/* ==========================================================================
+   PERMISSIONS
+   Mirrors firestore.rules. The rules are what actually enforce this — these
+   checks only keep the UI honest.
+   ========================================================================== */
+const SALES_EDITABLE = ["status", "salesOwner", "ghlUrl", "dealValue", "nextFollowUp", "lostReason", "notes", "sharedOn"];
+
+const can = {
+  create:  (r) => ["admin", "ops"].includes(r),
+  editAll: (r) => ["admin", "ops"].includes(r),
+  edit:    (r) => ["admin", "ops", "sales"].includes(r),
+  remove:  (r) => r === "admin",
+  admin:   (r) => r === "admin",
+  comment: (r) => r !== null,
+  editable(r, key) {
+    if (this.editAll(r)) return true;
+    if (r === "sales") return SALES_EDITABLE.includes(key);
+    return false;
+  },
+};
+
+/* ==========================================================================
+   STATE
+   ========================================================================== */
+const S = {
+  store: null,
+  me: null,
+  leads: [],
+  clients: [],
+  users: [],
+  exports: [],
+  feed: [],
+  tab: "review",
+  /* per-stream filter + sort state */
+  view: {
+    sales_partner: { q: "", status: "", owner: "", client: "", attn: false, sort: "createdAt", dir: -1 },
+    client:        { q: "", status: "", owner: "", client: "", attn: false, sort: "createdAt", dir: -1 },
+  },
+  drawer: { leadId: null, mode: null, tab: "details" },
+  unsubActivity: null,
+  drawerActivity: [],
+};
+
+const clientName = (id) => S.clients.find((c) => c.id === id)?.name || "";
+
+/* ==========================================================================
+   COPY GUARD
+   Copy / cut / right-click are suppressed on data surfaces so the tracked
+   Excel export is the only sanctioned way data leaves this dashboard. Form
+   controls stay untouched so people can still type and paste.
+   ========================================================================== */
+function installCopyGuard() {
+  const inField = (t) => t && t.closest && t.closest("input, textarea, select, [contenteditable]");
+  const guard = (e) => {
+    if (inField(e.target)) return;
+    if (!e.target.closest || !e.target.closest(".noselect, .drawer")) return;
+    e.preventDefault();
+    toast("Copying is off. Use Export to Excel — every export is logged.", "warn");
+  };
+  document.addEventListener("copy", guard);
+  document.addEventListener("cut", guard);
+  document.addEventListener("contextmenu", (e) => {
+    if (inField(e.target)) return;
+    if (e.target.closest && e.target.closest(".noselect, .drawer")) e.preventDefault();
+  });
+  document.addEventListener("keydown", (e) => {
+    const k = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && ["c", "x"].includes(k) && !inField(e.target)) {
+      e.preventDefault();
+      toast("Copying is off. Use Export to Excel — every export is logged.", "warn");
+    }
+  });
+}
+
+/* ==========================================================================
+   BOOT
+   ========================================================================== */
+(async function boot() {
+  installCopyGuard();
+  S.store = await openStore();
+
+  if (S.store.mode === "demo") $("#demobar").classList.remove("hide");
+
+  S.store.onAuth((profile) => {
+    S.me = profile;
+    if (!profile) return showLogin();
+    if (profile.pending) {
+      showLogin("Your login exists but no access has been set up yet. Ask an admin to add you.");
+      S.store.signOut();
+      return;
+    }
+    showApp();
+  });
+
+  wireLogin();
+  wireChrome();
+})();
+
+/* ==========================================================================
+   LOGIN
+   ========================================================================== */
+function showLogin(msg) {
+  $("#login").classList.remove("hide");
+  $("#app").classList.add("hide");
+  if (msg) {
+    $("#loginErr").textContent = msg;
+    $("#loginErr").classList.remove("hide");
+  }
+}
+
+function wireLogin() {
+  const err = $("#loginErr");
+  $("#loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    err.classList.add("hide");
+    const btn = $("#liBtn");
+    btn.disabled = true;
+    btn.textContent = "Signing in…";
+    try {
+      await S.store.signIn($("#liEmail").value.trim(), $("#liPass").value);
+    } catch (ex) {
+      err.textContent = loginError(ex);
+      err.classList.remove("hide");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Sign in";
+    }
+  });
+
+  $("#liForgot").addEventListener("click", async () => {
+    const email = $("#liEmail").value.trim();
+    if (!email) return toast("Type your email above first.", "warn");
+    try {
+      await S.store.resetPassword(email);
+      toast("Password reset email sent.", "good");
+    } catch (ex) {
+      toast(loginError(ex), "bad");
+    }
+  });
+}
+
+function loginError(ex) {
+  const code = ex?.code || "";
+  if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found"))
+    return "That email and password don't match.";
+  if (code.includes("too-many-requests")) return "Too many attempts. Wait a few minutes and try again.";
+  if (code.includes("network")) return "Can't reach the server. Check your connection.";
+  return ex?.message || "Something went wrong. Try again.";
+}
+
+/* ==========================================================================
+   APP SHELL
+   ========================================================================== */
+function showApp() {
+  $("#login").classList.add("hide");
+  $("#app").classList.remove("hide");
+
+  const name = S.me.name || S.me.email;
+  $("#meName").textContent = name;
+  $("#meRole").textContent = ROLES[S.me.role]?.label || "No role";
+  $("#meAvatar").textContent = initials(name);
+  $("#tabAdmin").classList.toggle("hide", !can.admin(S.me.role));
+
+  // Live subscriptions. Each fires immediately with current data.
+  S.store.watchLeads((rows) => { S.leads = rows; renderAll(); });
+  S.store.watchClients((rows) => { S.clients = rows; renderAll(); });
+  S.store.watchExports((rows) => { S.exports = rows; renderExports(); });
+  S.store.watchRecentActivity((rows) => { S.feed = rows; renderFeed(); });
+  if (can.admin(S.me.role)) S.store.watchUsers((rows) => { S.users = rows; renderUsers(); });
+}
+
+function wireChrome() {
+  $("#signOut").addEventListener("click", () => S.store.signOut());
+
+  $("#tabs").addEventListener("click", (e) => {
+    const t = e.target.closest(".tab");
+    if (!t) return;
+    S.tab = t.dataset.tab;
+    $$(".tab").forEach((x) => x.classList.toggle("on", x === t));
+    $$(".panel").forEach((p) => p.classList.toggle("on", p.dataset.panel === S.tab));
+  });
+
+  $("#drClose").addEventListener("click", closeDrawer);
+  $("#scrim").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+
+  $("#addClient").addEventListener("click", async () => {
+    const name = $("#newClient").value.trim();
+    if (!name) return;
+    await S.store.saveClient(null, { name, active: true });
+    $("#newClient").value = "";
+    toast("Client added.", "good");
+  });
+}
+
+function renderAll() {
+  renderReview();
+  renderClients();
+  renderFeed();
+  renderStream("sales_partner");
+  renderStream("client");
+  $("#cntSales").textContent = S.leads.filter((l) => l.stream === "sales_partner").length;
+  $("#cntClient").textContent = S.leads.filter((l) => l.stream === "client").length;
+  if (S.drawer.leadId) renderDrawer();
+}
+
+/* ==========================================================================
+   REVIEW TAB
+   ========================================================================== */
+function isStale(l) {
+  return OPEN_STAGES.includes(l.status) && daysSince(l.lastActivityAt || l.updatedAt || l.createdAt) >= STALE_DAYS;
+}
+
+function renderReview() {
+  const since = lastReviewStart();
+  const L = S.leads;
+  const newSince = L.filter((l) => asDate(l.createdAt) >= since);
+  const stale = L.filter(isStale);
+  const open = L.filter((l) => OPEN_STAGES.includes(l.status));
+
+  $("#reviewHint").textContent = `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
+
+  /* ---- stat tiles ---- */
+  const tiles = [
+    { k: "New since last call", v: newSince.length, d: `${L.length} leads all time` },
+    { k: "Open pipeline", v: open.length, d: "Not won or lost" },
+    { k: "Meetings booked", v: L.filter((l) => ["meeting", "proposal"].includes(l.status)).length, d: "Meeting or proposal stage" },
+    { k: "Won", v: L.filter((l) => l.status === "won").length, d: winRateLabel(L) },
+    { k: "Needs attention", v: stale.length, d: `No activity in ${STALE_DAYS}+ days`, alert: stale.length > 0 },
+  ];
+  $("#statTiles").innerHTML = tiles.map((t) => `
+    <div class="stat${t.alert ? " alert" : ""}">
+      <div class="k">${esc(t.k)}</div>
+      <div class="v num">${t.v}</div>
+      <div class="d">${esc(t.d)}</div>
+    </div>`).join("");
+
+  /* ---- needs attention ---- */
+  const attn = [...stale].sort(
+    (a, b) => daysSince(b.lastActivityAt || b.createdAt) - daysSince(a.lastActivityAt || a.createdAt)
+  ).slice(0, 12);
+
+  $("#attnHint").textContent = stale.length
+    ? `${stale.length} open lead${stale.length > 1 ? "s" : ""} with no activity in ${STALE_DAYS}+ days.`
+    : "Nothing is sitting idle. Good.";
+
+  $("#attnList").innerHTML = attn.length
+    ? `<div class="list">${attn.map((l) => `
+        <div class="li" data-openlead="${esc(l.id)}" style="cursor:pointer">
+          <div class="grow">
+            <div class="t">${esc(fullName(l))} <span class="muted" style="font-weight:600">· ${esc(l.company || "")}</span></div>
+            <div class="s">${streamLabel(l)} · owner ${esc(l.salesOwner || l.createdByName || "unassigned")}</div>
+          </div>
+          ${pill(l.status)}
+          <span class="pill pill-warn"><span class="dot"></span>${daysSince(l.lastActivityAt || l.createdAt)}d idle</span>
+        </div>`).join("")}</div>`
+    : `<p class="muted" style="font-size:13px">Every open lead has been touched in the last ${STALE_DAYS} days.</p>`;
+
+  $("#attnList").onclick = (e) => {
+    const row = e.target.closest("[data-openlead]");
+    if (row) openDrawer(row.dataset.openlead);
+  };
+
+  /* ---- funnel: open leads by stage, ordinal single-hue ramp ---- */
+  const funnelStages = STAGES.filter((s) => s.funnel);
+  const counts = funnelStages.map((s) => L.filter((l) => l.status === s.key).length);
+  const top = Math.max(...counts, 1);
+  $("#funnelChart").innerHTML = L.length
+    ? funnelStages.map((s, i) => {
+        const n = counts[i];
+        const pct = L.length ? Math.round((n / L.length) * 100) : 0;
+        const shade = VIZ.ordinal[Math.min(i, VIZ.ordinal.length - 1)];
+        return `<div class="fn-row">
+          <div class="bar-lab">${esc(s.label)}</div>
+          <div class="fn-track"><div class="fn-fill" style="width:${(n / top) * 100}%;background:${shade}"></div></div>
+          <div class="fn-meta"><b>${n}</b> · ${pct}%</div>
+        </div>`;
+      }).join("")
+    : emptyChart("No leads yet.");
+
+  /* ---- created by team member ---- */
+  const byWho = tally(L, (l) => l.createdByName || "Unknown");
+  $("#byWhoChart").innerHTML = barChart(byWho);
+  $("#byWhoHint").textContent = `${L.length} leads all time`;
+
+  /* ---- by client ---- */
+  const clientLeads = L.filter((l) => l.stream === "client");
+  const byClient = tally(clientLeads, (l) => clientName(l.clientId) || "Unassigned");
+  $("#byClientChart").innerHTML = barChart(byClient, "No client leads yet.");
+
+  /* ---- per week, last 8 weeks ---- */
+  $("#byWeekChart").innerHTML = weekChart(L);
+}
+
+function winRateLabel(L) {
+  const closed = L.filter((l) => ["won", "lost"].includes(l.status)).length;
+  const won = L.filter((l) => l.status === "won").length;
+  return closed ? `${Math.round((won / closed) * 100)}% of closed leads` : "No closed leads yet";
+}
+
+function tally(rows, keyFn) {
+  const m = new Map();
+  rows.forEach((r) => { const k = keyFn(r); m.set(k, (m.get(k) || 0) + 1); });
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function emptyChart(msg) { return `<div class="empty-chart">${esc(msg)}</div>`; }
+
+/* Single-series magnitude bars: length carries the value, every bar is
+   directly labelled, so no legend and no colour encoding is needed. */
+function barChart(pairs, emptyMsg = "Nothing to show yet.") {
+  if (!pairs.length) return emptyChart(emptyMsg);
+  const top = Math.max(...pairs.map((p) => p[1]), 1);
+  return pairs.slice(0, 10).map(([label, n]) => `
+    <div class="bar-row${n === 0 ? " is-zero" : ""}">
+      <div class="bar-lab" title="${esc(label)}">${esc(label)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n / top) * 100}%"></div></div>
+      <div class="bar-val num">${n}</div>
+    </div>`).join("");
+}
+
+function weekChart(L) {
+  const weeks = [];
+  const monday = new Date();
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7)); // this week's Monday
+  for (let i = 7; i >= 0; i--) {
+    const start = new Date(monday.getTime() - i * 7 * DAY);
+    const end = new Date(start.getTime() + 7 * DAY);
+    const n = L.filter((l) => { const d = asDate(l.createdAt); return d >= start && d < end; }).length;
+    weeks.push([start.toLocaleDateString(undefined, { day: "numeric", month: "short" }), n]);
+  }
+  if (!weeks.some((w) => w[1] > 0)) return emptyChart("No leads created in the last 8 weeks.");
+  const top = Math.max(...weeks.map((w) => w[1]), 1);
+  return weeks.map(([label, n]) => `
+    <div class="bar-row${n === 0 ? " is-zero" : ""}">
+      <div class="bar-lab">w/c ${esc(label)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n / top) * 100}%"></div></div>
+      <div class="bar-val num">${n}</div>
+    </div>`).join("");
+}
+
+/* ==========================================================================
+   PILLS
+   ========================================================================== */
+function pill(statusKey) {
+  const s = stage(statusKey);
+  return `<span class="pill pill-${s.tone}"><span class="dot"></span>${esc(s.label)}</span>`;
+}
+function streamLabel(l) {
+  if (l.stream === "client") {
+    const c = clientName(l.clientId);
+    return c ? `Client · ${c}` : "Client · unassigned";
+  }
+  return STREAMS.sales_partner.short;
+}
+
+/* ==========================================================================
+   LEAD STREAM (table + toolbar) — one function drives both tabs
+   ========================================================================== */
+const COLUMNS = {
+  sales_partner: [
+    { key: "name",      label: "Lead",          sort: "firstName" },
+    { key: "company",   label: "Company",       sort: "company" },
+    { key: "status",    label: "Stage",         sort: "status" },
+    { key: "salesOwner",label: "Sales Owner",   sort: "salesOwner" },
+    { key: "sharedOn",  label: "Shared",        sort: "sharedOn" },
+    { key: "createdByName", label: "Added By",  sort: "createdByName" },
+    { key: "activity",  label: "Last Activity", sort: "lastActivityAt" },
+  ],
+  client: [
+    { key: "name",      label: "Lead",          sort: "firstName" },
+    { key: "company",   label: "Company",       sort: "company" },
+    { key: "clientId",  label: "Client",        sort: "clientId" },
+    { key: "status",    label: "Stage",         sort: "status" },
+    { key: "sharedOn",  label: "Delivered",     sort: "sharedOn" },
+    { key: "createdByName", label: "Added By",  sort: "createdByName" },
+    { key: "activity",  label: "Last Activity", sort: "lastActivityAt" },
+  ],
+};
+
+function filteredLeads(streamKey) {
+  const v = S.view[streamKey];
+  const q = v.q.trim().toLowerCase();
+  let rows = S.leads.filter((l) => l.stream === streamKey);
+
+  if (q) {
+    rows = rows.filter((l) =>
+      LEAD_FIELDS.some((f) => String(l[f.key] ?? "").toLowerCase().includes(q)) ||
+      String(l.createdByName ?? "").toLowerCase().includes(q) ||
+      clientName(l.clientId).toLowerCase().includes(q));
+  }
+  if (v.status) rows = rows.filter((l) => l.status === v.status);
+  if (v.owner)  rows = rows.filter((l) => (l.createdByName || "Unknown") === v.owner);
+  if (v.client) rows = rows.filter((l) => l.clientId === v.client);
+  if (v.attn)   rows = rows.filter(isStale);
+
+  const dir = v.dir;
+  rows.sort((a, b) => {
+    let x = a[v.sort] ?? "", y = b[v.sort] ?? "";
+    if (v.sort === "status") { x = STAGES.findIndex((s) => s.key === x); y = STAGES.findIndex((s) => s.key === y); }
+    if (v.sort === "clientId") { x = clientName(x); y = clientName(y); }
+    if (typeof x === "number" && typeof y === "number") return (x - y) * dir;
+    return String(x).localeCompare(String(y), undefined, { numeric: true }) * dir;
+  });
+  return rows;
+}
+
+function renderStream(streamKey) {
+  const v = S.view[streamKey];
+  const rows = filteredLeads(streamKey);
+  const owners = [...new Set(S.leads.filter((l) => l.stream === streamKey).map((l) => l.createdByName || "Unknown"))].sort();
+
+  /* ---- toolbar ---- */
+  $(`#toolbar_${streamKey}`).innerHTML = `
+    <div class="toolbar">
+      <div class="fld search">
+        <label for="q_${streamKey}">Search</label>
+        <input class="inp" id="q_${streamKey}" placeholder="Name, company, title, email, notes…" value="${esc(v.q)}">
+      </div>
+      <div class="fld">
+        <label for="st_${streamKey}">Stage</label>
+        <select class="inp" id="st_${streamKey}">
+          <option value="">All stages</option>
+          ${STAGES.map((s) => `<option value="${s.key}"${v.status === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="fld">
+        <label for="ow_${streamKey}">Added by</label>
+        <select class="inp" id="ow_${streamKey}">
+          <option value="">Everyone</option>
+          ${owners.map((o) => `<option value="${esc(o)}"${v.owner === o ? " selected" : ""}>${esc(o)}</option>`).join("")}
+        </select>
+      </div>
+      ${streamKey === "client" ? `
+      <div class="fld">
+        <label for="cl_${streamKey}">Client</label>
+        <select class="inp" id="cl_${streamKey}">
+          <option value="">All clients</option>
+          ${S.clients.map((c) => `<option value="${esc(c.id)}"${v.client === c.id ? " selected" : ""}>${esc(c.name)}</option>`).join("")}
+        </select>
+      </div>` : ""}
+      <div class="fld">
+        <label>&nbsp;</label>
+        <button class="btn btn-sm ${v.attn ? "btn-dark" : "btn-ghost"}" id="attn_${streamKey}">
+          Needs attention${v.attn ? " ✓" : ""}
+        </button>
+      </div>
+      <div class="spacer"></div>
+      <div class="fld">
+        <label>&nbsp;</label>
+        <div style="display:flex; gap:8px">
+          <button class="btn btn-sm btn-ghost" id="exp_${streamKey}">⬇ Export to Excel</button>
+          ${can.create(S.me.role)
+            ? `<button class="btn btn-sm btn-gold" id="add_${streamKey}">+ Add Lead</button>` : ""}
+        </div>
+      </div>
+    </div>`;
+
+  const bind = (id, ev, fn) => { const el = $(id); if (el) el.addEventListener(ev, fn); };
+  bind(`#q_${streamKey}`, "input", (e) => {
+    v.q = e.target.value;
+    const pos = e.target.selectionStart;
+    renderStream(streamKey);
+    const again = $(`#q_${streamKey}`);
+    again.focus();
+    again.setSelectionRange(pos, pos);
+  });
+  bind(`#st_${streamKey}`, "change", (e) => { v.status = e.target.value; renderStream(streamKey); });
+  bind(`#ow_${streamKey}`, "change", (e) => { v.owner = e.target.value; renderStream(streamKey); });
+  bind(`#cl_${streamKey}`, "change", (e) => { v.client = e.target.value; renderStream(streamKey); });
+  bind(`#attn_${streamKey}`, "click", () => { v.attn = !v.attn; renderStream(streamKey); });
+  bind(`#exp_${streamKey}`, "click", () => exportLeads(streamKey, rows));
+  bind(`#add_${streamKey}`, "click", () => openDrawer(null, streamKey));
+
+  /* ---- table ---- */
+  const cols = COLUMNS[streamKey];
+  const host = $(`#table_${streamKey}`);
+
+  if (!rows.length) {
+    const anyInStream = S.leads.some((l) => l.stream === streamKey);
+    host.innerHTML = `<div class="tbl-wrap"><div class="tbl-empty">
+      <div class="big">${anyInStream ? "No leads match these filters" : "No leads here yet"}</div>
+      <div style="font-size:13px">${anyInStream
+        ? "Clear the search or filters above."
+        : can.create(S.me.role) ? "Add the first one with the button above." : "Nothing has been added to this stream."}</div>
+    </div></div>`;
+    return;
+  }
+
+  host.innerHTML = `
+    <div class="tbl-wrap">
+      <table class="leads">
+        <thead><tr>${cols.map((c) => `
+          <th data-sort="${c.sort}">${esc(c.label)}
+            <span class="arw">${v.sort === c.sort ? (v.dir === 1 ? "▲" : "▼") : ""}</span>
+          </th>`).join("")}</tr></thead>
+        <tbody>${rows.map((l) => `
+          <tr data-id="${esc(l.id)}">${cols.map((c) => `<td>${cellHtml(c.key, l)}</td>`).join("")}</tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+    <p class="muted" style="font-size:11.5px; margin-top:9px; font-weight:600">
+      ${rows.length} lead${rows.length === 1 ? "" : "s"} shown · click a row to open it
+    </p>`;
+
+  host.querySelector("thead").addEventListener("click", (e) => {
+    const th = e.target.closest("th");
+    if (!th) return;
+    const key = th.dataset.sort;
+    if (v.sort === key) v.dir *= -1; else { v.sort = key; v.dir = 1; }
+    renderStream(streamKey);
+  });
+  host.querySelector("tbody").addEventListener("click", (e) => {
+    const tr = e.target.closest("tr");
+    if (tr) openDrawer(tr.dataset.id);
+  });
+}
+
+function cellHtml(key, l) {
+  switch (key) {
+    case "name":
+      return `<div class="cell-name">${esc(fullName(l))}</div>
+              <div class="cell-sub">${esc(l.jobTitle || "—")}</div>`;
+    case "company":
+      return `<div style="font-weight:600">${esc(l.company || "—")}</div>
+              <div class="cell-sub">${esc(l.industry || l.country || "")}</div>`;
+    case "status":
+      return pill(l.status);
+    case "clientId":
+      return `<span class="pill pill-stream">${esc(clientName(l.clientId) || "Unassigned")}</span>`;
+    case "sharedOn":
+      return `<span class="${l.sharedOn ? "" : "cell-dim"}">${esc(l.sharedOn ? fmtDate(l.sharedOn) : "not yet")}</span>`;
+    case "activity": {
+      const d = daysSince(l.lastActivityAt || l.createdAt);
+      const late = OPEN_STAGES.includes(l.status) && d >= STALE_DAYS;
+      return `<span class="${late ? "" : "cell-dim"}" style="${late ? "color:var(--warn);font-weight:700" : ""}">
+                ${esc(fmtWhen(l.lastActivityAt || l.createdAt))}</span>`;
+    }
+    default:
+      return `<span class="${l[key] ? "" : "cell-dim"}">${esc(l[key] || "—")}</span>`;
+  }
+}
+
+/* ==========================================================================
+   DRAWER — lead detail, edit, comments
+   ========================================================================== */
+function openDrawer(leadId, streamKey) {
+  S.drawer = { leadId, mode: leadId ? "read" : "new", tab: "details", stream: streamKey || "sales_partner" };
+  S.drawerActivity = [];
+  if (S.unsubActivity) { S.unsubActivity(); S.unsubActivity = null; }
+  if (leadId) {
+    S.unsubActivity = S.store.watchActivity(leadId, (rows) => {
+      S.drawerActivity = rows;
+      if (S.drawer.leadId === leadId) renderDrawer();
+    });
+  }
+  $("#drawer").classList.add("on");
+  $("#drawer").setAttribute("aria-hidden", "false");
+  $("#scrim").classList.add("on");
+  renderDrawer();
+}
+
+function closeDrawer() {
+  $("#drawer").classList.remove("on");
+  $("#drawer").setAttribute("aria-hidden", "true");
+  $("#scrim").classList.remove("on");
+  if (S.unsubActivity) { S.unsubActivity(); S.unsubActivity = null; }
+  S.drawer = { leadId: null, mode: null, tab: "details" };
+}
+
+function renderDrawer() {
+  const d = S.drawer;
+  const isNew = d.mode === "new";
+  const lead = isNew ? null : S.leads.find((l) => l.id === d.leadId);
+  if (!isNew && !lead) return closeDrawer();
+
+  $("#drTitle").textContent = isNew ? "New lead" : fullName(lead);
+  $("#drSub").innerHTML = isNew
+    ? esc(STREAMS[d.stream].label)
+    : `${esc(lead.jobTitle || "")}${lead.jobTitle && lead.company ? " · " : ""}${esc(lead.company || "")}
+       <span style="opacity:.6"> — added by ${esc(lead.createdByName || "?")} ${esc(fmtWhen(lead.createdAt))}</span>`;
+
+  if (isNew || d.mode === "edit") return renderForm(lead, d.stream);
+
+  /* ---- read view ---- */
+  const body = $("#drBody");
+  body.innerHTML = `
+    <div class="dr-tabs">
+      <button class="dr-tab ${d.tab === "details" ? "on" : ""}" data-drtab="details">Details</button>
+      <button class="dr-tab ${d.tab === "activity" ? "on" : ""}" data-drtab="activity">
+        Activity${S.drawerActivity.length ? ` (${S.drawerActivity.length})` : ""}
+      </button>
+    </div>
+    ${d.tab === "details" ? detailsHtml(lead) : activityHtml(lead)}`;
+
+  body.querySelectorAll("[data-drtab]").forEach((b) =>
+    b.addEventListener("click", () => { S.drawer.tab = b.dataset.drtab; renderDrawer(); }));
+
+  if (d.tab === "activity") wireCommentBox(lead);
+
+  /* ---- footer ---- */
+  const canEdit = can.edit(S.me.role);
+  $("#drFoot").innerHTML = `
+    ${canEdit ? `<button class="btn btn-sm btn-dark" id="drEdit">Edit lead</button>` : ""}
+    ${canEdit ? `<select class="inp" id="drStage" style="max-width:190px">
+        ${STAGES.map((s) => `<option value="${s.key}"${lead.status === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
+      </select>` : ""}
+    <div style="flex:1"></div>
+    ${can.remove(S.me.role) ? `<button class="btn btn-sm btn-danger" id="drDel">Delete</button>` : ""}`;
+
+  if (canEdit) {
+    $("#drEdit").addEventListener("click", () => { S.drawer.mode = "edit"; renderDrawer(); });
+    $("#drStage").addEventListener("change", (e) => changeStage(lead, e.target.value));
+  }
+  if (can.remove(S.me.role)) {
+    $("#drDel").addEventListener("click", async () => {
+      if (!confirm(`Delete ${fullName(lead)} for everyone?\n\nThe lead row goes; its activity entries stay in the audit trail. Consider marking it Lost instead.`)) return;
+      await S.store.deleteLead(lead.id);
+      closeDrawer();
+      toast("Lead deleted.", "bad");
+    });
+  }
+}
+
+function detailsHtml(lead) {
+  const groups = FIELD_GROUPS.map((g) => {
+    const fields = LEAD_FIELDS.filter((f) => f.group === g && lead[f.key] !== undefined && lead[f.key] !== "");
+    if (!fields.length) return "";
+    return `<fieldset class="grp">
+      <legend>${esc(g)}</legend>
+      <div class="kv">${fields.map((f) => `
+        <div class="row">
+          <div class="k">${esc(f.label)}</div>
+          <div class="v">${valueHtml(f, lead[f.key])}</div>
+        </div>`).join("")}</div>
+    </fieldset>`;
+  }).join("");
+
+  return `
+    <fieldset class="grp">
+      <legend>Status</legend>
+      <div class="kv">
+        <div class="row"><div class="k">Stage</div><div class="v">${pill(lead.status)}</div></div>
+        <div class="row"><div class="k">Stream</div><div class="v">${esc(streamLabel(lead))}</div></div>
+        <div class="row"><div class="k">Added by</div><div class="v">${esc(lead.createdByName || "—")}</div></div>
+        <div class="row"><div class="k">Last activity</div><div class="v">${esc(fmtWhen(lead.lastActivityAt || lead.createdAt))}</div></div>
+      </div>
+    </fieldset>
+    ${groups || `<p class="muted" style="font-size:13px">No other details filled in yet.</p>`}`;
+}
+
+function valueHtml(f, v) {
+  if (v === "" || v == null) return `<span class="blank">—</span>`;
+  if (f.type === "url") return `<a href="${esc(v)}" target="_blank" rel="noopener noreferrer">${esc(shortUrl(v))} ↗</a>`;
+  if (f.type === "email") return `<a href="mailto:${esc(v)}">${esc(v)}</a>`;
+  if (f.type === "tel") return `<a href="tel:${esc(v)}">${esc(v)}</a>`;
+  if (f.type === "date") return esc(fmtDate(v));
+  if (f.key === "dealValue") return esc(`$${Number(v).toLocaleString()}`);
+  return esc(v);
+}
+const shortUrl = (u) => String(u).replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "").slice(0, 42);
+
+/* ---- activity + comments ---- */
+function activityHtml(lead) {
+  const rows = S.drawerActivity;
+  return `
+    <div class="feed">${rows.length
+      ? rows.map(feedItem).join("")
+      : `<p class="muted" style="font-size:13px; padding:8px 0">No activity yet. Add the first comment below.</p>`}
+    </div>
+    ${can.comment(S.me.role) ? `
+    <div class="cbox">
+      <div class="fld" style="flex:1">
+        <label for="cmt">Add a comment</label>
+        <textarea class="inp" id="cmt" placeholder="What happened with this lead?"></textarea>
+      </div>
+      <button class="btn btn-sm btn-dark" id="cmtBtn">Post</button>
+    </div>` : ""}`;
+}
+
+function feedItem(a, subtitle = "") {
+  const icon = a.type === "comment" ? "💬" : a.type === "stage" ? "→" : "＋";
+  const cls  = a.type === "comment" ? "comment" : a.type === "stage" ? "stage" : "";
+  return `<div class="fe" data-leadid="${esc(a.leadId || "")}">
+    <div class="fe-ic ${cls}">${icon}</div>
+    <div style="min-width:0">
+      <div class="fe-top">
+        <span class="fe-who">${esc(a.byName || "Someone")}</span>
+        <span class="fe-when">${esc(fmtWhen(a.at))}</span>
+      </div>
+      <div class="fe-txt">${esc(a.text || "")}</div>
+      ${subtitle}
+    </div>
+  </div>`;
+}
+
+function wireCommentBox(lead) {
+  const btn = $("#cmtBtn");
+  if (!btn) return;
+  const post = async () => {
+    const box = $("#cmt");
+    const text = box.value.trim();
+    if (!text) return;
+    btn.disabled = true;
+    await S.store.logActivity(lead, { type: "comment", text });
+    await S.store.updateLead(lead, { commentCount: (lead.commentCount || 0) + 1 });
+    box.value = "";
+    btn.disabled = false;
+    toast("Comment added.", "good");
+  };
+  btn.addEventListener("click", post);
+  $("#cmt").addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") post();
+  });
+}
+
+async function changeStage(lead, next) {
+  if (next === lead.status) return;
+  const from = stage(lead.status).label, to = stage(next).label;
+  const patch = { status: next };
+  // Moving to "Shared" stamps the handover date if it isn't already set.
+  if (stage(next).marksHandoff && !lead.sharedOn) patch.sharedOn = new Date().toISOString().slice(0, 10);
+  await S.store.updateLead(lead, patch, [{ type: "stage", text: `Stage moved: ${from} → ${to}`, from: lead.status, to: next }]);
+  toast(`Moved to ${to}.`, "good");
+}
+
+/* ---- add / edit form ---- */
+function renderForm(lead, streamKey) {
+  const isNew = !lead;
+  const stream = isNew ? streamKey : lead.stream;
+  const role = S.me.role;
+
+  const control = (f) => {
+    const val = lead?.[f.key] ?? "";
+    const locked = !isNew && !can.editable(role, f.key);
+    const dis = locked ? " disabled" : "";
+    const wide = ["notes", "linkedinUrl", "companyLinkedin", "companyWebsite", "lostReason"].includes(f.key) ? " wide" : "";
+    let input;
+    if (f.type === "textarea")
+      input = `<textarea class="inp" id="f_${f.key}"${dis} placeholder="${esc(f.placeholder || "")}">${esc(val)}</textarea>`;
+    else if (f.type === "select")
+      input = `<select class="inp" id="f_${f.key}"${dis}>
+        ${f.options.map((o) => `<option value="${esc(o)}"${val === o ? " selected" : ""}>${esc(o || "—")}</option>`).join("")}
+      </select>`;
+    else
+      input = `<input class="inp" type="${f.type}" id="f_${f.key}" value="${esc(val)}"${dis} placeholder="${esc(f.placeholder || "")}">`;
+
+    return `<div class="fld${wide}">
+      <label for="f_${f.key}">${esc(f.label)}${f.required ? ` <span class="req">*</span>` : ""}${locked ? ` <span class="muted">(locked)</span>` : ""}</label>
+      ${input}
+      <div class="err-msg hide" id="e_${f.key}"></div>
+    </div>`;
+  };
+
+  $("#drBody").innerHTML = `
+    <fieldset class="grp">
+      <legend>Routing</legend>
+      <div class="frm">
+        <div class="fld">
+          <label for="f_stream">Stream <span class="req">*</span></label>
+          <select class="inp" id="f_stream"${can.editAll(role) ? "" : " disabled"}>
+            ${Object.entries(STREAMS).map(([k, s]) => `<option value="${k}"${stream === k ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="fld" id="clientWrap">
+          <label for="f_clientId">Client</label>
+          <select class="inp" id="f_clientId"${can.editAll(role) ? "" : " disabled"}>
+            <option value="">— select client —</option>
+            ${S.clients.map((c) => `<option value="${esc(c.id)}"${lead?.clientId === c.id ? " selected" : ""}>${esc(c.name)}</option>`).join("")}
+          </select>
+          <div class="err-msg hide" id="e_clientId"></div>
+        </div>
+        <div class="fld">
+          <label for="f_status">Stage</label>
+          <select class="inp" id="f_status">
+            ${STAGES.map((s) => `<option value="${s.key}"${(lead?.status || "new") === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+    </fieldset>
+    ${FIELD_GROUPS.map((g) => `
+      <fieldset class="grp">
+        <legend>${esc(g)}</legend>
+        <div class="frm">${LEAD_FIELDS.filter((f) => f.group === g).map(control).join("")}</div>
+      </fieldset>`).join("")}`;
+
+  const syncClient = () => $("#clientWrap").classList.toggle("hide", $("#f_stream").value !== "client");
+  $("#f_stream").addEventListener("change", syncClient);
+  syncClient();
+
+  $("#drFoot").innerHTML = `
+    <button class="btn btn-sm btn-gold" id="frmSave">${isNew ? "Create lead" : "Save changes"}</button>
+    <button class="btn btn-sm btn-ghost" id="frmCancel">Cancel</button>
+    <div style="flex:1"></div>
+    <span class="muted" style="font-size:11.5px; font-weight:600">* required</span>`;
+
+  $("#frmCancel").addEventListener("click", () => {
+    if (isNew) closeDrawer();
+    else { S.drawer.mode = "read"; renderDrawer(); }
+  });
+  $("#frmSave").addEventListener("click", () => saveForm(lead));
+}
+
+async function saveForm(lead) {
+  const isNew = !lead;
+  const role = S.me.role;
+  const data = {};
+  let bad = null;
+
+  $$(".err-msg").forEach((e) => e.classList.add("hide"));
+  $$(".inp").forEach((e) => e.classList.remove("err"));
+
+  const fail = (key, msg) => {
+    const e = $(`#e_${key}`), i = $(`#f_${key}`);
+    if (e) { e.textContent = msg; e.classList.remove("hide"); }
+    if (i) i.classList.add("err");
+    bad = bad || i;
+  };
+
+  data.stream = $("#f_stream").value;
+  data.status = $("#f_status").value;
+  data.clientId = data.stream === "client" ? $("#f_clientId").value : "";
+  if (data.stream === "client" && !data.clientId) fail("clientId", "Pick which client this lead is for.");
+
+  for (const f of LEAD_FIELDS) {
+    const el = $(`#f_${f.key}`);
+    if (!el) continue;
+    if (!isNew && !can.editable(role, f.key)) continue; // never send locked fields
+    let v = el.value.trim();
+    if (f.required && !v) { fail(f.key, `${f.label} is required.`); continue; }
+    if (v && f.type === "url" && !/^https?:\/\//i.test(v)) v = "https://" + v;
+    if (v && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { fail(f.key, "That doesn't look like an email."); continue; }
+    if (f.type === "number") v = v === "" ? "" : Number(v);
+    data[f.key] = v;
+  }
+
+  if (bad) {
+    bad.scrollIntoView({ behavior: "smooth", block: "center" });
+    return toast("Fix the highlighted fields.", "bad");
+  }
+
+  const btn = $("#frmSave");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+
+  try {
+    if (isNew) {
+      if (stage(data.status).marksHandoff && !data.sharedOn) data.sharedOn = new Date().toISOString().slice(0, 10);
+      data.commentCount = 0;
+      const id = await S.store.createLead(data);
+      toast("Lead created.", "good");
+      S.drawer = { ...S.drawer, leadId: id, mode: "read" };
+      openDrawer(id);
+    } else {
+      const notes = [];
+      if (data.status !== lead.status) {
+        notes.push({
+          type: "stage",
+          text: `Stage moved: ${stage(lead.status).label} → ${stage(data.status).label}`,
+          from: lead.status, to: data.status,
+        });
+      }
+      const changed = Object.keys(data).filter(
+        (k) => k !== "status" && String(data[k] ?? "") !== String(lead[k] ?? "")
+      );
+      if (changed.length) {
+        notes.push({
+          type: "edit",
+          text: `Updated ${changed.map((k) => field(k)?.label || k).join(", ")}`,
+        });
+      }
+      await S.store.updateLead(lead, data, notes);
+      toast("Saved.", "good");
+      S.drawer.mode = "read";
+      renderDrawer();
+    }
+  } catch (ex) {
+    console.error(ex);
+    toast(ex?.message || "Could not save. Try again.", "bad");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = isNew ? "Create lead" : "Save changes";
+  }
+}
+
+/* ==========================================================================
+   EXPORT — Excel only, and every download is written to history first
+   ========================================================================== */
+function filterSummary(streamKey) {
+  const v = S.view[streamKey];
+  const bits = [];
+  if (v.q) bits.push(`search "${v.q}"`);
+  if (v.status) bits.push(`stage ${stage(v.status).label}`);
+  if (v.owner) bits.push(`added by ${v.owner}`);
+  if (v.client) bits.push(`client ${clientName(v.client)}`);
+  if (v.attn) bits.push("needs attention only");
+  return bits.length ? bits.join(" · ") : "no filters — everything in this stream";
+}
+
+async function exportLeads(streamKey, rows) {
+  if (!rows.length) return toast("Nothing to export with these filters.", "warn");
+
+  const btn = $(`#exp_${streamKey}`);
+  btn.disabled = true;
+  btn.textContent = "Preparing…";
+
+  try {
+    /* --- build the sheet --- */
+    const cols = [
+      { label: "Lead ID", width: 14, get: (l) => l.id },
+      { label: "Stream", width: 20, get: (l) => STREAMS[l.stream]?.label || l.stream },
+      { label: "Client", width: 22, get: (l) => clientName(l.clientId) },
+      { label: "Stage", width: 18, get: (l) => stage(l.status).label },
+      ...LEAD_FIELDS.map((f) => ({
+        label: f.label,
+        width: f.width || 18,
+        get: (l) => (f.type === "date" ? (l[f.key] ? fmtDate(l[f.key]) : "") : l[f.key] ?? ""),
+      })),
+      { label: "Added By", width: 20, get: (l) => l.createdByName || "" },
+      { label: "Created On", width: 18, get: (l) => fmtDate(l.createdAt) },
+      { label: "Last Activity", width: 18, get: (l) => fmtDate(l.lastActivityAt || l.createdAt) },
+      { label: "Days Idle", width: 12, get: (l) => (OPEN_STAGES.includes(l.status) ? daysSince(l.lastActivityAt || l.createdAt) : "") },
+      { label: "Comments", width: 12, get: (l) => l.commentCount || 0 },
+    ];
+
+    const aoa = [cols.map((c) => c.label), ...rows.map((l) => cols.map((c) => c.get(l)))];
+
+    const when = new Date();
+    const scope = STREAMS[streamKey].label;
+    const filters = filterSummary(streamKey);
+
+    /* --- a second sheet, so the file carries its own audit trail even after
+           it has been emailed on to someone else --- */
+    const info = [
+      ["LinkedIn Leads — export record"],
+      [],
+      ["Exported by", S.me.name || S.me.email],
+      ["Email", S.me.email],
+      ["Role", ROLES[S.me.role]?.label || S.me.role || ""],
+      ["Exported at", when.toLocaleString()],
+      ["Stream", scope],
+      ["Filters applied", filters],
+      ["Rows", rows.length],
+      [],
+      ["This export is logged in the dashboard's Export History with the exporter's name,"],
+      ["the time, the filters used and the exact leads included. Treat it as confidential."],
+    ];
+
+    const stamp = when.toISOString().slice(0, 16).replace("T", "_").replace(":", "");
+    const filename = `linkedin-leads_${streamKey}_${stamp}.xlsx`;
+
+    /* --- write the history record BEFORE handing over the file, so nothing
+           reaches someone's disk without leaving a trace --- */
+    await S.store.logExport({
+      scope,
+      stream: streamKey,
+      filters,
+      count: rows.length,
+      filename,
+      leadIds: rows.map((l) => l.id),
+    });
+
+    downloadXlsx(
+      [
+        { name: "Leads", aoa, cols: cols.map((c) => c.width) },
+        { name: "Export Info", aoa: info, cols: [20, 74] },
+      ],
+      filename
+    );
+
+    toast(`Exported ${rows.length} lead${rows.length === 1 ? "" : "s"} — logged in Export History.`, "good");
+  } catch (ex) {
+    console.error(ex);
+    toast("Export failed — nothing was downloaded. Try again.", "bad");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "⬇ Export to Excel";
+  }
+}
+
+/* ==========================================================================
+   EXPORT HISTORY / ACTIVITY / ADMIN PANELS
+   ========================================================================== */
+function renderExports() {
+  const mine = !can.admin(S.me.role);
+  $("#expHint").textContent = mine
+    ? "Your downloads. Admins can see everyone's."
+    : "Every download across the team — who, when, which leads.";
+
+  $("#expList").innerHTML = S.exports.length
+    ? S.exports.map((e) => `
+      <div class="exp-row">
+        <div class="exp-ic">⬇</div>
+        <div style="min-width:0">
+          <div class="exp-t">${esc(e.byName || e.byEmail || "Someone")} exported ${esc(e.scope || "leads")}</div>
+          <div class="exp-s">${esc(fmtWhen(e.at))} · ${esc(e.filters || "no filters")}</div>
+          <div class="exp-s" style="opacity:.75">${esc(e.filename || "")}</div>
+        </div>
+        <div class="exp-n">${e.count ?? 0} rows</div>
+      </div>`).join("")
+    : `<p class="muted" style="font-size:13px">No exports yet. Every download will appear here.</p>`;
+}
+
+function renderFeed() {
+  const byLead = new Map(S.leads.map((l) => [l.id, l]));
+  const host = $("#globalFeed");
+
+  host.innerHTML = S.feed.length
+    ? S.feed.map((a) => {
+        const l = byLead.get(a.leadId);
+        const tag = l
+          ? `<div class="fe-when" style="margin-top:3px; cursor:pointer">
+               on <b style="color:var(--ink-2)">${esc(fullName(l))}</b> · ${esc(l.company || "")}</div>`
+          : "";
+        return feedItem(a, tag);
+      }).join("")
+    : `<p class="muted" style="font-size:13px">Nothing has happened yet.</p>`;
+
+  host.onclick = (e) => {
+    const row = e.target.closest(".fe");
+    if (row?.dataset.leadid && byLead.has(row.dataset.leadid)) openDrawer(row.dataset.leadid);
+  };
+}
+
+function renderUsers() {
+  $("#userList").innerHTML = S.users.length
+    ? S.users.map((u) => `
+      <div class="li">
+        <div class="avatar" style="width:30px;height:30px;font-size:11px">${esc(initials(u.name || u.email))}</div>
+        <div class="grow">
+          <div class="t">${esc(u.name || u.email)}</div>
+          <div class="s">${esc(u.email || "")} · ${esc(ROLES[u.role]?.label || "no role")}</div>
+        </div>
+      </div>`).join("")
+    : `<p class="muted" style="font-size:13px">No user documents yet. Add them under <code>users/{uid}</code>.</p>`;
+}
+
+function renderClients() {
+  const host = $("#clientList");
+  if (!host) return;
+  host.innerHTML = S.clients.length
+    ? S.clients.map((c) => {
+        const n = S.leads.filter((l) => l.clientId === c.id).length;
+        return `<div class="li">
+          <div class="grow">
+            <div class="t">${esc(c.name)}</div>
+            <div class="s">${n} lead${n === 1 ? "" : "s"}</div>
+          </div>
+          <span class="pill ${c.active === false ? "pill-neutral" : "pill-accent"}">
+            <span class="dot"></span>${c.active === false ? "Inactive" : "Active"}
+          </span>
+        </div>`;
+      }).join("")
+    : `<p class="muted" style="font-size:13px">No clients yet. Add the first one below.</p>`;
+}
+
+</script>
