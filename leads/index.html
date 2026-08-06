@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Internal LinkedIn lead tracker — leads shared with the US sales partner and leads delivered to clients, with comments, activity history and tracked Excel exports.">
+<meta name="theme-color" content="#101012">
+<title>LinkedIn Leads · Internal Dashboard</title>
+<link rel="icon" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ====================== LOGIN ====================== -->
+<section id="login" class="hide">
+  <div class="login-card">
+    <div class="brandmark">L</div>
+    <h1 class="serif">LinkedIn Leads</h1>
+    <p class="tag">Internal lead tracker for the operations and sales teams.</p>
+
+    <div id="loginErr" class="login-err hide"></div>
+
+    <form id="loginForm" autocomplete="on">
+      <div class="fld">
+        <label for="liEmail">Work email</label>
+        <input class="inp" type="email" id="liEmail" required autocomplete="username" placeholder="you@company.com">
+      </div>
+      <div class="fld">
+        <label for="liPass">Password</label>
+        <input class="inp" type="password" id="liPass" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="btn btn-dark" type="submit" id="liBtn">Sign in</button>
+    </form>
+
+    <p class="login-foot">
+      No account? Ask an admin to create one.<br>
+      <button class="link-btn" id="liForgot" type="button">Forgot your password?</button>
+    </p>
+  </div>
+</section>
+
+<!-- ====================== APP ====================== -->
+<div id="app" class="hide">
+
+  <div id="demobar" class="hide">
+    Demo mode — sample data in this browser only. Fill in <code>leads/config.js</code> with your Firebase keys to go live.
+  </div>
+
+  <header id="topbar">
+    <div class="tb-row">
+      <div class="brandmark">L</div>
+      <div>
+        <div class="tb-title">LinkedIn Leads</div>
+        <div class="tb-sub">Operations → Sales handover tracker</div>
+      </div>
+      <div class="tb-right">
+        <div class="whoami">
+          <b id="meName">—</b>
+          <span id="meRole">—</span>
+        </div>
+        <div class="avatar" id="meAvatar">?</div>
+        <button class="tb-out" id="signOut">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap noselect">
+
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-tab="review">Review</button>
+      <button class="tab" data-tab="sales_partner">Sales Partner <span class="cnt" id="cntSales">0</span></button>
+      <button class="tab" data-tab="client">Clients <span class="cnt" id="cntClient">0</span></button>
+      <button class="tab" data-tab="activity">Activity</button>
+      <button class="tab" data-tab="exports">Export History</button>
+      <button class="tab" data-tab="admin" id="tabAdmin">Admin</button>
+    </nav>
+
+    <!-- ---------- REVIEW (the Tue/Thu call view) ---------- -->
+    <section class="panel on" data-panel="review">
+      <div class="sec-head">
+        <h2 class="serif">Review</h2>
+        <span class="hint" id="reviewHint">Since the last review call</span>
+        <div class="spacer" style="flex:1"></div>
+      </div>
+
+      <div class="stats" id="statTiles"></div>
+
+      <div class="card pad" style="margin-bottom:14px">
+        <div class="sec-head" style="margin-bottom:6px">
+          <h2 style="font-size:15px">Needs attention</h2>
+          <span class="hint" id="attnHint">Open leads with no activity — these are the ones that used to get dropped.</span>
+        </div>
+        <div id="attnList"></div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Pipeline</h2>
+            <span class="hint">Open leads by stage</span>
+          </div>
+          <div class="funnel" id="funnelChart"></div>
+        </div>
+
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Leads created by team member</h2>
+            <span class="hint" id="byWhoHint">All time</span>
+          </div>
+          <div class="bars" id="byWhoChart"></div>
+        </div>
+
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Leads by client</h2>
+            <span class="hint">Client delivery stream</span>
+          </div>
+          <div class="bars" id="byClientChart"></div>
+        </div>
+
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Leads created per week</h2>
+            <span class="hint">Last 8 weeks</span>
+          </div>
+          <div class="bars" id="byWeekChart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- LEAD STREAMS (one panel, reused) ---------- -->
+    <section class="panel" data-panel="sales_partner">
+      <div class="sec-head">
+        <h2 class="serif">Sales Partner (US)</h2>
+        <span class="hint">Leads handed to the US sales partner. Tracked here; worked in GHL.</span>
+      </div>
+      <div id="toolbar_sales_partner"></div>
+      <div id="table_sales_partner"></div>
+    </section>
+
+    <section class="panel" data-panel="client">
+      <div class="sec-head">
+        <h2 class="serif">Client Delivery</h2>
+        <span class="hint">Leads generated for the clients whose LinkedIn we run.</span>
+      </div>
+      <div id="toolbar_client"></div>
+      <div id="table_client"></div>
+    </section>
+
+    <!-- ---------- ACTIVITY ---------- -->
+    <section class="panel" data-panel="activity">
+      <div class="sec-head">
+        <h2 class="serif">Activity</h2>
+        <span class="hint">Every stage change and comment across all leads, newest first.</span>
+      </div>
+      <div class="card pad"><div class="feed" id="globalFeed"></div></div>
+    </section>
+
+    <!-- ---------- EXPORT HISTORY ---------- -->
+    <section class="panel" data-panel="exports">
+      <div class="sec-head">
+        <h2 class="serif">Export History</h2>
+        <span class="hint" id="expHint">Every download is recorded — who, when, which leads.</span>
+      </div>
+      <div class="card pad"><div id="expList"></div></div>
+    </section>
+
+    <!-- ---------- ADMIN ---------- -->
+    <section class="panel" data-panel="admin">
+      <div class="sec-head"><h2 class="serif">Admin</h2></div>
+
+      <div class="chart-grid">
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">Clients</h2>
+            <span class="hint">Accounts we run LinkedIn for</span>
+          </div>
+          <div class="list" id="clientList"></div>
+          <div class="cbox" style="margin-top:14px">
+            <div class="fld" style="flex:1">
+              <label for="newClient">Add a client</label>
+              <input class="inp" id="newClient" placeholder="Client name">
+            </div>
+            <button class="btn btn-dark btn-sm" id="addClient">Add</button>
+          </div>
+        </div>
+
+        <div class="card pad">
+          <div class="sec-head" style="margin-bottom:6px">
+            <h2 style="font-size:15px">People</h2>
+            <span class="hint">Roles come from the <code>users</code> collection</span>
+          </div>
+          <div class="list" id="userList"></div>
+          <p class="muted" style="font-size:12px; margin-top:14px; line-height:1.6">
+            Logins are created in the Firebase console (Authentication → Users), then a matching
+            document is added to <code>users/{uid}</code> with a <code>role</code>.
+            Full steps are in <code>leads/README.md</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div style="height:60px"></div>
+</div>
+
+<!-- ====================== DRAWER ====================== -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="dr-head">
+    <div style="min-width:0">
+      <h3 id="drTitle">Lead</h3>
+      <div class="sub" id="drSub"></div>
+    </div>
+    <button class="dr-close" id="drClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="dr-body" id="drBody"></div>
+  <div class="dr-foot" id="drFoot"></div>
+</aside>
+
+<div id="toasts"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+rules_version = '2';
+
+/* ============================================================================
+   Firestore security rules for the LinkedIn Leads dashboard.
+
+   The checks in app.js only shape the UI. THIS file is the actual boundary —
+   anyone can open the browser console and call Firestore directly, so every
+   rule that matters has to live here.
+
+   Deploy with:  firebase deploy --only firestore:rules
+   ========================================================================== */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ---------------------------------------------------------------------
+       Identity helpers. A login with no users/{uid} document has no access
+       to anything — creating the auth user is step one, granting a role is
+       step two.
+    --------------------------------------------------------------------- */
+    function userPath()    { return /databases/$(database)/documents/users/$(request.auth.uid); }
+    function hasProfile()  { return request.auth != null && exists(userPath()); }
+    function me()          { return get(userPath()).data; }
+    function active()      { return hasProfile() && me().get('active', true) == true; }
+    function role()        { return me().get('role', ''); }
+
+    function isAdmin()  { return active() && role() == 'admin'; }
+    function isOps()    { return active() && role() == 'ops'; }
+    function isSales()  { return active() && role() == 'sales'; }
+    function isClient() { return active() && role() == 'client'; }
+    function isStaff()  { return isAdmin() || isOps(); }
+
+    function myClients() { return me().get('clientAccess', []); }
+
+    /* Fields a sales-partner user is allowed to touch. They work the deal, so
+       they own the stage and the commercial fields — but they can't rewrite
+       who the lead is or which team member sourced it. */
+    function salesEditable() {
+      return ['status', 'salesOwner', 'ghlUrl', 'dealValue', 'nextFollowUp',
+              'lostReason', 'notes', 'sharedOn', 'updatedAt', 'lastActivityAt',
+              'commentCount'];
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    /* Scope check. `d` is any document carrying `stream` and `clientId` —
+       a lead, or an activity entry with those fields denormalised onto it.
+
+       Denormalising means an activity read costs no extra document read, and
+       it keeps every clause expressible as a `where` filter, which is what
+       lets the client's queries pass rule evaluation at all (Firestore checks
+       a query's potential result set, not the rows it returns). */
+    function inScope(d) {
+      return isStaff()
+          || (isSales()  && d.stream == 'sales_partner')
+          || (isClient() && d.get('clientId', '') in myClients());
+    }
+
+    /* Does this activity entry's denormalised scope actually match its lead?
+       Checked on write only, so the cost is one read per comment, not per
+       comment displayed. */
+    function activityMatchesLead(d) {
+      let path = /databases/$(database)/documents/leads/$(d.leadId);
+      return exists(path)
+          && get(path).data.stream == d.stream
+          && get(path).data.get('clientId', '') == d.get('clientId', '')
+          && inScope(get(path).data);
+    }
+
+    /* =====================================================================
+       LEADS
+    ===================================================================== */
+    match /leads/{leadId} {
+      allow read: if inScope(resource.data);
+
+      allow create: if isStaff()
+                    && request.resource.data.createdBy == request.auth.uid
+                    && request.resource.data.stream in ['sales_partner', 'client']
+                    // a client-stream lead must name its client
+                    && (request.resource.data.stream != 'client'
+                        || request.resource.data.get('clientId', '') != '');
+
+      allow update: if isStaff()
+                    || (isSales()
+                        && resource.data.stream == 'sales_partner'
+                        && changedKeys().hasOnly(salesEditable()));
+
+      allow delete: if isAdmin();
+    }
+
+    /* =====================================================================
+       ACTIVITY — comments and stage changes.
+       Append-only: once written, nobody edits or deletes an entry. That is
+       what makes it usable as a record on the Tuesday/Thursday call.
+    ===================================================================== */
+    match /activity/{entryId} {
+      allow read: if inScope(resource.data);
+
+      allow create: if active()
+                    && request.resource.data.by == request.auth.uid
+                    && request.resource.data.type in ['comment', 'stage', 'created', 'edit']
+                    && activityMatchesLead(request.resource.data);
+
+      allow update, delete: if false;
+    }
+
+    /* =====================================================================
+       EXPORT HISTORY
+       Also append-only, and deliberately so — an export log you can edit is
+       not a log. Users see their own; admins see everyone's.
+    ===================================================================== */
+    match /exports/{exportId} {
+      allow read: if isAdmin() || (active() && resource.data.by == request.auth.uid);
+
+      allow create: if active()
+                    && request.resource.data.by == request.auth.uid
+                    && request.resource.data.byEmail == request.auth.token.email
+                    && request.resource.data.count is int;
+
+      allow update, delete: if false;
+    }
+
+    /* =====================================================================
+       CLIENTS
+    ===================================================================== */
+    match /clients/{clientId} {
+      allow read:  if active();
+      allow write: if isAdmin();
+    }
+
+    /* =====================================================================
+       USERS — roles live here, so only an admin may write them.
+       Nobody can promote themselves.
+    ===================================================================== */
+    match /users/{uid} {
+      allow read:  if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      allow write: if isAdmin();
+    }
+
+    /* Everything else is closed. */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
