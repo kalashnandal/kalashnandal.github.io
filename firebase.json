@@ -1,0 +1,38 @@
+{
+  "//": [
+    "Deploys the leads dashboard, the Firestore rules and the indexes together.",
+    "",
+    "  firebase deploy",
+    "",
+    "Hosting serves the contents of leads/ at the root of your Firebase domain,",
+    "so the dashboard lands on https://<project>.web.app/ rather than a /leads/",
+    "subpath. Source files that are not part of the running app are excluded.",
+    "",
+    "This exists because GitHub Pages stopped assigning runners to this repo's",
+    "build. Firebase Hosting is independent of that, and you are already in this",
+    "console setting up Auth and Firestore."
+  ],
+  "hosting": {
+    "public": "leads",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "firestore.rules",
+      "firestore.indexes.json",
+      "README.md",
+      "build-standalone.mjs"
+    ],
+    "cleanUrls": true,
+    "headers": [
+      {
+        "source": "**/*.@(js|css|html)",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "leads/firestore.rules",
+    "indexes": "leads/firestore.indexes.json"
+  }
+}

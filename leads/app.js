@@ -333,8 +333,12 @@ function renderReview() {
 
   $("#heroLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
 
+  /* Labels carry their own timeframe. The eyebrow above says "since the last
+     call", but these figures sit far enough to the right that it doesn't read
+     as applying to them. */
   $("#heroFigs").innerHTML = [
-    { k: "New leads", n: newSince.length },
+    { k: "New since last call", n: newSince.length },
+    { k: "Open pipeline", n: open.length },
     { k: "In play", n: meetings, cls: meetings ? "is-good" : "" },
     { k: `Idle ${STALE_DAYS}d+`, n: stale.length, cls: stale.length ? "is-warn" : "" },
   ].map((f) => `

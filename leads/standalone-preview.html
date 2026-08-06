@@ -195,15 +195,15 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
   text-wrap:balance; line-height:1.22;
 }
 .hero-line b{color:#aab4ef; font-weight:800}
-.hero-figs{display:flex; gap:30px; margin-left:auto; flex-wrap:wrap}
-.hfig{min-width:74px}
+.hero-figs{display:flex; gap:26px; margin-left:auto; flex-wrap:wrap}
+.hfig{min-width:76px; max-width:110px}
 .hfig .n{
   font-size:34px; font-weight:800; line-height:1; letter-spacing:-.03em;
   font-variant-numeric:tabular-nums;
 }
 .hfig .k{
-  font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
-  color:#98a3d8; margin-top:7px;
+  font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:#98a3d8; margin-top:7px; line-height:1.35;
 }
 .hfig.is-good .n{color:#7ddba6}
 .hfig.is-warn .n{color:#f0b46a}
@@ -2016,8 +2016,12 @@ function renderReview() {
 
   $("#heroLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
 
+  /* Labels carry their own timeframe. The eyebrow above says "since the last
+     call", but these figures sit far enough to the right that it doesn't read
+     as applying to them. */
   $("#heroFigs").innerHTML = [
-    { k: "New leads", n: newSince.length },
+    { k: "New since last call", n: newSince.length },
+    { k: "Open pipeline", n: open.length },
     { k: "In play", n: meetings, cls: meetings ? "is-good" : "" },
     { k: `Idle ${STALE_DAYS}d+`, n: stale.length, cls: stale.length ? "is-warn" : "" },
   ].map((f) => `
