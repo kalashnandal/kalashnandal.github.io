@@ -66,25 +66,29 @@ export const STREAMS = {
    (won/lost/nurture are outcomes, not steps).
 
    COLOUR — each stage owns exactly one `ink`, used for its pill text, its dot,
-   its row stripe and its funnel bar, over a matching `tint`. The five pipeline
-   stages walk an ordinal ramp from cool grey into deepening gold, so a lead
-   getting further along *looks* further along at a glance — that is the whole
-   point on a review call. Won and Lost break out of the ramp into reserved
-   semantic green and red, because they are outcomes rather than progress, and
-   Nurture sits outside it entirely as an outline.
+   its row stripe and its pipeline block, over a matching `tint`.
 
-   Every pill carries its text label too, so colour is never the only signal.
-   Text contrast on tint was checked: all pass 4.5:1 or better.
+   The five pipeline stages walk an ordinal indigo ramp that gets darker at
+   every step, so a lead further along *looks* further along at a glance —
+   which is the whole job on a review call. The ramp's lightness was checked to
+   fall monotonically; that depth, not hue, is what carries progress.
+
+   Green and red are held back exclusively for Won and Lost, so an outcome can
+   never be mistaken for a step. Nurture sits outside the system entirely as an
+   outline — parked, not progressing.
+
+   Every pill carries its text label too, so colour is never the only signal,
+   and text contrast on every tint clears 4.5:1.
 --------------------------------------------------------------------------- */
 export const STAGES = [
-  { key: "new",       label: "New Lead",        funnel: true,  ink: "#52525b", tint: "#f4f4f5", line: "#e4e4e7", blurb: "Logged by the LinkedIn team. Not handed over yet." },
-  { key: "shared",    label: "Shared",          funnel: true,  ink: "#7a5f14", tint: "#fdf9ec", line: "#f0e4c0", blurb: "Handed to Summit Sales / delivered to the client.", marksHandoff: true },
-  { key: "contacted", label: "Contacted",       funnel: true,  ink: "#6f5610", tint: "#fbf6e6", line: "#ecdfb4", blurb: "Summit has made first contact." },
-  { key: "meeting",   label: "Meeting Booked",  funnel: true,  ink: "#5e480d", tint: "#f8f1dd", line: "#e5d5a3", blurb: "A call is on the calendar." },
-  { key: "proposal",  label: "Proposal Sent",   funnel: true,  ink: "#54410c", tint: "#f2e9d2", line: "#dcc98f", blurb: "Commercials are out." },
-  { key: "won",       label: "Won",             funnel: false, ink: "#14663c", tint: "#e8f4ee", line: "#bcdfcc", blurb: "Closed. Revenue booked." },
-  { key: "lost",      label: "Lost",            funnel: false, ink: "#8f1e18", tint: "#fbecea", line: "#f0c9c5", blurb: "Dead. Reason required." },
-  { key: "nurture",   label: "Nurture / Later", funnel: false, ink: "#6b6b73", tint: "#ffffff", line: "#d4d4d8", blurb: "Real, but not now. Revisit later.", outline: true },
+  { key: "new",       label: "New Lead",        short: "New",      funnel: true,  ink: "#5a6473", tint: "#f1f3f6", line: "#dfe3e9", blurb: "Logged by the LinkedIn team. Not handed over yet." },
+  { key: "shared",    label: "Shared",          short: "Shared",   funnel: true,  ink: "#4a56bd", tint: "#eef0fc", line: "#d3d8f5", blurb: "Handed to Summit Sales / delivered to the client.", marksHandoff: true },
+  { key: "contacted", label: "Contacted",       short: "Contacted",funnel: true,  ink: "#3b45a4", tint: "#e9ecfa", line: "#c7cdf1", blurb: "Summit has made first contact." },
+  { key: "meeting",   label: "Meeting Booked",  short: "Meeting",  funnel: true,  ink: "#2e3688", tint: "#e4e7f7", line: "#bcc3ee", blurb: "A call is on the calendar." },
+  { key: "proposal",  label: "Proposal Sent",   short: "Proposal", funnel: true,  ink: "#232969", tint: "#dfe3f4", line: "#b0b8e8", blurb: "Commercials are out." },
+  { key: "won",       label: "Won",             short: "Won",      funnel: false, ink: "#15703f", tint: "#e7f3ec", line: "#b9dcc7", blurb: "Closed. Revenue booked." },
+  { key: "lost",      label: "Lost",            short: "Lost",     funnel: false, ink: "#a8271d", tint: "#fbeae8", line: "#eec6c2", blurb: "Dead. Reason required." },
+  { key: "nurture",   label: "Nurture / Later", short: "Nurture",  funnel: false, ink: "#6b7684", tint: "#ffffff", line: "#d6dbe1", blurb: "Real, but not now. Revisit later.", outline: true },
 ];
 
 export const stage = (key) => STAGES.find((s) => s.key === key) || STAGES[0];

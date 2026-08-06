@@ -12,7 +12,7 @@ data. Deploys with the rest of the site to GitHub Pages.
 ```
 leads/
 ├── index.html              app shell
-├── style.css               design system (matches the other dashboards)
+├── style.css               design system — slate + indigo, stage colours in config.js
 ├── config.js               ← the file you edit: Firebase keys, fields, stages
 ├── store.js                all database access (Firebase + demo fallback)
 ├── app.js                  UI and behaviour

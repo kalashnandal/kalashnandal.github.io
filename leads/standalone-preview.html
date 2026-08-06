@@ -2,24 +2,33 @@
 <style>
 /* ============================================================================
    LinkedIn Leads Dashboard
-   Tokens and component names follow kalash-fitness-dashboard.html so the two
-   read as one family: white / black / grey, gold as the only chromatic accent.
+   Slate neutrals, an indigo accent that doubles as the end of the pipeline
+   ramp, and green/red reserved strictly for Won and Lost. Deliberately
+   single-theme: this mirrors the tool people actually use on the review call.
    ========================================================================== */
 
 :root{
   color-scheme:light;
-  --ink:#101012; --ink-2:#45454b; --ink-3:#83838c; --ink-4:#adadb5;
-  --line:#e7e7ea; --line-2:#f4f4f5;
-  --bg:#fafaf9; --card:#ffffff;
+  color-scheme:light;
 
-  --gold:#c9a227; --gold-d:#8a6a12; --gold-l:#fbf6e6; --gold-bd:#ecdfb4;
-  --viz:#a8801a;                 /* single-series chart fill, 3.6:1 on white */
+  /* Neutrals are slate — cooled slightly toward the indigo accent, so they
+     read as chosen rather than as default grey. */
+  --ink:#12161c; --ink-2:#3d4754; --ink-3:#6b7684; --ink-4:#9aa4b1;
+  --line:#e2e6ea; --line-2:#f1f4f6;
+  --bg:#f6f8f9; --card:#ffffff;
+  --navy:#181d33;                /* top bar and review hero ground */
+  --navy-2:#232a49;
 
-  /* Reserved status colours. Every pill also carries its text label, so
-     colour is never the only signal. */
-  --good:#1a7f4b; --good-l:#e8f4ee; --good-bd:#bcdfcc;
-  --bad:#b3261e;  --bad-l:#fbecea;  --bad-bd:#f0c9c5;
-  --warn:#b4690e; --warn-l:#fdf1e4; --warn-bd:#f2d8b6;
+  /* Indigo is the accent and also the terminal step of the pipeline ramp in
+     config.js, so "further along" and "primary action" share one hue. */
+  --accent:#3b45a4; --accent-d:#2e3688; --accent-l:#eef0fc; --accent-bd:#d3d8f5;
+  --viz:#4a56bd;                 /* single-series chart fill, 6.3:1 on white */
+
+  /* Reserved outcome colours — never used for a pipeline step, so an outcome
+     can't be mistaken for progress. Every pill carries its text label too. */
+  --good:#15703f; --good-l:#e7f3ec; --good-bd:#b9dcc7;
+  --bad:#a8271d;  --bad-l:#fbeae8;  --bad-bd:#eec6c2;
+  --warn:#a35a09; --warn-l:#fdf1e3; --warn-bd:#f2d6ae;
 
   --r-s:10px; --r-m:16px; --r-l:22px; --r-xl:30px;
   --sh-s:0 1px 2px rgba(16,16,18,.05), 0 2px 8px rgba(16,16,18,.04);
@@ -40,9 +49,9 @@ body{
 body::before{
   content:''; position:fixed; inset:0; z-index:-2; pointer-events:none;
   background:
-    radial-gradient(760px 420px at 88% -8%, #f6f0dd 0%, transparent 62%),
-    radial-gradient(620px 420px at 4% 8%, #f0f0ef 0%, transparent 60%),
-    radial-gradient(700px 500px at 60% 108%, #eceae4 0%, transparent 62%);
+    radial-gradient(820px 460px at 88% -10%, #e9ecfa 0%, transparent 64%),
+    radial-gradient(640px 440px at 2% 6%, #eef1f5 0%, transparent 62%),
+    radial-gradient(720px 520px at 62% 108%, #e8edf2 0%, transparent 64%);
 }
 h1,h2,h3,h4{margin:0; line-height:1.18; letter-spacing:-.02em}
 p{margin:0}
@@ -74,9 +83,9 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
 /* ============ TOP BAR ============ */
 #topbar{
   position:sticky; top:0; z-index:60;
-  background:linear-gradient(100deg,#0b0b0c,#18181b 48%,#241f14);
-  border-bottom:1px solid rgba(201,162,39,.28);
-  color:#fff; box-shadow:0 2px 14px rgba(16,16,18,.28);
+  background:linear-gradient(105deg,#12162b,#181d33 55%,#232a49);
+  border-bottom:1px solid rgba(122,134,224,.26);
+  color:#fff; box-shadow:0 2px 14px rgba(18,22,28,.3);
 }
 .tb-row{
   max-width:var(--maxw); margin:0 auto; padding:10px 18px;
@@ -84,9 +93,9 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
 }
 .brandmark{
   width:38px; height:38px; border-radius:12px; flex:none; display:grid; place-items:center;
-  background:linear-gradient(145deg,#26262b,#0d0d0f); color:var(--gold);
-  border:1px solid rgba(201,162,39,.4);
-  font-family:var(--serif); font-weight:900; font-size:17px;
+  background:linear-gradient(150deg,#3b45a4,#232969); color:#fff;
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 4px 12px -4px rgba(35,41,105,.6);
 }
 .tb-title{font-size:15px; font-weight:800; letter-spacing:-.01em}
 .tb-sub{font-size:11px; opacity:.55; font-weight:600; margin-top:1px}
@@ -96,7 +105,7 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
 .whoami span{font-size:10.5px; opacity:.55; font-weight:600}
 .avatar{
   width:34px; height:34px; border-radius:50%; flex:none; display:grid; place-items:center;
-  background:linear-gradient(135deg,#d9b545,#b8901f); color:#101012;
+  background:linear-gradient(135deg,#5c68d4,#3b45a4); color:#fff;
   font-size:13px; font-weight:800;
 }
 .tb-out{
@@ -108,7 +117,7 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
 
 /* Demo-mode banner */
 #demobar{
-  background:var(--gold-l); border-bottom:1px solid var(--gold-bd); color:var(--gold-d);
+  background:var(--accent-l); border-bottom:1px solid var(--accent-bd); color:var(--accent-d);
   font-size:12px; font-weight:700; text-align:center; padding:7px 16px;
 }
 
@@ -146,10 +155,10 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
 .btn[disabled]{opacity:.45; pointer-events:none}
 .btn-dark{background:var(--ink); color:#fff; box-shadow:var(--sh-m)}
 .btn-dark:hover{background:#2a2a30}
-.btn-gold{background:linear-gradient(135deg,#d9b545,#b8901f); color:#101012; box-shadow:0 8px 20px -8px rgba(184,144,31,.6)}
-.btn-gold:hover{filter:brightness(1.06)}
+.btn-primary{background:var(--accent); color:#fff; box-shadow:0 8px 20px -10px rgba(59,69,164,.75)}
+.btn-primary:hover{background:var(--accent-d)}
 .btn-ghost{background:#fff; color:var(--ink); border:1.5px solid var(--line); box-shadow:var(--sh-s)}
-.btn-ghost:hover{border-color:var(--gold); color:var(--gold-d); background:var(--gold-l)}
+.btn-ghost:hover{border-color:var(--accent); color:var(--accent-d); background:var(--accent-l)}
 .btn-danger{background:#fff; color:var(--bad); border:1.5px solid var(--bad-bd)}
 .btn-danger:hover{background:var(--bad-l)}
 .btn-sm{padding:7px 13px; font-size:12px}
@@ -162,6 +171,94 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
 .sec-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:14px}
 .sec-head h2{font-size:17px; font-weight:800}
 .sec-head .hint{font-size:12px; color:var(--ink-3); font-weight:500}
+
+/* ============ REVIEW HERO ============
+   The call opens on one sentence and three numbers. Everything else on the
+   page is detail behind those. */
+.hero{
+  background:linear-gradient(112deg,#12162b 0%,#1d2340 52%,#2b3357 100%);
+  border-radius:var(--r-xl); padding:26px 28px; margin-bottom:14px;
+  color:#fff; box-shadow:0 18px 40px -22px rgba(18,22,45,.7); position:relative; overflow:hidden;
+}
+.hero::after{
+  content:''; position:absolute; right:-70px; top:-110px; width:320px; height:320px;
+  border-radius:50%; background:radial-gradient(circle,rgba(122,134,224,.30),transparent 66%);
+  pointer-events:none;
+}
+.hero-top{display:flex; gap:26px; align-items:flex-end; flex-wrap:wrap; position:relative}
+.hero-eyebrow{
+  font-size:10.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+  color:#98a3d8; margin-bottom:9px;
+}
+.hero-line{
+  font-size:25px; font-weight:800; letter-spacing:-.025em; max-width:22ch;
+  text-wrap:balance; line-height:1.22;
+}
+.hero-line b{color:#aab4ef; font-weight:800}
+.hero-figs{display:flex; gap:30px; margin-left:auto; flex-wrap:wrap}
+.hfig{min-width:74px}
+.hfig .n{
+  font-size:34px; font-weight:800; line-height:1; letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;
+}
+.hfig .k{
+  font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  color:#98a3d8; margin-top:7px;
+}
+.hfig.is-good .n{color:#7ddba6}
+.hfig.is-warn .n{color:#f0b46a}
+@media(max-width:760px){
+  .hero{padding:22px 20px}
+  .hero-line{font-size:21px}
+  .hero-figs{margin-left:0; gap:22px; width:100%}
+  .hfig .n{font-size:28px}
+}
+
+/* ============ NEEDS ATTENTION ============ */
+.attn-card{padding:20px; margin-bottom:14px; border-left:4px solid var(--warn)}
+.attn-card.is-clear{border-left-color:var(--good)}
+.attn-head{display:flex; gap:13px; align-items:flex-start; margin-bottom:12px}
+.attn-icon{
+  width:32px; height:32px; border-radius:10px; flex:none; display:grid; place-items:center;
+  background:var(--warn-l); color:var(--warn); font-size:16px; font-weight:900;
+}
+.attn-card.is-clear .attn-icon{background:var(--good-l); color:var(--good)}
+.attn-title{font-size:15px; font-weight:800}
+.attn-sub{font-size:12.5px; color:var(--ink-3); font-weight:600; margin-top:2px}
+
+/* ============ PIPELINE STRIP ============
+   Stages read left to right the way a deal actually moves, each block carrying
+   its own stage colour so depth tracks progress. Conversion between steps sits
+   in the gap, which is the number the call argues about. */
+.pipe{display:flex; align-items:stretch; gap:0; overflow-x:auto; padding-bottom:6px; scrollbar-width:thin}
+.pipe-step{
+  flex:1 1 0; min-width:104px; border-radius:var(--r-m); padding:17px 12px 14px;
+  border:1px solid var(--line); background:var(--card); position:relative;
+  overflow:hidden;
+}
+.pipe-step::before{
+  content:''; position:absolute; inset:0 0 auto 0; height:4px; background:var(--step,var(--line));
+}
+.pipe-step.is-empty::before{opacity:.32}
+.pipe-step .n{font-size:26px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; color:var(--step)}
+.pipe-step .k{font-size:11.5px; font-weight:700; color:var(--ink-2); margin-top:6px}
+.pipe-step .p{font-size:10.5px; font-weight:700; color:var(--ink-4); margin-top:2px; font-variant-numeric:tabular-nums}
+.pipe-step.is-empty .n{color:var(--ink-4)}
+.pipe-arrow{
+  flex:none; width:46px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:3px; color:var(--ink-4);
+}
+.pipe-arrow .g{font-size:17px; line-height:1; color:var(--ink-4); font-weight:700}
+.pipe-arrow .c{font-size:10.5px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--ink-3)}
+@media(max-width:700px){ .pipe-arrow{width:26px} .pipe-step{min-width:92px; padding:12px 9px} }
+
+.outcomes{display:flex; gap:9px; flex-wrap:wrap; margin-top:16px; padding-top:15px; border-top:1px solid var(--line-2)}
+.outcome{
+  display:inline-flex; align-items:baseline; gap:8px; padding:8px 14px; border-radius:999px;
+  border:1px solid var(--line); background:var(--card);
+}
+.outcome .n{font-size:16px; font-weight:800; font-variant-numeric:tabular-nums}
+.outcome .k{font-size:11.5px; font-weight:700; color:var(--ink-3)}
 
 /* ============ STAT TILES ============ */
 .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px; margin-bottom:18px}
@@ -194,13 +291,6 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
 .bar-val{font-size:13px; font-weight:800; min-width:30px; text-align:right; font-variant-numeric:tabular-nums}
 .bar-row.is-zero .bar-val{color:var(--ink-4)}
 
-/* Funnel — an ordinal single-hue ramp, light to dark down the steps */
-.funnel{display:flex; flex-direction:column; gap:7px; margin-top:4px}
-.fn-row{display:grid; grid-template-columns:minmax(84px,124px) 1fr auto; align-items:center; gap:11px}
-.fn-track{height:26px; background:var(--line-2); border-radius:5px; overflow:hidden}
-.fn-fill{height:100%; border-radius:0 4px 4px 0; min-width:2px; transition:width .5s cubic-bezier(.4,0,.2,1)}
-.fn-meta{font-size:11.5px; font-weight:700; color:var(--ink-3); min-width:74px; text-align:right; font-variant-numeric:tabular-nums}
-.fn-meta b{color:var(--ink); font-size:13px}
 
 .empty-chart{font-size:12.5px; color:var(--ink-4); font-weight:600; padding:22px 0; text-align:center}
 
@@ -216,7 +306,7 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
   padding:8px 11px; border:1.5px solid var(--line); border-radius:9px; background:#fff;
   font-size:13px; min-width:0; transition:border-color .2s;
 }
-.inp:focus{outline:none; border-color:var(--gold)}
+.inp:focus{outline:none; border-color:var(--accent)}
 .inp::placeholder{color:var(--ink-4)}
 select.inp{cursor:pointer; padding-right:26px}
 textarea.inp{resize:vertical; min-height:74px; line-height:1.5}
@@ -239,7 +329,7 @@ table.leads thead th:hover{color:var(--ink)}
 table.leads thead th .arw{opacity:.4; font-size:9px}
 table.leads tbody td{padding:11px 12px; border-bottom:1px solid var(--line-2); vertical-align:middle}
 table.leads tbody tr{cursor:pointer; transition:background .15s}
-table.leads tbody tr:hover{background:var(--gold-l)}
+table.leads tbody tr:hover{background:var(--accent-l)}
 table.leads tbody tr:last-child td{border-bottom:0}
 
 /* A stage-coloured stripe down the first cell, so the pipeline is legible
@@ -273,7 +363,7 @@ table.leads tbody tr.stale td:first-child{position:relative}
 }
 .pill .dot{width:6px; height:6px; border-radius:50%; background:currentColor; flex:none}
 .pill-neutral{background:var(--line-2); color:var(--ink-2); border-color:var(--line)}
-.pill-accent{background:var(--gold-l); color:var(--gold-d); border-color:var(--gold-bd)}
+.pill-accent{background:var(--accent-l); color:var(--accent-d); border-color:var(--accent-bd)}
 .pill-good{background:var(--good-l); color:var(--good); border-color:var(--good-bd)}
 .pill-bad{background:var(--bad-l); color:var(--bad); border-color:var(--bad-bd)}
 .pill-warn{background:var(--warn-l); color:var(--warn); border-color:var(--warn-bd)}
@@ -321,7 +411,7 @@ fieldset.grp legend{
 }
 .frm{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
 .frm .wide{grid-column:1/-1}
-.frm .fld label .req{color:var(--gold-d)}
+.frm .fld label .req{color:var(--accent-d)}
 .err{border-color:var(--bad) !important}
 .err-msg{font-size:11px; color:var(--bad); font-weight:700; margin-top:3px}
 
@@ -340,7 +430,7 @@ fieldset.grp legend{
   width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
   background:var(--line-2); color:var(--ink-3); font-size:11px; flex:none;
 }
-.fe-ic.comment{background:var(--gold-l); color:var(--gold-d)}
+.fe-ic.comment{background:var(--accent-l); color:var(--accent-d)}
 .fe-ic.stage{background:var(--ink); color:#fff}
 .fe-top{display:flex; gap:8px; align-items:baseline; flex-wrap:wrap}
 .fe-who{font-size:12.5px; font-weight:800}
@@ -362,7 +452,7 @@ fieldset.grp legend{
   font-size:12.5px; font-weight:700; padding:9px 12px; border-radius:9px; margin-bottom:13px;
 }
 .login-foot{font-size:11.5px; color:var(--ink-4); text-align:center; margin-top:16px; font-weight:600}
-.link-btn{font-size:12px; font-weight:700; color:var(--gold-d); text-decoration:underline}
+.link-btn{font-size:12px; font-weight:700; color:var(--accent-d); text-decoration:underline}
 
 /* ============ TOAST ============ */
 #toasts{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none}
@@ -387,7 +477,7 @@ fieldset.grp legend{
 /* Export history rows */
 .exp-row{display:grid; grid-template-columns:34px 1fr auto; gap:12px; padding:13px 2px; border-bottom:1px solid var(--line-2); align-items:center}
 .exp-row:last-child{border-bottom:0}
-.exp-ic{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:var(--gold-l); color:var(--gold-d); font-size:14px}
+.exp-ic{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:var(--accent-l); color:var(--accent-d); font-size:14px}
 .exp-t{font-size:13.5px; font-weight:700}
 .exp-s{font-size:11.5px; color:var(--ink-3); font-weight:600; margin-top:2px}
 .exp-n{font-size:12px; font-weight:800; color:var(--ink-2); text-align:right; white-space:nowrap}
@@ -410,7 +500,7 @@ fieldset.grp legend{
 <!-- ====================== LOGIN ====================== -->
 <section id="login" class="hide">
   <div class="login-card">
-    <div class="brandmark">L</div>
+    <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="5.2" width="18" height="3.4" rx="1.7" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1.7" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1.7" fill="currentColor" opacity=".46"/></svg></span>
     <h1 class="serif">LinkedIn Leads</h1>
     <p class="tag">Internal lead tracker for the operations and sales teams.</p>
 
@@ -444,7 +534,7 @@ fieldset.grp legend{
 
   <header id="topbar">
     <div class="tb-row">
-      <div class="brandmark">L</div>
+      <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="5.2" width="18" height="3.4" rx="1.7" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1.7" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1.7" fill="currentColor" opacity=".46"/></svg></span>
       <div>
         <div class="tb-title">LinkedIn Leads</div>
         <div class="tb-sub">Operations → Sales handover tracker</div>
@@ -473,34 +563,44 @@ fieldset.grp legend{
 
     <!-- ---------- REVIEW (the Tue/Thu call view) ---------- -->
     <section class="panel on" data-panel="review">
-      <div class="sec-head">
-        <h2 class="serif">Review</h2>
-        <span class="hint" id="reviewHint">Since the last review call</span>
-        <div class="spacer" style="flex:1"></div>
+
+      <!-- The agenda for the call, in the order it gets discussed:
+           what moved → what's stuck → where everything sits → who did what. -->
+
+      <div class="hero">
+        <div class="hero-top">
+          <div>
+            <div class="hero-eyebrow" id="reviewHint">Since the last review call</div>
+            <h2 class="hero-line" id="heroLine">Loading…</h2>
+          </div>
+          <div class="hero-figs" id="heroFigs"></div>
+        </div>
       </div>
 
-      <div class="stats" id="statTiles"></div>
-
-      <div class="card pad" style="margin-bottom:14px">
-        <div class="sec-head" style="margin-bottom:6px">
-          <h2 style="font-size:15px">Needs attention</h2>
-          <span class="hint" id="attnHint">Open leads with no activity — these are the ones that used to get dropped.</span>
+      <div class="card attn-card" id="attnCard">
+        <div class="attn-head">
+          <div class="attn-icon" id="attnIcon">!</div>
+          <div style="min-width:0">
+            <h2 class="attn-title" id="attnTitle">Needs attention</h2>
+            <p class="attn-sub" id="attnHint">Open leads nobody has touched.</p>
+          </div>
         </div>
         <div id="attnList"></div>
+      </div>
+
+      <div class="card pad" style="margin-bottom:14px">
+        <div class="sec-head" style="margin-bottom:14px">
+          <h2 style="font-size:15px">Pipeline</h2>
+          <span class="hint">Every open lead, left to right. The number under each arrow is how many made it through.</span>
+        </div>
+        <div class="pipe" id="pipeChart"></div>
+        <div class="outcomes" id="outcomeChart"></div>
       </div>
 
       <div class="chart-grid">
         <div class="card pad">
           <div class="sec-head" style="margin-bottom:6px">
-            <h2 style="font-size:15px">Pipeline</h2>
-            <span class="hint">Open leads by stage</span>
-          </div>
-          <div class="funnel" id="funnelChart"></div>
-        </div>
-
-        <div class="card pad">
-          <div class="sec-head" style="margin-bottom:6px">
-            <h2 style="font-size:15px">Leads created by team member</h2>
+            <h2 style="font-size:15px">Who is sourcing the leads</h2>
             <span class="hint" id="byWhoHint">All time</span>
           </div>
           <div class="bars" id="byWhoChart"></div>
@@ -618,7 +718,7 @@ fieldset.grp legend{
           </div>
         </div>
 
-        <button class="btn btn-sm btn-gold" id="invSend">Send invite</button>
+        <button class="btn btn-sm btn-primary" id="invSend">Send invite</button>
 
         <div id="invList" style="margin-top:18px"></div>
       </div>
@@ -716,25 +816,29 @@ const STREAMS = {
    (won/lost/nurture are outcomes, not steps).
 
    COLOUR — each stage owns exactly one `ink`, used for its pill text, its dot,
-   its row stripe and its funnel bar, over a matching `tint`. The five pipeline
-   stages walk an ordinal ramp from cool grey into deepening gold, so a lead
-   getting further along *looks* further along at a glance — that is the whole
-   point on a review call. Won and Lost break out of the ramp into reserved
-   semantic green and red, because they are outcomes rather than progress, and
-   Nurture sits outside it entirely as an outline.
+   its row stripe and its pipeline block, over a matching `tint`.
 
-   Every pill carries its text label too, so colour is never the only signal.
-   Text contrast on tint was checked: all pass 4.5:1 or better.
+   The five pipeline stages walk an ordinal indigo ramp that gets darker at
+   every step, so a lead further along *looks* further along at a glance —
+   which is the whole job on a review call. The ramp's lightness was checked to
+   fall monotonically; that depth, not hue, is what carries progress.
+
+   Green and red are held back exclusively for Won and Lost, so an outcome can
+   never be mistaken for a step. Nurture sits outside the system entirely as an
+   outline — parked, not progressing.
+
+   Every pill carries its text label too, so colour is never the only signal,
+   and text contrast on every tint clears 4.5:1.
 --------------------------------------------------------------------------- */
 const STAGES = [
-  { key: "new",       label: "New Lead",        funnel: true,  ink: "#52525b", tint: "#f4f4f5", line: "#e4e4e7", blurb: "Logged by the LinkedIn team. Not handed over yet." },
-  { key: "shared",    label: "Shared",          funnel: true,  ink: "#7a5f14", tint: "#fdf9ec", line: "#f0e4c0", blurb: "Handed to Summit Sales / delivered to the client.", marksHandoff: true },
-  { key: "contacted", label: "Contacted",       funnel: true,  ink: "#6f5610", tint: "#fbf6e6", line: "#ecdfb4", blurb: "Summit has made first contact." },
-  { key: "meeting",   label: "Meeting Booked",  funnel: true,  ink: "#5e480d", tint: "#f8f1dd", line: "#e5d5a3", blurb: "A call is on the calendar." },
-  { key: "proposal",  label: "Proposal Sent",   funnel: true,  ink: "#54410c", tint: "#f2e9d2", line: "#dcc98f", blurb: "Commercials are out." },
-  { key: "won",       label: "Won",             funnel: false, ink: "#14663c", tint: "#e8f4ee", line: "#bcdfcc", blurb: "Closed. Revenue booked." },
-  { key: "lost",      label: "Lost",            funnel: false, ink: "#8f1e18", tint: "#fbecea", line: "#f0c9c5", blurb: "Dead. Reason required." },
-  { key: "nurture",   label: "Nurture / Later", funnel: false, ink: "#6b6b73", tint: "#ffffff", line: "#d4d4d8", blurb: "Real, but not now. Revisit later.", outline: true },
+  { key: "new",       label: "New Lead",        short: "New",      funnel: true,  ink: "#5a6473", tint: "#f1f3f6", line: "#dfe3e9", blurb: "Logged by the LinkedIn team. Not handed over yet." },
+  { key: "shared",    label: "Shared",          short: "Shared",   funnel: true,  ink: "#4a56bd", tint: "#eef0fc", line: "#d3d8f5", blurb: "Handed to Summit Sales / delivered to the client.", marksHandoff: true },
+  { key: "contacted", label: "Contacted",       short: "Contacted",funnel: true,  ink: "#3b45a4", tint: "#e9ecfa", line: "#c7cdf1", blurb: "Summit has made first contact." },
+  { key: "meeting",   label: "Meeting Booked",  short: "Meeting",  funnel: true,  ink: "#2e3688", tint: "#e4e7f7", line: "#bcc3ee", blurb: "A call is on the calendar." },
+  { key: "proposal",  label: "Proposal Sent",   short: "Proposal", funnel: true,  ink: "#232969", tint: "#dfe3f4", line: "#b0b8e8", blurb: "Commercials are out." },
+  { key: "won",       label: "Won",             short: "Won",      funnel: false, ink: "#15703f", tint: "#e7f3ec", line: "#b9dcc7", blurb: "Closed. Revenue booked." },
+  { key: "lost",      label: "Lost",            short: "Lost",     funnel: false, ink: "#a8271d", tint: "#fbeae8", line: "#eec6c2", blurb: "Dead. Reason required." },
+  { key: "nurture",   label: "Nurture / Later", short: "Nurture",  funnel: false, ink: "#6b7684", tint: "#ffffff", line: "#d6dbe1", blurb: "Real, but not now. Revisit later.", outline: true },
 ];
 
 const stage = (key) => STAGES.find((s) => s.key === key) || STAGES[0];
@@ -1902,65 +2006,98 @@ function renderReview() {
   const stale = L.filter(isStale);
   const open = L.filter((l) => OPEN_STAGES.includes(l.status));
 
-  $("#reviewHint").textContent = `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
+  $("#reviewHint").textContent =
+    `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
 
-  /* ---- stat tiles ---- */
-  const tiles = [
-    { k: "New since last call", v: newSince.length, d: `${L.length} leads all time` },
-    { k: "Open pipeline", v: open.length, d: "Not won or lost" },
-    { k: "Meetings booked", v: L.filter((l) => ["meeting", "proposal"].includes(l.status)).length, d: "Meeting or proposal stage" },
-    { k: "Won", v: L.filter((l) => l.status === "won").length, d: winRateLabel(L) },
-    { k: "Needs attention", v: stale.length, d: `No activity in ${STALE_DAYS}+ days`, alert: stale.length > 0 },
-  ];
-  $("#statTiles").innerHTML = tiles.map((t) => `
-    <div class="stat${t.alert ? " alert" : ""}">
-      <div class="k">${esc(t.k)}</div>
-      <div class="v num">${t.v}</div>
-      <div class="d">${esc(t.d)}</div>
+  /* ---- hero: the state of play in one sentence, plus the three numbers the
+         call actually opens on ---- */
+  const meetings = L.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
+  const won = L.filter((l) => l.status === "won").length;
+
+  $("#heroLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
+
+  $("#heroFigs").innerHTML = [
+    { k: "New leads", n: newSince.length },
+    { k: "In play", n: meetings, cls: meetings ? "is-good" : "" },
+    { k: `Idle ${STALE_DAYS}d+`, n: stale.length, cls: stale.length ? "is-warn" : "" },
+  ].map((f) => `
+    <div class="hfig ${f.cls || ""}">
+      <div class="n">${f.n}</div>
+      <div class="k">${esc(f.k)}</div>
     </div>`).join("");
+
+  /* ---- pipeline strip: stages left to right, with the conversion between
+         each pair in the gap ---- */
+  const fs = STAGES.filter((s) => s.funnel);
+  const counts = fs.map((s) => L.filter((l) => l.status === s.key).length);
+  const openTotal = counts.reduce((a, b) => a + b, 0);
+
+  const blocks = fs.map((s, i) => {
+    const n = counts[i];
+    const pct = openTotal ? Math.round((n / openTotal) * 100) : 0;
+    return `<div class="pipe-step${n ? "" : " is-empty"}" style="--step:${s.ink}">
+      <div class="n">${n}</div>
+      <div class="k">${esc(s.short || s.label)}</div>
+      <div class="p">${pct}% of open</div>
+    </div>`;
+  });
+
+  /* Between two stages, show how many of everything that reached the earlier
+     stage is now at or beyond the later one — the "did it actually move?"
+     number, not a raw ratio of two snapshots. */
+  const reached = (i) => counts.slice(i).reduce((a, b) => a + b, 0);
+  const arrows = fs.slice(0, -1).map((_, i) => {
+    const from = reached(i), to = reached(i + 1);
+    const pct = from ? Math.round((to / from) * 100) : 0;
+    return `<div class="pipe-arrow" title="${to} of ${from} moved past ${esc(fs[i].short)}">
+      <div class="g">›</div><div class="c">${from ? pct + "%" : "—"}</div>
+    </div>`;
+  });
+
+  $("#pipeChart").innerHTML = openTotal || L.length
+    ? blocks.map((b, i) => b + (arrows[i] || "")).join("")
+    : emptyChart("No leads yet.");
+
+  $("#outcomeChart").innerHTML = STAGES.filter((s) => !s.funnel).map((s) => {
+    const n = L.filter((l) => l.status === s.key).length;
+    return `<span class="outcome" style="border-color:${s.line};background:${s.outline ? "transparent" : s.tint}">
+      <span class="n" style="color:${s.ink}">${n}</span>
+      <span class="k">${esc(s.label)}</span>
+    </span>`;
+  }).join("") + `<span class="outcome" style="border-style:dashed">
+      <span class="k">${esc(winRateLabel(L))}</span></span>`;
 
   /* ---- needs attention ---- */
   const attn = [...stale].sort(
     (a, b) => daysSince(b.lastActivityAt || b.createdAt) - daysSince(a.lastActivityAt || a.createdAt)
   ).slice(0, 12);
 
+  const card = $("#attnCard");
+  card.classList.toggle("is-clear", stale.length === 0);
+  $("#attnIcon").textContent = stale.length ? "!" : "✓";
+  $("#attnTitle").textContent = stale.length
+    ? `${stale.length} lead${stale.length > 1 ? "s" : ""} going cold`
+    : "Nothing is slipping";
   $("#attnHint").textContent = stale.length
-    ? `${stale.length} open lead${stale.length > 1 ? "s" : ""} with no activity in ${STALE_DAYS}+ days.`
-    : "Nothing is sitting idle. Good.";
+    ? `No activity in ${STALE_DAYS}+ days. Work down this list on the call.`
+    : `Every open lead has been touched in the last ${STALE_DAYS} days.`;
 
   $("#attnList").innerHTML = attn.length
     ? `<div class="list">${attn.map((l) => `
         <div class="li" data-openlead="${esc(l.id)}" style="cursor:pointer">
           <div class="grow">
             <div class="t">${esc(fullName(l))} <span class="muted" style="font-weight:600">· ${esc(l.company || "")}</span></div>
-            <div class="s">${streamLabel(l)} · owner ${esc(l.salesOwner || l.createdByName || "unassigned")}</div>
+            <div class="s">${esc(streamLabel(l))} · owner ${esc(l.salesOwner || l.createdByName || "unassigned")}</div>
           </div>
           ${pill(l.status)}
           <span class="pill pill-warn"><span class="dot"></span>${daysSince(l.lastActivityAt || l.createdAt)}d idle</span>
         </div>`).join("")}</div>`
-    : `<p class="muted" style="font-size:13px">Every open lead has been touched in the last ${STALE_DAYS} days.</p>`;
+    : "";
 
   $("#attnList").onclick = (e) => {
     const row = e.target.closest("[data-openlead]");
     if (row) openDrawer(row.dataset.openlead);
   };
-
-  /* ---- funnel: open leads by stage, ordinal single-hue ramp ---- */
-  const funnelStages = STAGES.filter((s) => s.funnel);
-  const counts = funnelStages.map((s) => L.filter((l) => l.status === s.key).length);
-  const top = Math.max(...counts, 1);
-  $("#funnelChart").innerHTML = L.length
-    ? funnelStages.map((s, i) => {
-        const n = counts[i];
-        const pct = L.length ? Math.round((n / L.length) * 100) : 0;
-        const shade = s.ink;   // same ink as the stage's pill — one colour per stage
-        return `<div class="fn-row">
-          <div class="bar-lab">${esc(s.label)}</div>
-          <div class="fn-track"><div class="fn-fill" style="width:${(n / top) * 100}%;background:${shade}"></div></div>
-          <div class="fn-meta"><b>${n}</b> · ${pct}%</div>
-        </div>`;
-      }).join("")
-    : emptyChart("No leads yet.");
 
   /* ---- created by team member ---- */
   const byWho = tally(L, (l) => l.createdByName || "Unknown");
@@ -1974,6 +2111,21 @@ function renderReview() {
 
   /* ---- per week, last 8 weeks ---- */
   $("#byWeekChart").innerHTML = weekChart(L);
+}
+
+/* One plain sentence naming the thing that most deserves attention right now.
+   Ordered by what would actually change the conversation on the call. */
+function heroSentence(L, created, stale, meetings) {
+  if (!L.length) return "No leads yet — add the first one from the Summit Sales tab.";
+  if (stale) {
+    return `<b>${stale}</b> open lead${stale > 1 ? "s have" : " has"} gone quiet for ${STALE_DAYS}+ days.`;
+  }
+  if (created && meetings) {
+    return `<b>${created}</b> new lead${created > 1 ? "s" : ""} since the last call, and <b>${meetings}</b> in play.`;
+  }
+  if (created) return `<b>${created}</b> new lead${created > 1 ? "s" : ""} logged since the last call.`;
+  if (meetings) return `Nothing new since the last call, but <b>${meetings}</b> still in play.`;
+  return "Nothing new since the last call.";
 }
 
 function winRateLabel(L) {
@@ -2142,7 +2294,7 @@ function renderStream(streamKey) {
         <div style="display:flex; gap:8px">
           <button class="btn btn-sm btn-ghost" id="exp_${streamKey}">⬇ Export to Excel</button>
           ${can.create(S.me.role)
-            ? `<button class="btn btn-sm btn-gold" id="add_${streamKey}">+ Add Lead</button>` : ""}
+            ? `<button class="btn btn-sm btn-primary" id="add_${streamKey}">+ Add Lead</button>` : ""}
         </div>
       </div>
     </div>`;
@@ -2481,7 +2633,7 @@ function renderForm(lead, streamKey) {
   syncClient();
 
   $("#drFoot").innerHTML = `
-    <button class="btn btn-sm btn-gold" id="frmSave">${isNew ? "Create lead" : "Save changes"}</button>
+    <button class="btn btn-sm btn-primary" id="frmSave">${isNew ? "Create lead" : "Save changes"}</button>
     <button class="btn btn-sm btn-ghost" id="frmCancel">Cancel</button>
     <div style="flex:1"></div>
     <span class="muted" style="font-size:11.5px; font-weight:600">* required</span>`;

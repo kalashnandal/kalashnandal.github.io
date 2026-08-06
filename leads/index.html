@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Internal LinkedIn lead tracker — leads shared with Summit Sales and leads delivered to clients, with comments, activity history and tracked Excel exports.">
-<meta name="theme-color" content="#101012">
+<meta name="theme-color" content="#181d33">
 <title>LinkedIn Leads · Internal Dashboard</title>
 <link rel="icon" href="../favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
 <!-- ====================== LOGIN ====================== -->
 <section id="login" class="hide">
   <div class="login-card">
-    <div class="brandmark">L</div>
+    <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="5.2" width="18" height="3.4" rx="1.7" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1.7" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1.7" fill="currentColor" opacity=".46"/></svg></span>
     <h1 class="serif">LinkedIn Leads</h1>
     <p class="tag">Internal lead tracker for the operations and sales teams.</p>
 
@@ -52,7 +52,7 @@
 
   <header id="topbar">
     <div class="tb-row">
-      <div class="brandmark">L</div>
+      <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="5.2" width="18" height="3.4" rx="1.7" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1.7" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1.7" fill="currentColor" opacity=".46"/></svg></span>
       <div>
         <div class="tb-title">LinkedIn Leads</div>
         <div class="tb-sub">Operations → Sales handover tracker</div>
@@ -81,34 +81,44 @@
 
     <!-- ---------- REVIEW (the Tue/Thu call view) ---------- -->
     <section class="panel on" data-panel="review">
-      <div class="sec-head">
-        <h2 class="serif">Review</h2>
-        <span class="hint" id="reviewHint">Since the last review call</span>
-        <div class="spacer" style="flex:1"></div>
+
+      <!-- The agenda for the call, in the order it gets discussed:
+           what moved → what's stuck → where everything sits → who did what. -->
+
+      <div class="hero">
+        <div class="hero-top">
+          <div>
+            <div class="hero-eyebrow" id="reviewHint">Since the last review call</div>
+            <h2 class="hero-line" id="heroLine">Loading…</h2>
+          </div>
+          <div class="hero-figs" id="heroFigs"></div>
+        </div>
       </div>
 
-      <div class="stats" id="statTiles"></div>
-
-      <div class="card pad" style="margin-bottom:14px">
-        <div class="sec-head" style="margin-bottom:6px">
-          <h2 style="font-size:15px">Needs attention</h2>
-          <span class="hint" id="attnHint">Open leads with no activity — these are the ones that used to get dropped.</span>
+      <div class="card attn-card" id="attnCard">
+        <div class="attn-head">
+          <div class="attn-icon" id="attnIcon">!</div>
+          <div style="min-width:0">
+            <h2 class="attn-title" id="attnTitle">Needs attention</h2>
+            <p class="attn-sub" id="attnHint">Open leads nobody has touched.</p>
+          </div>
         </div>
         <div id="attnList"></div>
+      </div>
+
+      <div class="card pad" style="margin-bottom:14px">
+        <div class="sec-head" style="margin-bottom:14px">
+          <h2 style="font-size:15px">Pipeline</h2>
+          <span class="hint">Every open lead, left to right. The number under each arrow is how many made it through.</span>
+        </div>
+        <div class="pipe" id="pipeChart"></div>
+        <div class="outcomes" id="outcomeChart"></div>
       </div>
 
       <div class="chart-grid">
         <div class="card pad">
           <div class="sec-head" style="margin-bottom:6px">
-            <h2 style="font-size:15px">Pipeline</h2>
-            <span class="hint">Open leads by stage</span>
-          </div>
-          <div class="funnel" id="funnelChart"></div>
-        </div>
-
-        <div class="card pad">
-          <div class="sec-head" style="margin-bottom:6px">
-            <h2 style="font-size:15px">Leads created by team member</h2>
+            <h2 style="font-size:15px">Who is sourcing the leads</h2>
             <span class="hint" id="byWhoHint">All time</span>
           </div>
           <div class="bars" id="byWhoChart"></div>
@@ -226,7 +236,7 @@
           </div>
         </div>
 
-        <button class="btn btn-sm btn-gold" id="invSend">Send invite</button>
+        <button class="btn btn-sm btn-primary" id="invSend">Send invite</button>
 
         <div id="invList" style="margin-top:18px"></div>
       </div>

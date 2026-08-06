@@ -323,65 +323,98 @@ function renderReview() {
   const stale = L.filter(isStale);
   const open = L.filter((l) => OPEN_STAGES.includes(l.status));
 
-  $("#reviewHint").textContent = `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
+  $("#reviewHint").textContent =
+    `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
 
-  /* ---- stat tiles ---- */
-  const tiles = [
-    { k: "New since last call", v: newSince.length, d: `${L.length} leads all time` },
-    { k: "Open pipeline", v: open.length, d: "Not won or lost" },
-    { k: "Meetings booked", v: L.filter((l) => ["meeting", "proposal"].includes(l.status)).length, d: "Meeting or proposal stage" },
-    { k: "Won", v: L.filter((l) => l.status === "won").length, d: winRateLabel(L) },
-    { k: "Needs attention", v: stale.length, d: `No activity in ${STALE_DAYS}+ days`, alert: stale.length > 0 },
-  ];
-  $("#statTiles").innerHTML = tiles.map((t) => `
-    <div class="stat${t.alert ? " alert" : ""}">
-      <div class="k">${esc(t.k)}</div>
-      <div class="v num">${t.v}</div>
-      <div class="d">${esc(t.d)}</div>
+  /* ---- hero: the state of play in one sentence, plus the three numbers the
+         call actually opens on ---- */
+  const meetings = L.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
+  const won = L.filter((l) => l.status === "won").length;
+
+  $("#heroLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
+
+  $("#heroFigs").innerHTML = [
+    { k: "New leads", n: newSince.length },
+    { k: "In play", n: meetings, cls: meetings ? "is-good" : "" },
+    { k: `Idle ${STALE_DAYS}d+`, n: stale.length, cls: stale.length ? "is-warn" : "" },
+  ].map((f) => `
+    <div class="hfig ${f.cls || ""}">
+      <div class="n">${f.n}</div>
+      <div class="k">${esc(f.k)}</div>
     </div>`).join("");
+
+  /* ---- pipeline strip: stages left to right, with the conversion between
+         each pair in the gap ---- */
+  const fs = STAGES.filter((s) => s.funnel);
+  const counts = fs.map((s) => L.filter((l) => l.status === s.key).length);
+  const openTotal = counts.reduce((a, b) => a + b, 0);
+
+  const blocks = fs.map((s, i) => {
+    const n = counts[i];
+    const pct = openTotal ? Math.round((n / openTotal) * 100) : 0;
+    return `<div class="pipe-step${n ? "" : " is-empty"}" style="--step:${s.ink}">
+      <div class="n">${n}</div>
+      <div class="k">${esc(s.short || s.label)}</div>
+      <div class="p">${pct}% of open</div>
+    </div>`;
+  });
+
+  /* Between two stages, show how many of everything that reached the earlier
+     stage is now at or beyond the later one — the "did it actually move?"
+     number, not a raw ratio of two snapshots. */
+  const reached = (i) => counts.slice(i).reduce((a, b) => a + b, 0);
+  const arrows = fs.slice(0, -1).map((_, i) => {
+    const from = reached(i), to = reached(i + 1);
+    const pct = from ? Math.round((to / from) * 100) : 0;
+    return `<div class="pipe-arrow" title="${to} of ${from} moved past ${esc(fs[i].short)}">
+      <div class="g">›</div><div class="c">${from ? pct + "%" : "—"}</div>
+    </div>`;
+  });
+
+  $("#pipeChart").innerHTML = openTotal || L.length
+    ? blocks.map((b, i) => b + (arrows[i] || "")).join("")
+    : emptyChart("No leads yet.");
+
+  $("#outcomeChart").innerHTML = STAGES.filter((s) => !s.funnel).map((s) => {
+    const n = L.filter((l) => l.status === s.key).length;
+    return `<span class="outcome" style="border-color:${s.line};background:${s.outline ? "transparent" : s.tint}">
+      <span class="n" style="color:${s.ink}">${n}</span>
+      <span class="k">${esc(s.label)}</span>
+    </span>`;
+  }).join("") + `<span class="outcome" style="border-style:dashed">
+      <span class="k">${esc(winRateLabel(L))}</span></span>`;
 
   /* ---- needs attention ---- */
   const attn = [...stale].sort(
     (a, b) => daysSince(b.lastActivityAt || b.createdAt) - daysSince(a.lastActivityAt || a.createdAt)
   ).slice(0, 12);
 
+  const card = $("#attnCard");
+  card.classList.toggle("is-clear", stale.length === 0);
+  $("#attnIcon").textContent = stale.length ? "!" : "✓";
+  $("#attnTitle").textContent = stale.length
+    ? `${stale.length} lead${stale.length > 1 ? "s" : ""} going cold`
+    : "Nothing is slipping";
   $("#attnHint").textContent = stale.length
-    ? `${stale.length} open lead${stale.length > 1 ? "s" : ""} with no activity in ${STALE_DAYS}+ days.`
-    : "Nothing is sitting idle. Good.";
+    ? `No activity in ${STALE_DAYS}+ days. Work down this list on the call.`
+    : `Every open lead has been touched in the last ${STALE_DAYS} days.`;
 
   $("#attnList").innerHTML = attn.length
     ? `<div class="list">${attn.map((l) => `
         <div class="li" data-openlead="${esc(l.id)}" style="cursor:pointer">
           <div class="grow">
             <div class="t">${esc(fullName(l))} <span class="muted" style="font-weight:600">· ${esc(l.company || "")}</span></div>
-            <div class="s">${streamLabel(l)} · owner ${esc(l.salesOwner || l.createdByName || "unassigned")}</div>
+            <div class="s">${esc(streamLabel(l))} · owner ${esc(l.salesOwner || l.createdByName || "unassigned")}</div>
           </div>
           ${pill(l.status)}
           <span class="pill pill-warn"><span class="dot"></span>${daysSince(l.lastActivityAt || l.createdAt)}d idle</span>
         </div>`).join("")}</div>`
-    : `<p class="muted" style="font-size:13px">Every open lead has been touched in the last ${STALE_DAYS} days.</p>`;
+    : "";
 
   $("#attnList").onclick = (e) => {
     const row = e.target.closest("[data-openlead]");
     if (row) openDrawer(row.dataset.openlead);
   };
-
-  /* ---- funnel: open leads by stage, ordinal single-hue ramp ---- */
-  const funnelStages = STAGES.filter((s) => s.funnel);
-  const counts = funnelStages.map((s) => L.filter((l) => l.status === s.key).length);
-  const top = Math.max(...counts, 1);
-  $("#funnelChart").innerHTML = L.length
-    ? funnelStages.map((s, i) => {
-        const n = counts[i];
-        const pct = L.length ? Math.round((n / L.length) * 100) : 0;
-        const shade = s.ink;   // same ink as the stage's pill — one colour per stage
-        return `<div class="fn-row">
-          <div class="bar-lab">${esc(s.label)}</div>
-          <div class="fn-track"><div class="fn-fill" style="width:${(n / top) * 100}%;background:${shade}"></div></div>
-          <div class="fn-meta"><b>${n}</b> · ${pct}%</div>
-        </div>`;
-      }).join("")
-    : emptyChart("No leads yet.");
 
   /* ---- created by team member ---- */
   const byWho = tally(L, (l) => l.createdByName || "Unknown");
@@ -395,6 +428,21 @@ function renderReview() {
 
   /* ---- per week, last 8 weeks ---- */
   $("#byWeekChart").innerHTML = weekChart(L);
+}
+
+/* One plain sentence naming the thing that most deserves attention right now.
+   Ordered by what would actually change the conversation on the call. */
+function heroSentence(L, created, stale, meetings) {
+  if (!L.length) return "No leads yet — add the first one from the Summit Sales tab.";
+  if (stale) {
+    return `<b>${stale}</b> open lead${stale > 1 ? "s have" : " has"} gone quiet for ${STALE_DAYS}+ days.`;
+  }
+  if (created && meetings) {
+    return `<b>${created}</b> new lead${created > 1 ? "s" : ""} since the last call, and <b>${meetings}</b> in play.`;
+  }
+  if (created) return `<b>${created}</b> new lead${created > 1 ? "s" : ""} logged since the last call.`;
+  if (meetings) return `Nothing new since the last call, but <b>${meetings}</b> still in play.`;
+  return "Nothing new since the last call.";
 }
 
 function winRateLabel(L) {
@@ -563,7 +611,7 @@ function renderStream(streamKey) {
         <div style="display:flex; gap:8px">
           <button class="btn btn-sm btn-ghost" id="exp_${streamKey}">⬇ Export to Excel</button>
           ${can.create(S.me.role)
-            ? `<button class="btn btn-sm btn-gold" id="add_${streamKey}">+ Add Lead</button>` : ""}
+            ? `<button class="btn btn-sm btn-primary" id="add_${streamKey}">+ Add Lead</button>` : ""}
         </div>
       </div>
     </div>`;
@@ -902,7 +950,7 @@ function renderForm(lead, streamKey) {
   syncClient();
 
   $("#drFoot").innerHTML = `
-    <button class="btn btn-sm btn-gold" id="frmSave">${isNew ? "Create lead" : "Save changes"}</button>
+    <button class="btn btn-sm btn-primary" id="frmSave">${isNew ? "Create lead" : "Save changes"}</button>
     <button class="btn btn-sm btn-ghost" id="frmCancel">Cancel</button>
     <div style="flex:1"></div>
     <span class="muted" style="font-size:11.5px; font-weight:600">* required</span>`;
