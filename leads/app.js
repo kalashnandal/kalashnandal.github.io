@@ -4,7 +4,7 @@
 
 import {
   LEAD_FIELDS, FIELD_GROUPS, STAGES, stage, OPEN_STAGES, STALE_DAYS,
-  STREAMS, ROLES, VIZ, REVIEW_DAYS, field,
+  STREAMS, ROLES, REVIEW_DAYS, field,
 } from "./config.js";
 import { openStore } from "./store.js";
 import { downloadXlsx } from "./xlsx.js";
@@ -97,6 +97,7 @@ const S = {
   leads: [],
   clients: [],
   users: [],
+  invites: [],
   exports: [],
   feed: [],
   tab: "review",
@@ -150,11 +151,15 @@ function installCopyGuard() {
 
   if (S.store.mode === "demo") $("#demobar").classList.remove("hide");
 
+  // Someone arriving from an invite email lands here with a sign-in link in
+  // the URL. Complete that before deciding whether to show the login form.
+  if (S.store.isInviteLink()) await completeInviteSignIn();
+
   S.store.onAuth((profile) => {
     S.me = profile;
     if (!profile) return showLogin();
     if (profile.pending) {
-      showLogin("Your login exists but no access has been set up yet. Ask an admin to add you.");
+      showLogin("You're signed in, but nobody has given you access yet. Ask an admin to invite you.");
       S.store.signOut();
       return;
     }
@@ -174,6 +179,32 @@ function showLogin(msg) {
   if (msg) {
     $("#loginErr").textContent = msg;
     $("#loginErr").classList.remove("hide");
+  }
+}
+
+/* Finishes an invite: exchanges the emailed link for a session. The address is
+   normally remembered from the browser that requested it; if they opened the
+   link on a different device we have to ask, because Firebase requires the
+   email to match the one the link was issued for. */
+async function completeInviteSignIn() {
+  let email = "";
+  try { email = localStorage.getItem("leads:inviteEmail") || ""; } catch {}
+  if (!email) email = prompt("Confirm the email address this invite was sent to:") || "";
+  if (!email) return;
+
+  try {
+    await S.store.signInWithLink(email);
+    try { localStorage.removeItem("leads:inviteEmail"); } catch {}
+    // Drop the one-time link from the address bar so a refresh doesn't retry it.
+    history.replaceState(null, "", location.pathname);
+    toast("You're in. Set a password any time from Forgot your password.", "good");
+  } catch (ex) {
+    console.error(ex);
+    showLogin(
+      ex?.code?.includes("invalid-action-code")
+        ? "That invite link has already been used or has expired. Ask an admin to resend it."
+        : "We couldn't complete that invite link. Ask an admin to resend it."
+    );
   }
 }
 
@@ -235,7 +266,11 @@ function showApp() {
   S.store.watchClients((rows) => { S.clients = rows; renderAll(); });
   S.store.watchExports((rows) => { S.exports = rows; renderExports(); });
   S.store.watchRecentActivity((rows) => { S.feed = rows; renderFeed(); });
-  if (can.admin(S.me.role)) S.store.watchUsers((rows) => { S.users = rows; renderUsers(); });
+  if (can.admin(S.me.role)) {
+    wireInvites();
+    S.store.watchUsers((rows) => { S.users = rows; renderUsers(); });
+    S.store.watchInvites((rows) => { S.invites = rows; renderInvites(); });
+  }
 }
 
 function wireChrome() {
@@ -266,6 +301,7 @@ function renderAll() {
   renderReview();
   renderClients();
   renderFeed();
+  if (can.admin(S.me?.role)) renderInvites();
   renderStream("sales_partner");
   renderStream("client");
   $("#cntSales").textContent = S.leads.filter((l) => l.stream === "sales_partner").length;
@@ -338,7 +374,7 @@ function renderReview() {
     ? funnelStages.map((s, i) => {
         const n = counts[i];
         const pct = L.length ? Math.round((n / L.length) * 100) : 0;
-        const shade = VIZ.ordinal[Math.min(i, VIZ.ordinal.length - 1)];
+        const shade = s.ink;   // same ink as the stage's pill — one colour per stage
         return `<div class="fn-row">
           <div class="bar-lab">${esc(s.label)}</div>
           <div class="fn-track"><div class="fn-fill" style="width:${(n / top) * 100}%;background:${shade}"></div></div>
@@ -412,9 +448,15 @@ function weekChart(L) {
 /* ==========================================================================
    PILLS
    ========================================================================== */
+/* Each stage owns one ink and one tint (see STAGES in config.js), applied
+   inline so the pill, the dot, the row stripe and the funnel bar can never
+   drift apart into separate colour systems. */
 function pill(statusKey) {
   const s = stage(statusKey);
-  return `<span class="pill pill-${s.tone}"><span class="dot"></span>${esc(s.label)}</span>`;
+  const bg = s.outline ? "transparent" : s.tint;
+  const dash = s.outline ? "border-style:dashed;" : "";
+  return `<span class="pill" style="color:${s.ink};background:${bg};border-color:${s.line};${dash}">
+    <span class="dot"></span>${esc(s.label)}</span>`;
 }
 function streamLabel(l) {
   if (l.stream === "client") {
@@ -565,7 +607,8 @@ function renderStream(streamKey) {
             <span class="arw">${v.sort === c.sort ? (v.dir === 1 ? "▲" : "▼") : ""}</span>
           </th>`).join("")}</tr></thead>
         <tbody>${rows.map((l) => `
-          <tr data-id="${esc(l.id)}">${cols.map((c) => `<td>${cellHtml(c.key, l)}</td>`).join("")}</tr>`).join("")}
+          <tr data-id="${esc(l.id)}" style="--stripe:${stage(l.status).ink}"${isStale(l) ? ' class="stale"' : ""}>
+            ${cols.map((c) => `<td>${cellHtml(c.key, l)}</td>`).join("")}</tr>`).join("")}
         </tbody>
       </table>
     </div>
@@ -1101,8 +1144,124 @@ function renderUsers() {
           <div class="t">${esc(u.name || u.email)}</div>
           <div class="s">${esc(u.email || "")} · ${esc(ROLES[u.role]?.label || "no role")}</div>
         </div>
+        ${u.active === false ? `<span class="pill" style="color:#6b6b73;border-color:#d4d4d8">Disabled</span>` : ""}
       </div>`).join("")
-    : `<p class="muted" style="font-size:13px">No user documents yet. Add them under <code>users/{uid}</code>.</p>`;
+    : `<p class="muted" style="font-size:13px">Nobody yet. Invite your first person below.</p>`;
+}
+
+/* ---------------------------------------------------------------------------
+   INVITES
+   The admin picks the role here; the invitee never chooses their own. The
+   matching rule in firestore.rules copies that role across verbatim when they
+   sign in, so this dropdown is the only place a role is decided.
+--------------------------------------------------------------------------- */
+function wireInvites() {
+  const roleSel = $("#invRole");
+  if (!roleSel || roleSel.dataset.wired) return;
+  roleSel.dataset.wired = "1";
+
+  roleSel.innerHTML = Object.entries(ROLES)
+    .map(([k, r]) => `<option value="${k}"${k === "ops" ? " selected" : ""}>${esc(r.label)}</option>`)
+    .join("");
+
+  const sync = () => {
+    const r = roleSel.value;
+    $("#invRoleBlurb").textContent = ROLES[r]?.blurb || "";
+    $("#invClientWrap").classList.toggle("hide", r !== "client");
+  };
+  roleSel.addEventListener("change", sync);
+  sync();
+
+  $("#invSend").addEventListener("click", sendInvite);
+}
+
+async function sendInvite() {
+  const name = $("#invName").value.trim();
+  const email = $("#invEmail").value.trim().toLowerCase();
+  const role = $("#invRole").value;
+  const clientAccess = [...$("#invClients").selectedOptions].map((o) => o.value);
+
+  if (!name) return toast("Add their name so people know who this is.", "warn");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast("That email doesn't look right.", "warn");
+  if (role === "client" && !clientAccess.length) return toast("Pick which clients they can see.", "warn");
+  if (S.users.some((u) => (u.email || "").toLowerCase() === email)) {
+    return toast("That person already has access.", "warn");
+  }
+
+  const btn = $("#invSend");
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  try {
+    await S.store.createInvite(email, { name, role, clientAccess });
+    await S.store.sendInviteLink(email);
+    $("#invName").value = "";
+    $("#invEmail").value = "";
+    toast(
+      S.store.mode === "demo"
+        ? "Invite recorded. In demo mode no email is actually sent."
+        : `Invite sent to ${email}.`,
+      "good"
+    );
+  } catch (ex) {
+    console.error(ex);
+    toast(inviteError(ex), "bad");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Send invite";
+  }
+}
+
+function inviteError(ex) {
+  const code = ex?.code || "";
+  if (code.includes("operation-not-allowed"))
+    return "Email link sign-in isn't switched on yet. Enable it in Firebase → Authentication → Sign-in method.";
+  if (code.includes("unauthorized-continue-uri") || code.includes("invalid-continue-uri"))
+    return "This site's domain isn't authorised in Firebase → Authentication → Settings → Authorised domains.";
+  if (code.includes("permission-denied")) return "Only admins can invite people.";
+  return ex?.message || "Could not send the invite. Try again.";
+}
+
+function renderInvites() {
+  const host = $("#invList");
+  if (!host) return;
+
+  const opts = S.clients.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+  const sel = $("#invClients");
+  if (sel && sel.innerHTML !== opts) sel.innerHTML = opts;
+
+  const open = S.invites.filter((i) => i.status !== "accepted");
+  host.innerHTML = open.length
+    ? `<div class="eyebrow" style="margin-bottom:8px">Waiting to be accepted</div>
+       <div class="list">${open.map((i) => `
+        <div class="li">
+          <div class="grow">
+            <div class="t">${esc(i.name || i.email)}</div>
+            <div class="s">${esc(i.email)} · ${esc(ROLES[i.role]?.label || i.role)} · invited ${esc(fmtWhen(i.createdAt))}</div>
+          </div>
+          <span class="pill" style="color:#7a5f14;background:#fdf9ec;border-color:#f0e4c0">
+            <span class="dot"></span>${i.status === "sent" ? "Link sent" : "Not sent"}
+          </span>
+          <button class="btn btn-xs btn-ghost" data-resend="${esc(i.email)}">Resend</button>
+          <button class="btn btn-xs btn-danger" data-revoke="${esc(i.email)}">Revoke</button>
+        </div>`).join("")}</div>`
+    : `<p class="muted" style="font-size:12.5px">No invites waiting.</p>`;
+
+  host.onclick = async (e) => {
+    const resend = e.target.closest("[data-resend]");
+    const revoke = e.target.closest("[data-revoke]");
+    if (resend) {
+      try {
+        await S.store.sendInviteLink(resend.dataset.resend);
+        toast("Invite resent.", "good");
+      } catch (ex) { toast(inviteError(ex), "bad"); }
+    }
+    if (revoke) {
+      const email = revoke.dataset.revoke;
+      if (!confirm(`Revoke the invite for ${email}? Their link stops working.`)) return;
+      await S.store.revokeInvite(email);
+      toast("Invite revoked.", "bad");
+    }
+  };
 }
 
 function renderClients() {

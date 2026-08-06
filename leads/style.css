@@ -238,13 +238,31 @@ table.leads tbody td{padding:11px 12px; border-bottom:1px solid var(--line-2); v
 table.leads tbody tr{cursor:pointer; transition:background .15s}
 table.leads tbody tr:hover{background:var(--gold-l)}
 table.leads tbody tr:last-child td{border-bottom:0}
+
+/* A stage-coloured stripe down the first cell, so the pipeline is legible
+   scanning the left edge of the table without reading a single word.
+   --stripe is set per row from the stage's ink. */
+table.leads tbody td:first-child{
+  box-shadow:inset 3px 0 0 var(--stripe, transparent);
+  padding-left:15px;
+}
+/* Stale rows get a second, unmistakable mark — the one thing that must never
+   be missed on a review call. */
+table.leads tbody tr.stale td:first-child::after{
+  content:''; position:absolute; margin-left:6px; margin-top:5px;
+  width:6px; height:6px; border-radius:50%; background:var(--warn);
+}
+table.leads tbody tr.stale td:first-child{position:relative}
 .cell-name{font-weight:700; white-space:nowrap}
 .cell-sub{font-size:11px; color:var(--ink-3); font-weight:600; margin-top:1px}
 .cell-dim{color:var(--ink-3)}
 .tbl-empty{padding:46px 20px; text-align:center; color:var(--ink-3)}
 .tbl-empty .big{font-size:15px; font-weight:700; color:var(--ink-2); margin-bottom:5px}
 
-/* ============ PILLS ============ */
+/* ============ PILLS ============
+   Stage pills get their colours inline from STAGES in config.js, so the pill,
+   its dot, the row stripe and the funnel bar all read from one definition.
+   The classes below are only for pills that aren't stages. */
 .pill{
   display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px;
   font-size:11px; font-weight:800; white-space:nowrap; letter-spacing:.01em;

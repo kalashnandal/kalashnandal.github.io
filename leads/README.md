@@ -97,42 +97,47 @@ Index builds take a few minutes. Until they finish, some views log a
 
 Sign in. Everything else can be done from the **Admin** tab.
 
-### 6. Add everyone else
+### 6. Invite everyone else
 
-Same two steps per person — create the auth user, then the `users/{uid}`
-document. Roles:
+From here on, use the dashboard. **Admin → Invite someone**: enter their name,
+their work email, and the role you want them to have. They get an email link,
+sign in with one click, pick a password from *Forgot your password*, and land
+with exactly the role you chose.
+
+This needs one switch flipped first:
+**Authentication → Sign-in method → Email link (passwordless sign-in) → Enable.**
+Also check your domains are listed under **Authentication → Settings →
+Authorised domains**, or the link will refuse to send.
+
+Roles:
 
 | Role     | Sees                          | Can do                                                        |
 | -------- | ----------------------------- | ------------------------------------------------------------- |
-| `admin`  | everything                    | everything, plus manage clients and see all exports           |
+| `admin`  | everything                    | everything, plus manage clients, invite people, see all exports |
 | `ops`    | everything                    | add and edit leads, comment, export — the LinkedIn team        |
-| `sales`  | sales-partner leads only      | move stages, set sales owner / GHL link / deal value, comment  |
+| `sales`  | Summit Sales leads only       | move stages, set sales owner / GHL link / deal value, comment  |
 | `client` | only their own client's leads | read and comment only                                          |
 
-A `client` user also needs a `clientAccess` field — an **array** of client
-document IDs from the `clients` collection:
+Pick `client` and the form asks which client accounts they may see.
 
-```
-clientAccess: ["Ab3xY...", "Qw9zK..."]
-```
+Pending invites are listed under the form, where you can resend or revoke them.
+A revoked invite's link stops working immediately.
 
-Leave `role` unset and the person can sign in but sees nothing — the app tells
-them to ask an admin. That is the safe default.
-
-> A login with no `users/{uid}` document has no access at all. Creating the
-> auth user is step one; granting the role is step two. Deleting the `users`
-> document revokes access without deleting their login.
+**The role is decided by you, never by them.** The invite record carries it, and
+`firestore.rules` copies it across verbatim when they first sign in — the rule
+refuses any profile whose role doesn't match the invite. Nobody can sign
+themselves up as an admin, and someone with no invite gets nothing.
 
 ---
 
 ## How the team uses it
 
-**LinkedIn team** — add each lead as it comes in, on the *Sales Partner* or
+**LinkedIn team** — add each lead as it comes in, on the *Summit Sales* or
 *Clients* tab. Fill in what you have; only name, company and LinkedIn URL are
 required. When you hand it over, move the stage to **Shared** — that stamps the
 handover date, which is what makes "when did we give you this?" answerable.
 
-**Sales partner** — work the deal in GHL as usual, then keep this in sync:
+**Summit Sales** — work the deal in GHL as usual, then keep this in sync:
 move the stage, paste the GHL link, add a comment when something happens. This
 is the internal record, not a second CRM.
 

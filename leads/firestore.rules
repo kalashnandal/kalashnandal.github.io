@@ -131,12 +131,55 @@ service cloud.firestore {
     }
 
     /* =====================================================================
-       USERS — roles live here, so only an admin may write them.
-       Nobody can promote themselves.
+       INVITES — keyed by lowercased email, because an invite has to exist
+       before the person has a uid.
+
+       An invitee may read ONLY their own invite, and only to claim it.
+       Writing invites is admin-only, which is what makes the role in them
+       trustworthy.
+    ===================================================================== */
+    function myInvitePath() {
+      return /databases/$(database)/documents/invites/$(request.auth.token.email.lower());
+    }
+
+    match /invites/{email} {
+      allow read: if isAdmin()
+                  || (request.auth != null
+                      && request.auth.token.email != null
+                      && email == request.auth.token.email.lower());
+
+      allow create, delete: if isAdmin();
+
+      // An admin may edit freely. The invitee may only mark their own invite
+      // accepted — they cannot alter the role it grants.
+      allow update: if isAdmin()
+                    || (request.auth != null
+                        && email == request.auth.token.email.lower()
+                        && request.resource.data.role == resource.data.role
+                        && request.resource.data.status == 'accepted'
+                        && request.resource.data.diff(resource.data)
+                             .affectedKeys().hasOnly(['status', 'acceptedAt', 'uid']));
+    }
+
+    /* =====================================================================
+       USERS — roles live here, so this is the file's most sensitive rule.
+       Admins write freely. The ONLY other allowed write is a person creating
+       their own profile from an invite an admin already approved, with the
+       role copied across verbatim. Nobody can promote themselves.
     ===================================================================== */
     match /users/{uid} {
-      allow read:  if isAdmin() || (request.auth != null && request.auth.uid == uid);
-      allow write: if isAdmin();
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+
+      allow create: if isAdmin()
+                    || (request.auth != null
+                        && request.auth.uid == uid
+                        && exists(myInvitePath())
+                        && get(myInvitePath()).data.status in ['pending', 'sent']
+                        && request.resource.data.role == get(myInvitePath()).data.role
+                        && request.resource.data.email == request.auth.token.email.lower()
+                        && request.resource.data.active == true);
+
+      allow update, delete: if isAdmin();
     }
 
     /* Everything else is closed. */

@@ -34,21 +34,23 @@ export const isConfigured = () => !firebaseConfig.apiKey.startsWith("PASTE_");
    Set on each user's document in the `users` collection (see README).
 --------------------------------------------------------------------------- */
 export const ROLES = {
-  admin:  { label: "Admin",            blurb: "Full access. Manages people, clients and sees every export." },
-  ops:    { label: "LinkedIn Team",    blurb: "Creates and edits leads, comments, exports." },
-  sales:  { label: "Sales Partner",    blurb: "Sees leads shared with sales. Updates stage, comments, exports." },
-  client: { label: "Client",           blurb: "Read-only, and only the leads for their own client account." },
+  admin:  { label: "Admin",         blurb: "Full access. Manages people, clients and sees every export." },
+  ops:    { label: "LinkedIn Team", blurb: "Creates and edits leads, comments, exports." },
+  sales:  { label: "Summit Sales",  blurb: "Sees leads shared with Summit. Updates stage, comments, exports." },
+  client: { label: "Client",        blurb: "Read-only, and only the leads for their own client account." },
 };
 
 /* ---------------------------------------------------------------------------
    3. STREAMS — the two spreadsheets this dashboard replaces
 --------------------------------------------------------------------------- */
+/* The `sales_partner` key is deliberately unchanged — it is written into every
+   existing lead and into firestore.rules. Only the labels say "Summit Sales". */
 export const STREAMS = {
   sales_partner: {
-    label: "Sales Partner (US)",
-    short: "Sales Partner",
-    blurb: "Leads our LinkedIn team hands to the US sales partner. These are the ones that used to get lost in WhatsApp.",
-    handoffLabel: "Shared with sales on",
+    label: "Summit Sales",
+    short: "Summit",
+    blurb: "Leads our LinkedIn team hands to Summit Sales in the US. These are the ones that used to get lost in WhatsApp.",
+    handoffLabel: "Shared with Summit on",
   },
   client: {
     label: "Client Delivery",
@@ -63,19 +65,26 @@ export const STREAMS = {
    Ordered. `funnel: true` means the stage counts as a step in the funnel chart
    (won/lost/nurture are outcomes, not steps).
 
-   `tone` drives the status pill. Only won / lost / at-risk get a semantic
-   colour; every pill also carries its text label, so colour is never the only
-   signal.
+   COLOUR — each stage owns exactly one `ink`, used for its pill text, its dot,
+   its row stripe and its funnel bar, over a matching `tint`. The five pipeline
+   stages walk an ordinal ramp from cool grey into deepening gold, so a lead
+   getting further along *looks* further along at a glance — that is the whole
+   point on a review call. Won and Lost break out of the ramp into reserved
+   semantic green and red, because they are outcomes rather than progress, and
+   Nurture sits outside it entirely as an outline.
+
+   Every pill carries its text label too, so colour is never the only signal.
+   Text contrast on tint was checked: all pass 4.5:1 or better.
 --------------------------------------------------------------------------- */
 export const STAGES = [
-  { key: "new",       label: "New Lead",         tone: "neutral", funnel: true,  blurb: "Logged by the LinkedIn team. Not handed over yet." },
-  { key: "shared",    label: "Shared",           tone: "neutral", funnel: true,  blurb: "Handed to the sales partner / delivered to the client.", marksHandoff: true },
-  { key: "contacted", label: "Contacted",        tone: "neutral", funnel: true,  blurb: "Sales has made first contact." },
-  { key: "meeting",   label: "Meeting Booked",   tone: "accent",  funnel: true,  blurb: "A call is on the calendar." },
-  { key: "proposal",  label: "Proposal Sent",    tone: "accent",  funnel: true,  blurb: "Commercials are out." },
-  { key: "won",       label: "Won",              tone: "good",    funnel: false, blurb: "Closed. Revenue booked." },
-  { key: "lost",      label: "Lost",             tone: "bad",     funnel: false, blurb: "Dead. Reason required." },
-  { key: "nurture",   label: "Nurture / Later",  tone: "neutral", funnel: false, blurb: "Real, but not now. Revisit later." },
+  { key: "new",       label: "New Lead",        funnel: true,  ink: "#52525b", tint: "#f4f4f5", line: "#e4e4e7", blurb: "Logged by the LinkedIn team. Not handed over yet." },
+  { key: "shared",    label: "Shared",          funnel: true,  ink: "#7a5f14", tint: "#fdf9ec", line: "#f0e4c0", blurb: "Handed to Summit Sales / delivered to the client.", marksHandoff: true },
+  { key: "contacted", label: "Contacted",       funnel: true,  ink: "#6f5610", tint: "#fbf6e6", line: "#ecdfb4", blurb: "Summit has made first contact." },
+  { key: "meeting",   label: "Meeting Booked",  funnel: true,  ink: "#5e480d", tint: "#f8f1dd", line: "#e5d5a3", blurb: "A call is on the calendar." },
+  { key: "proposal",  label: "Proposal Sent",   funnel: true,  ink: "#54410c", tint: "#f2e9d2", line: "#dcc98f", blurb: "Commercials are out." },
+  { key: "won",       label: "Won",             funnel: false, ink: "#14663c", tint: "#e8f4ee", line: "#bcdfcc", blurb: "Closed. Revenue booked." },
+  { key: "lost",      label: "Lost",            funnel: false, ink: "#8f1e18", tint: "#fbecea", line: "#f0c9c5", blurb: "Dead. Reason required." },
+  { key: "nurture",   label: "Nurture / Later", funnel: false, ink: "#6b6b73", tint: "#ffffff", line: "#d4d4d8", blurb: "Real, but not now. Revisit later.", outline: true },
 ];
 
 export const stage = (key) => STAGES.find((s) => s.key === key) || STAGES[0];
@@ -127,7 +136,7 @@ export const LEAD_FIELDS = [
   /* --- Handover & deal -------------------------------------------------- */
   { key: "sharedOn",      label: "Shared On",         type: "date",     group: "Handover", table: true, width: 14 },
   { key: "salesOwner",    label: "Sales Owner",       type: "text",     group: "Handover", table: true, width: 20,
-    placeholder: "Who at the sales partner owns this" },
+    placeholder: "Who at Summit owns this" },
   { key: "ghlUrl",        label: "GHL Record",        type: "url",      group: "Handover", width: 36,
     placeholder: "Paste the GHL opportunity link" },
   { key: "dealValue",     label: "Deal Value (USD)",  type: "number",   group: "Handover", width: 16 },
@@ -140,15 +149,15 @@ export const FIELD_GROUPS = ["Person", "Company", "Source", "Handover"];
 export const field = (key) => LEAD_FIELDS.find((f) => f.key === key);
 
 /* ---------------------------------------------------------------------------
-   6. CHART COLOURS
-   The dashboard is monochrome + gold, so every chart is single-series and
-   magnitude is carried by bar length, not hue. These values were checked with
-   the palette validator against a white surface.
+   6. CHART COLOUR
+   Counts-by-person, by-client and by-week are single-series charts: bar length
+   carries the magnitude, so they need one hue and no legend. Mirrored in
+   style.css as --viz; checked at 3.6:1 against a white surface.
+
+   The pipeline funnel is the exception — it is ordinal, so each bar takes its
+   own stage's `ink` from STAGES above rather than a colour from here.
 --------------------------------------------------------------------------- */
-export const VIZ = {
-  mark:     "#a8801a",  // single-series bar fill — 3.6:1 on white
-  ordinal:  ["#d4b455", "#c9a227", "#b8901f", "#a8801a", "#9a7415"], // funnel steps, light -> dark
-};
+export const VIZ = { mark: "#a8801a" };
 
 /* Where the weekly review starts. The team reviews on Tuesday and Thursday, so
    "since the last review" means since the most recent Tue or Thu that passed. */

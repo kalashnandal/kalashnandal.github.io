@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Internal LinkedIn lead tracker — leads shared with the US sales partner and leads delivered to clients, with comments, activity history and tracked Excel exports.">
+<meta name="description" content="Internal LinkedIn lead tracker — leads shared with Summit Sales and leads delivered to clients, with comments, activity history and tracked Excel exports.">
 <meta name="theme-color" content="#101012">
 <title>LinkedIn Leads · Internal Dashboard</title>
 <link rel="icon" href="../favicon.png">
@@ -72,7 +72,7 @@
 
     <nav class="tabs" id="tabs">
       <button class="tab on" data-tab="review">Review</button>
-      <button class="tab" data-tab="sales_partner">Sales Partner <span class="cnt" id="cntSales">0</span></button>
+      <button class="tab" data-tab="sales_partner">Summit Sales <span class="cnt" id="cntSales">0</span></button>
       <button class="tab" data-tab="client">Clients <span class="cnt" id="cntClient">0</span></button>
       <button class="tab" data-tab="activity">Activity</button>
       <button class="tab" data-tab="exports">Export History</button>
@@ -135,8 +135,8 @@
     <!-- ---------- LEAD STREAMS (one panel, reused) ---------- -->
     <section class="panel" data-panel="sales_partner">
       <div class="sec-head">
-        <h2 class="serif">Sales Partner (US)</h2>
-        <span class="hint">Leads handed to the US sales partner. Tracked here; worked in GHL.</span>
+        <h2 class="serif">Summit Sales</h2>
+        <span class="hint">Leads handed to Summit Sales in the US. Tracked here; worked in GHL.</span>
       </div>
       <div id="toolbar_sales_partner"></div>
       <div id="table_sales_partner"></div>
@@ -192,15 +192,43 @@
         <div class="card pad">
           <div class="sec-head" style="margin-bottom:6px">
             <h2 style="font-size:15px">People</h2>
-            <span class="hint">Roles come from the <code>users</code> collection</span>
+            <span class="hint">Everyone with access</span>
           </div>
           <div class="list" id="userList"></div>
-          <p class="muted" style="font-size:12px; margin-top:14px; line-height:1.6">
-            Logins are created in the Firebase console (Authentication → Users), then a matching
-            document is added to <code>users/{uid}</code> with a <code>role</code>.
-            Full steps are in <code>leads/README.md</code>.
-          </p>
         </div>
+      </div>
+
+      <div class="card pad" style="margin-top:14px">
+        <div class="sec-head" style="margin-bottom:6px">
+          <h2 style="font-size:15px">Invite someone</h2>
+          <span class="hint">They get an email link, pick their own password, and land with the role you choose here.</span>
+        </div>
+
+        <div class="frm" style="margin-bottom:14px">
+          <div class="fld">
+            <label for="invName">Name</label>
+            <input class="inp" id="invName" placeholder="Priya Sharma">
+          </div>
+          <div class="fld">
+            <label for="invEmail">Work email</label>
+            <input class="inp" type="email" id="invEmail" placeholder="priya@company.com">
+          </div>
+          <div class="fld">
+            <label for="invRole">Role</label>
+            <select class="inp" id="invRole"></select>
+          </div>
+          <div class="fld hide" id="invClientWrap">
+            <label for="invClients">Which clients</label>
+            <select class="inp" id="invClients" multiple size="3"></select>
+          </div>
+          <div class="fld wide">
+            <p class="muted" id="invRoleBlurb" style="font-size:12px; font-weight:600"></p>
+          </div>
+        </div>
+
+        <button class="btn btn-sm btn-gold" id="invSend">Send invite</button>
+
+        <div id="invList" style="margin-top:18px"></div>
       </div>
     </section>
 

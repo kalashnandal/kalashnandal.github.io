@@ -97,9 +97,16 @@ async function firebaseStore() {
         // document means the login exists but access hasn't been granted.
         try {
           const snap = await getDoc(doc(D, "users", user.uid));
-          profile = snap.exists()
-            ? { uid: user.uid, email: user.email, ...snap.data() }
-            : { uid: user.uid, email: user.email, name: user.email, role: null, pending: true };
+          if (snap.exists()) {
+            profile = { uid: user.uid, email: user.email, ...snap.data() };
+          } else {
+            // No profile yet — this may be an invited person signing in for the
+            // first time. Turn their pending invite into a real profile.
+            const claimed = await store.claimInvite(user).catch(() => null);
+            profile = claimed
+              ? { uid: user.uid, email: user.email, ...claimed }
+              : { uid: user.uid, email: user.email, name: user.email, role: null, pending: true };
+          }
         } catch {
           profile = { uid: user.uid, email: user.email, name: user.email, role: null, pending: true };
         }
@@ -187,6 +194,71 @@ async function firebaseStore() {
     /* ---- people -------------------------------------------------------- */
     watchUsers: (cb) => live(query(collection(D, "users"), orderBy("name")), cb),
     saveUser: (uid, data) => setDoc(doc(D, "users", uid), data, { merge: true }),
+
+    /* ---- invites -------------------------------------------------------
+       An invite is keyed by the person's email, so it can be looked up
+       before they have a uid. The admin decides the role here; when the
+       invitee signs in, their users/{uid} document is created from this
+       record, and firestore.rules enforces that the role they end up with is
+       exactly the one the admin wrote. Nobody can invite themselves upward.
+    --------------------------------------------------------------------- */
+    watchInvites: (cb) => live(query(collection(D, "invites"), orderBy("createdAt", "desc")), cb),
+
+    createInvite(email, data) {
+      const key = email.trim().toLowerCase();
+      return setDoc(doc(D, "invites", key), {
+        ...data,
+        email: key,
+        status: "pending",
+        createdAt: serverTimestamp(),
+        invitedBy: profile.uid,
+        invitedByName: profile.name || profile.email,
+      });
+    },
+
+    revokeInvite: (email) => deleteDoc(doc(D, "invites", email.trim().toLowerCase())),
+
+    /* Emails a passwordless sign-in link. Requires "Email link (passwordless
+       sign-in)" to be enabled in Firebase console -> Authentication. */
+    async sendInviteLink(email) {
+      const key = email.trim().toLowerCase();
+      await auth.sendSignInLinkToEmail(A, key, {
+        url: location.href.split("?")[0].split("#")[0],
+        handleCodeInApp: true,
+      });
+      await updateDoc(doc(D, "invites", key), { status: "sent", sentAt: serverTimestamp() });
+      // Lets the invitee's browser skip re-typing their address on return.
+      try { localStorage.setItem("leads:inviteEmail", key); } catch {}
+    },
+
+    /* True when the current URL is a sign-in link the user just clicked. */
+    isInviteLink: () => auth.isSignInWithEmailLink(A, location.href),
+
+    signInWithLink(email) {
+      return auth.signInWithEmailLink(A, email.trim().toLowerCase(), location.href);
+    },
+
+    /* Called after sign-in when the user has no users/{uid} document yet.
+       Turns a pending invite into a real profile. */
+    async claimInvite(user) {
+      const key = (user.email || "").toLowerCase();
+      if (!key) return null;
+      const snap = await getDoc(doc(D, "invites", key));
+      if (!snap.exists()) return null;
+      const inv = snap.data();
+      if (inv.status === "revoked") return null;
+
+      const profileDoc = {
+        name: inv.name || user.email,
+        email: key,
+        role: inv.role,
+        active: true,
+        ...(inv.role === "client" ? { clientAccess: inv.clientAccess || [] } : {}),
+      };
+      await setDoc(doc(D, "users", user.uid), profileDoc);
+      await updateDoc(doc(D, "invites", key), { status: "accepted", acceptedAt: serverTimestamp(), uid: user.uid });
+      return profileDoc;
+    },
 
     /* ---- export history ------------------------------------------------ */
     logExport(rec) {
@@ -389,6 +461,41 @@ function demoStore() {
       else db.users.push({ id: id || uid(), ...data });
       write(db);
     },
+
+    /* Invites — same shape as Firebase, minus the actual email. */
+    watchInvites: (cb) =>
+      watch((db) => [...(db.invites || [])].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")), cb),
+
+    async createInvite(email, data) {
+      const db = read();
+      db.invites = db.invites || [];
+      const key = email.trim().toLowerCase();
+      const rec = {
+        id: key, email: key, ...data, status: "pending",
+        createdAt: now(), invitedBy: profile.uid, invitedByName: profile.name,
+      };
+      const i = db.invites.findIndex((v) => v.id === key);
+      if (i >= 0) db.invites[i] = rec; else db.invites.push(rec);
+      write(db);
+    },
+
+    async revokeInvite(email) {
+      const db = read();
+      db.invites = (db.invites || []).filter((v) => v.id !== email.trim().toLowerCase());
+      write(db);
+    },
+
+    async sendInviteLink(email) {
+      const db = read();
+      const key = email.trim().toLowerCase();
+      const i = (db.invites || []).findIndex((v) => v.id === key);
+      if (i >= 0) { db.invites[i].status = "sent"; db.invites[i].sentAt = now(); }
+      write(db);
+    },
+
+    isInviteLink: () => false,
+    signInWithLink: async () => profile,
+    claimInvite: async () => null,
 
     async logExport(rec) {
       const db = read();
