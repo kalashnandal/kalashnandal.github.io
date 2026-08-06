@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Internal LinkedIn lead tracker — leads shared with Summit Sales and leads delivered to clients, with comments, activity history and tracked Excel exports.">
-<meta name="theme-color" content="#181d33">
+<meta name="theme-color" content="#ffffff">
 <title>LinkedIn Leads · Internal Dashboard</title>
 <link rel="icon" href="../favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,9 +18,9 @@
 <!-- ====================== LOGIN ====================== -->
 <section id="login" class="hide">
   <div class="login-card">
-    <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="5.2" width="18" height="3.4" rx="1.7" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1.7" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1.7" fill="currentColor" opacity=".46"/></svg></span>
-    <h1 class="serif">LinkedIn Leads</h1>
-    <p class="tag">Internal lead tracker for the operations and sales teams.</p>
+    <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="5.2" width="18" height="3.4" rx="1" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1" fill="currentColor" opacity=".46"/></svg></span>
+    <h1>Sign in</h1>
+    <p class="tag">LinkedIn Leads — internal tracker for operations and sales.</p>
 
     <div id="loginErr" class="login-err hide"></div>
 
@@ -33,11 +33,11 @@
         <label for="liPass">Password</label>
         <input class="inp" type="password" id="liPass" required autocomplete="current-password" placeholder="••••••••">
       </div>
-      <button class="btn btn-dark" type="submit" id="liBtn">Sign in</button>
+      <button class="btn btn-primary" type="submit" id="liBtn">Sign in</button>
     </form>
 
     <p class="login-foot">
-      No account? Ask an admin to create one.<br>
+      No account? Ask an admin to invite you.<br>
       <button class="link-btn" id="liForgot" type="button">Forgot your password?</button>
     </p>
   </div>
@@ -45,215 +45,221 @@
 
 <!-- ====================== APP ====================== -->
 <div id="app" class="hide">
+  <div class="shell">
 
-  <div id="demobar" class="hide">
-    Demo mode — sample data in this browser only. Fill in <code>leads/config.js</code> with your Firebase keys to go live.
-  </div>
-
-  <header id="topbar">
-    <div class="tb-row">
-      <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="5.2" width="18" height="3.4" rx="1.7" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1.7" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1.7" fill="currentColor" opacity=".46"/></svg></span>
-      <div>
-        <div class="tb-title">LinkedIn Leads</div>
-        <div class="tb-sub">Operations → Sales handover tracker</div>
+    <!-- ---------- SIDEBAR ---------- -->
+    <aside class="side">
+      <div class="side-brand">
+        <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17"><rect x="3" y="5.2" width="18" height="3.4" rx="1" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1" fill="currentColor" opacity=".46"/></svg></span>
+        <div>
+          <div class="side-title">LinkedIn Leads</div>
+          <div class="side-sub">Ops → Sales</div>
+        </div>
       </div>
-      <div class="tb-right">
-        <div class="whoami">
+
+      <nav class="nav" id="tabs">
+        <button class="tab on" data-tab="review">Review</button>
+        <div class="nav-label">Leads</div>
+        <button class="tab" data-tab="sales_partner">Summit Sales <span class="cnt" id="cntSales">0</span></button>
+        <button class="tab" data-tab="client">Clients <span class="cnt" id="cntClient">0</span></button>
+        <div class="nav-label">Record</div>
+        <button class="tab" data-tab="activity">Activity</button>
+        <button class="tab" data-tab="exports">Exports</button>
+        <button class="tab" data-tab="admin" id="tabAdmin">Admin</button>
+      </nav>
+
+      <div class="side-user">
+        <div class="avatar" id="meAvatar">?</div>
+        <div class="grow">
           <b id="meName">—</b>
           <span id="meRole">—</span>
         </div>
-        <div class="avatar" id="meAvatar">?</div>
-        <button class="tb-out" id="signOut">Sign out</button>
+        <button class="icon-btn" id="signOut" title="Sign out" aria-label="Sign out">⏻</button>
       </div>
-    </div>
-  </header>
+    </aside>
 
-  <main class="wrap noselect">
-
-    <nav class="tabs" id="tabs">
-      <button class="tab on" data-tab="review">Review</button>
-      <button class="tab" data-tab="sales_partner">Summit Sales <span class="cnt" id="cntSales">0</span></button>
-      <button class="tab" data-tab="client">Clients <span class="cnt" id="cntClient">0</span></button>
-      <button class="tab" data-tab="activity">Activity</button>
-      <button class="tab" data-tab="exports">Export History</button>
-      <button class="tab" data-tab="admin" id="tabAdmin">Admin</button>
-    </nav>
-
-    <!-- ---------- REVIEW (the Tue/Thu call view) ---------- -->
-    <section class="panel on" data-panel="review">
-
-      <!-- The agenda for the call, in the order it gets discussed:
-           what moved → what's stuck → where everything sits → who did what. -->
-
-      <div class="hero">
-        <div class="hero-top">
-          <div>
-            <div class="hero-eyebrow" id="reviewHint">Since the last review call</div>
-            <h2 class="hero-line" id="heroLine">Loading…</h2>
-          </div>
-          <div class="hero-figs" id="heroFigs"></div>
-        </div>
+    <!-- ---------- MAIN ---------- -->
+    <div class="main">
+      <div id="demobar" class="hide">
+        Demo data — stored in this browser only. Add your Firebase keys in <code>config.js</code> to go live.
       </div>
 
-      <div class="card attn-card" id="attnCard">
-        <div class="attn-head">
-          <div class="attn-icon" id="attnIcon">!</div>
-          <div style="min-width:0">
-            <h2 class="attn-title" id="attnTitle">Needs attention</h2>
-            <p class="attn-sub" id="attnHint">Open leads nobody has touched.</p>
-          </div>
-        </div>
-        <div id="attnList"></div>
-      </div>
+      <main class="content noselect">
 
-      <!-- The handover itself — the thing this dashboard exists to fix. -->
-      <div class="card pad handover" style="margin-bottom:14px">
-        <div class="sec-head" style="margin-bottom:14px">
-          <h2 style="font-size:15px">The handover</h2>
-          <span class="hint">How fast a lead gets from the LinkedIn team to Summit, and what's waiting.</span>
-        </div>
-        <div class="hand-grid" id="handoverCard"></div>
-      </div>
-
-      <div class="card pad" style="margin-bottom:14px">
-        <div class="sec-head" style="margin-bottom:14px">
-          <h2 style="font-size:15px">Pipeline</h2>
-          <span class="hint">Every open lead, left to right. The number under each arrow is how many made it through.</span>
-        </div>
-        <div class="pipe" id="pipeChart"></div>
-        <div class="outcomes" id="outcomeChart"></div>
-      </div>
-
-      <div class="chart-grid">
-        <div class="card pad">
-          <div class="sec-head" style="margin-bottom:6px">
-            <h2 style="font-size:15px">Who is sourcing the leads</h2>
-            <span class="hint" id="byWhoHint">All time</span>
-          </div>
-          <div class="bars" id="byWhoChart"></div>
-        </div>
-
-        <div class="card pad">
-          <div class="sec-head" style="margin-bottom:6px">
-            <h2 style="font-size:15px">Leads by client</h2>
-            <span class="hint">Client delivery stream</span>
-          </div>
-          <div class="bars" id="byClientChart"></div>
-        </div>
-
-        <div class="card pad">
-          <div class="sec-head" style="margin-bottom:6px">
-            <h2 style="font-size:15px">Leads created per week</h2>
-            <span class="hint">Last 8 weeks</span>
-          </div>
-          <div class="bars" id="byWeekChart"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- LEAD STREAMS (one panel, reused) ---------- -->
-    <section class="panel" data-panel="sales_partner">
-      <div class="sec-head">
-        <h2 class="serif">Summit Sales</h2>
-        <span class="hint">Leads handed to Summit Sales in the US. Tracked here; worked in GHL.</span>
-      </div>
-      <div id="toolbar_sales_partner"></div>
-      <div id="table_sales_partner"></div>
-    </section>
-
-    <section class="panel" data-panel="client">
-      <div class="sec-head">
-        <h2 class="serif">Client Delivery</h2>
-        <span class="hint">Leads generated for the clients whose LinkedIn we run.</span>
-      </div>
-      <div id="toolbar_client"></div>
-      <div id="table_client"></div>
-    </section>
-
-    <!-- ---------- ACTIVITY ---------- -->
-    <section class="panel" data-panel="activity">
-      <div class="sec-head">
-        <h2 class="serif">Activity</h2>
-        <span class="hint">Every stage change and comment across all leads, newest first.</span>
-      </div>
-      <div class="card pad"><div class="feed" id="globalFeed"></div></div>
-    </section>
-
-    <!-- ---------- EXPORT HISTORY ---------- -->
-    <section class="panel" data-panel="exports">
-      <div class="sec-head">
-        <h2 class="serif">Export History</h2>
-        <span class="hint" id="expHint">Every download is recorded — who, when, which leads.</span>
-      </div>
-      <div class="card pad"><div id="expList"></div></div>
-    </section>
-
-    <!-- ---------- ADMIN ---------- -->
-    <section class="panel" data-panel="admin">
-      <div class="sec-head"><h2 class="serif">Admin</h2></div>
-
-      <div class="chart-grid">
-        <div class="card pad">
-          <div class="sec-head" style="margin-bottom:6px">
-            <h2 style="font-size:15px">Clients</h2>
-            <span class="hint">Accounts we run LinkedIn for</span>
-          </div>
-          <div class="list" id="clientList"></div>
-          <div class="cbox" style="margin-top:14px">
-            <div class="fld" style="flex:1">
-              <label for="newClient">Add a client</label>
-              <input class="inp" id="newClient" placeholder="Client name">
+        <!-- ---------- REVIEW ---------- -->
+        <section class="panel on" data-panel="review">
+          <header class="page-head">
+            <div>
+              <h1>Review</h1>
+              <p class="page-sub" id="reviewHint">Since the last review call</p>
             </div>
-            <button class="btn btn-dark btn-sm" id="addClient">Add</button>
-          </div>
-        </div>
+            <p class="page-note" id="reviewLine"></p>
+          </header>
 
-        <div class="card pad">
-          <div class="sec-head" style="margin-bottom:6px">
-            <h2 style="font-size:15px">People</h2>
-            <span class="hint">Everyone with access</span>
-          </div>
-          <div class="list" id="userList"></div>
-        </div>
-      </div>
+          <div class="stats" id="statTiles"></div>
 
-      <div class="card pad" style="margin-top:14px">
-        <div class="sec-head" style="margin-bottom:6px">
-          <h2 style="font-size:15px">Invite someone</h2>
-          <span class="hint">They get an email link, pick their own password, and land with the role you choose here.</span>
-        </div>
+          <section class="card" id="attnCard">
+            <div class="card-head">
+              <h2 id="attnTitle">Needs attention</h2>
+              <span class="hint" id="attnHint">Open leads nobody has touched.</span>
+              <span class="chip" id="attnIcon"></span>
+            </div>
+            <div id="attnList"></div>
+          </section>
 
-        <div class="frm" style="margin-bottom:14px">
-          <div class="fld">
-            <label for="invName">Name</label>
-            <input class="inp" id="invName" placeholder="Priya Sharma">
-          </div>
-          <div class="fld">
-            <label for="invEmail">Work email</label>
-            <input class="inp" type="email" id="invEmail" placeholder="priya@company.com">
-          </div>
-          <div class="fld">
-            <label for="invRole">Role</label>
-            <select class="inp" id="invRole"></select>
-          </div>
-          <div class="fld hide" id="invClientWrap">
-            <label for="invClients">Which clients</label>
-            <select class="inp" id="invClients" multiple size="3"></select>
-          </div>
-          <div class="fld wide">
-            <p class="muted" id="invRoleBlurb" style="font-size:12px; font-weight:600"></p>
-          </div>
-        </div>
+          <section class="card">
+            <div class="card-head">
+              <h2>Pipeline</h2>
+              <span class="hint">Open leads by stage. The figure between two stages is how many got past the first.</span>
+            </div>
+            <div class="card-body">
+              <div class="pipe" id="pipeChart"></div>
+              <div class="outcomes" id="outcomeChart"></div>
+            </div>
+          </section>
 
-        <button class="btn btn-sm btn-primary" id="invSend">Send invite</button>
+          <div class="grid-3">
+            <section class="card">
+              <div class="card-head">
+                <h2>Sourced by</h2>
+                <span class="hint" id="byWhoHint">All time</span>
+              </div>
+              <div class="card-body"><div class="bars" id="byWhoChart"></div></div>
+            </section>
 
-        <div id="invList" style="margin-top:18px"></div>
-      </div>
-    </section>
+            <section class="card">
+              <div class="card-head">
+                <h2>By client</h2>
+                <span class="hint">Client delivery</span>
+              </div>
+              <div class="card-body"><div class="bars" id="byClientChart"></div></div>
+            </section>
 
-  </main>
+            <section class="card">
+              <div class="card-head">
+                <h2>Created per week</h2>
+                <span class="hint">Last 8 weeks</span>
+              </div>
+              <div class="card-body"><div class="bars" id="byWeekChart"></div></div>
+            </section>
+          </div>
+        </section>
 
-  <div style="height:60px"></div>
+        <!-- ---------- LEAD STREAMS ---------- -->
+        <section class="panel" data-panel="sales_partner">
+          <header class="page-head">
+            <div>
+              <h1>Summit Sales</h1>
+              <p class="page-sub">Leads handed to Summit in the US. Tracked here, worked in GHL.</p>
+            </div>
+          </header>
+          <div id="toolbar_sales_partner"></div>
+          <div id="table_sales_partner"></div>
+        </section>
+
+        <section class="panel" data-panel="client">
+          <header class="page-head">
+            <div>
+              <h1>Client Delivery</h1>
+              <p class="page-sub">Leads generated for the clients whose LinkedIn we run.</p>
+            </div>
+          </header>
+          <div id="toolbar_client"></div>
+          <div id="table_client"></div>
+        </section>
+
+        <!-- ---------- ACTIVITY ---------- -->
+        <section class="panel" data-panel="activity">
+          <header class="page-head">
+            <div>
+              <h1>Activity</h1>
+              <p class="page-sub">Every stage change and comment, newest first.</p>
+            </div>
+          </header>
+          <section class="card"><div class="card-body"><div class="feed" id="globalFeed"></div></div></section>
+        </section>
+
+        <!-- ---------- EXPORTS ---------- -->
+        <section class="panel" data-panel="exports">
+          <header class="page-head">
+            <div>
+              <h1>Exports</h1>
+              <p class="page-sub" id="expHint">Every download is recorded — who, when, which leads.</p>
+            </div>
+          </header>
+          <section class="card"><div class="card-body"><div id="expList"></div></div></section>
+        </section>
+
+        <!-- ---------- ADMIN ---------- -->
+        <section class="panel" data-panel="admin">
+          <header class="page-head">
+            <div>
+              <h1>Admin</h1>
+              <p class="page-sub">People, roles and client accounts.</p>
+            </div>
+          </header>
+
+          <div class="grid-2">
+            <section class="card">
+              <div class="card-head">
+                <h2>Clients</h2>
+                <span class="hint">Accounts we run LinkedIn for</span>
+              </div>
+              <div class="card-body">
+                <div class="list" id="clientList"></div>
+                <div class="row-form">
+                  <div class="fld grow">
+                    <label for="newClient">Add a client</label>
+                    <input class="inp" id="newClient" placeholder="Client name">
+                  </div>
+                  <button class="btn btn-ghost" id="addClient">Add</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <h2>People</h2>
+                <span class="hint">Everyone with access</span>
+              </div>
+              <div class="card-body"><div class="list" id="userList"></div></div>
+            </section>
+          </div>
+
+          <section class="card">
+            <div class="card-head">
+              <h2>Invite someone</h2>
+              <span class="hint">They get an email link and land with the role you pick.</span>
+            </div>
+            <div class="card-body">
+              <div class="frm">
+                <div class="fld">
+                  <label for="invName">Name</label>
+                  <input class="inp" id="invName" placeholder="Priya Sharma">
+                </div>
+                <div class="fld">
+                  <label for="invEmail">Work email</label>
+                  <input class="inp" type="email" id="invEmail" placeholder="priya@company.com">
+                </div>
+                <div class="fld">
+                  <label for="invRole">Role</label>
+                  <select class="inp" id="invRole"></select>
+                </div>
+                <div class="fld hide" id="invClientWrap">
+                  <label for="invClients">Which clients</label>
+                  <select class="inp" id="invClients" multiple size="3"></select>
+                </div>
+              </div>
+              <p class="muted mt-8" id="invRoleBlurb"></p>
+              <div class="mt-12"><button class="btn btn-primary" id="invSend">Send invite</button></div>
+              <div id="invList" class="mt-16"></div>
+            </div>
+          </section>
+        </section>
+
+      </main>
+    </div>
+  </div>
 </div>
 
 <!-- ====================== DRAWER ====================== -->
@@ -279,7 +285,7 @@
 <script type="text/javascript">
   (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://cal.id/embed-link/embed.js", "init");
   Cal("init", "default", {origin:"https://cal.id"});
-  Cal.ns["default"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#3b45a4"},"dark":{"cal-brand":"#fafafa"}},"hideEventTypeDetails":false,"layout":"month_view"});
+  Cal.ns["default"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#3d52d5"},"dark":{"cal-brand":"#fafafa"}},"hideEventTypeDetails":false,"layout":"month_view"});
 </script>
 
 <script type="module" src="app.js"></script>

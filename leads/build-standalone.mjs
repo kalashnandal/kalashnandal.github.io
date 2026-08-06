@@ -33,24 +33,17 @@ for (const [label, re] of [
 /* ---- CSS: swap the webfont stacks for chosen system equivalents ---------- */
 let css = read("style.css");
 
-css = css.replace(
-  /--sans:[^;]+;/,
-  `--sans:system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;`
-).replace(
-  /--serif:[^;]+;/,
-  // Georgia stands in for Fraunces: warm, high-contrast, strong old-style
-  // numerals — which is exactly the job the display face does in the tiles.
-  `--serif:Georgia, 'Iowan Old Style', 'Times New Roman', serif;`
-);
+/* The host blocks font CDNs, so Inter / Inter Tight would fail silently.
+   Substitute the platform UI stack deliberately: system-ui is a grotesk in the
+   same family of shapes as Inter on every OS this will be read on, so the
+   layout metrics and the tight numeric columns hold up. */
+const UI_STACK = `system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`;
+css = css.replace(/--sans:[^;]+;/, `--sans:${UI_STACK};`)
+         .replace(/--disp:[^;]+;/, `--disp:${UI_STACK};`);
 
-/* Georgia sets larger on the body than Fraunces at the same px, so ease the
-   display sizes back a touch to keep the original optical weight. */
-css = css.replace(/(\.stat \.v\{font-family:var\(--serif\); font-size:)32px/, "$130px")
-         .replace(/(\.login-card h1\{[^}]*font-size:)26px/, "$124px");
-
-/* Single-theme by choice — mirrors the deployed dashboard, which is light-only
-   to match the other dashboards on the site. Declared so form controls follow. */
-css = css.replace(":root{", ":root{\n  color-scheme:light;");
+/* Inter Tight runs narrower than the fallbacks at the same size; ease the
+   display numerals back so the stat tiles don't crowd their labels. */
+css = css.replace(/(\.stat \.v\{[^}]*font-size:)25px/, "$123px");
 
 /* ---- HTML: take the body content only; the publisher supplies the shell --- */
 const html = read("index.html");

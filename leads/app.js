@@ -328,25 +328,26 @@ function renderReview() {
   $("#reviewHint").textContent =
     `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
 
-  /* ---- hero: the state of play in one sentence, plus the three numbers the
-         call actually opens on ---- */
   const meetings = L.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
   const won = L.filter((l) => l.status === "won").length;
+  const waiting = L.filter((l) => l.status === "shared").length;
 
-  $("#heroLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
+  $("#reviewLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
 
-  /* Labels carry their own timeframe. The eyebrow above says "since the last
-     call", but these figures sit far enough to the right that it doesn't read
-     as applying to them. */
-  $("#heroFigs").innerHTML = [
-    { k: "New since last call", n: newSince.length },
-    { k: "Open pipeline", n: open.length },
-    { k: "In play", n: meetings, cls: meetings ? "is-good" : "" },
-    { k: `Idle ${STALE_DAYS}d+`, n: stale.length, cls: stale.length ? "is-warn" : "" },
-  ].map((f) => `
-    <div class="hfig ${f.cls || ""}">
-      <div class="n">${f.n}</div>
-      <div class="k">${esc(f.k)}</div>
+  /* Every tile label carries its own timeframe — "new" on its own reads as
+     all-time at a glance. */
+  $("#statTiles").innerHTML = [
+    { k: "New since last call", v: newSince.length, d: `${L.length} all time` },
+    { k: "Open pipeline", v: open.length, d: "not won or lost" },
+    { k: "With Summit, untouched", v: waiting, d: "shared, not yet contacted" },
+    { k: "In play", v: meetings, d: "meeting or proposal", cls: meetings ? "good" : "" },
+    { k: "Won", v: won, d: winRateLabel(L), cls: won ? "good" : "" },
+    { k: `Idle ${STALE_DAYS}d+`, v: stale.length, d: "needs chasing", cls: stale.length ? "alert" : "" },
+  ].map((t) => `
+    <div class="stat ${t.cls || ""}">
+      <div class="k" title="${esc(t.k)}">${esc(t.k)}</div>
+      <div class="v">${t.v}</div>
+      <div class="d">${esc(t.d)}</div>
     </div>`).join("");
 
   /* ---- pipeline strip: stages left to right, with the conversion between
@@ -396,8 +397,10 @@ function renderReview() {
   ).slice(0, 12);
 
   const card = $("#attnCard");
-  card.classList.toggle("is-clear", stale.length === 0);
-  $("#attnIcon").textContent = stale.length ? "!" : "✓";
+  
+  const chip = $("#attnIcon");
+  chip.textContent = stale.length ? `${stale.length} to chase` : "All clear";
+  chip.className = `chip ${stale.length ? "warn" : "good"}`;
   $("#attnTitle").textContent = stale.length
     ? `${stale.length} lead${stale.length > 1 ? "s" : ""} going cold`
     : "Nothing is slipping";
@@ -415,14 +418,12 @@ function renderReview() {
           ${pill(l.status)}
           <span class="pill pill-warn"><span class="dot"></span>${daysSince(l.lastActivityAt || l.createdAt)}d idle</span>
         </div>`).join("")}</div>`
-    : "";
+    : `<div class="card-body"><p class="muted">Every open lead has been touched in the last ${STALE_DAYS} days.</p></div>`;
 
   $("#attnList").onclick = (e) => {
     const row = e.target.closest("[data-openlead]");
     if (row) openDrawer(row.dataset.openlead);
   };
-
-  renderHandover(L);
 
   /* ---- created by team member ---- */
   const byWho = tally(L, (l) => l.createdByName || "Unknown");
@@ -451,93 +452,6 @@ function heroSentence(L, created, stale, meetings) {
   if (created) return `<b>${created}</b> new lead${created > 1 ? "s" : ""} logged since the last call.`;
   if (meetings) return `Nothing new since the last call, but <b>${meetings}</b> still in play.`;
   return "Nothing new since the last call.";
-}
-
-/* ---------------------------------------------------------------------------
-   THE HANDOVER
-   The original problem was a lead being dropped in the gap between the
-   LinkedIn team and Summit. These are the three numbers that make that gap
-   visible instead of anecdotal:
-
-     1. how long the team takes to hand a lead over,
-     2. how many are handed over and then sitting untouched,
-     3. how long the worst of those has been waiting.
-
-   Median, not mean — one forgotten lead from six weeks ago shouldn't drag the
-   headline number and make a healthy week look broken.
---------------------------------------------------------------------------- */
-const median = (xs) => {
-  if (!xs.length) return null;
-  const s = [...xs].sort((a, b) => a - b);
-  const m = s.length >> 1;
-  return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
-};
-
-/* Local midnight for a value that may be a full timestamp (createdAt) or a
-   bare date string (sharedOn, which comes from a date input). Comparing the
-   two raw would make a same-day handover look negative — "2026-07-25" parses
-   as UTC midnight, before that morning's createdAt — and silently drop the
-   row from the median. */
-const dayStart = (v) => {
-  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v)) {
-    const [y, m, d] = v.split("-").map(Number);
-    return new Date(y, m - 1, d).getTime();
-  }
-  const d = new Date(v);
-  return isNaN(d) ? NaN : new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-};
-
-function renderHandover(L) {
-  const host = $("#handoverCard");
-  if (!host) return;
-
-  // Days from being logged to being handed over.
-  const lags = L.filter((l) => l.sharedOn && l.createdAt)
-    .map((l) => Math.round((dayStart(l.sharedOn) - dayStart(l.createdAt)) / DAY))
-    .filter((d) => Number.isFinite(d) && d >= 0);
-  const lag = median(lags);
-
-  // Handed over, but nobody at Summit has moved it on yet.
-  const waiting = L.filter((l) => l.status === "shared");
-  const waits = waiting.map((l) => daysSince(l.sharedOn || l.createdAt));
-  const worst = waits.length ? Math.max(...waits) : 0;
-
-  // Still sitting with the LinkedIn team, never handed over.
-  const unshared = L.filter((l) => l.status === "new");
-
-  const cells = [
-    {
-      k: "Median time to hand over",
-      v: lag === null ? "—" : lag === 0 ? "Same day" : `${lag}d`,
-      d: lags.length ? `across ${lags.length} handed-over lead${lags.length > 1 ? "s" : ""}` : "nothing handed over yet",
-      tone: lag !== null && lag <= 1 ? "ok" : "",
-    },
-    {
-      k: "Not handed over yet",
-      v: unshared.length,
-      d: unshared.length ? "still with the LinkedIn team" : "nothing queued up",
-      tone: unshared.length ? "" : "ok",
-    },
-    {
-      k: "With Summit, untouched",
-      v: waiting.length,
-      d: waiting.length ? "shared but not yet contacted" : "Summit has picked everything up",
-      tone: waiting.length ? "warn" : "ok",
-    },
-    {
-      k: "Longest wait",
-      v: worst ? `${worst}d` : "—",
-      d: worst ? "since it was shared" : "nothing waiting",
-      tone: worst >= STALE_DAYS ? "warn" : worst ? "" : "ok",
-    },
-  ];
-
-  host.innerHTML = cells.map((c) => `
-    <div class="hand ${c.tone || ""}">
-      <div class="k">${esc(c.k)}</div>
-      <div class="v num">${esc(String(c.v))}</div>
-      <div class="d">${esc(c.d)}</div>
-    </div>`).join("");
 }
 
 function winRateLabel(L) {
@@ -704,7 +618,7 @@ function renderStream(streamKey) {
       <div class="fld">
         <label>&nbsp;</label>
         <div style="display:flex; gap:8px">
-          <button class="btn btn-sm btn-ghost" id="exp_${streamKey}">⬇ Export to Excel</button>
+          <button class="btn btn-sm btn-ghost" id="exp_${streamKey}">Export to Excel</button>
           ${can.create(S.me.role)
             ? `<button class="btn btn-sm btn-primary" id="add_${streamKey}">+ Add Lead</button>` : ""}
         </div>
@@ -755,9 +669,7 @@ function renderStream(streamKey) {
         </tbody>
       </table>
     </div>
-    <p class="muted" style="font-size:11.5px; margin-top:9px; font-weight:600">
-      ${rows.length} lead${rows.length === 1 ? "" : "s"} shown · click a row to open it
-    </p>`;
+    <p class="tbl-note">${rows.length} lead${rows.length === 1 ? "" : "s"} · click a row to open it</p>`;
 
   host.querySelector("thead").addEventListener("click", (e) => {
     const th = e.target.closest("th");
@@ -926,7 +838,7 @@ function activityHtml(lead) {
   return `
     <div class="feed">${rows.length
       ? rows.map(feedItem).join("")
-      : `<p class="muted" style="font-size:13px; padding:8px 0">No activity yet. Add the first comment below.</p>`}
+      : `<p class="muted" style="padding:6px 0">No activity yet. Add the first comment below.</p>`}
     </div>
     ${can.comment(S.me.role) ? `
     <div class="cbox">
@@ -939,7 +851,7 @@ function activityHtml(lead) {
 }
 
 function feedItem(a, subtitle = "") {
-  const icon = a.type === "comment" ? "💬" : a.type === "stage" ? "→" : "＋";
+  const icon = a.type === "comment" ? "C" : a.type === "stage" ? "→" : "+";
   const cls  = a.type === "comment" ? "comment" : a.type === "stage" ? "stage" : "";
   return `<div class="fe" data-leadid="${esc(a.leadId || "")}">
     <div class="fe-ic ${cls}">${icon}</div>
@@ -997,7 +909,7 @@ function bookButton(lead) {
       data-cal-namespace="${esc(CAL.namespace)}"
       data-cal-config='${esc(cfg)}'
       title="${booked ? "Call booked for " + esc(fmtDate(booked)) + " — book another" : "Open the Summit discovery-call calendar"}">
-      ${booked ? "📅 " + esc(fmtDate(booked)) : "Book discovery call"}</a>`;
+      ${booked ? "Call " + esc(fmtDate(booked)) : "Book discovery call"}</a>`;
 }
 
 /* Cal fires this once a booking completes. Without it a booked call would be
@@ -1315,7 +1227,7 @@ async function exportLeads(streamKey, rows) {
     toast("Export failed — nothing was downloaded. Try again.", "bad");
   } finally {
     btn.disabled = false;
-    btn.textContent = "⬇ Export to Excel";
+    btn.textContent = "Export to Excel";
   }
 }
 
@@ -1331,8 +1243,7 @@ function renderExports() {
   $("#expList").innerHTML = S.exports.length
     ? S.exports.map((e) => `
       <div class="exp-row">
-        <div class="exp-ic">⬇</div>
-        <div style="min-width:0">
+                <div style="min-width:0">
           <div class="exp-t">${esc(e.byName || e.byEmail || "Someone")} exported ${esc(e.scope || "leads")}</div>
           <div class="exp-s">${esc(fmtWhen(e.at))} · ${esc(e.filters || "no filters")}</div>
           <div class="exp-s" style="opacity:.75">${esc(e.filename || "")}</div>
@@ -1352,7 +1263,7 @@ function renderFeed() {
         const tag = l
           ? `<div class="fe-when" style="margin-top:3px; cursor:pointer">
                on <b style="color:var(--ink-2)">${esc(fullName(l))}</b> · ${esc(l.company || "")}</div>`
-          : "";
+          : `<div class="card-body"><p class="muted">Every open lead has been touched in the last ${STALE_DAYS} days.</p></div>`;
         return feedItem(a, tag);
       }).join("")
     : `<p class="muted" style="font-size:13px">Nothing has happened yet.</p>`;
