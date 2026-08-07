@@ -397,9 +397,8 @@ function renderReview() {
 
   const card = $("#attnCard");
   
-  const chip = $("#attnIcon");
-  chip.textContent = stale.length ? `${stale.length} to chase` : "All clear";
-  chip.className = `chip ${stale.length ? "warn" : "good"}`;
+  $("#attnIcon").textContent = stale.length ? "!" : "\u2713";
+  card.classList.toggle("clear", stale.length === 0);
   $("#attnTitle").textContent = stale.length
     ? `${stale.length} lead${stale.length > 1 ? "s" : ""} going cold`
     : "Nothing is slipping";

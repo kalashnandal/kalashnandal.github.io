@@ -139,23 +139,63 @@ input,textarea,select,[contenteditable],.selectable,.selectable *{
 .panel{display:none}
 .panel.on{display:block}
 
-/* ============ STAT TILES ============ */
-.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(152px,1fr)); gap:10px; margin-bottom:14px}
-.stat{
-  background:var(--card); border:1px solid var(--line); border-radius:var(--r-l); padding:12px 14px;
+/* ============ REVIEW HERO ============
+   The one block on the page that carries colour for its own sake. It earns it
+   by being the thing the call opens on: the date, the state of play in a
+   sentence, and the counts. Everything below it stays flat and neutral. */
+.hero{
+  background:linear-gradient(112deg,#141a33 0%,#212a52 48%,#33407b 100%);
+  border-radius:var(--r-l); padding:20px 22px; margin-bottom:14px;
+  color:#fff; position:relative; overflow:hidden;
 }
-.stat .k{
-  font-size:11px; font-weight:550; color:var(--ink-3); letter-spacing:.005em;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+.hero::after{
+  content:''; position:absolute; right:-80px; top:-120px; width:300px; height:300px;
+  border-radius:50%; background:radial-gradient(circle,rgba(126,142,240,.32),transparent 68%);
+  pointer-events:none;
 }
+.hero-eyebrow{
+  font-size:10.5px; font-weight:600; letter-spacing:.11em; text-transform:uppercase;
+  color:#98a5e0; position:relative;
+}
+.hero-line{
+  font-size:22px; font-weight:600; letter-spacing:-.02em; margin-top:7px;
+  max-width:34ch; text-wrap:balance; position:relative; line-height:1.25;
+}
+.hero-line b{color:#b3bdf4; font-weight:600}
+
+/* Plain counts. Same five figures, sitting on the hero instead of in a
+   separate row of white boxes. */
+.hero-figs{
+  display:flex; gap:30px; flex-wrap:wrap; position:relative;
+  margin-top:20px; padding-top:17px; border-top:1px solid rgba(255,255,255,.13);
+}
+.stat{min-width:92px}
+.stat .k{font-size:10.5px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:#98a5e0}
 .stat .v{
-  font-family:var(--disp); font-size:23px; font-weight:600; line-height:1.1;
-  margin-top:6px; letter-spacing:-.025em; font-variant-numeric:tabular-nums;
+  font-family:var(--disp); font-size:27px; font-weight:600; line-height:1.05;
+  margin-top:6px; letter-spacing:-.03em; font-variant-numeric:tabular-nums;
 }
-.stat .d{font-size:11.5px; color:var(--ink-4); margin-top:3px}
-.stat.alert{border-color:var(--warn-bd); background:var(--warn-l)}
-.stat.alert .v{color:var(--warn)} .stat.alert .k,.stat.alert .d{color:#7a4506}
-.stat.good .v{color:var(--good)}
+.stat .d{font-size:11px; color:rgba(255,255,255,.5); margin-top:3px}
+.stat.good .v{color:#7fdcaa}
+.stat.alert .v{color:#f5b46b}
+.stat.alert .k{color:#f5b46b}
+@media(max-width:760px){
+  .hero{padding:17px 16px}
+  .hero-line{font-size:18px}
+  .hero-figs{gap:20px}
+  .stat{min-width:78px}
+  .stat .v{font-size:23px}
+}
+
+/* Needs attention keeps its warning rail — it is the one card that should
+   catch the eye before you have read anything. */
+.card.attn{border-left:3px solid var(--warn)}
+.card.attn.clear{border-left-color:var(--good)}
+.attn-badge{
+  width:20px; height:20px; border-radius:var(--r-s); flex:none; display:grid; place-items:center;
+  background:var(--warn-l); color:var(--warn); font-size:12px; font-weight:700; align-self:center;
+}
+.card.attn.clear .attn-badge{background:var(--good-l); color:var(--good)}
 
 /* ============ CARDS ============ */
 .card{background:var(--card); border:1px solid var(--line); border-radius:var(--r-l); margin-bottom:14px}
@@ -495,21 +535,17 @@ fieldset.grp legend{
 
         <!-- ---------- REVIEW ---------- -->
         <section class="panel on" data-panel="review">
-          <header class="page-head">
-            <div>
-              <h1>Review</h1>
-              <p class="page-sub" id="reviewHint">Since the last review call</p>
-            </div>
-            <p class="page-note" id="reviewLine"></p>
-          </header>
+          <div class="hero">
+            <div class="hero-eyebrow" id="reviewHint">Since the last review call</div>
+            <h1 class="hero-line" id="reviewLine">Loading…</h1>
+            <div class="hero-figs" id="statTiles"></div>
+          </div>
 
-          <div class="stats" id="statTiles"></div>
-
-          <section class="card" id="attnCard">
+          <section class="card attn" id="attnCard">
             <div class="card-head">
+              <span class="attn-badge" id="attnIcon">!</span>
               <h2 id="attnTitle">Needs attention</h2>
               <span class="hint" id="attnHint">Open leads nobody has touched.</span>
-              <span class="chip" id="attnIcon"></span>
             </div>
             <div id="attnList"></div>
           </section>
@@ -2063,9 +2099,8 @@ function renderReview() {
 
   const card = $("#attnCard");
   
-  const chip = $("#attnIcon");
-  chip.textContent = stale.length ? `${stale.length} to chase` : "All clear";
-  chip.className = `chip ${stale.length ? "warn" : "good"}`;
+  $("#attnIcon").textContent = stale.length ? "!" : "\u2713";
+  card.classList.toggle("clear", stale.length === 0);
   $("#attnTitle").textContent = stale.length
     ? `${stale.length} lead${stale.length > 1 ? "s" : ""} going cold`
     : "Nothing is slipping";

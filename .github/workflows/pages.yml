@@ -1,0 +1,54 @@
+# Publishes the site to GitHub Pages using the official Actions.
+#
+# Why this exists: the legacy "deploy from a branch" builder
+# (pages-build-deployment) stopped being assigned a runner — every build job
+# reported runner_id 0 and was cancelled after ~15 minutes. In the same runs,
+# ordinary jobs picked up a runner in seconds, so the runner pool is healthy
+# and it is that one builder that is wedged. This path uses normal runners.
+#
+# ONE-TIME SETUP: Settings → Pages → Build and deployment → Source must be set
+# to "GitHub Actions". Until that is switched over, the deploy step here fails
+# with "Pages site not configured for GitHub Actions" — the workflow is fine,
+# it just isn't the configured publisher yet.
+
+name: Deploy site to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # lets you re-run it by hand from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; queue instead of cancelling, so a push during a
+# deploy still ends up published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      # The whole repo is the site — it is a plain static site with no build
+      # step. .nojekyll means the files are served exactly as committed.
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

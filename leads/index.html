@@ -88,21 +88,17 @@
 
         <!-- ---------- REVIEW ---------- -->
         <section class="panel on" data-panel="review">
-          <header class="page-head">
-            <div>
-              <h1>Review</h1>
-              <p class="page-sub" id="reviewHint">Since the last review call</p>
-            </div>
-            <p class="page-note" id="reviewLine"></p>
-          </header>
+          <div class="hero">
+            <div class="hero-eyebrow" id="reviewHint">Since the last review call</div>
+            <h1 class="hero-line" id="reviewLine">Loading…</h1>
+            <div class="hero-figs" id="statTiles"></div>
+          </div>
 
-          <div class="stats" id="statTiles"></div>
-
-          <section class="card" id="attnCard">
+          <section class="card attn" id="attnCard">
             <div class="card-head">
+              <span class="attn-badge" id="attnIcon">!</span>
               <h2 id="attnTitle">Needs attention</h2>
               <span class="hint" id="attnHint">Open leads nobody has touched.</span>
-              <span class="chip" id="attnIcon"></span>
             </div>
             <div id="attnList"></div>
           </section>
