@@ -124,24 +124,61 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* 2. Lock the app shell to exactly the screen size */
-#llb-root .shell {
-    height: 100vh !important;
-    min-height: 100vh !important;
-    overflow: hidden !important;
+/* ==========================================================================
+   SCROLLBAR & VIEWPORT FIXES (Disables Horizontal Scroll + Fixes Mobile)
+   ========================================================================== */
+html, body, #preview-container, .hl_page-preview--content {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important; 
 }
-/* 3. BRING THE SCROLL BACK ONLY FOR THE DASHBOARD CONTENT */
-#llb-root .main {
-    overflow-y: auto !important;
-    height: 100vh !important;
+
+#llb-root {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
+    position: relative !important;
+    isolation: isolate !important;
+    overflow-x: hidden !important; 
 }
-/* Ensure the app shell doesn't overflow */
-#llb-root .shell {
-    height: 100vh !important;
-    min-height: 100vh !important;
-    overflow: hidden !important;
+
+@media (min-width: 901px) {
+    html, body, #preview-container, .hl_page-preview--content {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow-y: hidden !important;
+    }
+    #llb-root .shell {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        overflow: hidden !important; 
+    }
+    #llb-root .main {
+        overflow-y: auto !important;
+        height: 100vh !important;
+    }
 }
-/* Force GHL's parent wrappers to remove their default white space */
+
+@media (max-width: 900px) {
+    html, body, #preview-container, .hl_page-preview--content {
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+    }
+    #llb-root .shell {
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    #llb-root .main {
+        height: auto !important;
+        overflow-y: visible !important;
+    }
+}
+
 .hl_page-preview--content .c-section,
 .hl_page-preview--content .c-row,
 .hl_page-preview--content .c-column {
@@ -150,28 +187,12 @@
     margin-top: 0 !important;
     margin-bottom: 0 !important;
 }
-/* Specific overrides for your exact element IDs */
+
 #section-4UwCfdb1Wc,
 #row-jOLRIuwvhW,
 #col-YiDelBYPAs {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
-}
-#llb-root{
-  width:100vw; max-width:100vw;
-  margin-left:calc(50% - 50vw) !important; margin-right:calc(50% - 50vw) !important;
-position:relative; isolation:isolate;}
-#llb-root button, #llb-root input, #llb-root select, #llb-root textarea,
-#llb-root table, #llb-root th, #llb-root td, #llb-root h1, #llb-root h2, #llb-root h3,
-#llb-root h4, #llb-root p, #llb-root a, #llb-root ul, #llb-root li, #llb-root fieldset,
-#llb-root legend, #llb-root label, #llb-root section, #llb-root aside, #llb-root header,
-#llb-root nav, #llb-root main, #llb-root div, #llb-root span{
-  all:revert;
-}
-#llb-root *, #llb-root *::before, #llb-root *::after{
-  box-sizing:border-box !important; float:none !important;
-  text-transform:none !important; text-shadow:none !important;
-  outline:0 !important;
 }
 /* ============================================================================
    LinkedIn Leads — internal tool
