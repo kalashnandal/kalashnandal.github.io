@@ -4,7 +4,7 @@
 
 import {
   LEAD_FIELDS, FIELD_GROUPS, STAGES, stage, OPEN_STAGES, STALE_DAYS,
-  STREAMS, ROLES, REVIEW_DAYS, field, CAL, calUrl, AUTH,
+  STREAMS, ROLES, REVIEW_DAYS, field, CAL, calUrl, AUTH, NOINDEX, FULL_BLEED,
 } from "./config.js";
 import { openStore } from "./store.js";
 import { downloadXlsx } from "./xlsx.js";
@@ -146,7 +146,53 @@ function installCopyGuard() {
 /* ==========================================================================
    BOOT
    ========================================================================== */
+/* Embedded in a page builder there is no <head> of ours to carry a robots
+   meta, so it is added at runtime. See NOINDEX in config.js for the two
+   caveats: it applies to the whole host page, and a JS-injected tag is
+   honoured by Google but not by every crawler. */
+/* Pin the embedded block to the window's edges.
+
+   The CSS in the GHL build does this with calc(50% - 50vw), which gets it
+   right immediately but is off by the scrollbar width — 100vw counts the
+   scrollbar, the usable width doesn't, and the difference shows up as a
+   horizontal scrollbar on mobile. Measuring gives the exact number, so the
+   CSS handles the first paint and this corrects it. No-ops on the standalone
+   page, which has no #llb-root to break out of. */
+function applyFullBleed() {
+  const root = document.getElementById("llb-root");
+  if (!root) return;
+
+  const fit = () => {
+    // Measure where the block would naturally sit, with the overrides off.
+    const set = (prop, val) => root.style.setProperty(prop, val, "important");
+    set("width", "auto"); set("margin-left", "0"); set("margin-right", "0");
+    const { left, width: hostWidth } = root.getBoundingClientRect();
+    const docWidth = document.documentElement.clientWidth;
+
+    // The two margins have to add back to the host's content width, or the
+    // host box itself overflows by its own padding and the page scrolls
+    // sideways — which is exactly what a bare -50vw on both sides gets wrong.
+    set("width", docWidth + "px");
+    set("margin-left", -left + "px");
+    set("margin-right", hostWidth - docWidth + left + "px");
+  };
+
+  fit();
+  addEventListener("resize", fit, { passive: true });
+}
+
+function applyNoindex() {
+  if (!NOINDEX || document.getElementById("llb-robots")) return;
+  const m = document.createElement("meta");
+  m.id = "llb-robots";
+  m.name = "robots";
+  m.content = "noindex, nofollow, noarchive, nosnippet";
+  (document.head || document.documentElement).appendChild(m);
+}
+
 (async function boot() {
+  applyNoindex();
+  if (FULL_BLEED) applyFullBleed();
   installCopyGuard();
 
   try {
@@ -229,7 +275,9 @@ function wireLogin() {
   const say = (el, msg) => { el.textContent = msg; el.classList.remove("hide"); };
   const clear = () => { err.classList.add("hide"); ok.classList.add("hide"); };
 
-  /* Only show the methods that are switched on in config.js. */
+  /* Only show the methods that are switched on in config.js. Password and
+     email link are independent — with both on you get a password form plus a
+     "send me a link instead" button, not one or the other. */
   const on = (sel, yes) => $(sel)?.classList.toggle("hide", !yes);
   on("#liGoogle", AUTH.google);
   on("#loginForm", AUTH.emailLink || AUTH.password);
@@ -237,7 +285,24 @@ function wireLogin() {
   on("#liOr", AUTH.google && (AUTH.emailLink || AUTH.password));
   on("#liPassWrap", AUTH.password);
   on("#liForgot", AUTH.password);
-  if (AUTH.password) $("#liBtn").textContent = "Sign in";
+  on("#liLinkBtn", AUTH.emailLink && AUTH.password);
+  if (!AUTH.password) $("#liBtn").textContent = "Email me a sign-in link";
+
+  const sendLink = async (btn) => {
+    clear();
+    const email = $("#liEmail").value.trim();
+    if (!email) { say(err, "Enter your email first."); return; }
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+    try {
+      await S.store.sendSignInLink(email);
+      say(ok, `Link sent to ${email}. Open it on this device. If it hasn't arrived in a minute, check spam.`);
+    } catch (ex) {
+      say(err, loginError(ex));
+    } finally { btn.disabled = false; btn.textContent = label; }
+  };
+  $("#liLinkBtn")?.addEventListener("click", (e) => sendLink(e.currentTarget));
 
   /* ---- Google ---- */
   $("#liGoogle")?.addEventListener("click", async () => {
@@ -265,7 +330,7 @@ function wireLogin() {
         await S.store.signIn(email, $("#liPass").value);
       } else {
         await S.store.sendSignInLink(email);
-        say(ok, `Link sent to ${email}. Open it on this device to finish signing in.`);
+        say(ok, `Link sent to ${email}. Open it on this device. If it hasn't arrived in a minute, check spam.`);
       }
     } catch (ex) {
       say(err, loginError(ex));

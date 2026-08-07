@@ -19,7 +19,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-#llb-root{--app-height:100dvh; position:relative; isolation:isolate;}
+#llb-root{
+  width:100vw; max-width:100vw;
+  margin-left:calc(50% - 50vw) !important; margin-right:calc(50% - 50vw) !important;
+position:relative; isolation:isolate;}
 #llb-root button, #llb-root input, #llb-root select, #llb-root textarea,
 #llb-root table, #llb-root th, #llb-root td, #llb-root h1, #llb-root h2, #llb-root h3,
 #llb-root h4, #llb-root p, #llb-root a, #llb-root ul, #llb-root li, #llb-root fieldset,
@@ -70,7 +73,7 @@
 #llb-root *, #llb-root *::before, #llb-root *::after{box-sizing:border-box !important}
 #llb-root{-webkit-text-size-adjust:100% !important}
 #llb-root{
-  margin:0 !important; font-family:var(--sans) !important; color:var(--ink) !important; background:var(--bg) !important;
+  font-family:var(--sans) !important; color:var(--ink) !important; background:var(--bg) !important;
   -webkit-font-smoothing:antialiased !important; font-size:14px !important; line-height:1.5 !important;
   font-feature-settings:'cv05' 1,'cv08' 1 !important;
 }
@@ -550,7 +553,10 @@
         <label for="liPass">Password</label>
         <input class="inp" type="password" id="liPass" autocomplete="current-password" placeholder="••••••••">
       </div>
-      <button class="btn btn-primary" type="submit" id="liBtn">Email me a sign-in link</button>
+      <button class="btn btn-primary" type="submit" id="liBtn">Sign in</button>
+      <button class="btn btn-ghost hide" type="button" id="liLinkBtn" style="width:100%; margin-top:7px">
+        Email me a sign-in link instead
+      </button>
     </form>
 
     <!-- Phone: SMS one-time code. -->
@@ -876,8 +882,15 @@ const AUTH = {
   google:    true,   // one click, best option for @imarkinfotech.com accounts
   emailLink: true,   // magic link — Firebase's passwordless email method
   phone:     true,   // SMS one-time code, needs reCAPTCHA
-  password:  false,  // classic email + password, off by default
+  password:  true,   // classic email + password
 };
+
+/* Break the dashboard out of a page builder's centred column so it uses the
+   whole window. Set false if you would rather it sit inside the container.
+
+   If this leaves a horizontal scrollbar, the host row has padding that cannot
+   be reached from here — set that GHL section/row to full width as well. */
+const FULL_BLEED = true;
 
 /* Whoever holds this address can bootstrap themselves as the first admin the
    first time they sign in, so the project does not need a hand-made Firestore
@@ -887,6 +900,25 @@ const AUTH = {
    Only ever grants admin to a VERIFIED email, so an unverified sign-in
    claiming this address gets nothing. */
 const BOOTSTRAP_ADMIN = "kalash.nandal@imarkinfotech.com";
+
+/* ---------------------------------------------------------------------------
+   1c. KEEPING THE PAGE OUT OF SEARCH
+
+   The dashboard is internal. When embedded in a page builder there is no
+   <head> to put a robots meta in, so it is injected at runtime instead.
+
+   TWO THINGS TO KNOW:
+
+   1. It is a PAGE-level directive. It de-indexes the whole page the block is
+      pasted into, not just the block. That is right for a dedicated dashboard
+      page and wrong for a marketing page — set this to false if the block ever
+      shares a page you want found.
+
+   2. A meta tag added by JavaScript is honoured by Google, which renders
+      pages before indexing, but not by every crawler. The reliable control is
+      your page builder's own SEO setting. Use that as well, not instead.
+--------------------------------------------------------------------------- */
+const NOINDEX = true;
 
 /* ---------------------------------------------------------------------------
    2. ROLES
@@ -2068,7 +2100,53 @@ function installCopyGuard() {
 /* ==========================================================================
    BOOT
    ========================================================================== */
+/* Embedded in a page builder there is no <head> of ours to carry a robots
+   meta, so it is added at runtime. See NOINDEX in config.js for the two
+   caveats: it applies to the whole host page, and a JS-injected tag is
+   honoured by Google but not by every crawler. */
+/* Pin the embedded block to the window's edges.
+
+   The CSS in the GHL build does this with calc(50% - 50vw), which gets it
+   right immediately but is off by the scrollbar width — 100vw counts the
+   scrollbar, the usable width doesn't, and the difference shows up as a
+   horizontal scrollbar on mobile. Measuring gives the exact number, so the
+   CSS handles the first paint and this corrects it. No-ops on the standalone
+   page, which has no #llb-root to break out of. */
+function applyFullBleed() {
+  const root = document.getElementById("llb-root");
+  if (!root) return;
+
+  const fit = () => {
+    // Measure where the block would naturally sit, with the overrides off.
+    const set = (prop, val) => root.style.setProperty(prop, val, "important");
+    set("width", "auto"); set("margin-left", "0"); set("margin-right", "0");
+    const { left, width: hostWidth } = root.getBoundingClientRect();
+    const docWidth = document.documentElement.clientWidth;
+
+    // The two margins have to add back to the host's content width, or the
+    // host box itself overflows by its own padding and the page scrolls
+    // sideways — which is exactly what a bare -50vw on both sides gets wrong.
+    set("width", docWidth + "px");
+    set("margin-left", -left + "px");
+    set("margin-right", hostWidth - docWidth + left + "px");
+  };
+
+  fit();
+  addEventListener("resize", fit, { passive: true });
+}
+
+function applyNoindex() {
+  if (!NOINDEX || document.getElementById("llb-robots")) return;
+  const m = document.createElement("meta");
+  m.id = "llb-robots";
+  m.name = "robots";
+  m.content = "noindex, nofollow, noarchive, nosnippet";
+  (document.head || document.documentElement).appendChild(m);
+}
+
 (async function boot() {
+  applyNoindex();
+  if (FULL_BLEED) applyFullBleed();
   installCopyGuard();
 
   try {
@@ -2151,7 +2229,9 @@ function wireLogin() {
   const say = (el, msg) => { el.textContent = msg; el.classList.remove("hide"); };
   const clear = () => { err.classList.add("hide"); ok.classList.add("hide"); };
 
-  /* Only show the methods that are switched on in config.js. */
+  /* Only show the methods that are switched on in config.js. Password and
+     email link are independent — with both on you get a password form plus a
+     "send me a link instead" button, not one or the other. */
   const on = (sel, yes) => $(sel)?.classList.toggle("hide", !yes);
   on("#liGoogle", AUTH.google);
   on("#loginForm", AUTH.emailLink || AUTH.password);
@@ -2159,7 +2239,24 @@ function wireLogin() {
   on("#liOr", AUTH.google && (AUTH.emailLink || AUTH.password));
   on("#liPassWrap", AUTH.password);
   on("#liForgot", AUTH.password);
-  if (AUTH.password) $("#liBtn").textContent = "Sign in";
+  on("#liLinkBtn", AUTH.emailLink && AUTH.password);
+  if (!AUTH.password) $("#liBtn").textContent = "Email me a sign-in link";
+
+  const sendLink = async (btn) => {
+    clear();
+    const email = $("#liEmail").value.trim();
+    if (!email) { say(err, "Enter your email first."); return; }
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+    try {
+      await S.store.sendSignInLink(email);
+      say(ok, `Link sent to ${email}. Open it on this device. If it hasn't arrived in a minute, check spam.`);
+    } catch (ex) {
+      say(err, loginError(ex));
+    } finally { btn.disabled = false; btn.textContent = label; }
+  };
+  $("#liLinkBtn")?.addEventListener("click", (e) => sendLink(e.currentTarget));
 
   /* ---- Google ---- */
   $("#liGoogle")?.addEventListener("click", async () => {
@@ -2187,7 +2284,7 @@ function wireLogin() {
         await S.store.signIn(email, $("#liPass").value);
       } else {
         await S.store.sendSignInLink(email);
-        say(ok, `Link sent to ${email}. Open it on this device to finish signing in.`);
+        say(ok, `Link sent to ${email}. Open it on this device. If it hasn't arrived in a minute, check spam.`);
       }
     } catch (ex) {
       say(err, loginError(ex));

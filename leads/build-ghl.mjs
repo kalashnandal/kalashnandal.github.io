@@ -174,7 +174,14 @@ function armour(css) {
   return out;
 }
 
-let css = armour(scopeCss(read("style.css")));
+/* `body{margin:0}` exists to kill the browser's default body margin. Scoped
+   to #llb-root it becomes a margin reset on an ordinary div, and armoured it
+   becomes `margin:0 !important` — which outranks the full-bleed margins and
+   even inline styles, pinning the block inside the host's column. Drop it
+   before scoping; a div has no default margin to reset. */
+const baseCss = read("style.css").replace(/(\bbody\{[^}]*?)margin:0;\s*/, "$1");
+
+let css = armour(scopeCss(baseCss));
 
 /* ---------------------------------------------------------------------------
    Keep .hide winning
@@ -210,6 +217,21 @@ ${ROOT} *, ${ROOT} *::before, ${ROOT} *::after{
 /* The container has to carry what `body` used to: it is the app's own ground,
    and a stacking context so the fixed drawer and toasts behave. */
 css = `${ROOT}{position:relative; isolation:isolate;}\n` + css;
+
+/* Break out of the page builder's centred column.
+
+   The classic full-bleed trick: pull the element back to the viewport edge by
+   half the difference between its container and the window. 100vw includes the
+   scrollbar, so the negative margin uses 50% of the parent to compensate
+   rather than a bare -50vw, which would overshoot by the scrollbar width and
+   add a horizontal scrollbar of its own. */
+const fullBleed = /FULL_BLEED\s*=\s*true/.test(read("config.js"));
+if (fullBleed) {
+  css = css.replace(`${ROOT}{`, `${ROOT}{
+  width:100vw; max-width:100vw;
+  margin-left:calc(50% - 50vw) !important; margin-right:calc(50% - 50vw) !important;
+`);
+}
 
 /* One knob for how tall the app sits inside the GHL page. */
 css = css.replace(`${ROOT} .shell{display:grid;`, `${ROOT} .shell{min-height:var(--app-height,100dvh); display:grid;`)

@@ -48,8 +48,15 @@ export const AUTH = {
   google:    true,   // one click, best option for @imarkinfotech.com accounts
   emailLink: true,   // magic link — Firebase's passwordless email method
   phone:     true,   // SMS one-time code, needs reCAPTCHA
-  password:  false,  // classic email + password, off by default
+  password:  true,   // classic email + password
 };
+
+/* Break the dashboard out of a page builder's centred column so it uses the
+   whole window. Set false if you would rather it sit inside the container.
+
+   If this leaves a horizontal scrollbar, the host row has padding that cannot
+   be reached from here — set that GHL section/row to full width as well. */
+export const FULL_BLEED = true;
 
 /* Whoever holds this address can bootstrap themselves as the first admin the
    first time they sign in, so the project does not need a hand-made Firestore
@@ -59,6 +66,25 @@ export const AUTH = {
    Only ever grants admin to a VERIFIED email, so an unverified sign-in
    claiming this address gets nothing. */
 export const BOOTSTRAP_ADMIN = "kalash.nandal@imarkinfotech.com";
+
+/* ---------------------------------------------------------------------------
+   1c. KEEPING THE PAGE OUT OF SEARCH
+
+   The dashboard is internal. When embedded in a page builder there is no
+   <head> to put a robots meta in, so it is injected at runtime instead.
+
+   TWO THINGS TO KNOW:
+
+   1. It is a PAGE-level directive. It de-indexes the whole page the block is
+      pasted into, not just the block. That is right for a dedicated dashboard
+      page and wrong for a marketing page — set this to false if the block ever
+      shares a page you want found.
+
+   2. A meta tag added by JavaScript is honoured by Google, which renders
+      pages before indexing, but not by every crawler. The reliable control is
+      your page builder's own SEO setting. Use that as well, not instead.
+--------------------------------------------------------------------------- */
+export const NOINDEX = true;
 
 /* ---------------------------------------------------------------------------
    2. ROLES
