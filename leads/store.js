@@ -148,7 +148,9 @@ async function firebaseStore() {
       }
     },
     signInWithGoogle() { return this.signInWithProvider("google"); },
-    resolveRedirect: () => auth.getRedirectResult(A).catch(() => null),
+    /* A redirect sign-in comes back here. Swallowing the error would drop the
+       user on the sign-in screen with no explanation, so it is surfaced. */
+    resolveRedirect: () => auth.getRedirectResult(A),
 
     /* ---- Phone OTP ------------------------------------------------------
        Firebase requires a reCAPTCHA before it will send an SMS. Invisible

@@ -143,6 +143,10 @@ function installCopyGuard() {
   });
 }
 
+/* Set when a redirect sign-in fails, so the message survives long enough to
+   be shown once the login screen renders. */
+let pendingAuthError = "";
+
 /* ==========================================================================
    BOOT
    ========================================================================== */
@@ -212,12 +216,21 @@ function applyNoindex() {
 
   // Someone arriving from an invite email lands here with a sign-in link in
   // the URL. Complete that before deciding whether to show the login form.
-  await S.store.resolveRedirect?.();
+  try {
+    await S.store.resolveRedirect?.();
+  } catch (ex) {
+    console.error("[auth] redirect sign-in failed", ex);
+    pendingAuthError = loginError(ex, /microsoft/i.test(ex?.message || "") ? "microsoft" : "google");
+  }
   if (S.store.isInviteLink()) await completeInviteSignIn();
 
   S.store.onAuth((profile) => {
     S.me = profile;
-    if (!profile) return showLogin();
+    if (!profile) {
+      showLogin(pendingAuthError || undefined);
+      pendingAuthError = "";
+      return;
+    }
     if (profile.pending) {
       showLogin("You're signed in, but nobody has given you access yet. Ask an admin to invite you.");
       S.store.signOut();
@@ -314,7 +327,10 @@ function wireLogin() {
       await S.store.signInWithProvider(kind);
     } catch (ex) {
       // Closing the window is a decision, not an error worth shouting about.
-      if (!/popup-closed|cancelled/.test(ex?.code || "")) say(err, loginError(ex));
+      if (!/popup-closed|cancelled/.test(ex?.code || "")) {
+        console.error(`[auth] ${kind} sign-in failed`, ex);
+        say(err, loginError(ex, kind));
+      }
     } finally { b.disabled = false; }
   });
   federated("#liMicrosoft", "microsoft");
@@ -382,8 +398,33 @@ function wireLogin() {
   });
 }
 
-function loginError(ex) {
+/* `ctx` is which button was pressed. It matters because Firebase reuses
+   auth/invalid-credential for both a wrong password and a failed OAuth
+   handshake — without the context, a Microsoft failure gets reported as
+   "that email and password don't match", which sends you hunting in
+   completely the wrong place. */
+function loginError(ex, ctx = "") {
   const code = ex?.code || "";
+  const oauth = ctx === "microsoft" || ctx === "google";
+  const who = ctx === "microsoft" ? "Microsoft" : ctx === "google" ? "Google" : "The provider";
+
+  if (oauth) {
+    if (code.includes("invalid-credential") || code.includes("invalid-oauth")) {
+      return `${who} rejected the sign-in. Usually the Application ID or secret in Firebase ` +
+             `doesn't match the app registration, or its redirect URL is wrong. (${code || "no code"})`;
+    }
+    if (code.includes("unauthorized-domain"))
+      return "This site isn't on Firebase's authorised-domains list. Add it under Authentication → Settings.";
+    if (code.includes("operation-not-allowed"))
+      return `${who} sign-in isn't switched on in Firebase → Authentication → Sign-in method.`;
+    if (code.includes("account-exists-with-different-credential"))
+      return "That address already signed up with a different method. Use the one you used the first time.";
+    if (code.includes("network")) return "Couldn't reach the sign-in service. Check your connection.";
+    // Never silently swallow an unmapped OAuth failure — the code is the
+    // only thing that makes it diagnosable.
+    return `${who} sign-in failed: ${ex?.message || "unknown error"} (${code || "no code"})`;
+  }
+
   if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found"))
     return "That email and password don't match.";
   if (code.includes("too-many-requests")) return "Too many attempts. Wait a few minutes, then try again.";
