@@ -231,7 +231,7 @@ body = body.replace(cal, "").trim();
 body = body.replace(
   /(<div id="demobar" class="hide">)[\s\S]*?(<\/div>)/,
   `$1
-        Demo data — stored in this browser only. Add your Firebase keys in the config block to go live.
+        Demo data — stored in this browser only. Remove <code>?demo=1</code> from the address to use the live project.
       $2`
 );
 
@@ -242,8 +242,9 @@ const out = `<!-- ==============================================================
      Everything is scoped to #llb-root, so GHL's page styles cannot reach in
      and these styles cannot leak out.
 
-     TO GO LIVE: find "PASTE_YOUR_API_KEY" below and fill in the six Firebase
-     values. Until then it runs on demo data held in each visitor's browser.
+     LIVE: wired to Firebase project leads-dashboard-9d76f. Sign in with
+     Google, an emailed sign-in link, or an SMS code. Add ?demo=1 to the page
+     URL to show sample data instead of the live project.
 
      Height: the app fills the viewport by default. To fit it inside a GHL
      page that has its own header and footer, change --app-height on the

@@ -23,22 +23,55 @@
     <p class="tag">LinkedIn Leads — internal tracker for operations and sales.</p>
 
     <div id="loginErr" class="login-err hide"></div>
+    <div id="loginOk" class="login-ok hide"></div>
 
-    <form id="loginForm" autocomplete="on">
+    <!-- Google first: one click, and everyone here already has a work
+         Google account. -->
+    <button class="btn btn-ghost btn-google hide" id="liGoogle" type="button">
+      <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true">
+        <path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.3-.2-1.9H9v3.5h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/>
+        <path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.3c-.8.6-1.9.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/>
+        <path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8l3-2.3z"/>
+        <path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div class="login-or hide" id="liOr"><span>or</span></div>
+
+    <!-- Email link: Firebase's passwordless email method. -->
+    <form id="loginForm" class="hide" autocomplete="on">
       <div class="fld">
         <label for="liEmail">Work email</label>
         <input class="inp" type="email" id="liEmail" required autocomplete="username" placeholder="you@company.com">
       </div>
-      <div class="fld">
+      <div class="fld hide" id="liPassWrap">
         <label for="liPass">Password</label>
-        <input class="inp" type="password" id="liPass" required autocomplete="current-password" placeholder="••••••••">
+        <input class="inp" type="password" id="liPass" autocomplete="current-password" placeholder="••••••••">
       </div>
-      <button class="btn btn-primary" type="submit" id="liBtn">Sign in</button>
+      <button class="btn btn-primary" type="submit" id="liBtn">Email me a sign-in link</button>
     </form>
+
+    <!-- Phone: SMS one-time code. -->
+    <div class="hide" id="liPhoneBlock">
+      <div class="login-or"><span>or</span></div>
+      <div class="fld">
+        <label for="liPhone">Mobile number</label>
+        <input class="inp" type="tel" id="liPhone" autocomplete="tel" placeholder="+91 98765 43210">
+      </div>
+      <div class="fld hide" id="liCodeWrap">
+        <label for="liCode">6-digit code</label>
+        <input class="inp" type="text" id="liCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
+      </div>
+      <button class="btn btn-ghost" id="liPhoneBtn" type="button" style="width:100%">Send me a code</button>
+    </div>
+
+    <!-- Firebase mounts its invisible reCAPTCHA here before sending an SMS. -->
+    <div id="recaptcha"></div>
 
     <p class="login-foot">
       No account? Ask an admin to invite you.<br>
-      <button class="link-btn" id="liForgot" type="button">Forgot your password?</button>
+      <button class="link-btn hide" id="liForgot" type="button">Forgot your password?</button>
     </p>
   </div>
 </section>
@@ -81,7 +114,7 @@
     <!-- ---------- MAIN ---------- -->
     <div class="main">
       <div id="demobar" class="hide">
-        Demo data — stored in this browser only. Add your Firebase keys in <code>config.js</code> to go live.
+        Demo data — stored in this browser only. Remove <code>?demo=1</code> from the address to use the live project.
       </div>
 
       <main class="content noselect">
@@ -236,6 +269,10 @@
                 <div class="fld">
                   <label for="invEmail">Work email</label>
                   <input class="inp" type="email" id="invEmail" placeholder="priya@company.com">
+                </div>
+                <div class="fld">
+                  <label for="invPhone">Mobile <span class="muted">(optional)</span></label>
+                  <input class="inp" type="tel" id="invPhone" placeholder="+91 98765 43210">
                 </div>
                 <div class="fld">
                   <label for="invRole">Role</label>

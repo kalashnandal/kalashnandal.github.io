@@ -4,7 +4,7 @@
 
 import {
   LEAD_FIELDS, FIELD_GROUPS, STAGES, stage, OPEN_STAGES, STALE_DAYS,
-  STREAMS, ROLES, REVIEW_DAYS, field, CAL, calUrl,
+  STREAMS, ROLES, REVIEW_DAYS, field, CAL, calUrl, AUTH,
 } from "./config.js";
 import { openStore } from "./store.js";
 import { downloadXlsx } from "./xlsx.js";
@@ -148,12 +148,25 @@ function installCopyGuard() {
    ========================================================================== */
 (async function boot() {
   installCopyGuard();
-  S.store = await openStore();
+
+  try {
+    S.store = await openStore();
+  } catch (ex) {
+    // Never leave a blank page. Say what happened and offer the one useful
+    // action, rather than silently degrading to sample data.
+    showLogin(ex?.message || "Couldn't start. Reload and try again.");
+    $("#liGoogle")?.classList.add("hide");
+    $("#loginForm")?.classList.add("hide");
+    $("#liPhoneBlock")?.classList.add("hide");
+    $("#liOr")?.classList.add("hide");
+    return;
+  }
 
   if (S.store.mode === "demo") $("#demobar").classList.remove("hide");
 
   // Someone arriving from an invite email lands here with a sign-in link in
   // the URL. Complete that before deciding whether to show the login form.
+  await S.store.resolveRedirect?.();
   if (S.store.isInviteLink()) await completeInviteSignIn();
 
   S.store.onAuth((profile) => {
@@ -212,32 +225,91 @@ async function completeInviteSignIn() {
 
 function wireLogin() {
   const err = $("#loginErr");
-  $("#loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    err.classList.add("hide");
-    const btn = $("#liBtn");
-    btn.disabled = true;
-    btn.textContent = "Signing in…";
+  const ok = $("#loginOk");
+  const say = (el, msg) => { el.textContent = msg; el.classList.remove("hide"); };
+  const clear = () => { err.classList.add("hide"); ok.classList.add("hide"); };
+
+  /* Only show the methods that are switched on in config.js. */
+  const on = (sel, yes) => $(sel)?.classList.toggle("hide", !yes);
+  on("#liGoogle", AUTH.google);
+  on("#loginForm", AUTH.emailLink || AUTH.password);
+  on("#liPhoneBlock", AUTH.phone);
+  on("#liOr", AUTH.google && (AUTH.emailLink || AUTH.password));
+  on("#liPassWrap", AUTH.password);
+  on("#liForgot", AUTH.password);
+  if (AUTH.password) $("#liBtn").textContent = "Sign in";
+
+  /* ---- Google ---- */
+  $("#liGoogle")?.addEventListener("click", async () => {
+    clear();
+    const b = $("#liGoogle");
+    b.disabled = true;
     try {
-      await S.store.signIn($("#liEmail").value.trim(), $("#liPass").value);
+      await S.store.signInWithGoogle();
     } catch (ex) {
-      err.textContent = loginError(ex);
-      err.classList.remove("hide");
+      if (!/popup-closed|cancelled/.test(ex?.code || "")) say(err, loginError(ex));
+    } finally { b.disabled = false; }
+  });
+
+  /* ---- Email: link, or password when that is the configured method ---- */
+  $("#loginForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clear();
+    const email = $("#liEmail").value.trim();
+    const btn = $("#liBtn");
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Working…";
+    try {
+      if (AUTH.password) {
+        await S.store.signIn(email, $("#liPass").value);
+      } else {
+        await S.store.sendSignInLink(email);
+        say(ok, `Link sent to ${email}. Open it on this device to finish signing in.`);
+      }
+    } catch (ex) {
+      say(err, loginError(ex));
     } finally {
       btn.disabled = false;
-      btn.textContent = "Sign in";
+      btn.textContent = label;
     }
   });
 
-  $("#liForgot").addEventListener("click", async () => {
+  /* ---- Phone OTP: one button that sends, then confirms ---- */
+  const phoneBtn = $("#liPhoneBtn");
+  phoneBtn?.addEventListener("click", async () => {
+    clear();
+    const sending = $("#liCodeWrap").classList.contains("hide");
+    phoneBtn.disabled = true;
+    const label = phoneBtn.textContent;
+    phoneBtn.textContent = sending ? "Sending…" : "Checking…";
+    try {
+      if (sending) {
+        const raw = $("#liPhone").value.trim();
+        if (!/^\+[1-9]\d{7,14}$/.test(raw.replace(/[\s()-]/g, ""))) {
+          throw new Error("Include the country code, like +91 98765 43210.");
+        }
+        await S.store.sendPhoneCode(raw.replace(/[\s()-]/g, ""), "recaptcha");
+        $("#liCodeWrap").classList.remove("hide");
+        $("#liCode").focus();
+        say(ok, `Code sent to ${raw}.`);
+        phoneBtn.textContent = "Sign in";
+      } else {
+        await S.store.confirmPhoneCode($("#liCode").value.trim());
+      }
+    } catch (ex) {
+      say(err, loginError(ex));
+      phoneBtn.textContent = label;
+    } finally { phoneBtn.disabled = false; }
+  });
+
+  $("#liForgot")?.addEventListener("click", async () => {
     const email = $("#liEmail").value.trim();
     if (!email) return toast("Type your email above first.", "warn");
     try {
       await S.store.resetPassword(email);
       toast("Password reset email sent.", "good");
-    } catch (ex) {
-      toast(loginError(ex), "bad");
-    }
+    } catch (ex) { toast(loginError(ex), "bad"); }
   });
 }
 
@@ -245,8 +317,21 @@ function loginError(ex) {
   const code = ex?.code || "";
   if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found"))
     return "That email and password don't match.";
-  if (code.includes("too-many-requests")) return "Too many attempts. Wait a few minutes and try again.";
+  if (code.includes("too-many-requests")) return "Too many attempts. Wait a few minutes, then try again.";
   if (code.includes("network")) return "Can't reach the server. Check your connection.";
+  if (code.includes("popup-blocked")) return "Your browser blocked the Google window. Allow popups for this site, or use the email link instead.";
+  if (code.includes("account-exists-with-different-credential"))
+    return "That address is already signed up with a different method. Use the one you used originally.";
+  if (code.includes("unauthorized-domain"))
+    return "This site isn't on the Firebase authorised-domains list yet. An admin needs to add it.";
+  if (code.includes("operation-not-allowed"))
+    return "That sign-in method isn't switched on in Firebase yet. An admin needs to enable it.";
+  if (code.includes("invalid-phone-number")) return "That number doesn't look right. Include the country code, like +91.";
+  if (code.includes("invalid-verification-code")) return "That code isn't right. Check it and try again.";
+  if (code.includes("code-expired")) return "That code has expired. Ask for a new one.";
+  if (code.includes("missing-phone-number")) return "Enter your mobile number first.";
+  if (code.includes("captcha-check-failed")) return "The robot check failed. Reload the page and try again.";
+  if (code.includes("quota-exceeded")) return "The SMS quota for today is used up. Use Google or the email link instead.";
   return ex?.message || "Something went wrong. Try again.";
 }
 
@@ -1317,10 +1402,13 @@ async function sendInvite() {
   const email = $("#invEmail").value.trim().toLowerCase();
   const role = $("#invRole").value;
   const clientAccess = [...$("#invClients").selectedOptions].map((o) => o.value);
+  const phone = $("#invPhone").value.trim().replace(/[\s()-]/g, "");
 
   if (!name) return toast("Add their name so people know who this is.", "warn");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast("That email doesn't look right.", "warn");
   if (role === "client" && !clientAccess.length) return toast("Pick which clients they can see.", "warn");
+  if (phone && !/^\+[1-9]\d{7,14}$/.test(phone))
+    return toast("Include the country code on the mobile, like +91 98765 43210.", "warn");
   if (S.users.some((u) => (u.email || "").toLowerCase() === email)) {
     return toast("That person already has access.", "warn");
   }
@@ -1329,10 +1417,11 @@ async function sendInvite() {
   btn.disabled = true;
   btn.textContent = "Sending…";
   try {
-    await S.store.createInvite(email, { name, role, clientAccess });
+    await S.store.createInvite(email, { name, role, clientAccess, phone });
     await S.store.sendInviteLink(email);
     $("#invName").value = "";
     $("#invEmail").value = "";
+    $("#invPhone").value = "";
     toast(
       S.store.mode === "demo"
         ? "Invite recorded. In demo mode no email is actually sent."
@@ -1395,7 +1484,7 @@ function renderInvites() {
     if (revoke) {
       const email = revoke.dataset.revoke;
       if (!confirm(`Revoke the invite for ${email}? Their link stops working.`)) return;
-      await S.store.revokeInvite(email);
+      await S.store.revokeInvite(email, S.invites.find((i) => i.email === email)?.phone);
       toast("Invite revoked.", "bad");
     }
   };

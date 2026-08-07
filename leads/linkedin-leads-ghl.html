@@ -5,8 +5,9 @@
      Everything is scoped to #llb-root, so GHL's page styles cannot reach in
      and these styles cannot leak out.
 
-     TO GO LIVE: find "PASTE_YOUR_API_KEY" below and fill in the six Firebase
-     values. Until then it runs on demo data held in each visitor's browser.
+     LIVE: wired to Firebase project leads-dashboard-9d76f. Sign in with
+     Google, an emailed sign-in link, or an SMS code. Add ?demo=1 to the page
+     URL to show sample data instead of the live project.
 
      Height: the app fills the viewport by default. To fit it inside a GHL
      page that has its own header and footer, change --app-height on the
@@ -468,6 +469,19 @@
 }
 #llb-root .login-foot{font-size:11.5px !important; color:var(--ink-4) !important; text-align:center !important; margin-top:16px !important; line-height:1.7 !important}
 #llb-root .link-btn{font-size:12px !important; font-weight:550 !important; color:var(--accent-d) !important; text-decoration:underline !important}
+#llb-root .login-ok{
+  background:var(--good-l) !important; border:1px solid var(--good-bd) !important; color:var(--good) !important;
+  font-size:12.5px !important; padding:8px 11px !important; border-radius:var(--r-m) !important; margin-bottom:12px !important;
+}
+#llb-root .btn-google{width:100% !important; padding:9px !important; gap:9px !important; font-weight:550 !important}
+#llb-root .login-or{
+  display:flex !important; align-items:center !important; gap:10px !important; margin:14px 0 !important;
+  font-size:11.5px !important; color:var(--ink-4) !important;
+}
+#llb-root .login-or::before, #llb-root .login-or::after{content:'' !important; flex:1 !important; height:1px !important; background:var(--line) !important}
+/* Firebase injects an invisible reCAPTCHA badge here; it must exist but has
+   nothing to show until a code is requested. */
+#llb-root #recaptcha:empty{display:none !important}
 
 /* ============ TOASTS ============ */
 #llb-root #toasts{position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:7px; align-items:center; pointer-events:none}
@@ -494,6 +508,7 @@
 
 /* .hide must outrank the ID rules armoured above. */
 #llb-root #login.hide,
+#llb-root #recaptcha.hide,
 #llb-root #toasts.hide,
 #llb-root #demobar.hide,
 #llb-root .hide{display:none !important}
@@ -509,22 +524,55 @@
     <p class="tag">LinkedIn Leads — internal tracker for operations and sales.</p>
 
     <div id="loginErr" class="login-err hide"></div>
+    <div id="loginOk" class="login-ok hide"></div>
 
-    <form id="loginForm" autocomplete="on">
+    <!-- Google first: one click, and everyone here already has a work
+         Google account. -->
+    <button class="btn btn-ghost btn-google hide" id="liGoogle" type="button">
+      <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true">
+        <path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.3-.2-1.9H9v3.5h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/>
+        <path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.3c-.8.6-1.9.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/>
+        <path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8l3-2.3z"/>
+        <path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div class="login-or hide" id="liOr"><span>or</span></div>
+
+    <!-- Email link: Firebase's passwordless email method. -->
+    <form id="loginForm" class="hide" autocomplete="on">
       <div class="fld">
         <label for="liEmail">Work email</label>
         <input class="inp" type="email" id="liEmail" required autocomplete="username" placeholder="you@company.com">
       </div>
-      <div class="fld">
+      <div class="fld hide" id="liPassWrap">
         <label for="liPass">Password</label>
-        <input class="inp" type="password" id="liPass" required autocomplete="current-password" placeholder="••••••••">
+        <input class="inp" type="password" id="liPass" autocomplete="current-password" placeholder="••••••••">
       </div>
-      <button class="btn btn-primary" type="submit" id="liBtn">Sign in</button>
+      <button class="btn btn-primary" type="submit" id="liBtn">Email me a sign-in link</button>
     </form>
+
+    <!-- Phone: SMS one-time code. -->
+    <div class="hide" id="liPhoneBlock">
+      <div class="login-or"><span>or</span></div>
+      <div class="fld">
+        <label for="liPhone">Mobile number</label>
+        <input class="inp" type="tel" id="liPhone" autocomplete="tel" placeholder="+91 98765 43210">
+      </div>
+      <div class="fld hide" id="liCodeWrap">
+        <label for="liCode">6-digit code</label>
+        <input class="inp" type="text" id="liCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
+      </div>
+      <button class="btn btn-ghost" id="liPhoneBtn" type="button" style="width:100%">Send me a code</button>
+    </div>
+
+    <!-- Firebase mounts its invisible reCAPTCHA here before sending an SMS. -->
+    <div id="recaptcha"></div>
 
     <p class="login-foot">
       No account? Ask an admin to invite you.<br>
-      <button class="link-btn" id="liForgot" type="button">Forgot your password?</button>
+      <button class="link-btn hide" id="liForgot" type="button">Forgot your password?</button>
     </p>
   </div>
 </section>
@@ -567,7 +615,7 @@
     <!-- ---------- MAIN ---------- -->
     <div class="main">
       <div id="demobar" class="hide">
-        Demo data — stored in this browser only. Add your Firebase keys in the config block to go live.
+        Demo data — stored in this browser only. Remove <code>?demo=1</code> from the address to use the live project.
       </div>
 
       <main class="content noselect">
@@ -724,6 +772,10 @@
                   <input class="inp" type="email" id="invEmail" placeholder="priya@company.com">
                 </div>
                 <div class="fld">
+                  <label for="invPhone">Mobile <span class="muted">(optional)</span></label>
+                  <input class="inp" type="tel" id="invPhone" placeholder="+91 98765 43210">
+                </div>
+                <div class="fld">
                   <label for="invRole">Role</label>
                   <select class="inp" id="invRole"></select>
                 </div>
@@ -795,15 +847,46 @@
    through it before the Firebase project exists.
 --------------------------------------------------------------------------- */
 const firebaseConfig = {
-  apiKey:            "PASTE_YOUR_API_KEY",
-  authDomain:        "PASTE_YOUR_PROJECT.firebaseapp.com",
-  projectId:         "PASTE_YOUR_PROJECT_ID",
-  storageBucket:     "PASTE_YOUR_PROJECT.appspot.com",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID",
-  appId:             "PASTE_YOUR_APP_ID",
+  apiKey:            "AIzaSyCSnCg1B-zdrCKE44PPBHf177P8KLPVZR0",
+  authDomain:        "leads-dashboard-9d76f.firebaseapp.com",
+  projectId:         "leads-dashboard-9d76f",
+  storageBucket:     "leads-dashboard-9d76f.firebasestorage.app",
+  messagingSenderId: "1008363923882",
+  appId:             "1:1008363923882:web:7a973ea7a7146ad55863d3",
+  measurementId:     "G-6R90ZXWJXY",
 };
 
 const isConfigured = () => !firebaseConfig.apiKey.startsWith("PASTE_");
+
+/* ---------------------------------------------------------------------------
+   1b. SIGN-IN METHODS
+
+   Turn a method off here and its button disappears from the sign-in screen.
+   Each one still has to be enabled in Firebase console → Authentication →
+   Sign-in method, or it will fail at the point of use.
+
+   A NOTE ON EMAIL OTP: Firebase Auth has no email one-time-code provider.
+   It ships email/password, email *link* (a magic link, no code to type),
+   phone OTP, and OAuth. A six-digit code by email needs a Cloud Function to
+   generate it, send it, and mint a custom token — server-side work that a
+   pasted HTML block cannot do on its own. `emailLink` below is the closest
+   thing available client-side.
+--------------------------------------------------------------------------- */
+const AUTH = {
+  google:    true,   // one click, best option for @imarkinfotech.com accounts
+  emailLink: true,   // magic link — Firebase's passwordless email method
+  phone:     true,   // SMS one-time code, needs reCAPTCHA
+  password:  false,  // classic email + password, off by default
+};
+
+/* Whoever holds this address can bootstrap themselves as the first admin the
+   first time they sign in, so the project does not need a hand-made Firestore
+   document to get started. The same address is pinned in firestore.rules —
+   change it in BOTH places or the rules will reject the profile.
+
+   Only ever grants admin to a VERIFIED email, so an unverified sign-in
+   claiming this address gets nothing. */
+const BOOTSTRAP_ADMIN = "kalash.nandal@imarkinfotech.com";
 
 /* ---------------------------------------------------------------------------
    2. ROLES
@@ -1278,6 +1361,7 @@ async function firebaseStore() {
     );
 
   let profile = null;
+  let phoneVerifier = null, phoneConfirmation = null;
 
   /* The where() clause that makes a query provably safe for this user's role.
      null means "no clause needed" (staff see everything);
@@ -1332,6 +1416,47 @@ async function firebaseStore() {
     signOut: () => auth.signOut(A),
     resetPassword: (email) => auth.sendPasswordResetEmail(A, email),
     me: () => profile,
+
+    /* ---- Google ---------------------------------------------------------
+       Popup first because it keeps the page state. Embedded contexts (an
+       iframe in a page builder, some in-app browsers) block popups, so fall
+       back to a full redirect rather than failing. */
+    async signInWithGoogle() {
+      const provider = new auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      try {
+        return await auth.signInWithPopup(A, provider);
+      } catch (ex) {
+        const code = ex?.code || "";
+        if (/popup-blocked|popup-closed-by-user|operation-not-supported|cancelled-popup/.test(code)) {
+          if (code.includes("popup-closed") || code.includes("cancelled")) throw ex;  // user's choice
+          return auth.signInWithRedirect(A, provider);
+        }
+        throw ex;
+      }
+    },
+    resolveRedirect: () => auth.getRedirectResult(A).catch(() => null),
+
+    /* ---- Phone OTP ------------------------------------------------------
+       Firebase requires a reCAPTCHA before it will send an SMS. Invisible
+       mode solves silently in the normal case. The verifier is single-use, so
+       it is torn down and rebuilt for each attempt — reusing one is the usual
+       cause of a second send failing. */
+    async sendPhoneCode(phoneE164, containerId) {
+      if (phoneVerifier) { try { phoneVerifier.clear(); } catch {} phoneVerifier = null; }
+      phoneVerifier = new auth.RecaptchaVerifier(A, containerId, { size: "invisible" });
+      await phoneVerifier.render();
+      phoneConfirmation = await auth.signInWithPhoneNumber(A, phoneE164, phoneVerifier);
+      return true;
+    },
+
+    async confirmPhoneCode(code) {
+      if (!phoneConfirmation) throw new Error("Ask for a code first.");
+      const res = await phoneConfirmation.confirm(code);
+      phoneConfirmation = null;
+      if (phoneVerifier) { try { phoneVerifier.clear(); } catch {} phoneVerifier = null; }
+      return res;
+    },
 
     /* ---- leads --------------------------------------------------------- */
     watchLeads(cb) {
@@ -1419,19 +1544,29 @@ async function firebaseStore() {
     --------------------------------------------------------------------- */
     watchInvites: (cb) => live(query(collection(D, "invites"), orderBy("createdAt", "desc")), cb),
 
-    createInvite(email, data) {
+    /* Written under the email, and again under the phone number when one is
+       given, so the invite can be claimed by whichever method the person ends
+       up signing in with. Two small documents beats a lookup query, which the
+       rules would have to open up to make work. */
+    async createInvite(email, data) {
       const key = email.trim().toLowerCase();
-      return setDoc(doc(D, "invites", key), {
+      const phone = (data.phone || "").trim();
+      const payload = {
         ...data,
         email: key,
         status: "pending",
         createdAt: serverTimestamp(),
         invitedBy: profile.uid,
         invitedByName: profile.name || profile.email,
-      });
+      };
+      await setDoc(doc(D, "invites", key), payload);
+      if (phone) await setDoc(doc(D, "invites", phone), { ...payload, viaPhone: true });
     },
 
-    revokeInvite: (email) => deleteDoc(doc(D, "invites", email.trim().toLowerCase())),
+    async revokeInvite(email, phone) {
+      await deleteDoc(doc(D, "invites", email.trim().toLowerCase()));
+      if (phone) await deleteDoc(doc(D, "invites", phone.trim())).catch(() => {});
+    },
 
     /* Emails a passwordless sign-in link. Requires "Email link (passwordless
        sign-in)" to be enabled in Firebase console -> Authentication. */
@@ -1446,6 +1581,18 @@ async function firebaseStore() {
       try { localStorage.setItem("leads:inviteEmail", key); } catch {}
     },
 
+    /* Plain passwordless sign-in from the login screen. Same mechanism as an
+       invite link, but it touches no invite document — this is for people who
+       already have access and just want in. */
+    async sendSignInLink(email) {
+      const key = email.trim().toLowerCase();
+      await auth.sendSignInLinkToEmail(A, key, {
+        url: location.href.split("?")[0].split("#")[0],
+        handleCodeInApp: true,
+      });
+      try { localStorage.setItem("leads:inviteEmail", key); } catch {}
+    },
+
     /* True when the current URL is a sign-in link the user just clicked. */
     isInviteLink: () => auth.isSignInWithEmailLink(A, location.href),
 
@@ -1456,16 +1603,32 @@ async function firebaseStore() {
     /* Called after sign-in when the user has no users/{uid} document yet.
        Turns a pending invite into a real profile. */
     async claimInvite(user) {
-      const key = (user.email || "").toLowerCase();
+      const email = (user.email || "").toLowerCase();
+
+      /* The first admin has nobody to invite them. A verified match on the
+         address pinned in config.js (and in firestore.rules) bootstraps the
+         project, so it doesn't need a hand-made Firestore document to start.
+         Unverified addresses get nothing — otherwise the check is spoofable. */
+      if (email && email === BOOTSTRAP_ADMIN.toLowerCase() && user.emailVerified) {
+        const admin = { name: user.displayName || email, email, role: "admin", active: true };
+        await setDoc(doc(D, "users", user.uid), admin);
+        return admin;
+      }
+
+      /* Invites are claimable by whichever identifier the person signed in
+         with: their email (Google, email link) or their phone (SMS code). */
+      const key = email || user.phoneNumber || "";
       if (!key) return null;
+
       const snap = await getDoc(doc(D, "invites", key));
       if (!snap.exists()) return null;
       const inv = snap.data();
       if (inv.status === "revoked") return null;
 
       const profileDoc = {
-        name: inv.name || user.email,
-        email: key,
+        name: inv.name || key,
+        email: inv.email || email || "",
+        ...(user.phoneNumber ? { phone: user.phoneNumber } : {}),
         role: inv.role,
         active: true,
         ...(inv.role === "client" ? { clientAccess: inv.clientAccess || [] } : {}),
@@ -1711,6 +1874,11 @@ function demoStore() {
     isInviteLink: () => false,
     signInWithLink: async () => profile,
     claimInvite: async () => null,
+    sendSignInLink: async () => {},
+    signInWithGoogle: async () => profile,
+    resolveRedirect: async () => null,
+    sendPhoneCode: async () => true,
+    confirmPhoneCode: async () => profile,
 
     async logExport(rec) {
       const db = read();
@@ -1732,12 +1900,24 @@ function demoStore() {
    PICKER
    ========================================================================== */
 async function openStore() {
-  if (!isConfigured()) return demoStore();
+  /* ?demo=1 forces the sample data, so the dashboard can be walked through
+     with the team without touching the live project. */
+  const forced = new URLSearchParams(location.search).has("demo");
+  if (forced || !isConfigured()) return demoStore();
+
+  /* Once real keys are configured, a failure must NOT quietly fall back to
+     demo mode. Demo data lives in localStorage and goes nowhere — someone
+     would enter real leads into a dashboard that only looks like it works. */
   try {
     return await firebaseStore();
   } catch (err) {
-    console.error("Firebase failed to start; falling back to demo mode.", err);
-    return demoStore();
+    console.error("Firebase failed to start.", err);
+    const e = new Error(
+      "Couldn't reach Firebase. Check your connection and reload — " +
+      "your data is safe, this page just can't load it right now."
+    );
+    e.cause = err;
+    throw e;
   }
 }
 
@@ -1890,12 +2070,25 @@ function installCopyGuard() {
    ========================================================================== */
 (async function boot() {
   installCopyGuard();
-  S.store = await openStore();
+
+  try {
+    S.store = await openStore();
+  } catch (ex) {
+    // Never leave a blank page. Say what happened and offer the one useful
+    // action, rather than silently degrading to sample data.
+    showLogin(ex?.message || "Couldn't start. Reload and try again.");
+    $("#liGoogle")?.classList.add("hide");
+    $("#loginForm")?.classList.add("hide");
+    $("#liPhoneBlock")?.classList.add("hide");
+    $("#liOr")?.classList.add("hide");
+    return;
+  }
 
   if (S.store.mode === "demo") $("#demobar").classList.remove("hide");
 
   // Someone arriving from an invite email lands here with a sign-in link in
   // the URL. Complete that before deciding whether to show the login form.
+  await S.store.resolveRedirect?.();
   if (S.store.isInviteLink()) await completeInviteSignIn();
 
   S.store.onAuth((profile) => {
@@ -1954,32 +2147,91 @@ async function completeInviteSignIn() {
 
 function wireLogin() {
   const err = $("#loginErr");
-  $("#loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    err.classList.add("hide");
-    const btn = $("#liBtn");
-    btn.disabled = true;
-    btn.textContent = "Signing in…";
+  const ok = $("#loginOk");
+  const say = (el, msg) => { el.textContent = msg; el.classList.remove("hide"); };
+  const clear = () => { err.classList.add("hide"); ok.classList.add("hide"); };
+
+  /* Only show the methods that are switched on in config.js. */
+  const on = (sel, yes) => $(sel)?.classList.toggle("hide", !yes);
+  on("#liGoogle", AUTH.google);
+  on("#loginForm", AUTH.emailLink || AUTH.password);
+  on("#liPhoneBlock", AUTH.phone);
+  on("#liOr", AUTH.google && (AUTH.emailLink || AUTH.password));
+  on("#liPassWrap", AUTH.password);
+  on("#liForgot", AUTH.password);
+  if (AUTH.password) $("#liBtn").textContent = "Sign in";
+
+  /* ---- Google ---- */
+  $("#liGoogle")?.addEventListener("click", async () => {
+    clear();
+    const b = $("#liGoogle");
+    b.disabled = true;
     try {
-      await S.store.signIn($("#liEmail").value.trim(), $("#liPass").value);
+      await S.store.signInWithGoogle();
     } catch (ex) {
-      err.textContent = loginError(ex);
-      err.classList.remove("hide");
+      if (!/popup-closed|cancelled/.test(ex?.code || "")) say(err, loginError(ex));
+    } finally { b.disabled = false; }
+  });
+
+  /* ---- Email: link, or password when that is the configured method ---- */
+  $("#loginForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clear();
+    const email = $("#liEmail").value.trim();
+    const btn = $("#liBtn");
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Working…";
+    try {
+      if (AUTH.password) {
+        await S.store.signIn(email, $("#liPass").value);
+      } else {
+        await S.store.sendSignInLink(email);
+        say(ok, `Link sent to ${email}. Open it on this device to finish signing in.`);
+      }
+    } catch (ex) {
+      say(err, loginError(ex));
     } finally {
       btn.disabled = false;
-      btn.textContent = "Sign in";
+      btn.textContent = label;
     }
   });
 
-  $("#liForgot").addEventListener("click", async () => {
+  /* ---- Phone OTP: one button that sends, then confirms ---- */
+  const phoneBtn = $("#liPhoneBtn");
+  phoneBtn?.addEventListener("click", async () => {
+    clear();
+    const sending = $("#liCodeWrap").classList.contains("hide");
+    phoneBtn.disabled = true;
+    const label = phoneBtn.textContent;
+    phoneBtn.textContent = sending ? "Sending…" : "Checking…";
+    try {
+      if (sending) {
+        const raw = $("#liPhone").value.trim();
+        if (!/^\+[1-9]\d{7,14}$/.test(raw.replace(/[\s()-]/g, ""))) {
+          throw new Error("Include the country code, like +91 98765 43210.");
+        }
+        await S.store.sendPhoneCode(raw.replace(/[\s()-]/g, ""), "recaptcha");
+        $("#liCodeWrap").classList.remove("hide");
+        $("#liCode").focus();
+        say(ok, `Code sent to ${raw}.`);
+        phoneBtn.textContent = "Sign in";
+      } else {
+        await S.store.confirmPhoneCode($("#liCode").value.trim());
+      }
+    } catch (ex) {
+      say(err, loginError(ex));
+      phoneBtn.textContent = label;
+    } finally { phoneBtn.disabled = false; }
+  });
+
+  $("#liForgot")?.addEventListener("click", async () => {
     const email = $("#liEmail").value.trim();
     if (!email) return toast("Type your email above first.", "warn");
     try {
       await S.store.resetPassword(email);
       toast("Password reset email sent.", "good");
-    } catch (ex) {
-      toast(loginError(ex), "bad");
-    }
+    } catch (ex) { toast(loginError(ex), "bad"); }
   });
 }
 
@@ -1987,8 +2239,21 @@ function loginError(ex) {
   const code = ex?.code || "";
   if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found"))
     return "That email and password don't match.";
-  if (code.includes("too-many-requests")) return "Too many attempts. Wait a few minutes and try again.";
+  if (code.includes("too-many-requests")) return "Too many attempts. Wait a few minutes, then try again.";
   if (code.includes("network")) return "Can't reach the server. Check your connection.";
+  if (code.includes("popup-blocked")) return "Your browser blocked the Google window. Allow popups for this site, or use the email link instead.";
+  if (code.includes("account-exists-with-different-credential"))
+    return "That address is already signed up with a different method. Use the one you used originally.";
+  if (code.includes("unauthorized-domain"))
+    return "This site isn't on the Firebase authorised-domains list yet. An admin needs to add it.";
+  if (code.includes("operation-not-allowed"))
+    return "That sign-in method isn't switched on in Firebase yet. An admin needs to enable it.";
+  if (code.includes("invalid-phone-number")) return "That number doesn't look right. Include the country code, like +91.";
+  if (code.includes("invalid-verification-code")) return "That code isn't right. Check it and try again.";
+  if (code.includes("code-expired")) return "That code has expired. Ask for a new one.";
+  if (code.includes("missing-phone-number")) return "Enter your mobile number first.";
+  if (code.includes("captcha-check-failed")) return "The robot check failed. Reload the page and try again.";
+  if (code.includes("quota-exceeded")) return "The SMS quota for today is used up. Use Google or the email link instead.";
   return ex?.message || "Something went wrong. Try again.";
 }
 
@@ -3059,10 +3324,13 @@ async function sendInvite() {
   const email = $("#invEmail").value.trim().toLowerCase();
   const role = $("#invRole").value;
   const clientAccess = [...$("#invClients").selectedOptions].map((o) => o.value);
+  const phone = $("#invPhone").value.trim().replace(/[\s()-]/g, "");
 
   if (!name) return toast("Add their name so people know who this is.", "warn");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast("That email doesn't look right.", "warn");
   if (role === "client" && !clientAccess.length) return toast("Pick which clients they can see.", "warn");
+  if (phone && !/^\+[1-9]\d{7,14}$/.test(phone))
+    return toast("Include the country code on the mobile, like +91 98765 43210.", "warn");
   if (S.users.some((u) => (u.email || "").toLowerCase() === email)) {
     return toast("That person already has access.", "warn");
   }
@@ -3071,10 +3339,11 @@ async function sendInvite() {
   btn.disabled = true;
   btn.textContent = "Sending…";
   try {
-    await S.store.createInvite(email, { name, role, clientAccess });
+    await S.store.createInvite(email, { name, role, clientAccess, phone });
     await S.store.sendInviteLink(email);
     $("#invName").value = "";
     $("#invEmail").value = "";
+    $("#invPhone").value = "";
     toast(
       S.store.mode === "demo"
         ? "Invite recorded. In demo mode no email is actually sent."
@@ -3137,7 +3406,7 @@ function renderInvites() {
     if (revoke) {
       const email = revoke.dataset.revoke;
       if (!confirm(`Revoke the invite for ${email}? Their link stops working.`)) return;
-      await S.store.revokeInvite(email);
+      await S.store.revokeInvite(email, S.invites.find((i) => i.email === email)?.phone);
       toast("Invite revoked.", "bad");
     }
   };

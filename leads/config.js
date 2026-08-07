@@ -19,15 +19,46 @@
    through it before the Firebase project exists.
 --------------------------------------------------------------------------- */
 export const firebaseConfig = {
-  apiKey:            "PASTE_YOUR_API_KEY",
-  authDomain:        "PASTE_YOUR_PROJECT.firebaseapp.com",
-  projectId:         "PASTE_YOUR_PROJECT_ID",
-  storageBucket:     "PASTE_YOUR_PROJECT.appspot.com",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID",
-  appId:             "PASTE_YOUR_APP_ID",
+  apiKey:            "AIzaSyCSnCg1B-zdrCKE44PPBHf177P8KLPVZR0",
+  authDomain:        "leads-dashboard-9d76f.firebaseapp.com",
+  projectId:         "leads-dashboard-9d76f",
+  storageBucket:     "leads-dashboard-9d76f.firebasestorage.app",
+  messagingSenderId: "1008363923882",
+  appId:             "1:1008363923882:web:7a973ea7a7146ad55863d3",
+  measurementId:     "G-6R90ZXWJXY",
 };
 
 export const isConfigured = () => !firebaseConfig.apiKey.startsWith("PASTE_");
+
+/* ---------------------------------------------------------------------------
+   1b. SIGN-IN METHODS
+
+   Turn a method off here and its button disappears from the sign-in screen.
+   Each one still has to be enabled in Firebase console → Authentication →
+   Sign-in method, or it will fail at the point of use.
+
+   A NOTE ON EMAIL OTP: Firebase Auth has no email one-time-code provider.
+   It ships email/password, email *link* (a magic link, no code to type),
+   phone OTP, and OAuth. A six-digit code by email needs a Cloud Function to
+   generate it, send it, and mint a custom token — server-side work that a
+   pasted HTML block cannot do on its own. `emailLink` below is the closest
+   thing available client-side.
+--------------------------------------------------------------------------- */
+export const AUTH = {
+  google:    true,   // one click, best option for @imarkinfotech.com accounts
+  emailLink: true,   // magic link — Firebase's passwordless email method
+  phone:     true,   // SMS one-time code, needs reCAPTCHA
+  password:  false,  // classic email + password, off by default
+};
+
+/* Whoever holds this address can bootstrap themselves as the first admin the
+   first time they sign in, so the project does not need a hand-made Firestore
+   document to get started. The same address is pinned in firestore.rules —
+   change it in BOTH places or the rules will reject the profile.
+
+   Only ever grants admin to a VERIFIED email, so an unverified sign-in
+   claiming this address gets nothing. */
+export const BOOTSTRAP_ADMIN = "kalash.nandal@imarkinfotech.com";
 
 /* ---------------------------------------------------------------------------
    2. ROLES

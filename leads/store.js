@@ -24,7 +24,7 @@
    document read per entry).
    ========================================================================== */
 
-import { firebaseConfig, isConfigured } from "./config.js";
+import { firebaseConfig, isConfigured, BOOTSTRAP_ADMIN } from "./config.js";
 
 const SDK = "https://www.gstatic.com/firebasejs/10.14.1";
 
@@ -63,6 +63,7 @@ async function firebaseStore() {
     );
 
   let profile = null;
+  let phoneVerifier = null, phoneConfirmation = null;
 
   /* The where() clause that makes a query provably safe for this user's role.
      null means "no clause needed" (staff see everything);
@@ -117,6 +118,47 @@ async function firebaseStore() {
     signOut: () => auth.signOut(A),
     resetPassword: (email) => auth.sendPasswordResetEmail(A, email),
     me: () => profile,
+
+    /* ---- Google ---------------------------------------------------------
+       Popup first because it keeps the page state. Embedded contexts (an
+       iframe in a page builder, some in-app browsers) block popups, so fall
+       back to a full redirect rather than failing. */
+    async signInWithGoogle() {
+      const provider = new auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      try {
+        return await auth.signInWithPopup(A, provider);
+      } catch (ex) {
+        const code = ex?.code || "";
+        if (/popup-blocked|popup-closed-by-user|operation-not-supported|cancelled-popup/.test(code)) {
+          if (code.includes("popup-closed") || code.includes("cancelled")) throw ex;  // user's choice
+          return auth.signInWithRedirect(A, provider);
+        }
+        throw ex;
+      }
+    },
+    resolveRedirect: () => auth.getRedirectResult(A).catch(() => null),
+
+    /* ---- Phone OTP ------------------------------------------------------
+       Firebase requires a reCAPTCHA before it will send an SMS. Invisible
+       mode solves silently in the normal case. The verifier is single-use, so
+       it is torn down and rebuilt for each attempt — reusing one is the usual
+       cause of a second send failing. */
+    async sendPhoneCode(phoneE164, containerId) {
+      if (phoneVerifier) { try { phoneVerifier.clear(); } catch {} phoneVerifier = null; }
+      phoneVerifier = new auth.RecaptchaVerifier(A, containerId, { size: "invisible" });
+      await phoneVerifier.render();
+      phoneConfirmation = await auth.signInWithPhoneNumber(A, phoneE164, phoneVerifier);
+      return true;
+    },
+
+    async confirmPhoneCode(code) {
+      if (!phoneConfirmation) throw new Error("Ask for a code first.");
+      const res = await phoneConfirmation.confirm(code);
+      phoneConfirmation = null;
+      if (phoneVerifier) { try { phoneVerifier.clear(); } catch {} phoneVerifier = null; }
+      return res;
+    },
 
     /* ---- leads --------------------------------------------------------- */
     watchLeads(cb) {
@@ -204,19 +246,29 @@ async function firebaseStore() {
     --------------------------------------------------------------------- */
     watchInvites: (cb) => live(query(collection(D, "invites"), orderBy("createdAt", "desc")), cb),
 
-    createInvite(email, data) {
+    /* Written under the email, and again under the phone number when one is
+       given, so the invite can be claimed by whichever method the person ends
+       up signing in with. Two small documents beats a lookup query, which the
+       rules would have to open up to make work. */
+    async createInvite(email, data) {
       const key = email.trim().toLowerCase();
-      return setDoc(doc(D, "invites", key), {
+      const phone = (data.phone || "").trim();
+      const payload = {
         ...data,
         email: key,
         status: "pending",
         createdAt: serverTimestamp(),
         invitedBy: profile.uid,
         invitedByName: profile.name || profile.email,
-      });
+      };
+      await setDoc(doc(D, "invites", key), payload);
+      if (phone) await setDoc(doc(D, "invites", phone), { ...payload, viaPhone: true });
     },
 
-    revokeInvite: (email) => deleteDoc(doc(D, "invites", email.trim().toLowerCase())),
+    async revokeInvite(email, phone) {
+      await deleteDoc(doc(D, "invites", email.trim().toLowerCase()));
+      if (phone) await deleteDoc(doc(D, "invites", phone.trim())).catch(() => {});
+    },
 
     /* Emails a passwordless sign-in link. Requires "Email link (passwordless
        sign-in)" to be enabled in Firebase console -> Authentication. */
@@ -231,6 +283,18 @@ async function firebaseStore() {
       try { localStorage.setItem("leads:inviteEmail", key); } catch {}
     },
 
+    /* Plain passwordless sign-in from the login screen. Same mechanism as an
+       invite link, but it touches no invite document — this is for people who
+       already have access and just want in. */
+    async sendSignInLink(email) {
+      const key = email.trim().toLowerCase();
+      await auth.sendSignInLinkToEmail(A, key, {
+        url: location.href.split("?")[0].split("#")[0],
+        handleCodeInApp: true,
+      });
+      try { localStorage.setItem("leads:inviteEmail", key); } catch {}
+    },
+
     /* True when the current URL is a sign-in link the user just clicked. */
     isInviteLink: () => auth.isSignInWithEmailLink(A, location.href),
 
@@ -241,16 +305,32 @@ async function firebaseStore() {
     /* Called after sign-in when the user has no users/{uid} document yet.
        Turns a pending invite into a real profile. */
     async claimInvite(user) {
-      const key = (user.email || "").toLowerCase();
+      const email = (user.email || "").toLowerCase();
+
+      /* The first admin has nobody to invite them. A verified match on the
+         address pinned in config.js (and in firestore.rules) bootstraps the
+         project, so it doesn't need a hand-made Firestore document to start.
+         Unverified addresses get nothing — otherwise the check is spoofable. */
+      if (email && email === BOOTSTRAP_ADMIN.toLowerCase() && user.emailVerified) {
+        const admin = { name: user.displayName || email, email, role: "admin", active: true };
+        await setDoc(doc(D, "users", user.uid), admin);
+        return admin;
+      }
+
+      /* Invites are claimable by whichever identifier the person signed in
+         with: their email (Google, email link) or their phone (SMS code). */
+      const key = email || user.phoneNumber || "";
       if (!key) return null;
+
       const snap = await getDoc(doc(D, "invites", key));
       if (!snap.exists()) return null;
       const inv = snap.data();
       if (inv.status === "revoked") return null;
 
       const profileDoc = {
-        name: inv.name || user.email,
-        email: key,
+        name: inv.name || key,
+        email: inv.email || email || "",
+        ...(user.phoneNumber ? { phone: user.phoneNumber } : {}),
         role: inv.role,
         active: true,
         ...(inv.role === "client" ? { clientAccess: inv.clientAccess || [] } : {}),
@@ -496,6 +576,11 @@ function demoStore() {
     isInviteLink: () => false,
     signInWithLink: async () => profile,
     claimInvite: async () => null,
+    sendSignInLink: async () => {},
+    signInWithGoogle: async () => profile,
+    resolveRedirect: async () => null,
+    sendPhoneCode: async () => true,
+    confirmPhoneCode: async () => profile,
 
     async logExport(rec) {
       const db = read();
@@ -517,11 +602,23 @@ function demoStore() {
    PICKER
    ========================================================================== */
 export async function openStore() {
-  if (!isConfigured()) return demoStore();
+  /* ?demo=1 forces the sample data, so the dashboard can be walked through
+     with the team without touching the live project. */
+  const forced = new URLSearchParams(location.search).has("demo");
+  if (forced || !isConfigured()) return demoStore();
+
+  /* Once real keys are configured, a failure must NOT quietly fall back to
+     demo mode. Demo data lives in localStorage and goes nowhere — someone
+     would enter real leads into a dashboard that only looks like it works. */
   try {
     return await firebaseStore();
   } catch (err) {
-    console.error("Firebase failed to start; falling back to demo mode.", err);
-    return demoStore();
+    console.error("Firebase failed to start.", err);
+    const e = new Error(
+      "Couldn't reach Firebase. Check your connection and reload — " +
+      "your data is safe, this page just can't load it right now."
+    );
+    e.cause = err;
+    throw e;
   }
 }

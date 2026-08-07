@@ -435,6 +435,19 @@ fieldset.grp legend{
 }
 .login-foot{font-size:11.5px; color:var(--ink-4); text-align:center; margin-top:16px; line-height:1.7}
 .link-btn{font-size:12px; font-weight:550; color:var(--accent-d); text-decoration:underline}
+.login-ok{
+  background:var(--good-l); border:1px solid var(--good-bd); color:var(--good);
+  font-size:12.5px; padding:8px 11px; border-radius:var(--r-m); margin-bottom:12px;
+}
+.btn-google{width:100%; padding:9px; gap:9px; font-weight:550}
+.login-or{
+  display:flex; align-items:center; gap:10px; margin:14px 0;
+  font-size:11.5px; color:var(--ink-4);
+}
+.login-or::before,.login-or::after{content:''; flex:1; height:1px; background:var(--line)}
+/* Firebase injects an invisible reCAPTCHA badge here; it must exist but has
+   nothing to show until a code is requested. */
+#recaptcha:empty{display:none}
 
 /* ============ TOASTS ============ */
 #toasts{position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:7px; align-items:center; pointer-events:none}
