@@ -1,0 +1,3165 @@
+<!-- ==========================================================================
+     LinkedIn Leads dashboard — paste this whole block into a GHL custom HTML
+     element. It is self-contained: no build step, no files to upload.
+
+     Everything is scoped to #llb-root, so GHL's page styles cannot reach in
+     and these styles cannot leak out.
+
+     TO GO LIVE: find "PASTE_YOUR_API_KEY" below and fill in the six Firebase
+     values. Until then it runs on demo data held in each visitor's browser.
+
+     Height: the app fills the viewport by default. To fit it inside a GHL
+     page that has its own header and footer, change --app-height on the
+     first CSS rule (e.g. --app-height:900px).
+     ========================================================================== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+#llb-root{--app-height:100dvh; position:relative; isolation:isolate;}
+#llb-root button, #llb-root input, #llb-root select, #llb-root textarea,
+#llb-root table, #llb-root th, #llb-root td, #llb-root h1, #llb-root h2, #llb-root h3,
+#llb-root h4, #llb-root p, #llb-root a, #llb-root ul, #llb-root li, #llb-root fieldset,
+#llb-root legend, #llb-root label, #llb-root section, #llb-root aside, #llb-root header,
+#llb-root nav, #llb-root main, #llb-root div, #llb-root span{
+  all:revert;
+}
+#llb-root *, #llb-root *::before, #llb-root *::after{
+  box-sizing:border-box !important; float:none !important;
+  text-transform:none !important; text-shadow:none !important;
+  outline:0 !important;
+}
+/* ============================================================================
+   LinkedIn Leads — internal tool
+
+   Built like software people work in all day, not like a landing page:
+   left nav rail, dense tables, 1px borders instead of shadows, 6px radii,
+   and colour reserved for state. The only saturated hue on a resting screen
+   is the active nav item; everything else earns its colour by meaning
+   something (a stage, a warning, an outcome).
+   ========================================================================== */
+
+#llb-root{
+  color-scheme:light !important;
+
+  /* Slate neutrals, cooled a touch toward the indigo so greys look chosen. */
+  --ink:#0e1116 !important; --ink-2:#39424e; --ink-3:#68717e; --ink-4:#98a1ad;
+  --line:#e4e7ec; --line-2:#eef1f4; --line-3:#f6f8fa;
+  --bg:#f7f8fa; --card:#ffffff;
+
+  --accent:#3d52d5; --accent-d:#2f40b0; --accent-l:#eef1fe; --accent-bd:#ccd4fa;
+  --viz:#4a5bd8;
+
+  /* Reserved for state. Never used decoratively. */
+  --good:#136c3e !important; --good-l:#e8f4ed; --good-bd:#bcdfcb;
+  --bad:#a3241b;  --bad-l:#fceceb;  --bad-bd:#efc7c3;
+  --warn:#8f5108; --warn-l:#fdf2e5; --warn-bd:#f0d7b4;
+
+  /* Small radii. Big ones are the giveaway of a page pretending to be an app. */
+  --r-s:4px !important; --r-m:6px; --r-l:8px;
+
+  --sans:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --disp:'Inter Tight', 'Inter', -apple-system, sans-serif;
+
+  --side:216px;
+}
+
+#llb-root *, #llb-root *::before, #llb-root *::after{box-sizing:border-box !important}
+#llb-root{-webkit-text-size-adjust:100% !important}
+#llb-root{
+  margin:0 !important; font-family:var(--sans) !important; color:var(--ink) !important; background:var(--bg) !important;
+  -webkit-font-smoothing:antialiased !important; font-size:14px !important; line-height:1.5 !important;
+  font-feature-settings:'cv05' 1,'cv08' 1 !important;
+}
+#llb-root h1, #llb-root h2, #llb-root h3, #llb-root h4{margin:0 !important; font-family:var(--disp) !important; line-height:1.2 !important; letter-spacing:-.014em !important}
+#llb-root p{margin:0 !important}
+#llb-root button{font-family:inherit !important; cursor:pointer !important; border:0 !important; background:none !important; color:inherit !important}
+#llb-root input, #llb-root select, #llb-root textarea{font-family:inherit !important; font-size:13.5px !important; color:var(--ink) !important}
+#llb-root a{color:var(--accent-d) !important; text-underline-offset:2px !important}
+#llb-root .num, #llb-root table{font-variant-numeric:tabular-nums}
+#llb-root .muted{color:var(--ink-3); font-size:12.5px}
+#llb-root .hide{display:none !important}
+#llb-root .grow{flex:1; min-width:0}
+#llb-root .mt-8{margin-top:8px} #llb-root .mt-12{margin-top:12px} #llb-root .mt-16{margin-top:16px}
+#llb-root :focus-visible{outline:2px solid var(--accent) !important; outline-offset:1px !important; border-radius:2px !important}
+
+/* Copy guard — data surfaces aren't selectable so the tracked export is the
+   path of least resistance. Form controls stay fully editable. */
+#llb-root .noselect, #llb-root .noselect *{-webkit-user-select:none; -moz-user-select:none; user-select:none}
+#llb-root input, #llb-root textarea, #llb-root select, #llb-root [contenteditable], #llb-root .selectable, #llb-root .selectable *{
+  -webkit-user-select:text !important; -moz-user-select:text !important; user-select:text !important;
+}
+
+/* ============ SHELL ============ */
+#llb-root .shell{min-height:var(--app-height,100dvh); display:grid; grid-template-columns:var(--side) minmax(0,1fr); min-height:100dvh}
+#llb-root .main{min-width:0; display:flex; flex-direction:column}
+#llb-root .content{padding:22px 26px 72px; max-width:1460px; width:100%}
+
+/* ============ SIDEBAR ============ */
+#llb-root .side{
+  min-width:0 !important;
+  position:sticky !important; top:0 !important; height:100dvh !important; background:var(--card) !important;
+  border-right:1px solid var(--line) !important; display:flex !important; flex-direction:column !important; z-index:30 !important;
+}
+#llb-root .side-brand{display:flex !important; align-items:center !important; gap:9px !important; padding:15px 14px !important; border-bottom:1px solid var(--line-2) !important}
+#llb-root .brandmark{
+  width:28px !important; height:28px !important; border-radius:var(--r-m) !important; flex:none !important; display:grid !important; place-items:center !important;
+  background:var(--accent) !important; color:#fff !important;
+}
+#llb-root .side-title{font-family:var(--disp) !important; font-size:13.5px !important; font-weight:600 !important; letter-spacing:-.01em !important}
+#llb-root .side-sub{font-size:11px !important; color:var(--ink-4) !important; font-weight:500 !important; margin-top:1px !important}
+
+#llb-root .nav{flex:1 !important; padding:10px 8px !important; overflow-y:auto !important; display:flex !important; flex-direction:column !important; gap:1px !important}
+#llb-root .nav-label{
+  font-size:10px !important; font-weight:600 !important; letter-spacing:.07em !important; text-transform:uppercase !important;
+  color:var(--ink-4) !important; padding:14px 8px 5px !important;
+}
+#llb-root .tab{
+  display:flex !important; align-items:center !important; gap:8px !important; width:100% !important; text-align:left !important;
+  padding:7px 9px !important; border-radius:var(--r-m) !important; font-size:13.5px !important; font-weight:500 !important;
+  color:var(--ink-2) !important; transition:background .12s, color .12s !important;
+}
+#llb-root .tab:hover{background:var(--line-3) !important; color:var(--ink) !important}
+#llb-root .tab.on{background:var(--accent-l) !important; color:var(--accent-d) !important; font-weight:600 !important}
+#llb-root .tab .cnt{
+  margin-left:auto !important; font-size:11px !important; font-weight:600 !important; padding:1px 6px !important; border-radius:20px !important;
+  background:var(--line-2) !important; color:var(--ink-3) !important; font-variant-numeric:tabular-nums !important;
+}
+#llb-root .tab.on .cnt{background:#fff !important; color:var(--accent-d) !important}
+
+#llb-root .side-user{
+  display:flex !important; align-items:center !important; gap:9px !important; padding:10px 12px !important;
+  border-top:1px solid var(--line-2) !important;
+}
+#llb-root .side-user b{display:block !important; font-size:12.5px !important; font-weight:600 !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important}
+#llb-root .side-user span{font-size:11px !important; color:var(--ink-4) !important}
+#llb-root .avatar{
+  width:27px !important; height:27px !important; border-radius:var(--r-m) !important; flex:none !important; display:grid !important; place-items:center !important;
+  background:var(--accent-l) !important; color:var(--accent-d) !important; font-size:11px !important; font-weight:600 !important;
+}
+#llb-root .icon-btn{
+  width:26px !important; height:26px !important; border-radius:var(--r-s) !important; flex:none !important; display:grid !important; place-items:center !important;
+  color:var(--ink-4) !important; font-size:13px !important; transition:.12s !important;
+}
+#llb-root .icon-btn:hover{background:var(--line-2) !important; color:var(--bad) !important}
+
+@media(max-width:900px){
+  #llb-root .shell{grid-template-columns:minmax(0,1fr)}
+  #llb-root .side{position:sticky !important; top:0 !important; height:auto !important; border-right:0 !important; border-bottom:1px solid var(--line) !important}
+  #llb-root .side-brand{border-bottom:0 !important; padding:11px 14px !important}
+  #llb-root .nav{flex-direction:row !important; overflow-x:auto !important; padding:0 10px 9px !important; gap:3px !important; scrollbar-width:none !important}
+  #llb-root .nav::-webkit-scrollbar{display:none !important}
+  #llb-root .nav-label{display:none !important}
+  #llb-root .tab{width:auto !important; white-space:nowrap !important; padding:6px 11px !important}
+  #llb-root .side-user{position:absolute !important; top:9px !important; right:12px !important; border-top:0 !important; padding:0 !important; background:none !important}
+  #llb-root .side-user .grow{display:none !important}
+  #llb-root .content{padding:16px 14px 64px}
+}
+
+/* ============ PAGE HEAD ============ */
+#llb-root .page-head{display:flex !important; align-items:flex-end !important; gap:18px !important; flex-wrap:wrap !important; margin-bottom:16px !important}
+#llb-root .page-head h1{font-size:21px !important; font-weight:600 !important}
+#llb-root .page-sub{font-size:13px !important; color:var(--ink-3) !important; margin-top:3px !important}
+#llb-root .page-note{
+  margin-left:auto; font-size:13px; color:var(--ink-2); font-weight:500;
+  padding:6px 11px; background:var(--card); border:1px solid var(--line); border-radius:var(--r-m);
+}
+#llb-root .page-note b{font-weight:650; color:var(--ink)}
+#llb-root .panel{display:none}
+#llb-root .panel.on{display:block}
+
+/* ============ REVIEW HERO ============
+   The one block on the page that carries colour for its own sake. It earns it
+   by being the thing the call opens on: the date, the state of play in a
+   sentence, and the counts. Everything below it stays flat and neutral. */
+#llb-root .hero{
+  background:linear-gradient(112deg,#141a33 0%,#212a52 48%,#33407b 100%) !important;
+  border-radius:var(--r-l) !important; padding:20px 22px !important; margin-bottom:14px !important;
+  color:#fff !important; position:relative !important; overflow:hidden !important;
+}
+#llb-root .hero::after{
+  content:'' !important; position:absolute !important; right:-80px !important; top:-120px !important; width:300px !important; height:300px !important;
+  border-radius:50% !important; background:radial-gradient(circle,rgba(126,142,240,.32),transparent 68%) !important;
+  pointer-events:none !important;
+}
+#llb-root .hero-eyebrow{
+  font-size:10.5px !important; font-weight:600 !important; letter-spacing:.11em !important; text-transform:uppercase !important;
+  color:#98a5e0 !important; position:relative !important;
+}
+#llb-root .hero-line{
+  font-size:22px !important; font-weight:600 !important; letter-spacing:-.02em !important; margin-top:7px !important;
+  max-width:34ch !important; text-wrap:balance !important; position:relative !important; line-height:1.25 !important;
+}
+#llb-root .hero-line b{color:#b3bdf4 !important; font-weight:600 !important}
+
+/* Plain counts. Same five figures, sitting on the hero instead of in a
+   separate row of white boxes. */
+#llb-root .hero-figs{
+  display:flex !important; gap:30px !important; flex-wrap:wrap !important; position:relative !important;
+  margin-top:20px !important; padding-top:17px !important; border-top:1px solid rgba(255,255,255,.13) !important;
+}
+#llb-root .stat{min-width:92px !important}
+#llb-root .stat .k{font-size:10.5px !important; font-weight:600 !important; letter-spacing:.07em !important; text-transform:uppercase !important; color:#98a5e0 !important}
+#llb-root .stat .v{
+  font-family:var(--disp) !important; font-size:27px !important; font-weight:600 !important; line-height:1.05 !important;
+  margin-top:6px !important; letter-spacing:-.03em !important; font-variant-numeric:tabular-nums !important;
+}
+#llb-root .stat .d{font-size:11px !important; color:rgba(255,255,255,.5) !important; margin-top:3px !important}
+#llb-root .stat.good .v{color:#7fdcaa !important}
+#llb-root .stat.alert .v{color:#f5b46b !important}
+#llb-root .stat.alert .k{color:#f5b46b !important}
+@media(max-width:760px){
+  #llb-root .hero{padding:17px 16px !important}
+  #llb-root .hero-line{font-size:18px !important}
+  #llb-root .hero-figs{gap:20px !important}
+  #llb-root .stat{min-width:78px !important}
+  #llb-root .stat .v{font-size:23px !important}
+}
+
+/* Needs attention keeps its warning rail — it is the one card that should
+   catch the eye before you have read anything. */
+#llb-root .card.attn{border-left:3px solid var(--warn) !important}
+#llb-root .card.attn.clear{border-left-color:var(--good) !important}
+#llb-root .attn-badge{
+  width:20px; height:20px; border-radius:var(--r-s); flex:none; display:grid; place-items:center;
+  background:var(--warn-l); color:var(--warn); font-size:12px; font-weight:700; align-self:center;
+}
+#llb-root .card.attn.clear .attn-badge{background:var(--good-l) !important; color:var(--good) !important}
+
+/* ============ CARDS ============ */
+#llb-root .card{background:var(--card) !important; border:1px solid var(--line) !important; border-radius:var(--r-l) !important; margin-bottom:14px !important}
+#llb-root .card-head{
+  display:flex !important; align-items:baseline !important; gap:10px !important; flex-wrap:wrap !important;
+  padding:12px 15px !important; border-bottom:1px solid var(--line-2) !important;
+}
+#llb-root .card-head h2{font-size:13.5px !important; font-weight:600 !important}
+#llb-root .card-head .hint{font-size:12px !important; color:var(--ink-4) !important}
+#llb-root .card-body{padding:15px !important}
+#llb-root .chip{
+  margin-left:auto; font-size:11px; font-weight:600; padding:2px 9px; border-radius:20px;
+  background:var(--line-2); color:var(--ink-3);
+}
+#llb-root .chip.warn{background:var(--warn-l); color:var(--warn)}
+#llb-root .chip.good{background:var(--good-l); color:var(--good)}
+#llb-root .grid-2{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr)); gap:14px}
+#llb-root .grid-3{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); gap:14px}
+
+/* ============ BUTTONS ============ */
+#llb-root .btn{
+  display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:6px !important;
+  padding:7px 13px !important; border-radius:var(--r-m) !important; font-size:13px !important; font-weight:550 !important;
+  border:1px solid transparent !important; transition:background .12s, border-color .12s, color .12s !important;
+  white-space:nowrap !important; line-height:1.3 !important;
+}
+#llb-root .btn[disabled]{opacity:.5 !important; pointer-events:none !important}
+#llb-root .btn-primary{background:var(--accent) !important; color:#fff !important}
+#llb-root .btn-primary:hover{background:var(--accent-d) !important}
+#llb-root .btn-ghost{background:var(--card) !important; color:var(--ink-2) !important; border-color:var(--line) !important}
+#llb-root .btn-ghost:hover{background:var(--line-3) !important; border-color:var(--ink-4) !important; color:var(--ink) !important}
+#llb-root .btn-dark{background:var(--ink) !important; color:#fff !important}
+#llb-root .btn-dark:hover{background:#242c36 !important}
+#llb-root .btn-danger{background:var(--card) !important; color:var(--bad) !important; border-color:var(--bad-bd) !important}
+#llb-root .btn-danger:hover{background:var(--bad-l) !important}
+#llb-root .btn-sm{padding:5px 10px !important; font-size:12.5px !important}
+#llb-root .btn-xs{padding:3px 8px !important; font-size:11.5px !important}
+
+/* ============ FORM CONTROLS ============ */
+#llb-root .fld{display:flex !important; flex-direction:column !important; gap:4px !important; min-width:0 !important}
+#llb-root .fld label{font-size:11.5px !important; font-weight:550 !important; color:var(--ink-3) !important}
+#llb-root .fld label .req{color:var(--accent-d) !important}
+#llb-root .inp{
+  padding:6px 9px !important; border:1px solid var(--line) !important; border-radius:var(--r-m) !important; background:var(--card) !important;
+  transition:border-color .12s, box-shadow .12s !important; width:100% !important;
+}
+#llb-root .inp:focus{outline:none !important; border-color:var(--accent) !important; box-shadow:0 0 0 3px var(--accent-l) !important}
+#llb-root .inp::placeholder{color:var(--ink-4) !important}
+#llb-root select.inp{cursor:pointer !important}
+#llb-root textarea.inp{resize:vertical !important; min-height:66px !important; line-height:1.5 !important}
+#llb-root .err{border-color:var(--bad) !important}
+#llb-root .err-msg{font-size:11.5px; color:var(--bad); font-weight:550; margin-top:2px}
+#llb-root .row-form{display:flex; gap:8px; align-items:flex-end; margin-top:14px}
+#llb-root .frm{display:grid !important; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)) !important; gap:11px !important}
+#llb-root .frm .wide{grid-column:1/-1 !important}
+
+/* ============ TOOLBAR ============ */
+#llb-root .toolbar{
+  display:flex !important; gap:8px !important; flex-wrap:wrap !important; align-items:flex-end !important;
+  background:var(--card) !important; border:1px solid var(--line) !important; border-radius:var(--r-l) !important;
+  padding:11px 13px !important; margin-bottom:12px !important;
+}
+#llb-root .toolbar .search{flex:1 1 200px !important; min-width:160px !important}
+#llb-root .toolbar .spacer{flex:1 !important}
+
+/* ============ TABLE ============ */
+#llb-root .tbl-wrap{
+  background:var(--card) !important; border:1px solid var(--line) !important; border-radius:var(--r-l) !important;
+  overflow:auto !important; max-height:min(72vh,780px) !important;
+}
+#llb-root table.leads{border-collapse:separate !important; border-spacing:0 !important; width:100% !important; min-width:900px !important; font-size:13px !important}
+#llb-root table.leads thead th{
+  position:sticky !important; top:0 !important; z-index:2 !important; background:var(--line-3) !important;
+  text-align:left !important; font-size:11px !important; font-weight:600 !important; color:var(--ink-3) !important;
+  padding:8px 12px !important; border-bottom:1px solid var(--line) !important; white-space:nowrap !important;
+  cursor:pointer !important; user-select:none !important;
+}
+#llb-root table.leads thead th:hover{color:var(--ink) !important}
+#llb-root table.leads thead th .arw{opacity:.5 !important; font-size:9px !important; margin-left:2px !important}
+#llb-root table.leads tbody td{padding:8px 12px !important; border-bottom:1px solid var(--line-2) !important; vertical-align:middle !important}
+#llb-root table.leads tbody tr{cursor:pointer !important; transition:background .1s !important}
+#llb-root table.leads tbody tr:hover{background:var(--line-3) !important}
+#llb-root table.leads tbody tr:last-child td{border-bottom:0 !important}
+
+/* Stage-coloured rail on the first cell — the pipeline is readable straight
+   down the left edge without reading a word. */
+#llb-root table.leads tbody td:first-child{box-shadow:inset 2px 0 0 var(--stripe,transparent) !important; padding-left:14px !important; position:relative !important}
+#llb-root table.leads tbody tr.stale td:first-child::after{
+  content:'' !important; position:absolute !important; left:6px !important; top:calc(50% + 7px) !important;
+  width:5px !important; height:5px !important; border-radius:50% !important; background:var(--warn) !important;
+}
+#llb-root .cell-name{font-weight:550}
+#llb-root .cell-sub{font-size:11.5px; color:var(--ink-4); margin-top:1px}
+#llb-root .cell-dim{color:var(--ink-4)}
+#llb-root .tbl-empty{padding:44px 20px; text-align:center; color:var(--ink-3)}
+#llb-root .tbl-empty .big{font-size:14px; font-weight:600; color:var(--ink-2); margin-bottom:4px}
+#llb-root .tbl-note{font-size:11.5px; color:var(--ink-4); margin-top:8px}
+
+/* ============ PILLS ============
+   Stage pills take their colours inline from STAGES in config.js. */
+#llb-root .pill{
+  display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:20px;
+  font-size:11.5px; font-weight:550; white-space:nowrap; border:1px solid transparent;
+}
+#llb-root .pill .dot{width:5px; height:5px; border-radius:50%; background:currentColor; flex:none}
+#llb-root .pill-neutral{background:var(--line-2); color:var(--ink-2); border-color:var(--line)}
+#llb-root .pill-accent{background:var(--accent-l); color:var(--accent-d); border-color:var(--accent-bd)}
+#llb-root .pill-good{background:var(--good-l); color:var(--good); border-color:var(--good-bd)}
+#llb-root .pill-bad{background:var(--bad-l); color:var(--bad); border-color:var(--bad-bd)}
+#llb-root .pill-warn{background:var(--warn-l); color:var(--warn); border-color:var(--warn-bd)}
+#llb-root .pill-stream{background:var(--line-2); color:var(--ink-2); border-color:var(--line); font-size:11px}
+
+/* ============ PIPELINE ============ */
+#llb-root .pipe{display:flex; align-items:stretch; overflow-x:auto; padding-bottom:4px}
+#llb-root .pipe-step{
+  flex:1 1 0; min-width:98px; border:1px solid var(--line); border-radius:var(--r-m);
+  padding:11px 12px 10px; position:relative; overflow:hidden; background:var(--card);
+}
+#llb-root .pipe-step::before{content:''; position:absolute; inset:0 0 auto 0; height:3px; background:var(--step,var(--line))}
+#llb-root .pipe-step.is-empty::before{opacity:.3}
+#llb-root .pipe-step .n{font-family:var(--disp); font-size:22px; font-weight:600; line-height:1; color:var(--step); font-variant-numeric:tabular-nums}
+#llb-root .pipe-step.is-empty .n{color:var(--ink-4)}
+#llb-root .pipe-step .k{font-size:12px; font-weight:550; color:var(--ink-2); margin-top:5px}
+#llb-root .pipe-step .p{font-size:11px !important; color:var(--ink-4) !important; margin-top:1px !important; font-variant-numeric:tabular-nums !important}
+#llb-root .pipe-arrow{
+  flex:none; width:44px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:2px;
+}
+#llb-root .pipe-arrow .g{font-size:14px; line-height:1; color:var(--ink-4)}
+#llb-root .pipe-arrow .c{font-size:11px; font-weight:600; color:var(--ink-3); font-variant-numeric:tabular-nums}
+@media(max-width:700px){ #llb-root .pipe-arrow{width:24px} #llb-root .pipe-step{min-width:88px} }
+
+#llb-root .outcomes{display:flex; gap:7px; flex-wrap:wrap; margin-top:14px; padding-top:13px; border-top:1px solid var(--line-2)}
+#llb-root .outcome{
+  display:inline-flex; align-items:baseline; gap:7px; padding:5px 11px; border-radius:var(--r-m);
+  border:1px solid var(--line); background:var(--card);
+}
+#llb-root .outcome .n{font-size:14px; font-weight:600; font-variant-numeric:tabular-nums}
+#llb-root .outcome .k{font-size:12px; color:var(--ink-3)}
+
+/* ============ BAR CHARTS ============ */
+#llb-root .bars{display:flex; flex-direction:column; gap:7px}
+#llb-root .bar-row{display:grid; grid-template-columns:minmax(76px,116px) 1fr auto; align-items:center; gap:10px}
+#llb-root .bar-lab{font-size:12.5px; color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+#llb-root .bar-track{height:16px; background:var(--line-2); border-radius:var(--r-s); overflow:hidden}
+#llb-root .bar-fill{height:100%; background:var(--viz); border-radius:0 var(--r-s) var(--r-s) 0; min-width:2px; transition:width .35s ease}
+#llb-root .bar-val{font-size:12.5px; font-weight:600; min-width:24px; text-align:right; font-variant-numeric:tabular-nums}
+#llb-root .bar-row.is-zero .bar-val{color:var(--ink-4)}
+#llb-root .empty-chart{font-size:12.5px; color:var(--ink-4); padding:18px 0; text-align:center}
+
+/* ============ LISTS ============ */
+#llb-root .list{display:flex !important; flex-direction:column !important}
+#llb-root .li{display:flex !important; align-items:center !important; gap:11px !important; padding:9px 0 !important; border-bottom:1px solid var(--line-2) !important}
+#llb-root .li:last-child{border-bottom:0 !important}
+#llb-root .li .t{font-size:13px !important; font-weight:550 !important}
+#llb-root .li .s{font-size:11.5px !important; color:var(--ink-4) !important; margin-top:1px !important}
+#llb-root #attnCard .list{padding:0 15px !important}
+#llb-root #attnCard .li:last-child{padding-bottom:14px !important}
+
+#llb-root .exp-row{display:grid; grid-template-columns:1fr auto; gap:12px; padding:9px 0; border-bottom:1px solid var(--line-2); align-items:center}
+#llb-root .exp-row:last-child{border-bottom:0}
+#llb-root .exp-t{font-size:13px; font-weight:550}
+#llb-root .exp-s{font-size:11.5px; color:var(--ink-4); margin-top:1px}
+#llb-root .exp-n{font-size:12px; font-weight:600; color:var(--ink-2); white-space:nowrap}
+
+/* ============ ACTIVITY FEED ============ */
+#llb-root .feed{display:flex !important; flex-direction:column !important}
+#llb-root .fe{display:grid !important; grid-template-columns:22px 1fr !important; gap:10px !important; padding:9px 0 !important; border-bottom:1px solid var(--line-2) !important}
+#llb-root .fe:last-child{border-bottom:0 !important}
+#llb-root .fe-ic{
+  width:22px !important; height:22px !important; border-radius:var(--r-s) !important; display:grid !important; place-items:center !important;
+  background:var(--line-2) !important; color:var(--ink-3) !important; font-size:10px !important; font-weight:600 !important;
+}
+#llb-root .fe-ic.comment{background:var(--accent-l) !important; color:var(--accent-d) !important}
+#llb-root .fe-ic.stage{background:var(--ink) !important; color:#fff !important}
+#llb-root .fe-top{display:flex !important; gap:7px !important; align-items:baseline !important; flex-wrap:wrap !important}
+#llb-root .fe-who{font-size:12.5px !important; font-weight:600 !important}
+#llb-root .fe-when{font-size:11.5px !important; color:var(--ink-4) !important}
+#llb-root .fe-txt{font-size:13px !important; color:var(--ink-2) !important; margin-top:1px !important; white-space:pre-wrap !important; word-break:break-word !important}
+#llb-root .cbox{display:flex; gap:8px; align-items:flex-end; margin-top:13px}
+
+/* ============ DRAWER ============ */
+#llb-root .scrim{
+  position:fixed; inset:0; background:rgba(14,17,22,.34); z-index:90;
+  opacity:0; pointer-events:none; transition:opacity .18s;
+}
+#llb-root .scrim.on{opacity:1; pointer-events:auto}
+#llb-root .drawer{
+  position:fixed !important; top:0 !important; right:0 !important; bottom:0 !important; width:min(620px,100%) !important;
+  background:var(--bg) !important; z-index:100 !important; box-shadow:-16px 0 40px -24px rgba(14,17,22,.4) !important;
+  transform:translateX(100%) !important; transition:transform .22s cubic-bezier(.32,.72,0,1) !important;
+  display:flex !important; flex-direction:column !important; border-left:1px solid var(--line) !important;
+}
+#llb-root .drawer.on{transform:none !important}
+#llb-root .dr-head{
+  padding:13px 18px !important; border-bottom:1px solid var(--line) !important; background:var(--card) !important;
+  display:flex !important; align-items:flex-start !important; gap:12px !important; flex:none !important;
+}
+#llb-root .dr-head h3{font-size:16px !important; font-weight:600 !important}
+#llb-root .dr-head .sub{font-size:12.5px !important; color:var(--ink-3) !important; margin-top:2px !important}
+#llb-root .dr-close{
+  margin-left:auto !important; width:27px !important; height:27px !important; border-radius:var(--r-s) !important; flex:none !important;
+  display:grid !important; place-items:center !important; color:var(--ink-3) !important; font-size:17px !important; transition:.12s !important;
+}
+#llb-root .dr-close:hover{background:var(--line-2) !important; color:var(--ink) !important}
+#llb-root .dr-body{flex:1 !important; overflow-y:auto !important; padding:16px 18px 26px !important}
+#llb-root .dr-foot{
+  padding:11px 18px !important; border-top:1px solid var(--line) !important; background:var(--card) !important; flex:none !important;
+  display:flex !important; gap:8px !important; align-items:center !important; flex-wrap:wrap !important;
+}
+#llb-root .dr-tabs{display:flex !important; gap:2px !important; padding:2px !important; background:var(--line-2) !important; border-radius:var(--r-m) !important; margin-bottom:15px !important}
+#llb-root .dr-tab{flex:1 !important; padding:6px 11px !important; border-radius:var(--r-s) !important; font-size:12.5px !important; font-weight:550 !important; color:var(--ink-3) !important; transition:.12s !important}
+#llb-root .dr-tab.on{background:var(--card) !important; color:var(--ink) !important; font-weight:600 !important}
+
+#llb-root fieldset.grp{border:0; padding:0; margin:0 0 18px}
+#llb-root fieldset.grp legend{
+  font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-4); padding:0 0 8px;
+}
+#llb-root .kv{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px 16px}
+#llb-root .kv .k{font-size:11px; color:var(--ink-4)}
+#llb-root .kv .v{font-size:13px; font-weight:500; margin-top:1px; word-break:break-word}
+#llb-root .kv .v.blank{color:var(--ink-4); font-weight:400}
+
+/* ============ LOGIN ============ */
+#llb-root #login{min-height:100dvh !important; display:grid !important; place-items:center !important; padding:24px !important; background:var(--bg) !important}
+#llb-root .login-card{
+  width:min(374px,100%) !important; background:var(--card) !important; border:1px solid var(--line) !important;
+  border-radius:var(--r-l) !important; padding:28px 26px !important;
+}
+#llb-root .login-card .brandmark{width:34px !important; height:34px !important; margin-bottom:16px !important}
+#llb-root .login-card h1{font-size:19px !important; font-weight:600 !important}
+#llb-root .login-card .tag{font-size:12.5px !important; color:var(--ink-3) !important; margin-top:4px !important; margin-bottom:20px !important}
+#llb-root .login-card .fld{margin-bottom:11px !important}
+#llb-root .login-card .btn{width:100% !important; margin-top:6px !important; padding:8px !important}
+#llb-root .login-err{
+  background:var(--bad-l) !important; border:1px solid var(--bad-bd) !important; color:var(--bad) !important;
+  font-size:12.5px !important; padding:8px 11px !important; border-radius:var(--r-m) !important; margin-bottom:12px !important;
+}
+#llb-root .login-foot{font-size:11.5px !important; color:var(--ink-4) !important; text-align:center !important; margin-top:16px !important; line-height:1.7 !important}
+#llb-root .link-btn{font-size:12px !important; font-weight:550 !important; color:var(--accent-d) !important; text-decoration:underline !important}
+
+/* ============ TOASTS ============ */
+#llb-root #toasts{position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:7px; align-items:center; pointer-events:none}
+#llb-root .toast{
+  background:var(--ink) !important; color:#fff !important; font-size:12.5px !important; font-weight:500 !important;
+  padding:8px 14px !important; border-radius:var(--r-m) !important; max-width:min(90vw,440px) !important; text-align:center !important;
+  box-shadow:0 8px 24px -10px rgba(14,17,22,.5) !important; animation:rise .16s ease-out !important;
+}
+#llb-root .toast.warn{background:var(--warn) !important} #llb-root .toast.bad{background:var(--bad) !important} #llb-root .toast.good{background:var(--good) !important}
+@keyframes rise{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:none}}
+
+@media(prefers-reduced-motion:reduce){
+  #llb-root *, #llb-root *::before, #llb-root *::after{animation-duration:.01ms !important; transition-duration:.01ms !important}
+}
+@media print{ #llb-root .side, #llb-root .toolbar, #llb-root .dr-foot, #llb-root #demobar{display:none !important} }
+
+/* Demo banner — informational, not decorative. */
+#llb-root #demobar{
+  background:var(--accent-l); border-bottom:1px solid var(--accent-bd); color:var(--accent-d);
+  font-size:12px; font-weight:500; text-align:center; padding:6px 16px;
+}
+#llb-root #demobar code{font-size:11.5px; background:rgba(61,82,213,.1); padding:1px 4px; border-radius:3px}
+
+
+/* .hide must outrank the ID rules armoured above. */
+#llb-root #login.hide,
+#llb-root #toasts.hide,
+#llb-root #demobar.hide,
+#llb-root .hide{display:none !important}
+
+</style>
+
+<div id="llb-root">
+<!-- ====================== LOGIN ====================== -->
+<section id="login" class="hide">
+  <div class="login-card">
+    <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="5.2" width="18" height="3.4" rx="1" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1" fill="currentColor" opacity=".46"/></svg></span>
+    <h1>Sign in</h1>
+    <p class="tag">LinkedIn Leads — internal tracker for operations and sales.</p>
+
+    <div id="loginErr" class="login-err hide"></div>
+
+    <form id="loginForm" autocomplete="on">
+      <div class="fld">
+        <label for="liEmail">Work email</label>
+        <input class="inp" type="email" id="liEmail" required autocomplete="username" placeholder="you@company.com">
+      </div>
+      <div class="fld">
+        <label for="liPass">Password</label>
+        <input class="inp" type="password" id="liPass" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" type="submit" id="liBtn">Sign in</button>
+    </form>
+
+    <p class="login-foot">
+      No account? Ask an admin to invite you.<br>
+      <button class="link-btn" id="liForgot" type="button">Forgot your password?</button>
+    </p>
+  </div>
+</section>
+
+<!-- ====================== APP ====================== -->
+<div id="app" class="hide">
+  <div class="shell">
+
+    <!-- ---------- SIDEBAR ---------- -->
+    <aside class="side">
+      <div class="side-brand">
+        <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17"><rect x="3" y="5.2" width="18" height="3.4" rx="1" fill="currentColor"/><rect x="6.2" y="10.3" width="11.6" height="3.4" rx="1" fill="currentColor" opacity=".72"/><rect x="9.4" y="15.4" width="5.2" height="3.4" rx="1" fill="currentColor" opacity=".46"/></svg></span>
+        <div>
+          <div class="side-title">LinkedIn Leads</div>
+          <div class="side-sub">Ops → Sales</div>
+        </div>
+      </div>
+
+      <nav class="nav" id="tabs">
+        <button class="tab on" data-tab="review">Review</button>
+        <div class="nav-label">Leads</div>
+        <button class="tab" data-tab="sales_partner">Summit Sales <span class="cnt" id="cntSales">0</span></button>
+        <button class="tab" data-tab="client">Clients <span class="cnt" id="cntClient">0</span></button>
+        <div class="nav-label">Record</div>
+        <button class="tab" data-tab="activity">Activity</button>
+        <button class="tab" data-tab="exports">Exports</button>
+        <button class="tab" data-tab="admin" id="tabAdmin">Admin</button>
+      </nav>
+
+      <div class="side-user">
+        <div class="avatar" id="meAvatar">?</div>
+        <div class="grow">
+          <b id="meName">—</b>
+          <span id="meRole">—</span>
+        </div>
+        <button class="icon-btn" id="signOut" title="Sign out" aria-label="Sign out">⏻</button>
+      </div>
+    </aside>
+
+    <!-- ---------- MAIN ---------- -->
+    <div class="main">
+      <div id="demobar" class="hide">
+        Demo data — stored in this browser only. Add your Firebase keys in the config block to go live.
+      </div>
+
+      <main class="content noselect">
+
+        <!-- ---------- REVIEW ---------- -->
+        <section class="panel on" data-panel="review">
+          <div class="hero">
+            <div class="hero-eyebrow" id="reviewHint">Since the last review call</div>
+            <h1 class="hero-line" id="reviewLine">Loading…</h1>
+            <div class="hero-figs" id="statTiles"></div>
+          </div>
+
+          <section class="card attn" id="attnCard">
+            <div class="card-head">
+              <span class="attn-badge" id="attnIcon">!</span>
+              <h2 id="attnTitle">Needs attention</h2>
+              <span class="hint" id="attnHint">Open leads nobody has touched.</span>
+            </div>
+            <div id="attnList"></div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h2>Pipeline</h2>
+              <span class="hint">Open leads by stage. The figure between two stages is how many got past the first.</span>
+            </div>
+            <div class="card-body">
+              <div class="pipe" id="pipeChart"></div>
+              <div class="outcomes" id="outcomeChart"></div>
+            </div>
+          </section>
+
+          <div class="grid-3">
+            <section class="card">
+              <div class="card-head">
+                <h2>Sourced by</h2>
+                <span class="hint" id="byWhoHint">All time</span>
+              </div>
+              <div class="card-body"><div class="bars" id="byWhoChart"></div></div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <h2>By client</h2>
+                <span class="hint">Client delivery</span>
+              </div>
+              <div class="card-body"><div class="bars" id="byClientChart"></div></div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <h2>Created per week</h2>
+                <span class="hint">Last 8 weeks</span>
+              </div>
+              <div class="card-body"><div class="bars" id="byWeekChart"></div></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ---------- LEAD STREAMS ---------- -->
+        <section class="panel" data-panel="sales_partner">
+          <header class="page-head">
+            <div>
+              <h1>Summit Sales</h1>
+              <p class="page-sub">Leads handed to Summit in the US. Tracked here, worked in GHL.</p>
+            </div>
+          </header>
+          <div id="toolbar_sales_partner"></div>
+          <div id="table_sales_partner"></div>
+        </section>
+
+        <section class="panel" data-panel="client">
+          <header class="page-head">
+            <div>
+              <h1>Client Delivery</h1>
+              <p class="page-sub">Leads generated for the clients whose LinkedIn we run.</p>
+            </div>
+          </header>
+          <div id="toolbar_client"></div>
+          <div id="table_client"></div>
+        </section>
+
+        <!-- ---------- ACTIVITY ---------- -->
+        <section class="panel" data-panel="activity">
+          <header class="page-head">
+            <div>
+              <h1>Activity</h1>
+              <p class="page-sub">Every stage change and comment, newest first.</p>
+            </div>
+          </header>
+          <section class="card"><div class="card-body"><div class="feed" id="globalFeed"></div></div></section>
+        </section>
+
+        <!-- ---------- EXPORTS ---------- -->
+        <section class="panel" data-panel="exports">
+          <header class="page-head">
+            <div>
+              <h1>Exports</h1>
+              <p class="page-sub" id="expHint">Every download is recorded — who, when, which leads.</p>
+            </div>
+          </header>
+          <section class="card"><div class="card-body"><div id="expList"></div></div></section>
+        </section>
+
+        <!-- ---------- ADMIN ---------- -->
+        <section class="panel" data-panel="admin">
+          <header class="page-head">
+            <div>
+              <h1>Admin</h1>
+              <p class="page-sub">People, roles and client accounts.</p>
+            </div>
+          </header>
+
+          <div class="grid-2">
+            <section class="card">
+              <div class="card-head">
+                <h2>Clients</h2>
+                <span class="hint">Accounts we run LinkedIn for</span>
+              </div>
+              <div class="card-body">
+                <div class="list" id="clientList"></div>
+                <div class="row-form">
+                  <div class="fld grow">
+                    <label for="newClient">Add a client</label>
+                    <input class="inp" id="newClient" placeholder="Client name">
+                  </div>
+                  <button class="btn btn-ghost" id="addClient">Add</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <h2>People</h2>
+                <span class="hint">Everyone with access</span>
+              </div>
+              <div class="card-body"><div class="list" id="userList"></div></div>
+            </section>
+          </div>
+
+          <section class="card">
+            <div class="card-head">
+              <h2>Invite someone</h2>
+              <span class="hint">They get an email link and land with the role you pick.</span>
+            </div>
+            <div class="card-body">
+              <div class="frm">
+                <div class="fld">
+                  <label for="invName">Name</label>
+                  <input class="inp" id="invName" placeholder="Priya Sharma">
+                </div>
+                <div class="fld">
+                  <label for="invEmail">Work email</label>
+                  <input class="inp" type="email" id="invEmail" placeholder="priya@company.com">
+                </div>
+                <div class="fld">
+                  <label for="invRole">Role</label>
+                  <select class="inp" id="invRole"></select>
+                </div>
+                <div class="fld hide" id="invClientWrap">
+                  <label for="invClients">Which clients</label>
+                  <select class="inp" id="invClients" multiple size="3"></select>
+                </div>
+              </div>
+              <p class="muted mt-8" id="invRoleBlurb"></p>
+              <div class="mt-12"><button class="btn btn-primary" id="invSend">Send invite</button></div>
+              <div id="invList" class="mt-16"></div>
+            </div>
+          </section>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== DRAWER ====================== -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="dr-head">
+    <div style="min-width:0">
+      <h3 id="drTitle">Lead</h3>
+      <div class="sub" id="drSub"></div>
+    </div>
+    <button class="dr-close" id="drClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="dr-body" id="drBody"></div>
+  <div class="dr-foot" id="drFoot"></div>
+</aside>
+
+<div id="toasts"></div>
+</div>
+
+<!-- Cal element-click embed. Buttons carrying data-cal-link open the booking
+     modal; app.js listens for the completed booking and updates the lead. The
+     buttons are real links underneath, so if this script is blocked the click
+     still opens the booking page in a new tab. -->
+<script type="text/javascript">
+  (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://cal.id/embed-link/embed.js", "init");
+  Cal("init", "default", {origin:"https://cal.id"});
+  Cal.ns["default"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#3d52d5"},"dark":{"cal-brand":"#fafafa"}},"hideEventTypeDetails":false,"layout":"month_view"});
+</script>
+
+<script type="module">
+
+/* ===== config.js =================================================== */
+/* ============================================================================
+   config.js — the single source of truth for the LinkedIn Leads dashboard.
+
+   Everything downstream (the add/edit form, the table columns, the Excel
+   export, the filters) is generated from LEAD_FIELDS and STAGES below. Add a
+   field here once and it shows up everywhere.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. FIREBASE
+   Replace the placeholder values with the config from:
+   Firebase console -> Project settings -> Your apps -> Web app -> SDK setup.
+
+   These values are NOT secrets — a web Firebase config is public by design.
+   Access is enforced by firestore.rules, not by hiding this object.
+
+   While apiKey is still "PASTE_...", the app runs in DEMO MODE: the same UI
+   backed by localStorage with seeded sample data, so you can walk the team
+   through it before the Firebase project exists.
+--------------------------------------------------------------------------- */
+const firebaseConfig = {
+  apiKey:            "PASTE_YOUR_API_KEY",
+  authDomain:        "PASTE_YOUR_PROJECT.firebaseapp.com",
+  projectId:         "PASTE_YOUR_PROJECT_ID",
+  storageBucket:     "PASTE_YOUR_PROJECT.appspot.com",
+  messagingSenderId: "PASTE_YOUR_SENDER_ID",
+  appId:             "PASTE_YOUR_APP_ID",
+};
+
+const isConfigured = () => !firebaseConfig.apiKey.startsWith("PASTE_");
+
+/* ---------------------------------------------------------------------------
+   2. ROLES
+   Set on each user's document in the `users` collection (see README).
+--------------------------------------------------------------------------- */
+const ROLES = {
+  admin:  { label: "Admin",         blurb: "Full access. Manages people, clients and sees every export." },
+  ops:    { label: "LinkedIn Team", blurb: "Creates and edits leads, comments, exports." },
+  sales:  { label: "Summit Sales",  blurb: "Sees leads shared with Summit. Updates stage, comments, exports." },
+  client: { label: "Client",        blurb: "Read-only, and only the leads for their own client account." },
+};
+
+/* ---------------------------------------------------------------------------
+   3. STREAMS — the two spreadsheets this dashboard replaces
+--------------------------------------------------------------------------- */
+/* The `sales_partner` key is deliberately unchanged — it is written into every
+   existing lead and into firestore.rules. Only the labels say "Summit Sales". */
+const STREAMS = {
+  sales_partner: {
+    label: "Summit Sales",
+    short: "Summit",
+    blurb: "Leads our LinkedIn team hands to Summit Sales in the US. These are the ones that used to get lost in WhatsApp.",
+    handoffLabel: "Shared with Summit on",
+  },
+  client: {
+    label: "Client Delivery",
+    short: "Client",
+    blurb: "Leads generated for clients whose LinkedIn we run. One line per client, delivered and acknowledged.",
+    handoffLabel: "Delivered to client on",
+  },
+};
+
+/* ---------------------------------------------------------------------------
+   4. PIPELINE STAGES
+   Ordered. `funnel: true` means the stage counts as a step in the funnel chart
+   (won/lost/nurture are outcomes, not steps).
+
+   COLOUR — each stage owns exactly one `ink`, used for its pill text, its dot,
+   its row stripe and its pipeline block, over a matching `tint`.
+
+   The five pipeline stages walk an ordinal indigo ramp that gets darker at
+   every step, so a lead further along *looks* further along at a glance —
+   which is the whole job on a review call. The ramp's lightness was checked to
+   fall monotonically; that depth, not hue, is what carries progress.
+
+   Green and red are held back exclusively for Won and Lost, so an outcome can
+   never be mistaken for a step. Nurture sits outside the system entirely as an
+   outline — parked, not progressing.
+
+   Every pill carries its text label too, so colour is never the only signal,
+   and text contrast on every tint clears 4.5:1.
+--------------------------------------------------------------------------- */
+const STAGES = [
+  { key: "new",       label: "New Lead",        short: "New",      funnel: true,  ink: "#5a6473", tint: "#f1f3f6", line: "#dfe3e9", blurb: "Logged by the LinkedIn team. Not handed over yet." },
+  { key: "shared",    label: "Shared",          short: "Shared",   funnel: true,  ink: "#4a56bd", tint: "#eef0fc", line: "#d3d8f5", blurb: "Handed to Summit Sales / delivered to the client.", marksHandoff: true },
+  { key: "contacted", label: "Contacted",       short: "Contacted",funnel: true,  ink: "#3b45a4", tint: "#e9ecfa", line: "#c7cdf1", blurb: "Summit has made first contact." },
+  { key: "meeting",   label: "Meeting Booked",  short: "Meeting",  funnel: true,  ink: "#2e3688", tint: "#e4e7f7", line: "#bcc3ee", blurb: "A call is on the calendar." },
+  { key: "proposal",  label: "Proposal Sent",   short: "Proposal", funnel: true,  ink: "#232969", tint: "#dfe3f4", line: "#b0b8e8", blurb: "Commercials are out." },
+  { key: "won",       label: "Won",             short: "Won",      funnel: false, ink: "#15703f", tint: "#e7f3ec", line: "#b9dcc7", blurb: "Closed. Revenue booked." },
+  { key: "lost",      label: "Lost",            short: "Lost",     funnel: false, ink: "#a8271d", tint: "#fbeae8", line: "#eec6c2", blurb: "Dead. Reason required." },
+  { key: "nurture",   label: "Nurture / Later", short: "Nurture",  funnel: false, ink: "#6b7684", tint: "#ffffff", line: "#d6dbe1", blurb: "Real, but not now. Revisit later.", outline: true },
+];
+
+const stage = (key) => STAGES.find((s) => s.key === key) || STAGES[0];
+const OPEN_STAGES = STAGES.filter((s) => !["won", "lost"].includes(s.key)).map((s) => s.key);
+
+/* How many days a lead can sit in one stage with no activity before the
+   dashboard flags it. This is the number that answers "which lead got
+   dropped?" on the Tuesday/Thursday call. */
+const STALE_DAYS = 7;
+
+/* ---------------------------------------------------------------------------
+   4b. CAL BOOKING
+   The "Book discovery call" button on a lead. Clicking it opens Cal's booking
+   modal, pre-filled with that lead's name and email so nobody retypes them.
+
+   When the booking completes, the dashboard moves the lead to Meeting Booked
+   and writes it to the activity trail by itself — the point of wiring this up
+   rather than just linking out is that a booked call stops being invisible to
+   the review.
+
+   The button is a real link underneath, pointing at the same booking page. If
+   Cal's script is blocked or fails to load, the click just opens that page in
+   a new tab instead of doing nothing.
+--------------------------------------------------------------------------- */
+const CAL = {
+  enabled:   true,
+  origin:    "https://cal.id",
+  namespace: "default",
+  link:      "summit-sales-and-marketing/discovery-call",
+  layout:    "month_view",
+  brand:     "#3b45a4",   // matches --accent so the modal doesn't look bolted on
+};
+
+const calUrl = (lead) => {
+  const u = new URL(`${CAL.origin}/${CAL.link}`);
+  const name = `${lead?.firstName || ""} ${lead?.lastName || ""}`.trim();
+  if (name) u.searchParams.set("name", name);
+  if (lead?.email) u.searchParams.set("email", lead.email);
+  return u.toString();
+};
+
+/* ---------------------------------------------------------------------------
+   5. LEAD FIELDS
+   type:     text | email | tel | url | date | number | textarea | select
+   group:    which fieldset it sits in on the form
+   table:    show as a column in the leads table
+   required: enforced on save
+   export:   included in the Excel export (defaults to true)
+--------------------------------------------------------------------------- */
+const LEAD_FIELDS = [
+  /* --- The person ------------------------------------------------------- */
+  { key: "firstName",     label: "First Name",        type: "text",     group: "Person",  required: true, table: true, width: 16 },
+  { key: "lastName",      label: "Last Name",         type: "text",     group: "Person",  table: true, width: 16 },
+  { key: "jobTitle",      label: "Job Title",         type: "text",     group: "Person",  table: true, width: 26 },
+  { key: "linkedinUrl",   label: "LinkedIn Profile",  type: "url",      group: "Person",  required: true, width: 40, placeholder: "https://linkedin.com/in/..." },
+  { key: "email",         label: "Email",             type: "email",    group: "Person",  table: true, width: 30 },
+  { key: "phone",         label: "Phone",             type: "tel",      group: "Person",  width: 18 },
+  { key: "whatsapp",      label: "WhatsApp",          type: "tel",      group: "Person",  width: 18 },
+  { key: "city",          label: "City",              type: "text",     group: "Person",  width: 16 },
+  { key: "country",       label: "Country",           type: "text",     group: "Person",  table: true, width: 16 },
+
+  /* --- The company ------------------------------------------------------ */
+  { key: "company",        label: "Company",          type: "text",     group: "Company", required: true, table: true, width: 26 },
+  { key: "companyWebsite", label: "Company Website",  type: "url",      group: "Company", width: 32 },
+  { key: "companyLinkedin",label: "Company LinkedIn", type: "url",      group: "Company", width: 36 },
+  { key: "industry",       label: "Industry",         type: "text",     group: "Company", table: true, width: 22 },
+  { key: "companySize",    label: "Company Size",     type: "select",   group: "Company", width: 14,
+    options: ["", "1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5000+"] },
+  { key: "revenue",        label: "Est. Revenue",     type: "text",     group: "Company", width: 16 },
+
+  /* --- Where it came from ----------------------------------------------- */
+  { key: "source",        label: "Source",            type: "select",   group: "Source",  table: true, width: 20,
+    options: ["LinkedIn Outreach", "LinkedIn Inbound", "Content / Post", "Referral", "Event", "Other"] },
+  { key: "campaign",      label: "Campaign",          type: "text",     group: "Source",  width: 22 },
+  { key: "connectedOn",   label: "Connected On",      type: "date",     group: "Source",  width: 14 },
+  { key: "repliedOn",     label: "Replied On",        type: "date",     group: "Source",  width: 14 },
+  { key: "intent",        label: "Intent",            type: "select",   group: "Source",  width: 14,
+    options: ["", "Hot", "Warm", "Cold"] },
+
+  /* --- Handover & deal -------------------------------------------------- */
+  { key: "sharedOn",      label: "Shared On",         type: "date",     group: "Handover", table: true, width: 14 },
+  { key: "callBookedFor", label: "Discovery Call",    type: "date",     group: "Handover", width: 16,
+    placeholder: "Set automatically when a call is booked" },
+  { key: "salesOwner",    label: "Sales Owner",       type: "text",     group: "Handover", table: true, width: 20,
+    placeholder: "Who at Summit owns this" },
+  { key: "ghlUrl",        label: "GHL Record",        type: "url",      group: "Handover", width: 36,
+    placeholder: "Paste the GHL opportunity link" },
+  { key: "dealValue",     label: "Deal Value (USD)",  type: "number",   group: "Handover", width: 16 },
+  { key: "nextFollowUp",  label: "Next Follow-up",    type: "date",     group: "Handover", table: true, width: 16 },
+  { key: "lostReason",    label: "Lost Reason",       type: "text",     group: "Handover", width: 30 },
+  { key: "notes",         label: "Notes",             type: "textarea", group: "Handover", width: 50 },
+];
+
+const FIELD_GROUPS = ["Person", "Company", "Source", "Handover"];
+const field = (key) => LEAD_FIELDS.find((f) => f.key === key);
+
+/* ---------------------------------------------------------------------------
+   6. CHART COLOUR
+   Counts-by-person, by-client and by-week are single-series charts: bar length
+   carries the magnitude, so they need one hue and no legend. Mirrored in
+   style.css as --viz; checked at 3.6:1 against a white surface.
+
+   The pipeline funnel is the exception — it is ordinal, so each bar takes its
+   own stage's `ink` from STAGES above rather than a colour from here.
+--------------------------------------------------------------------------- */
+const VIZ = { mark: "#a8801a" };
+
+/* Where the weekly review starts. The team reviews on Tuesday and Thursday, so
+   "since the last review" means since the most recent Tue or Thu that passed. */
+const REVIEW_DAYS = [2, 4]; // 0 = Sunday
+
+
+/* ===== xlsx.js ===================================================== */
+/* ============================================================================
+   xlsx.js — a minimal, dependency-free .xlsx writer.
+
+   Why not a library? This dashboard is a static page on GitHub Pages, and the
+   export is the one feature that absolutely has to work: it is the only
+   sanctioned way data leaves the system. Pulling a spreadsheet library off a
+   CDN at click time means the export breaks whenever an office network blocks
+   the CDN or the CDN has a bad day. Everything needed here is a flat grid of
+   strings and numbers, which is a small enough slice of OOXML to just write.
+
+   An .xlsx is a ZIP of XML parts. Entries are STORED (no compression) so no
+   deflate implementation is needed — the files are small and Excel does not
+   care.
+
+   Produces: bold frozen header row, column widths, an autofilter, real
+   numeric cells, and one tab per sheet.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   XML helpers
+--------------------------------------------------------------------------- */
+
+/* XML 1.0 forbids most control characters outright — they cannot be escaped,
+   only removed, and a stray one makes the whole file unopenable. */
+const stripBad = (s) => s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
+
+const xml = (s) =>
+  stripBad(String(s)).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[c]));
+
+/* 0 -> A, 25 -> Z, 26 -> AA … */
+function colName(i) {
+  let s = "";
+  for (i += 1; i > 0; i = Math.floor((i - 1) / 26)) {
+    s = String.fromCharCode(65 + ((i - 1) % 26)) + s;
+  }
+  return s;
+}
+
+/* ---------------------------------------------------------------------------
+   CRC32 — required by the ZIP container
+--------------------------------------------------------------------------- */
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(bytes) {
+  let c = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+/* ---------------------------------------------------------------------------
+   ZIP writer (STORED entries only)
+--------------------------------------------------------------------------- */
+function zip(files) {
+  const enc = new TextEncoder();
+  const parts = [];
+  const central = [];
+  let offset = 0;
+
+  // DOS time/date. Excel ignores these; a fixed timestamp keeps output stable.
+  const time = 0, date = ((2020 - 1980) << 9) | (1 << 5) | 1;
+
+  const u16 = (n) => [n & 0xff, (n >>> 8) & 0xff];
+  const u32 = (n) => [n & 0xff, (n >>> 8) & 0xff, (n >>> 16) & 0xff, (n >>> 24) & 0xff];
+
+  for (const { name, data } of files) {
+    const nameBytes = enc.encode(name);
+    const body = typeof data === "string" ? enc.encode(data) : data;
+    const crc = crc32(body);
+
+    const local = [
+      ...u32(0x04034b50), ...u16(20), ...u16(0), ...u16(0),
+      ...u16(time), ...u16(date),
+      ...u32(crc), ...u32(body.length), ...u32(body.length),
+      ...u16(nameBytes.length), ...u16(0),
+    ];
+    parts.push(new Uint8Array(local), nameBytes, body);
+
+    central.push([
+      ...u32(0x02014b50), ...u16(20), ...u16(20), ...u16(0), ...u16(0),
+      ...u16(time), ...u16(date),
+      ...u32(crc), ...u32(body.length), ...u32(body.length),
+      ...u16(nameBytes.length), ...u16(0), ...u16(0),
+      ...u16(0), ...u16(0), ...u32(0),
+      ...u32(offset),
+    ]);
+    central.push(nameBytes);
+
+    offset += local.length + nameBytes.length + body.length;
+  }
+
+  const cdParts = [];
+  let cdSize = 0;
+  for (const c of central) {
+    const arr = c instanceof Uint8Array ? c : new Uint8Array(c);
+    cdParts.push(arr);
+    cdSize += arr.length;
+  }
+
+  const end = new Uint8Array([
+    ...u32(0x06054b50), ...u16(0), ...u16(0),
+    ...u16(files.length), ...u16(files.length),
+    ...u32(cdSize), ...u32(offset), ...u16(0),
+  ]);
+
+  const total = offset + cdSize + end.length;
+  const out = new Uint8Array(total);
+  let p = 0;
+  for (const a of [...parts, ...cdParts, end]) { out.set(a, p); p += a.length; }
+  return out;
+}
+
+/* ---------------------------------------------------------------------------
+   Sheet XML
+--------------------------------------------------------------------------- */
+function sheetXml(aoa, cols) {
+  const rowCount = aoa.length;
+  const colCount = aoa.reduce((m, r) => Math.max(m, r.length), 0);
+  const dim = `A1:${colName(Math.max(colCount - 1, 0))}${Math.max(rowCount, 1)}`;
+
+  const colsXml = cols?.length
+    ? `<cols>${cols.map((w, i) =>
+        `<col min="${i + 1}" max="${i + 1}" width="${Number(w) || 14}" customWidth="1"/>`).join("")}</cols>`
+    : "";
+
+  const rows = aoa.map((row, r) => {
+    const cells = row.map((v, c) => {
+      const ref = `${colName(c)}${r + 1}`;
+      const style = r === 0 ? ' s="1"' : "";
+      if (v === null || v === undefined || v === "") return `<c r="${ref}"${style}/>`;
+      if (typeof v === "number" && Number.isFinite(v)) {
+        return `<c r="${ref}"${style}><v>${v}</v></c>`;
+      }
+      // Inline strings keep the file to one part per sheet — no shared string table.
+      return `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xml(v)}</t></is></c>`;
+    }).join("");
+    return `<row r="${r + 1}">${cells}</row>`;
+  }).join("");
+
+  // Freeze the header row, and put an autofilter on it when there is data.
+  const pane = rowCount > 1
+    ? `<sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A2" sqref="A2"/></sheetView>`
+    : `<sheetView workbookViewId="0"/>`;
+
+  const filter = rowCount > 1 && colCount > 0
+    ? `<autoFilter ref="A1:${colName(colCount - 1)}${rowCount}"/>`
+    : "";
+
+  /* Element order below follows the CT_Worksheet sequence — Excel rejects the
+     file if these are out of order. */
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="${dim}"/><sheetViews>${pane}</sheetViews><sheetFormatPr defaultRowHeight="15"/>${colsXml}<sheetData>${rows}</sheetData>${filter}</worksheet>`;
+}
+
+const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+
+/* Excel limits sheet names to 31 chars and forbids : \ / ? * [ ] */
+const safeSheetName = (n, i) =>
+  (String(n || `Sheet${i + 1}`).replace(/[:\\\/?*\[\]]/g, " ").slice(0, 31)) || `Sheet${i + 1}`;
+
+/* ---------------------------------------------------------------------------
+   PUBLIC API
+
+   sheets: [{ name, aoa, cols }]
+     aoa  — array of rows, each an array of strings / numbers. Row 0 is the
+            header and is styled bold and frozen.
+     cols — optional array of column widths (characters).
+--------------------------------------------------------------------------- */
+function buildXlsx(sheets) {
+  const names = sheets.map((s, i) => safeSheetName(s.name, i));
+
+  const files = [
+    {
+      name: "[Content_Types].xml",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${
+        sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")
+      }<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`,
+    },
+    {
+      name: "_rels/.rels",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
+    },
+    {
+      name: "xl/workbook.xml",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${
+        names.map((n, i) => `<sheet name="${xml(n)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")
+      }</sheets></workbook>`,
+    },
+    {
+      name: "xl/_rels/workbook.xml.rels",
+      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${
+        sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")
+      }<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`,
+    },
+    { name: "xl/styles.xml", data: STYLES },
+    ...sheets.map((s, i) => ({
+      name: `xl/worksheets/sheet${i + 1}.xml`,
+      data: sheetXml(s.aoa || [], s.cols),
+    })),
+  ];
+
+  return zip(files);
+}
+
+/* Build the workbook and hand it to the browser as a download. */
+function downloadXlsx(sheets, filename) {
+  const bytes = buildXlsx(sheets);
+  const blob = new Blob([bytes], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+
+/* ===== store.js ==================================================== */
+/* ============================================================================
+   store.js — the only file that talks to a database.
+
+   Exposes one interface used by app.js. Behind it sit two implementations:
+
+     firebaseStore  real Firebase Auth + Firestore (once config.js is filled in)
+     demoStore      localStorage, seeded with sample rows, so the UI can be
+                    demoed to the team before the Firebase project exists
+
+   Both are live: every watch* function takes a callback, fires immediately
+   with current data, and re-fires on every change.
+
+   ── A note on the queries ────────────────────────────────────────────────
+   Firestore evaluates security rules against a query's POTENTIAL result set,
+   not the documents it happens to return. A rule like
+   `resource.data.stream == 'sales_partner'` therefore requires the query to
+   carry a matching `where` clause, or the whole request is rejected. So the
+   watch* functions below narrow their queries by role to exactly mirror
+   firestore.rules. Change one, change the other.
+
+   For the same reason `activity` documents carry a denormalised copy of the
+   parent lead's `stream` and `clientId`: it lets the rules authorise an
+   activity read without a get() on the lead (which would cost an extra
+   document read per entry).
+   ========================================================================== */
+
+
+
+const SDK = "https://www.gstatic.com/firebasejs/10.14.1";
+
+/* ==========================================================================
+   FIREBASE IMPLEMENTATION
+   ========================================================================== */
+async function firebaseStore() {
+  const [{ initializeApp }, auth, fs] = await Promise.all([
+    import(`${SDK}/firebase-app.js`),
+    import(`${SDK}/firebase-auth.js`),
+    import(`${SDK}/firebase-firestore.js`),
+  ]);
+
+  const app = initializeApp(firebaseConfig);
+  const A = auth.getAuth(app);
+  const D = fs.getFirestore(app);
+
+  const {
+    collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc,
+    onSnapshot, query, where, orderBy, limit, serverTimestamp,
+  } = fs;
+
+  /* Firestore Timestamps -> plain ISO strings the UI can sort and format. */
+  const norm = (snap) => {
+    const o = { id: snap.id, ...snap.data() };
+    for (const k of Object.keys(o)) {
+      if (o[k] && typeof o[k].toDate === "function") o[k] = o[k].toDate().toISOString();
+    }
+    return o;
+  };
+  const live = (q, cb) =>
+    onSnapshot(
+      q,
+      (snap) => cb(snap.docs.map(norm)),
+      (err) => { console.error("[firestore]", err); cb([], err); }
+    );
+
+  let profile = null;
+
+  /* The where() clause that makes a query provably safe for this user's role.
+     null means "no clause needed" (staff see everything);
+     false means "this user can see nothing". */
+  const scopeClause = () => {
+    const r = profile?.role;
+    if (r === "admin" || r === "ops") return null;
+    if (r === "sales") return where("stream", "==", "sales_partner");
+    if (r === "client") {
+      const ids = (profile.clientAccess || []).slice(0, 30);
+      return ids.length ? where("clientId", "in", ids) : false;
+    }
+    return false;
+  };
+
+  const scoped = (col, ...tail) => {
+    const clause = scopeClause();
+    if (clause === false) return false;
+    return clause
+      ? query(collection(D, col), clause, ...tail)
+      : query(collection(D, col), ...tail);
+  };
+
+  const store = {
+    mode: "firebase",
+
+    /* ---- auth ---------------------------------------------------------- */
+    onAuth(cb) {
+      return auth.onAuthStateChanged(A, async (user) => {
+        if (!user) { profile = null; return cb(null); }
+        // The users/{uid} document carries the role and client scoping. No
+        // document means the login exists but access hasn't been granted.
+        try {
+          const snap = await getDoc(doc(D, "users", user.uid));
+          if (snap.exists()) {
+            profile = { uid: user.uid, email: user.email, ...snap.data() };
+          } else {
+            // No profile yet — this may be an invited person signing in for the
+            // first time. Turn their pending invite into a real profile.
+            const claimed = await store.claimInvite(user).catch(() => null);
+            profile = claimed
+              ? { uid: user.uid, email: user.email, ...claimed }
+              : { uid: user.uid, email: user.email, name: user.email, role: null, pending: true };
+          }
+        } catch {
+          profile = { uid: user.uid, email: user.email, name: user.email, role: null, pending: true };
+        }
+        cb(profile);
+      });
+    },
+    signIn: (email, password) => auth.signInWithEmailAndPassword(A, email, password),
+    signOut: () => auth.signOut(A),
+    resetPassword: (email) => auth.sendPasswordResetEmail(A, email),
+    me: () => profile,
+
+    /* ---- leads --------------------------------------------------------- */
+    watchLeads(cb) {
+      const q = scoped("leads", orderBy("createdAt", "desc"));
+      if (!q) { cb([]); return () => {}; }
+      return live(q, cb);
+    },
+
+    async createLead(data) {
+      const ref = await addDoc(collection(D, "leads"), {
+        ...data,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        lastActivityAt: serverTimestamp(),
+        createdBy: profile.uid,
+        createdByName: profile.name || profile.email,
+      });
+      await store.logActivity(
+        { id: ref.id, stream: data.stream, clientId: data.clientId || "" },
+        { type: "created", text: `Lead created — ${data.firstName || ""} ${data.lastName || ""}`.trim() }
+      );
+      return ref.id;
+    },
+
+    async updateLead(lead, patch, activity) {
+      await updateDoc(doc(D, "leads", lead.id), {
+        ...patch,
+        updatedAt: serverTimestamp(),
+        lastActivityAt: serverTimestamp(),
+      });
+      // The patch may itself move the lead between streams/clients, so stamp
+      // activity with where the lead ends up, not where it started.
+      const ctx = {
+        id: lead.id,
+        stream: patch.stream ?? lead.stream,
+        clientId: patch.clientId ?? lead.clientId ?? "",
+      };
+      for (const a of activity || []) await store.logActivity(ctx, a);
+    },
+
+    deleteLead: (id) => deleteDoc(doc(D, "leads", id)),
+
+    /* ---- activity ------------------------------------------------------ */
+    logActivity(lead, entry) {
+      return addDoc(collection(D, "activity"), {
+        leadId: lead.id,
+        stream: lead.stream || "",
+        clientId: lead.clientId || "",
+        ...entry,
+        at: serverTimestamp(),
+        by: profile.uid,
+        byName: profile.name || profile.email,
+      });
+    },
+
+    watchActivity(leadId, cb) {
+      const q = scoped("activity", where("leadId", "==", leadId), orderBy("at", "desc"));
+      if (!q) { cb([]); return () => {}; }
+      return live(q, cb);
+    },
+
+    watchRecentActivity(cb, n = 120) {
+      const q = scoped("activity", orderBy("at", "desc"), limit(n));
+      if (!q) { cb([]); return () => {}; }
+      return live(q, cb);
+    },
+
+    /* ---- clients ------------------------------------------------------- */
+    watchClients: (cb) => live(query(collection(D, "clients"), orderBy("name")), cb),
+    saveClient: (id, data) =>
+      id
+        ? updateDoc(doc(D, "clients", id), data)
+        : addDoc(collection(D, "clients"), { ...data, createdAt: serverTimestamp() }),
+
+    /* ---- people -------------------------------------------------------- */
+    watchUsers: (cb) => live(query(collection(D, "users"), orderBy("name")), cb),
+    saveUser: (uid, data) => setDoc(doc(D, "users", uid), data, { merge: true }),
+
+    /* ---- invites -------------------------------------------------------
+       An invite is keyed by the person's email, so it can be looked up
+       before they have a uid. The admin decides the role here; when the
+       invitee signs in, their users/{uid} document is created from this
+       record, and firestore.rules enforces that the role they end up with is
+       exactly the one the admin wrote. Nobody can invite themselves upward.
+    --------------------------------------------------------------------- */
+    watchInvites: (cb) => live(query(collection(D, "invites"), orderBy("createdAt", "desc")), cb),
+
+    createInvite(email, data) {
+      const key = email.trim().toLowerCase();
+      return setDoc(doc(D, "invites", key), {
+        ...data,
+        email: key,
+        status: "pending",
+        createdAt: serverTimestamp(),
+        invitedBy: profile.uid,
+        invitedByName: profile.name || profile.email,
+      });
+    },
+
+    revokeInvite: (email) => deleteDoc(doc(D, "invites", email.trim().toLowerCase())),
+
+    /* Emails a passwordless sign-in link. Requires "Email link (passwordless
+       sign-in)" to be enabled in Firebase console -> Authentication. */
+    async sendInviteLink(email) {
+      const key = email.trim().toLowerCase();
+      await auth.sendSignInLinkToEmail(A, key, {
+        url: location.href.split("?")[0].split("#")[0],
+        handleCodeInApp: true,
+      });
+      await updateDoc(doc(D, "invites", key), { status: "sent", sentAt: serverTimestamp() });
+      // Lets the invitee's browser skip re-typing their address on return.
+      try { localStorage.setItem("leads:inviteEmail", key); } catch {}
+    },
+
+    /* True when the current URL is a sign-in link the user just clicked. */
+    isInviteLink: () => auth.isSignInWithEmailLink(A, location.href),
+
+    signInWithLink(email) {
+      return auth.signInWithEmailLink(A, email.trim().toLowerCase(), location.href);
+    },
+
+    /* Called after sign-in when the user has no users/{uid} document yet.
+       Turns a pending invite into a real profile. */
+    async claimInvite(user) {
+      const key = (user.email || "").toLowerCase();
+      if (!key) return null;
+      const snap = await getDoc(doc(D, "invites", key));
+      if (!snap.exists()) return null;
+      const inv = snap.data();
+      if (inv.status === "revoked") return null;
+
+      const profileDoc = {
+        name: inv.name || user.email,
+        email: key,
+        role: inv.role,
+        active: true,
+        ...(inv.role === "client" ? { clientAccess: inv.clientAccess || [] } : {}),
+      };
+      await setDoc(doc(D, "users", user.uid), profileDoc);
+      await updateDoc(doc(D, "invites", key), { status: "accepted", acceptedAt: serverTimestamp(), uid: user.uid });
+      return profileDoc;
+    },
+
+    /* ---- export history ------------------------------------------------ */
+    logExport(rec) {
+      return addDoc(collection(D, "exports"), {
+        ...rec,
+        count: Number(rec.count) || 0,
+        at: serverTimestamp(),
+        by: profile.uid,
+        byName: profile.name || profile.email,
+        byEmail: profile.email,
+      });
+    },
+
+    watchExports(cb) {
+      const base = collection(D, "exports");
+      const q = profile?.role === "admin"
+        ? query(base, orderBy("at", "desc"), limit(300))
+        : query(base, where("by", "==", profile.uid), orderBy("at", "desc"), limit(300));
+      return live(q, cb);
+    },
+  };
+
+  return store;
+}
+
+/* ==========================================================================
+   DEMO IMPLEMENTATION — localStorage, same interface
+   ========================================================================== */
+function demoStore() {
+  const KEY = "linkedin-leads-demo-v1";
+  const listeners = new Set();
+
+  const blank = () => ({ leads: [], activity: [], clients: [], users: [], exports: [] });
+  const read = () => {
+    try { return { ...blank(), ...JSON.parse(localStorage.getItem(KEY) || "{}") }; }
+    catch { return blank(); }
+  };
+  const write = (db) => {
+    localStorage.setItem(KEY, JSON.stringify(db));
+    listeners.forEach((fn) => fn());
+  };
+  const uid = () => Math.random().toString(36).slice(2, 11);
+  const now = () => new Date().toISOString();
+
+  /* A watcher re-runs its selector whenever anything changes. */
+  const watch = (select, cb) => {
+    const run = () => cb(select(read()));
+    listeners.add(run);
+    run();
+    return () => listeners.delete(run);
+  };
+
+  const profile = { uid: "demo-user", email: "demo@local", name: "Demo User", role: "admin", demo: true };
+
+  seed();
+  function seed() {
+    if (localStorage.getItem(KEY + ":seeded")) return;
+    localStorage.setItem(KEY + ":seeded", "1");
+    const db = read();
+    if (db.leads.length) return;
+
+    const c1 = uid(), c2 = uid();
+    db.clients = [
+      { id: c1, name: "Northwind Capital", active: true, createdAt: now() },
+      { id: c2, name: "Beacon Health", active: true, createdAt: now() },
+    ];
+    const rows = [
+      ["Priya", "Menon", "VP Operations", "Aurora Logistics", "meeting", "sales_partner", "", 12],
+      ["Daniel", "Reyes", "Head of Growth", "Vertex Software", "shared", "sales_partner", "", 9],
+      ["Sarah", "Whitfield", "COO", "Lakeside Manufacturing", "contacted", "sales_partner", "", 21],
+      ["Tom", "Okafor", "Founder", "Bright Yard", "new", "sales_partner", "", 2],
+      ["Amara", "Singh", "CFO", "Helio Ventures", "won", "sales_partner", "", 40],
+      ["James", "Delaney", "Director of IT", "Corfield Group", "lost", "sales_partner", "", 33],
+      ["Nina", "Kowalski", "Marketing Lead", "Pinehurst Retail", "shared", "client", c1, 6],
+      ["Owen", "Baptiste", "Practice Manager", "Cedar Clinic", "new", "client", c2, 1],
+      ["Ravi", "Iyer", "Procurement Head", "Trellis Foods", "proposal", "client", c1, 15],
+    ];
+    const team = ["Aisha", "Rohit", "Meera"];
+    db.leads = rows.map(([f, l, t, co, st, stream, clientId, age], i) => {
+      const created = new Date(Date.now() - age * 864e5).toISOString();
+      const touched = new Date(Date.now() - Math.max(0, age - 4) * 864e5).toISOString();
+      return {
+        id: uid(),
+        firstName: f, lastName: l, jobTitle: t, company: co,
+        linkedinUrl: `https://linkedin.com/in/${f.toLowerCase()}-${l.toLowerCase()}`,
+        email: `${f.toLowerCase()}@${co.toLowerCase().replace(/\W/g, "")}.com`,
+        country: ["United States", "United Kingdom", "Canada"][i % 3],
+        industry: ["Logistics", "Software", "Manufacturing", "Retail", "Healthcare"][i % 5],
+        source: "LinkedIn Outreach",
+        status: st,
+        stream,
+        clientId,
+        sharedOn: st === "new" ? "" : created.slice(0, 10),
+        salesOwner: stream === "sales_partner" && st !== "new" ? "Mark Ellison" : "",
+        dealValue: st === "won" ? 18000 : st === "proposal" ? 24000 : "",
+        lostReason: st === "lost" ? "Went with an incumbent vendor" : "",
+        commentCount: 0,
+        createdAt: created,
+        updatedAt: touched,
+        lastActivityAt: touched,
+        createdBy: "demo-user",
+        createdByName: team[i % team.length],
+      };
+    });
+    db.activity = db.leads.map((ld) => ({
+      id: uid(), leadId: ld.id, stream: ld.stream, clientId: ld.clientId,
+      type: "created", text: `Lead created — ${ld.firstName} ${ld.lastName}`,
+      at: ld.createdAt, by: "demo-user", byName: ld.createdByName,
+    }));
+    write(db);
+  }
+
+  const store = {
+    mode: "demo",
+
+    onAuth(cb) { setTimeout(() => cb(profile), 0); return () => {}; },
+    signIn: async () => profile,
+    signOut: async () => { location.reload(); },
+    resetPassword: async () => {},
+    me: () => profile,
+
+    watchLeads: (cb) =>
+      watch((db) => [...db.leads].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")), cb),
+
+    async createLead(data) {
+      const db = read();
+      const id = uid();
+      db.leads.push({
+        ...data, id, commentCount: 0,
+        createdAt: now(), updatedAt: now(), lastActivityAt: now(),
+        createdBy: profile.uid, createdByName: profile.name,
+      });
+      db.activity.push({
+        id: uid(), leadId: id, stream: data.stream, clientId: data.clientId || "",
+        type: "created", text: `Lead created — ${data.firstName || ""} ${data.lastName || ""}`.trim(),
+        at: now(), by: profile.uid, byName: profile.name,
+      });
+      write(db);
+      return id;
+    },
+
+    async updateLead(lead, patch, activity) {
+      const db = read();
+      const i = db.leads.findIndex((l) => l.id === lead.id);
+      if (i < 0) return;
+      db.leads[i] = { ...db.leads[i], ...patch, updatedAt: now(), lastActivityAt: now() };
+      const stream = patch.stream ?? lead.stream;
+      const clientId = patch.clientId ?? lead.clientId ?? "";
+      for (const a of activity || []) {
+        db.activity.push({
+          id: uid(), leadId: lead.id, stream, clientId, ...a,
+          at: now(), by: profile.uid, byName: profile.name,
+        });
+      }
+      write(db);
+    },
+
+    async deleteLead(id) {
+      const db = read();
+      db.leads = db.leads.filter((l) => l.id !== id);
+      write(db);
+    },
+
+    async logActivity(lead, entry) {
+      const db = read();
+      db.activity.push({
+        id: uid(), leadId: lead.id, stream: lead.stream || "", clientId: lead.clientId || "",
+        ...entry, at: now(), by: profile.uid, byName: profile.name,
+      });
+      write(db);
+    },
+
+    watchActivity: (leadId, cb) =>
+      watch((db) => db.activity
+        .filter((a) => a.leadId === leadId)
+        .sort((a, b) => (b.at || "").localeCompare(a.at || "")), cb),
+
+    watchRecentActivity: (cb, n = 120) =>
+      watch((db) => [...db.activity]
+        .sort((a, b) => (b.at || "").localeCompare(a.at || ""))
+        .slice(0, n), cb),
+
+    watchClients: (cb) => watch((db) => [...db.clients].sort((a, b) => a.name.localeCompare(b.name)), cb),
+
+    async saveClient(id, data) {
+      const db = read();
+      if (id) {
+        const i = db.clients.findIndex((c) => c.id === id);
+        if (i >= 0) db.clients[i] = { ...db.clients[i], ...data };
+      } else db.clients.push({ id: uid(), ...data, createdAt: now() });
+      write(db);
+    },
+
+    watchUsers: (cb) => watch((db) => db.users, cb),
+
+    async saveUser(id, data) {
+      const db = read();
+      const i = db.users.findIndex((u) => u.id === id);
+      if (i >= 0) db.users[i] = { ...db.users[i], ...data };
+      else db.users.push({ id: id || uid(), ...data });
+      write(db);
+    },
+
+    /* Invites — same shape as Firebase, minus the actual email. */
+    watchInvites: (cb) =>
+      watch((db) => [...(db.invites || [])].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")), cb),
+
+    async createInvite(email, data) {
+      const db = read();
+      db.invites = db.invites || [];
+      const key = email.trim().toLowerCase();
+      const rec = {
+        id: key, email: key, ...data, status: "pending",
+        createdAt: now(), invitedBy: profile.uid, invitedByName: profile.name,
+      };
+      const i = db.invites.findIndex((v) => v.id === key);
+      if (i >= 0) db.invites[i] = rec; else db.invites.push(rec);
+      write(db);
+    },
+
+    async revokeInvite(email) {
+      const db = read();
+      db.invites = (db.invites || []).filter((v) => v.id !== email.trim().toLowerCase());
+      write(db);
+    },
+
+    async sendInviteLink(email) {
+      const db = read();
+      const key = email.trim().toLowerCase();
+      const i = (db.invites || []).findIndex((v) => v.id === key);
+      if (i >= 0) { db.invites[i].status = "sent"; db.invites[i].sentAt = now(); }
+      write(db);
+    },
+
+    isInviteLink: () => false,
+    signInWithLink: async () => profile,
+    claimInvite: async () => null,
+
+    async logExport(rec) {
+      const db = read();
+      db.exports.push({
+        id: uid(), ...rec, count: Number(rec.count) || 0,
+        at: now(), by: profile.uid, byName: profile.name, byEmail: profile.email,
+      });
+      write(db);
+    },
+
+    watchExports: (cb) =>
+      watch((db) => [...db.exports].sort((a, b) => (b.at || "").localeCompare(a.at || "")), cb),
+  };
+
+  return store;
+}
+
+/* ==========================================================================
+   PICKER
+   ========================================================================== */
+async function openStore() {
+  if (!isConfigured()) return demoStore();
+  try {
+    return await firebaseStore();
+  } catch (err) {
+    console.error("Firebase failed to start; falling back to demo mode.", err);
+    return demoStore();
+  }
+}
+
+
+/* ===== app.js ====================================================== */
+/* ============================================================================
+   app.js — UI and behaviour for the LinkedIn Leads dashboard.
+   ========================================================================== */
+
+
+
+
+
+/* ==========================================================================
+   TINY HELPERS
+   ========================================================================== */
+const $  = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+const esc = (v) =>
+  String(v ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const DAY = 864e5;
+const asDate = (v) => (v ? new Date(v) : null);
+const daysSince = (v) => (v ? Math.floor((Date.now() - new Date(v)) / DAY) : Infinity);
+
+const fmtDate = (v) => {
+  const d = asDate(v);
+  if (!d || isNaN(d)) return "";
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+};
+const fmtWhen = (v) => {
+  const d = asDate(v);
+  if (!d || isNaN(d)) return "";
+  const mins = Math.round((Date.now() - d) / 6e4);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1440) return `${Math.round(mins / 60)}h ago`;
+  const days = Math.round(mins / 1440);
+  if (days < 7) return `${days}d ago`;
+  return fmtDate(v);
+};
+const fullName = (l) => `${l.firstName || ""} ${l.lastName || ""}`.trim() || "(no name)";
+const initials = (s) =>
+  (s || "?").split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+
+function toast(msg, kind = "") {
+  const t = document.createElement("div");
+  t.className = `toast ${kind}`;
+  t.textContent = msg;
+  $("#toasts").appendChild(t);
+  setTimeout(() => {
+    t.style.transition = "opacity .3s, transform .3s";
+    t.style.opacity = "0";
+    t.style.transform = "translateY(8px)";
+    setTimeout(() => t.remove(), 320);
+  }, 3200);
+}
+
+/* The most recent Tuesday or Thursday boundary — "since the last review call". */
+function lastReviewStart() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 8; i++) {
+    if (REVIEW_DAYS.includes(d.getDay()) && d.getTime() < Date.now()) return d;
+    d.setDate(d.getDate() - 1);
+  }
+  return d;
+}
+
+/* ==========================================================================
+   PERMISSIONS
+   Mirrors firestore.rules. The rules are what actually enforce this — these
+   checks only keep the UI honest.
+   ========================================================================== */
+const SALES_EDITABLE = ["status", "salesOwner", "ghlUrl", "dealValue", "nextFollowUp", "lostReason", "notes", "sharedOn"];
+
+const can = {
+  create:  (r) => ["admin", "ops"].includes(r),
+  editAll: (r) => ["admin", "ops"].includes(r),
+  edit:    (r) => ["admin", "ops", "sales"].includes(r),
+  remove:  (r) => r === "admin",
+  admin:   (r) => r === "admin",
+  comment: (r) => r !== null,
+  editable(r, key) {
+    if (this.editAll(r)) return true;
+    if (r === "sales") return SALES_EDITABLE.includes(key);
+    return false;
+  },
+};
+
+/* ==========================================================================
+   STATE
+   ========================================================================== */
+const S = {
+  store: null,
+  me: null,
+  leads: [],
+  clients: [],
+  users: [],
+  invites: [],
+  exports: [],
+  feed: [],
+  tab: "review",
+  /* per-stream filter + sort state */
+  view: {
+    sales_partner: { q: "", status: "", owner: "", client: "", attn: false, sort: "createdAt", dir: -1 },
+    client:        { q: "", status: "", owner: "", client: "", attn: false, sort: "createdAt", dir: -1 },
+  },
+  drawer: { leadId: null, mode: null, tab: "details" },
+  bookingFor: null,   // lead the Cal modal was opened for
+  unsubActivity: null,
+  drawerActivity: [],
+};
+
+const clientName = (id) => S.clients.find((c) => c.id === id)?.name || "";
+
+/* ==========================================================================
+   COPY GUARD
+   Copy / cut / right-click are suppressed on data surfaces so the tracked
+   Excel export is the only sanctioned way data leaves this dashboard. Form
+   controls stay untouched so people can still type and paste.
+   ========================================================================== */
+function installCopyGuard() {
+  const inField = (t) => t && t.closest && t.closest("input, textarea, select, [contenteditable]");
+  const guard = (e) => {
+    if (inField(e.target)) return;
+    if (!e.target.closest || !e.target.closest(".noselect, .drawer")) return;
+    e.preventDefault();
+    toast("Copying is off. Use Export to Excel — every export is logged.", "warn");
+  };
+  document.addEventListener("copy", guard);
+  document.addEventListener("cut", guard);
+  document.addEventListener("contextmenu", (e) => {
+    if (inField(e.target)) return;
+    if (e.target.closest && e.target.closest(".noselect, .drawer")) e.preventDefault();
+  });
+  document.addEventListener("keydown", (e) => {
+    const k = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && ["c", "x"].includes(k) && !inField(e.target)) {
+      e.preventDefault();
+      toast("Copying is off. Use Export to Excel — every export is logged.", "warn");
+    }
+  });
+}
+
+/* ==========================================================================
+   BOOT
+   ========================================================================== */
+(async function boot() {
+  installCopyGuard();
+  S.store = await openStore();
+
+  if (S.store.mode === "demo") $("#demobar").classList.remove("hide");
+
+  // Someone arriving from an invite email lands here with a sign-in link in
+  // the URL. Complete that before deciding whether to show the login form.
+  if (S.store.isInviteLink()) await completeInviteSignIn();
+
+  S.store.onAuth((profile) => {
+    S.me = profile;
+    if (!profile) return showLogin();
+    if (profile.pending) {
+      showLogin("You're signed in, but nobody has given you access yet. Ask an admin to invite you.");
+      S.store.signOut();
+      return;
+    }
+    showApp();
+  });
+
+  wireLogin();
+  wireChrome();
+  wireCalBookings();
+})();
+
+/* ==========================================================================
+   LOGIN
+   ========================================================================== */
+function showLogin(msg) {
+  $("#login").classList.remove("hide");
+  $("#app").classList.add("hide");
+  if (msg) {
+    $("#loginErr").textContent = msg;
+    $("#loginErr").classList.remove("hide");
+  }
+}
+
+/* Finishes an invite: exchanges the emailed link for a session. The address is
+   normally remembered from the browser that requested it; if they opened the
+   link on a different device we have to ask, because Firebase requires the
+   email to match the one the link was issued for. */
+async function completeInviteSignIn() {
+  let email = "";
+  try { email = localStorage.getItem("leads:inviteEmail") || ""; } catch {}
+  if (!email) email = prompt("Confirm the email address this invite was sent to:") || "";
+  if (!email) return;
+
+  try {
+    await S.store.signInWithLink(email);
+    try { localStorage.removeItem("leads:inviteEmail"); } catch {}
+    // Drop the one-time link from the address bar so a refresh doesn't retry it.
+    history.replaceState(null, "", location.pathname);
+    toast("You're in. Set a password any time from Forgot your password.", "good");
+  } catch (ex) {
+    console.error(ex);
+    showLogin(
+      ex?.code?.includes("invalid-action-code")
+        ? "That invite link has already been used or has expired. Ask an admin to resend it."
+        : "We couldn't complete that invite link. Ask an admin to resend it."
+    );
+  }
+}
+
+function wireLogin() {
+  const err = $("#loginErr");
+  $("#loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    err.classList.add("hide");
+    const btn = $("#liBtn");
+    btn.disabled = true;
+    btn.textContent = "Signing in…";
+    try {
+      await S.store.signIn($("#liEmail").value.trim(), $("#liPass").value);
+    } catch (ex) {
+      err.textContent = loginError(ex);
+      err.classList.remove("hide");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Sign in";
+    }
+  });
+
+  $("#liForgot").addEventListener("click", async () => {
+    const email = $("#liEmail").value.trim();
+    if (!email) return toast("Type your email above first.", "warn");
+    try {
+      await S.store.resetPassword(email);
+      toast("Password reset email sent.", "good");
+    } catch (ex) {
+      toast(loginError(ex), "bad");
+    }
+  });
+}
+
+function loginError(ex) {
+  const code = ex?.code || "";
+  if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found"))
+    return "That email and password don't match.";
+  if (code.includes("too-many-requests")) return "Too many attempts. Wait a few minutes and try again.";
+  if (code.includes("network")) return "Can't reach the server. Check your connection.";
+  return ex?.message || "Something went wrong. Try again.";
+}
+
+/* ==========================================================================
+   APP SHELL
+   ========================================================================== */
+function showApp() {
+  $("#login").classList.add("hide");
+  $("#app").classList.remove("hide");
+
+  const name = S.me.name || S.me.email;
+  $("#meName").textContent = name;
+  $("#meRole").textContent = ROLES[S.me.role]?.label || "No role";
+  $("#meAvatar").textContent = initials(name);
+  $("#tabAdmin").classList.toggle("hide", !can.admin(S.me.role));
+
+  // Live subscriptions. Each fires immediately with current data.
+  S.store.watchLeads((rows) => { S.leads = rows; renderAll(); });
+  S.store.watchClients((rows) => { S.clients = rows; renderAll(); });
+  S.store.watchExports((rows) => { S.exports = rows; renderExports(); });
+  S.store.watchRecentActivity((rows) => { S.feed = rows; renderFeed(); });
+  if (can.admin(S.me.role)) {
+    wireInvites();
+    S.store.watchUsers((rows) => { S.users = rows; renderUsers(); });
+    S.store.watchInvites((rows) => { S.invites = rows; renderInvites(); });
+  }
+}
+
+function wireChrome() {
+  $("#signOut").addEventListener("click", () => S.store.signOut());
+
+  $("#tabs").addEventListener("click", (e) => {
+    const t = e.target.closest(".tab");
+    if (!t) return;
+    S.tab = t.dataset.tab;
+    $$(".tab").forEach((x) => x.classList.toggle("on", x === t));
+    $$(".panel").forEach((p) => p.classList.toggle("on", p.dataset.panel === S.tab));
+  });
+
+  $("#drClose").addEventListener("click", closeDrawer);
+  $("#scrim").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+
+  $("#addClient").addEventListener("click", async () => {
+    const name = $("#newClient").value.trim();
+    if (!name) return;
+    await S.store.saveClient(null, { name, active: true });
+    $("#newClient").value = "";
+    toast("Client added.", "good");
+  });
+}
+
+function renderAll() {
+  renderReview();
+  renderClients();
+  renderFeed();
+  if (can.admin(S.me?.role)) renderInvites();
+  renderStream("sales_partner");
+  renderStream("client");
+  $("#cntSales").textContent = S.leads.filter((l) => l.stream === "sales_partner").length;
+  $("#cntClient").textContent = S.leads.filter((l) => l.stream === "client").length;
+  if (S.drawer.leadId) renderDrawer();
+}
+
+/* ==========================================================================
+   REVIEW TAB
+   ========================================================================== */
+function isStale(l) {
+  return OPEN_STAGES.includes(l.status) && daysSince(l.lastActivityAt || l.updatedAt || l.createdAt) >= STALE_DAYS;
+}
+
+function renderReview() {
+  const since = lastReviewStart();
+  const L = S.leads;
+  const newSince = L.filter((l) => asDate(l.createdAt) >= since);
+  const stale = L.filter(isStale);
+  const open = L.filter((l) => OPEN_STAGES.includes(l.status));
+
+  $("#reviewHint").textContent =
+    `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
+
+  const meetings = L.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
+  const won = L.filter((l) => l.status === "won").length;
+
+  $("#reviewLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
+
+  /* Plain counts. Every one of these is just "how many leads are in this
+     state" — nothing averaged, nothing derived. The label carries its own
+     timeframe, since "new" alone reads as all-time at a glance. */
+  $("#statTiles").innerHTML = [
+    { k: "New since last call", v: newSince.length, d: `${L.length} leads all time` },
+    { k: "Open pipeline", v: open.length, d: "not won or lost" },
+    { k: "Meetings booked", v: meetings, d: "meeting or proposal", cls: meetings ? "good" : "" },
+    { k: "Won", v: won, d: "closed and won", cls: won ? "good" : "" },
+    { k: "Needs attention", v: stale.length, d: `no activity in ${STALE_DAYS}+ days`, cls: stale.length ? "alert" : "" },
+  ].map((t) => `
+    <div class="stat ${t.cls || ""}">
+      <div class="k" title="${esc(t.k)}">${esc(t.k)}</div>
+      <div class="v">${t.v}</div>
+      <div class="d">${esc(t.d)}</div>
+    </div>`).join("");
+
+  /* ---- pipeline strip: stages left to right, with the conversion between
+         each pair in the gap ---- */
+  const fs = STAGES.filter((s) => s.funnel);
+  const counts = fs.map((s) => L.filter((l) => l.status === s.key).length);
+  const openTotal = counts.reduce((a, b) => a + b, 0);
+
+  const blocks = fs.map((s, i) => {
+    const n = counts[i];
+    const pct = openTotal ? Math.round((n / openTotal) * 100) : 0;
+    return `<div class="pipe-step${n ? "" : " is-empty"}" style="--step:${s.ink}">
+      <div class="n">${n}</div>
+      <div class="k">${esc(s.short || s.label)}</div>
+      <div class="p">${pct}% of open</div>
+    </div>`;
+  });
+
+  /* Between two stages, show how many of everything that reached the earlier
+     stage is now at or beyond the later one — the "did it actually move?"
+     number, not a raw ratio of two snapshots. */
+  const reached = (i) => counts.slice(i).reduce((a, b) => a + b, 0);
+  const arrows = fs.slice(0, -1).map((_, i) => {
+    const from = reached(i), to = reached(i + 1);
+    const pct = from ? Math.round((to / from) * 100) : 0;
+    return `<div class="pipe-arrow" title="${to} of ${from} moved past ${esc(fs[i].short)}">
+      <div class="g">›</div><div class="c">${from ? pct + "%" : "—"}</div>
+    </div>`;
+  });
+
+  $("#pipeChart").innerHTML = openTotal || L.length
+    ? blocks.map((b, i) => b + (arrows[i] || "")).join("")
+    : emptyChart("No leads yet.");
+
+  $("#outcomeChart").innerHTML = STAGES.filter((s) => !s.funnel).map((s) => {
+    const n = L.filter((l) => l.status === s.key).length;
+    return `<span class="outcome" style="border-color:${s.line};background:${s.outline ? "transparent" : s.tint}">
+      <span class="n" style="color:${s.ink}">${n}</span>
+      <span class="k">${esc(s.label)}</span>
+    </span>`;
+  }).join("") + `<span class="outcome" style="border-style:dashed">
+      <span class="k">${esc(winRateLabel(L))}</span></span>`;
+
+  /* ---- needs attention ---- */
+  const attn = [...stale].sort(
+    (a, b) => daysSince(b.lastActivityAt || b.createdAt) - daysSince(a.lastActivityAt || a.createdAt)
+  ).slice(0, 12);
+
+  const card = $("#attnCard");
+  
+  $("#attnIcon").textContent = stale.length ? "!" : "\u2713";
+  card.classList.toggle("clear", stale.length === 0);
+  $("#attnTitle").textContent = stale.length
+    ? `${stale.length} lead${stale.length > 1 ? "s" : ""} going cold`
+    : "Nothing is slipping";
+  $("#attnHint").textContent = stale.length
+    ? `No activity in ${STALE_DAYS}+ days. Work down this list on the call.`
+    : `Every open lead has been touched in the last ${STALE_DAYS} days.`;
+
+  $("#attnList").innerHTML = attn.length
+    ? `<div class="list">${attn.map((l) => `
+        <div class="li" data-openlead="${esc(l.id)}" style="cursor:pointer">
+          <div class="grow">
+            <div class="t">${esc(fullName(l))} <span class="muted" style="font-weight:600">· ${esc(l.company || "")}</span></div>
+            <div class="s">${esc(streamLabel(l))} · owner ${esc(l.salesOwner || l.createdByName || "unassigned")}</div>
+          </div>
+          ${pill(l.status)}
+          <span class="pill pill-warn"><span class="dot"></span>${daysSince(l.lastActivityAt || l.createdAt)}d idle</span>
+        </div>`).join("")}</div>`
+    : `<div class="card-body"><p class="muted">Every open lead has been touched in the last ${STALE_DAYS} days.</p></div>`;
+
+  $("#attnList").onclick = (e) => {
+    const row = e.target.closest("[data-openlead]");
+    if (row) openDrawer(row.dataset.openlead);
+  };
+
+  /* ---- created by team member ---- */
+  const byWho = tally(L, (l) => l.createdByName || "Unknown");
+  $("#byWhoChart").innerHTML = barChart(byWho);
+  $("#byWhoHint").textContent = `${L.length} leads all time`;
+
+  /* ---- by client ---- */
+  const clientLeads = L.filter((l) => l.stream === "client");
+  const byClient = tally(clientLeads, (l) => clientName(l.clientId) || "Unassigned");
+  $("#byClientChart").innerHTML = barChart(byClient, "No client leads yet.");
+
+  /* ---- per week, last 8 weeks ---- */
+  $("#byWeekChart").innerHTML = weekChart(L);
+}
+
+/* One plain sentence naming the thing that most deserves attention right now.
+   Ordered by what would actually change the conversation on the call. */
+function heroSentence(L, created, stale, meetings) {
+  if (!L.length) return "No leads yet — add the first one from the Summit Sales tab.";
+  if (stale) {
+    return `<b>${stale}</b> open lead${stale > 1 ? "s have" : " has"} gone quiet for ${STALE_DAYS}+ days.`;
+  }
+  if (created && meetings) {
+    return `<b>${created}</b> new lead${created > 1 ? "s" : ""} since the last call, and <b>${meetings}</b> in play.`;
+  }
+  if (created) return `<b>${created}</b> new lead${created > 1 ? "s" : ""} logged since the last call.`;
+  if (meetings) return `Nothing new since the last call, but <b>${meetings}</b> still in play.`;
+  return "Nothing new since the last call.";
+}
+
+function winRateLabel(L) {
+  const closed = L.filter((l) => ["won", "lost"].includes(l.status)).length;
+  const won = L.filter((l) => l.status === "won").length;
+  return closed ? `${Math.round((won / closed) * 100)}% of closed leads` : "No closed leads yet";
+}
+
+function tally(rows, keyFn) {
+  const m = new Map();
+  rows.forEach((r) => { const k = keyFn(r); m.set(k, (m.get(k) || 0) + 1); });
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function emptyChart(msg) { return `<div class="empty-chart">${esc(msg)}</div>`; }
+
+/* Single-series magnitude bars: length carries the value, every bar is
+   directly labelled, so no legend and no colour encoding is needed. */
+function barChart(pairs, emptyMsg = "Nothing to show yet.") {
+  if (!pairs.length) return emptyChart(emptyMsg);
+  const top = Math.max(...pairs.map((p) => p[1]), 1);
+  return pairs.slice(0, 10).map(([label, n]) => `
+    <div class="bar-row${n === 0 ? " is-zero" : ""}">
+      <div class="bar-lab" title="${esc(label)}">${esc(label)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n / top) * 100}%"></div></div>
+      <div class="bar-val num">${n}</div>
+    </div>`).join("");
+}
+
+function weekChart(L) {
+  const weeks = [];
+  const monday = new Date();
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7)); // this week's Monday
+  for (let i = 7; i >= 0; i--) {
+    const start = new Date(monday.getTime() - i * 7 * DAY);
+    const end = new Date(start.getTime() + 7 * DAY);
+    const n = L.filter((l) => { const d = asDate(l.createdAt); return d >= start && d < end; }).length;
+    weeks.push([start.toLocaleDateString(undefined, { day: "numeric", month: "short" }), n]);
+  }
+  if (!weeks.some((w) => w[1] > 0)) return emptyChart("No leads created in the last 8 weeks.");
+  const top = Math.max(...weeks.map((w) => w[1]), 1);
+  return weeks.map(([label, n]) => `
+    <div class="bar-row${n === 0 ? " is-zero" : ""}">
+      <div class="bar-lab">w/c ${esc(label)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n / top) * 100}%"></div></div>
+      <div class="bar-val num">${n}</div>
+    </div>`).join("");
+}
+
+/* ==========================================================================
+   PILLS
+   ========================================================================== */
+/* Each stage owns one ink and one tint (see STAGES in config.js), applied
+   inline so the pill, the dot, the row stripe and the funnel bar can never
+   drift apart into separate colour systems. */
+function pill(statusKey) {
+  const s = stage(statusKey);
+  const bg = s.outline ? "transparent" : s.tint;
+  const dash = s.outline ? "border-style:dashed;" : "";
+  return `<span class="pill" style="color:${s.ink};background:${bg};border-color:${s.line};${dash}">
+    <span class="dot"></span>${esc(s.label)}</span>`;
+}
+function streamLabel(l) {
+  if (l.stream === "client") {
+    const c = clientName(l.clientId);
+    return c ? `Client · ${c}` : "Client · unassigned";
+  }
+  return STREAMS.sales_partner.short;
+}
+
+/* ==========================================================================
+   LEAD STREAM (table + toolbar) — one function drives both tabs
+   ========================================================================== */
+const COLUMNS = {
+  sales_partner: [
+    { key: "name",      label: "Lead",          sort: "firstName" },
+    { key: "company",   label: "Company",       sort: "company" },
+    { key: "status",    label: "Stage",         sort: "status" },
+    { key: "salesOwner",label: "Sales Owner",   sort: "salesOwner" },
+    { key: "sharedOn",  label: "Shared",        sort: "sharedOn" },
+    { key: "createdByName", label: "Added By",  sort: "createdByName" },
+    { key: "activity",  label: "Last Activity", sort: "lastActivityAt" },
+  ],
+  client: [
+    { key: "name",      label: "Lead",          sort: "firstName" },
+    { key: "company",   label: "Company",       sort: "company" },
+    { key: "clientId",  label: "Client",        sort: "clientId" },
+    { key: "status",    label: "Stage",         sort: "status" },
+    { key: "sharedOn",  label: "Delivered",     sort: "sharedOn" },
+    { key: "createdByName", label: "Added By",  sort: "createdByName" },
+    { key: "activity",  label: "Last Activity", sort: "lastActivityAt" },
+  ],
+};
+
+function filteredLeads(streamKey) {
+  const v = S.view[streamKey];
+  const q = v.q.trim().toLowerCase();
+  let rows = S.leads.filter((l) => l.stream === streamKey);
+
+  if (q) {
+    rows = rows.filter((l) =>
+      LEAD_FIELDS.some((f) => String(l[f.key] ?? "").toLowerCase().includes(q)) ||
+      String(l.createdByName ?? "").toLowerCase().includes(q) ||
+      clientName(l.clientId).toLowerCase().includes(q));
+  }
+  if (v.status) rows = rows.filter((l) => l.status === v.status);
+  if (v.owner)  rows = rows.filter((l) => (l.createdByName || "Unknown") === v.owner);
+  if (v.client) rows = rows.filter((l) => l.clientId === v.client);
+  if (v.attn)   rows = rows.filter(isStale);
+
+  const dir = v.dir;
+  rows.sort((a, b) => {
+    let x = a[v.sort] ?? "", y = b[v.sort] ?? "";
+    if (v.sort === "status") { x = STAGES.findIndex((s) => s.key === x); y = STAGES.findIndex((s) => s.key === y); }
+    if (v.sort === "clientId") { x = clientName(x); y = clientName(y); }
+    if (typeof x === "number" && typeof y === "number") return (x - y) * dir;
+    return String(x).localeCompare(String(y), undefined, { numeric: true }) * dir;
+  });
+  return rows;
+}
+
+function renderStream(streamKey) {
+  const v = S.view[streamKey];
+  const rows = filteredLeads(streamKey);
+  const owners = [...new Set(S.leads.filter((l) => l.stream === streamKey).map((l) => l.createdByName || "Unknown"))].sort();
+
+  /* ---- toolbar ---- */
+  $(`#toolbar_${streamKey}`).innerHTML = `
+    <div class="toolbar">
+      <div class="fld search">
+        <label for="q_${streamKey}">Search</label>
+        <input class="inp" id="q_${streamKey}" placeholder="Name, company, title, email, notes…" value="${esc(v.q)}">
+      </div>
+      <div class="fld">
+        <label for="st_${streamKey}">Stage</label>
+        <select class="inp" id="st_${streamKey}">
+          <option value="">All stages</option>
+          ${STAGES.map((s) => `<option value="${s.key}"${v.status === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="fld">
+        <label for="ow_${streamKey}">Added by</label>
+        <select class="inp" id="ow_${streamKey}">
+          <option value="">Everyone</option>
+          ${owners.map((o) => `<option value="${esc(o)}"${v.owner === o ? " selected" : ""}>${esc(o)}</option>`).join("")}
+        </select>
+      </div>
+      ${streamKey === "client" ? `
+      <div class="fld">
+        <label for="cl_${streamKey}">Client</label>
+        <select class="inp" id="cl_${streamKey}">
+          <option value="">All clients</option>
+          ${S.clients.map((c) => `<option value="${esc(c.id)}"${v.client === c.id ? " selected" : ""}>${esc(c.name)}</option>`).join("")}
+        </select>
+      </div>` : ""}
+      <div class="fld">
+        <label>&nbsp;</label>
+        <button class="btn btn-sm ${v.attn ? "btn-dark" : "btn-ghost"}" id="attn_${streamKey}">
+          Needs attention${v.attn ? " ✓" : ""}
+        </button>
+      </div>
+      <div class="spacer"></div>
+      <div class="fld">
+        <label>&nbsp;</label>
+        <div style="display:flex; gap:8px">
+          <button class="btn btn-sm btn-ghost" id="exp_${streamKey}">Export to Excel</button>
+          ${can.create(S.me.role)
+            ? `<button class="btn btn-sm btn-primary" id="add_${streamKey}">+ Add Lead</button>` : ""}
+        </div>
+      </div>
+    </div>`;
+
+  const bind = (id, ev, fn) => { const el = $(id); if (el) el.addEventListener(ev, fn); };
+  bind(`#q_${streamKey}`, "input", (e) => {
+    v.q = e.target.value;
+    const pos = e.target.selectionStart;
+    renderStream(streamKey);
+    const again = $(`#q_${streamKey}`);
+    again.focus();
+    again.setSelectionRange(pos, pos);
+  });
+  bind(`#st_${streamKey}`, "change", (e) => { v.status = e.target.value; renderStream(streamKey); });
+  bind(`#ow_${streamKey}`, "change", (e) => { v.owner = e.target.value; renderStream(streamKey); });
+  bind(`#cl_${streamKey}`, "change", (e) => { v.client = e.target.value; renderStream(streamKey); });
+  bind(`#attn_${streamKey}`, "click", () => { v.attn = !v.attn; renderStream(streamKey); });
+  bind(`#exp_${streamKey}`, "click", () => exportLeads(streamKey, rows));
+  bind(`#add_${streamKey}`, "click", () => openDrawer(null, streamKey));
+
+  /* ---- table ---- */
+  const cols = COLUMNS[streamKey];
+  const host = $(`#table_${streamKey}`);
+
+  if (!rows.length) {
+    const anyInStream = S.leads.some((l) => l.stream === streamKey);
+    host.innerHTML = `<div class="tbl-wrap"><div class="tbl-empty">
+      <div class="big">${anyInStream ? "No leads match these filters" : "No leads here yet"}</div>
+      <div style="font-size:13px">${anyInStream
+        ? "Clear the search or filters above."
+        : can.create(S.me.role) ? "Add the first one with the button above." : "Nothing has been added to this stream."}</div>
+    </div></div>`;
+    return;
+  }
+
+  host.innerHTML = `
+    <div class="tbl-wrap">
+      <table class="leads">
+        <thead><tr>${cols.map((c) => `
+          <th data-sort="${c.sort}">${esc(c.label)}
+            <span class="arw">${v.sort === c.sort ? (v.dir === 1 ? "▲" : "▼") : ""}</span>
+          </th>`).join("")}</tr></thead>
+        <tbody>${rows.map((l) => `
+          <tr data-id="${esc(l.id)}" style="--stripe:${stage(l.status).ink}"${isStale(l) ? ' class="stale"' : ""}>
+            ${cols.map((c) => `<td>${cellHtml(c.key, l)}</td>`).join("")}</tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+    <p class="tbl-note">${rows.length} lead${rows.length === 1 ? "" : "s"} · click a row to open it</p>`;
+
+  host.querySelector("thead").addEventListener("click", (e) => {
+    const th = e.target.closest("th");
+    if (!th) return;
+    const key = th.dataset.sort;
+    if (v.sort === key) v.dir *= -1; else { v.sort = key; v.dir = 1; }
+    renderStream(streamKey);
+  });
+  host.querySelector("tbody").addEventListener("click", (e) => {
+    const tr = e.target.closest("tr");
+    if (tr) openDrawer(tr.dataset.id);
+  });
+}
+
+function cellHtml(key, l) {
+  switch (key) {
+    case "name":
+      return `<div class="cell-name">${esc(fullName(l))}</div>
+              <div class="cell-sub">${esc(l.jobTitle || "—")}</div>`;
+    case "company":
+      return `<div style="font-weight:600">${esc(l.company || "—")}</div>
+              <div class="cell-sub">${esc(l.industry || l.country || "")}</div>`;
+    case "status":
+      return pill(l.status);
+    case "clientId":
+      return `<span class="pill pill-stream">${esc(clientName(l.clientId) || "Unassigned")}</span>`;
+    case "sharedOn":
+      return `<span class="${l.sharedOn ? "" : "cell-dim"}">${esc(l.sharedOn ? fmtDate(l.sharedOn) : "not yet")}</span>`;
+    case "activity": {
+      const d = daysSince(l.lastActivityAt || l.createdAt);
+      const late = OPEN_STAGES.includes(l.status) && d >= STALE_DAYS;
+      return `<span class="${late ? "" : "cell-dim"}" style="${late ? "color:var(--warn);font-weight:700" : ""}">
+                ${esc(fmtWhen(l.lastActivityAt || l.createdAt))}</span>`;
+    }
+    default:
+      return `<span class="${l[key] ? "" : "cell-dim"}">${esc(l[key] || "—")}</span>`;
+  }
+}
+
+/* ==========================================================================
+   DRAWER — lead detail, edit, comments
+   ========================================================================== */
+function openDrawer(leadId, streamKey) {
+  S.drawer = { leadId, mode: leadId ? "read" : "new", tab: "details", stream: streamKey || "sales_partner" };
+  S.drawerActivity = [];
+  if (S.unsubActivity) { S.unsubActivity(); S.unsubActivity = null; }
+  if (leadId) {
+    S.unsubActivity = S.store.watchActivity(leadId, (rows) => {
+      S.drawerActivity = rows;
+      if (S.drawer.leadId === leadId) renderDrawer();
+    });
+  }
+  $("#drawer").classList.add("on");
+  $("#drawer").setAttribute("aria-hidden", "false");
+  $("#scrim").classList.add("on");
+  renderDrawer();
+}
+
+function closeDrawer() {
+  $("#drawer").classList.remove("on");
+  $("#drawer").setAttribute("aria-hidden", "true");
+  $("#scrim").classList.remove("on");
+  if (S.unsubActivity) { S.unsubActivity(); S.unsubActivity = null; }
+  S.drawer = { leadId: null, mode: null, tab: "details" };
+}
+
+function renderDrawer() {
+  const d = S.drawer;
+  const isNew = d.mode === "new";
+  const lead = isNew ? null : S.leads.find((l) => l.id === d.leadId);
+  if (!isNew && !lead) return closeDrawer();
+
+  $("#drTitle").textContent = isNew ? "New lead" : fullName(lead);
+  $("#drSub").innerHTML = isNew
+    ? esc(STREAMS[d.stream].label)
+    : `${esc(lead.jobTitle || "")}${lead.jobTitle && lead.company ? " · " : ""}${esc(lead.company || "")}
+       <span style="opacity:.6"> — added by ${esc(lead.createdByName || "?")} ${esc(fmtWhen(lead.createdAt))}</span>`;
+
+  if (isNew || d.mode === "edit") return renderForm(lead, d.stream);
+
+  /* ---- read view ---- */
+  const body = $("#drBody");
+  body.innerHTML = `
+    <div class="dr-tabs">
+      <button class="dr-tab ${d.tab === "details" ? "on" : ""}" data-drtab="details">Details</button>
+      <button class="dr-tab ${d.tab === "activity" ? "on" : ""}" data-drtab="activity">
+        Activity${S.drawerActivity.length ? ` (${S.drawerActivity.length})` : ""}
+      </button>
+    </div>
+    ${d.tab === "details" ? detailsHtml(lead) : activityHtml(lead)}`;
+
+  body.querySelectorAll("[data-drtab]").forEach((b) =>
+    b.addEventListener("click", () => { S.drawer.tab = b.dataset.drtab; renderDrawer(); }));
+
+  if (d.tab === "activity") wireCommentBox(lead);
+
+  /* ---- footer ---- */
+  const canEdit = can.edit(S.me.role);
+  $("#drFoot").innerHTML = `
+    ${canEdit ? bookButton(lead) : ""}
+    ${canEdit ? `<button class="btn btn-sm btn-ghost" id="drEdit">Edit lead</button>` : ""}
+    ${canEdit ? `<select class="inp" id="drStage" style="max-width:190px">
+        ${STAGES.map((s) => `<option value="${s.key}"${lead.status === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
+      </select>` : ""}
+    <div style="flex:1"></div>
+    ${can.remove(S.me.role) ? `<button class="btn btn-sm btn-danger" id="drDel">Delete</button>` : ""}`;
+
+  if (canEdit) {
+    $("#drEdit").addEventListener("click", () => { S.drawer.mode = "edit"; renderDrawer(); });
+    $("#drStage").addEventListener("change", (e) => changeStage(lead, e.target.value));
+    // Remember which lead the booking modal was opened for, so the completed
+    // booking can be attached to the right record.
+    $("#drBook")?.addEventListener("click", () => { S.bookingFor = lead.id; });
+  }
+  if (can.remove(S.me.role)) {
+    $("#drDel").addEventListener("click", async () => {
+      if (!confirm(`Delete ${fullName(lead)} for everyone?\n\nThe lead row goes; its activity entries stay in the audit trail. Consider marking it Lost instead.`)) return;
+      await S.store.deleteLead(lead.id);
+      closeDrawer();
+      toast("Lead deleted.", "bad");
+    });
+  }
+}
+
+function detailsHtml(lead) {
+  const groups = FIELD_GROUPS.map((g) => {
+    const fields = LEAD_FIELDS.filter((f) => f.group === g && lead[f.key] !== undefined && lead[f.key] !== "");
+    if (!fields.length) return "";
+    return `<fieldset class="grp">
+      <legend>${esc(g)}</legend>
+      <div class="kv">${fields.map((f) => `
+        <div class="row">
+          <div class="k">${esc(f.label)}</div>
+          <div class="v">${valueHtml(f, lead[f.key])}</div>
+        </div>`).join("")}</div>
+    </fieldset>`;
+  }).join("");
+
+  return `
+    <fieldset class="grp">
+      <legend>Status</legend>
+      <div class="kv">
+        <div class="row"><div class="k">Stage</div><div class="v">${pill(lead.status)}</div></div>
+        <div class="row"><div class="k">Stream</div><div class="v">${esc(streamLabel(lead))}</div></div>
+        <div class="row"><div class="k">Added by</div><div class="v">${esc(lead.createdByName || "—")}</div></div>
+        <div class="row"><div class="k">Last activity</div><div class="v">${esc(fmtWhen(lead.lastActivityAt || lead.createdAt))}</div></div>
+      </div>
+    </fieldset>
+    ${groups || `<p class="muted" style="font-size:13px">No other details filled in yet.</p>`}`;
+}
+
+function valueHtml(f, v) {
+  if (v === "" || v == null) return `<span class="blank">—</span>`;
+  if (f.type === "url") return `<a href="${esc(v)}" target="_blank" rel="noopener noreferrer">${esc(shortUrl(v))} ↗</a>`;
+  if (f.type === "email") return `<a href="mailto:${esc(v)}">${esc(v)}</a>`;
+  if (f.type === "tel") return `<a href="tel:${esc(v)}">${esc(v)}</a>`;
+  if (f.type === "date") return esc(fmtDate(v));
+  if (f.key === "dealValue") return esc(`$${Number(v).toLocaleString()}`);
+  return esc(v);
+}
+const shortUrl = (u) => String(u).replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "").slice(0, 42);
+
+/* ---- activity + comments ---- */
+function activityHtml(lead) {
+  const rows = S.drawerActivity;
+  return `
+    <div class="feed">${rows.length
+      ? rows.map(feedItem).join("")
+      : `<p class="muted" style="padding:6px 0">No activity yet. Add the first comment below.</p>`}
+    </div>
+    ${can.comment(S.me.role) ? `
+    <div class="cbox">
+      <div class="fld" style="flex:1">
+        <label for="cmt">Add a comment</label>
+        <textarea class="inp" id="cmt" placeholder="What happened with this lead?"></textarea>
+      </div>
+      <button class="btn btn-sm btn-dark" id="cmtBtn">Post</button>
+    </div>` : ""}`;
+}
+
+function feedItem(a, subtitle = "") {
+  const icon = a.type === "comment" ? "C" : a.type === "stage" ? "→" : "+";
+  const cls  = a.type === "comment" ? "comment" : a.type === "stage" ? "stage" : "";
+  return `<div class="fe" data-leadid="${esc(a.leadId || "")}">
+    <div class="fe-ic ${cls}">${icon}</div>
+    <div style="min-width:0">
+      <div class="fe-top">
+        <span class="fe-who">${esc(a.byName || "Someone")}</span>
+        <span class="fe-when">${esc(fmtWhen(a.at))}</span>
+      </div>
+      <div class="fe-txt">${esc(a.text || "")}</div>
+      ${subtitle}
+    </div>
+  </div>`;
+}
+
+function wireCommentBox(lead) {
+  const btn = $("#cmtBtn");
+  if (!btn) return;
+  const post = async () => {
+    const box = $("#cmt");
+    const text = box.value.trim();
+    if (!text) return;
+    btn.disabled = true;
+    await S.store.logActivity(lead, { type: "comment", text });
+    await S.store.updateLead(lead, { commentCount: (lead.commentCount || 0) + 1 });
+    box.value = "";
+    btn.disabled = false;
+    toast("Comment added.", "good");
+  };
+  btn.addEventListener("click", post);
+  $("#cmt").addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") post();
+  });
+}
+
+/* ---------------------------------------------------------------------------
+   CAL BOOKING
+   The button is an ordinary link to the booking page carrying Cal's data
+   attributes. Cal's script intercepts the click and opens its modal; if that
+   script is blocked or slow, the link simply opens the page in a new tab. The
+   feature degrades instead of breaking.
+--------------------------------------------------------------------------- */
+function bookButton(lead) {
+  if (!CAL.enabled) return "";
+  const name = `${lead.firstName || ""} ${lead.lastName || ""}`.trim();
+  const cfg = JSON.stringify({
+    layout: CAL.layout,
+    ...(name ? { name } : {}),
+    ...(lead.email ? { email: lead.email } : {}),
+    ...(lead.company ? { notes: `${name || "Lead"} — ${lead.company}` } : {}),
+  });
+  const booked = lead.callBookedFor;
+  return `<a class="btn btn-sm ${booked ? "btn-ghost" : "btn-primary"}" id="drBook"
+      href="${esc(calUrl(lead))}" target="_blank" rel="noopener noreferrer"
+      data-cal-link="${esc(CAL.link)}"
+      data-cal-namespace="${esc(CAL.namespace)}"
+      data-cal-config='${esc(cfg)}'
+      title="${booked ? "Call booked for " + esc(fmtDate(booked)) + " — book another" : "Open the Summit discovery-call calendar"}">
+      ${booked ? "Call " + esc(fmtDate(booked)) : "Book discovery call"}</a>`;
+}
+
+/* Cal fires this once a booking completes. Without it a booked call would be
+   invisible here, which is the gap this whole dashboard exists to close. */
+function wireCalBookings() {
+  if (!CAL.enabled || typeof window.Cal !== "function") return;
+  try {
+    window.Cal.ns?.[CAL.namespace]?.("on", {
+      action: "bookingSuccessful",
+      callback: (e) => onBookingSuccess(e?.detail?.data || {}),
+    });
+  } catch (ex) {
+    console.warn("Cal booking listener could not be attached.", ex);
+  }
+}
+
+async function onBookingSuccess(data) {
+  const lead = S.leads.find((l) => l.id === S.bookingFor);
+  S.bookingFor = null;
+  if (!lead) return;   // booked from somewhere else — nothing to attach it to
+
+  // Cal's payload shape varies by version; read defensively rather than assume.
+  const booking = data.booking || data;
+  const startsAt = booking.startTime || booking.start || data.date || null;
+  const when = startsAt ? new Date(startsAt) : null;
+  const valid = when && !isNaN(when);
+
+  const patch = { callBookedFor: valid ? when.toISOString().slice(0, 10) : "" };
+  const notes = [{
+    type: "comment",
+    text: valid
+      ? `Discovery call booked for ${when.toLocaleString()} via Cal.`
+      : "Discovery call booked via Cal.",
+  }];
+
+  // Only ever move a lead forward. A booking shouldn't drag a lead that's
+  // already at proposal back to meeting.
+  const order = STAGES.findIndex((s) => s.key === lead.status);
+  const meetingIdx = STAGES.findIndex((s) => s.key === "meeting");
+  if (order >= 0 && order < meetingIdx) {
+    patch.status = "meeting";
+    notes.push({
+      type: "stage",
+      text: `Stage moved: ${stage(lead.status).label} → Meeting Booked`,
+      from: lead.status, to: "meeting",
+    });
+  }
+
+  try {
+    await S.store.updateLead(lead, patch, notes);
+    toast(valid ? `Call booked — ${fmtDate(patch.callBookedFor)}. Lead updated.` : "Call booked. Lead updated.", "good");
+  } catch (ex) {
+    console.error(ex);
+    toast("Call was booked, but the lead couldn't be updated. Set the stage by hand.", "bad");
+  }
+}
+
+async function changeStage(lead, next) {
+  if (next === lead.status) return;
+  const from = stage(lead.status).label, to = stage(next).label;
+  const patch = { status: next };
+  // Moving to "Shared" stamps the handover date if it isn't already set.
+  if (stage(next).marksHandoff && !lead.sharedOn) patch.sharedOn = new Date().toISOString().slice(0, 10);
+  await S.store.updateLead(lead, patch, [{ type: "stage", text: `Stage moved: ${from} → ${to}`, from: lead.status, to: next }]);
+  toast(`Moved to ${to}.`, "good");
+}
+
+/* ---- add / edit form ---- */
+function renderForm(lead, streamKey) {
+  const isNew = !lead;
+  const stream = isNew ? streamKey : lead.stream;
+  const role = S.me.role;
+
+  const control = (f) => {
+    const val = lead?.[f.key] ?? "";
+    const locked = !isNew && !can.editable(role, f.key);
+    const dis = locked ? " disabled" : "";
+    const wide = ["notes", "linkedinUrl", "companyLinkedin", "companyWebsite", "lostReason"].includes(f.key) ? " wide" : "";
+    let input;
+    if (f.type === "textarea")
+      input = `<textarea class="inp" id="f_${f.key}"${dis} placeholder="${esc(f.placeholder || "")}">${esc(val)}</textarea>`;
+    else if (f.type === "select")
+      input = `<select class="inp" id="f_${f.key}"${dis}>
+        ${f.options.map((o) => `<option value="${esc(o)}"${val === o ? " selected" : ""}>${esc(o || "—")}</option>`).join("")}
+      </select>`;
+    else
+      input = `<input class="inp" type="${f.type}" id="f_${f.key}" value="${esc(val)}"${dis} placeholder="${esc(f.placeholder || "")}">`;
+
+    return `<div class="fld${wide}">
+      <label for="f_${f.key}">${esc(f.label)}${f.required ? ` <span class="req">*</span>` : ""}${locked ? ` <span class="muted">(locked)</span>` : ""}</label>
+      ${input}
+      <div class="err-msg hide" id="e_${f.key}"></div>
+    </div>`;
+  };
+
+  $("#drBody").innerHTML = `
+    <fieldset class="grp">
+      <legend>Routing</legend>
+      <div class="frm">
+        <div class="fld">
+          <label for="f_stream">Stream <span class="req">*</span></label>
+          <select class="inp" id="f_stream"${can.editAll(role) ? "" : " disabled"}>
+            ${Object.entries(STREAMS).map(([k, s]) => `<option value="${k}"${stream === k ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="fld" id="clientWrap">
+          <label for="f_clientId">Client</label>
+          <select class="inp" id="f_clientId"${can.editAll(role) ? "" : " disabled"}>
+            <option value="">— select client —</option>
+            ${S.clients.map((c) => `<option value="${esc(c.id)}"${lead?.clientId === c.id ? " selected" : ""}>${esc(c.name)}</option>`).join("")}
+          </select>
+          <div class="err-msg hide" id="e_clientId"></div>
+        </div>
+        <div class="fld">
+          <label for="f_status">Stage</label>
+          <select class="inp" id="f_status">
+            ${STAGES.map((s) => `<option value="${s.key}"${(lead?.status || "new") === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+    </fieldset>
+    ${FIELD_GROUPS.map((g) => `
+      <fieldset class="grp">
+        <legend>${esc(g)}</legend>
+        <div class="frm">${LEAD_FIELDS.filter((f) => f.group === g).map(control).join("")}</div>
+      </fieldset>`).join("")}`;
+
+  const syncClient = () => $("#clientWrap").classList.toggle("hide", $("#f_stream").value !== "client");
+  $("#f_stream").addEventListener("change", syncClient);
+  syncClient();
+
+  $("#drFoot").innerHTML = `
+    <button class="btn btn-sm btn-primary" id="frmSave">${isNew ? "Create lead" : "Save changes"}</button>
+    <button class="btn btn-sm btn-ghost" id="frmCancel">Cancel</button>
+    <div style="flex:1"></div>
+    <span class="muted" style="font-size:11.5px; font-weight:600">* required</span>`;
+
+  $("#frmCancel").addEventListener("click", () => {
+    if (isNew) closeDrawer();
+    else { S.drawer.mode = "read"; renderDrawer(); }
+  });
+  $("#frmSave").addEventListener("click", () => saveForm(lead));
+}
+
+async function saveForm(lead) {
+  const isNew = !lead;
+  const role = S.me.role;
+  const data = {};
+  let bad = null;
+
+  $$(".err-msg").forEach((e) => e.classList.add("hide"));
+  $$(".inp").forEach((e) => e.classList.remove("err"));
+
+  const fail = (key, msg) => {
+    const e = $(`#e_${key}`), i = $(`#f_${key}`);
+    if (e) { e.textContent = msg; e.classList.remove("hide"); }
+    if (i) i.classList.add("err");
+    bad = bad || i;
+  };
+
+  data.stream = $("#f_stream").value;
+  data.status = $("#f_status").value;
+  data.clientId = data.stream === "client" ? $("#f_clientId").value : "";
+  if (data.stream === "client" && !data.clientId) fail("clientId", "Pick which client this lead is for.");
+
+  for (const f of LEAD_FIELDS) {
+    const el = $(`#f_${f.key}`);
+    if (!el) continue;
+    if (!isNew && !can.editable(role, f.key)) continue; // never send locked fields
+    let v = el.value.trim();
+    if (f.required && !v) { fail(f.key, `${f.label} is required.`); continue; }
+    if (v && f.type === "url" && !/^https?:\/\//i.test(v)) v = "https://" + v;
+    if (v && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { fail(f.key, "That doesn't look like an email."); continue; }
+    if (f.type === "number") v = v === "" ? "" : Number(v);
+    data[f.key] = v;
+  }
+
+  if (bad) {
+    bad.scrollIntoView({ behavior: "smooth", block: "center" });
+    return toast("Fix the highlighted fields.", "bad");
+  }
+
+  const btn = $("#frmSave");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+
+  try {
+    if (isNew) {
+      if (stage(data.status).marksHandoff && !data.sharedOn) data.sharedOn = new Date().toISOString().slice(0, 10);
+      data.commentCount = 0;
+      const id = await S.store.createLead(data);
+      toast("Lead created.", "good");
+      S.drawer = { ...S.drawer, leadId: id, mode: "read" };
+      openDrawer(id);
+    } else {
+      const notes = [];
+      if (data.status !== lead.status) {
+        notes.push({
+          type: "stage",
+          text: `Stage moved: ${stage(lead.status).label} → ${stage(data.status).label}`,
+          from: lead.status, to: data.status,
+        });
+      }
+      const changed = Object.keys(data).filter(
+        (k) => k !== "status" && String(data[k] ?? "") !== String(lead[k] ?? "")
+      );
+      if (changed.length) {
+        notes.push({
+          type: "edit",
+          text: `Updated ${changed.map((k) => field(k)?.label || k).join(", ")}`,
+        });
+      }
+      await S.store.updateLead(lead, data, notes);
+      toast("Saved.", "good");
+      S.drawer.mode = "read";
+      renderDrawer();
+    }
+  } catch (ex) {
+    console.error(ex);
+    toast(ex?.message || "Could not save. Try again.", "bad");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = isNew ? "Create lead" : "Save changes";
+  }
+}
+
+/* ==========================================================================
+   EXPORT — Excel only, and every download is written to history first
+   ========================================================================== */
+function filterSummary(streamKey) {
+  const v = S.view[streamKey];
+  const bits = [];
+  if (v.q) bits.push(`search "${v.q}"`);
+  if (v.status) bits.push(`stage ${stage(v.status).label}`);
+  if (v.owner) bits.push(`added by ${v.owner}`);
+  if (v.client) bits.push(`client ${clientName(v.client)}`);
+  if (v.attn) bits.push("needs attention only");
+  return bits.length ? bits.join(" · ") : "no filters — everything in this stream";
+}
+
+async function exportLeads(streamKey, rows) {
+  if (!rows.length) return toast("Nothing to export with these filters.", "warn");
+
+  const btn = $(`#exp_${streamKey}`);
+  btn.disabled = true;
+  btn.textContent = "Preparing…";
+
+  try {
+    /* --- build the sheet --- */
+    const cols = [
+      { label: "Lead ID", width: 14, get: (l) => l.id },
+      { label: "Stream", width: 20, get: (l) => STREAMS[l.stream]?.label || l.stream },
+      { label: "Client", width: 22, get: (l) => clientName(l.clientId) },
+      { label: "Stage", width: 18, get: (l) => stage(l.status).label },
+      ...LEAD_FIELDS.map((f) => ({
+        label: f.label,
+        width: f.width || 18,
+        get: (l) => (f.type === "date" ? (l[f.key] ? fmtDate(l[f.key]) : "") : l[f.key] ?? ""),
+      })),
+      { label: "Added By", width: 20, get: (l) => l.createdByName || "" },
+      { label: "Created On", width: 18, get: (l) => fmtDate(l.createdAt) },
+      { label: "Last Activity", width: 18, get: (l) => fmtDate(l.lastActivityAt || l.createdAt) },
+      { label: "Days Idle", width: 12, get: (l) => (OPEN_STAGES.includes(l.status) ? daysSince(l.lastActivityAt || l.createdAt) : "") },
+      { label: "Comments", width: 12, get: (l) => l.commentCount || 0 },
+    ];
+
+    const aoa = [cols.map((c) => c.label), ...rows.map((l) => cols.map((c) => c.get(l)))];
+
+    const when = new Date();
+    const scope = STREAMS[streamKey].label;
+    const filters = filterSummary(streamKey);
+
+    /* --- a second sheet, so the file carries its own audit trail even after
+           it has been emailed on to someone else --- */
+    const info = [
+      ["LinkedIn Leads — export record"],
+      [],
+      ["Exported by", S.me.name || S.me.email],
+      ["Email", S.me.email],
+      ["Role", ROLES[S.me.role]?.label || S.me.role || ""],
+      ["Exported at", when.toLocaleString()],
+      ["Stream", scope],
+      ["Filters applied", filters],
+      ["Rows", rows.length],
+      [],
+      ["This export is logged in the dashboard's Export History with the exporter's name,"],
+      ["the time, the filters used and the exact leads included. Treat it as confidential."],
+    ];
+
+    const stamp = when.toISOString().slice(0, 16).replace("T", "_").replace(":", "");
+    const filename = `linkedin-leads_${streamKey}_${stamp}.xlsx`;
+
+    /* --- write the history record BEFORE handing over the file, so nothing
+           reaches someone's disk without leaving a trace --- */
+    await S.store.logExport({
+      scope,
+      stream: streamKey,
+      filters,
+      count: rows.length,
+      filename,
+      leadIds: rows.map((l) => l.id),
+    });
+
+    downloadXlsx(
+      [
+        { name: "Leads", aoa, cols: cols.map((c) => c.width) },
+        { name: "Export Info", aoa: info, cols: [20, 74] },
+      ],
+      filename
+    );
+
+    toast(`Exported ${rows.length} lead${rows.length === 1 ? "" : "s"} — logged in Export History.`, "good");
+  } catch (ex) {
+    console.error(ex);
+    toast("Export failed — nothing was downloaded. Try again.", "bad");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Export to Excel";
+  }
+}
+
+/* ==========================================================================
+   EXPORT HISTORY / ACTIVITY / ADMIN PANELS
+   ========================================================================== */
+function renderExports() {
+  const mine = !can.admin(S.me.role);
+  $("#expHint").textContent = mine
+    ? "Your downloads. Admins can see everyone's."
+    : "Every download across the team — who, when, which leads.";
+
+  $("#expList").innerHTML = S.exports.length
+    ? S.exports.map((e) => `
+      <div class="exp-row">
+                <div style="min-width:0">
+          <div class="exp-t">${esc(e.byName || e.byEmail || "Someone")} exported ${esc(e.scope || "leads")}</div>
+          <div class="exp-s">${esc(fmtWhen(e.at))} · ${esc(e.filters || "no filters")}</div>
+          <div class="exp-s" style="opacity:.75">${esc(e.filename || "")}</div>
+        </div>
+        <div class="exp-n">${e.count ?? 0} rows</div>
+      </div>`).join("")
+    : `<p class="muted" style="font-size:13px">No exports yet. Every download will appear here.</p>`;
+}
+
+function renderFeed() {
+  const byLead = new Map(S.leads.map((l) => [l.id, l]));
+  const host = $("#globalFeed");
+
+  host.innerHTML = S.feed.length
+    ? S.feed.map((a) => {
+        const l = byLead.get(a.leadId);
+        const tag = l
+          ? `<div class="fe-when" style="margin-top:3px; cursor:pointer">
+               on <b style="color:var(--ink-2)">${esc(fullName(l))}</b> · ${esc(l.company || "")}</div>`
+          : `<div class="card-body"><p class="muted">Every open lead has been touched in the last ${STALE_DAYS} days.</p></div>`;
+        return feedItem(a, tag);
+      }).join("")
+    : `<p class="muted" style="font-size:13px">Nothing has happened yet.</p>`;
+
+  host.onclick = (e) => {
+    const row = e.target.closest(".fe");
+    if (row?.dataset.leadid && byLead.has(row.dataset.leadid)) openDrawer(row.dataset.leadid);
+  };
+}
+
+function renderUsers() {
+  $("#userList").innerHTML = S.users.length
+    ? S.users.map((u) => `
+      <div class="li">
+        <div class="avatar" style="width:30px;height:30px;font-size:11px">${esc(initials(u.name || u.email))}</div>
+        <div class="grow">
+          <div class="t">${esc(u.name || u.email)}</div>
+          <div class="s">${esc(u.email || "")} · ${esc(ROLES[u.role]?.label || "no role")}</div>
+        </div>
+        ${u.active === false ? `<span class="pill" style="color:#6b6b73;border-color:#d4d4d8">Disabled</span>` : ""}
+      </div>`).join("")
+    : `<p class="muted" style="font-size:13px">Nobody yet. Invite your first person below.</p>`;
+}
+
+/* ---------------------------------------------------------------------------
+   INVITES
+   The admin picks the role here; the invitee never chooses their own. The
+   matching rule in firestore.rules copies that role across verbatim when they
+   sign in, so this dropdown is the only place a role is decided.
+--------------------------------------------------------------------------- */
+function wireInvites() {
+  const roleSel = $("#invRole");
+  if (!roleSel || roleSel.dataset.wired) return;
+  roleSel.dataset.wired = "1";
+
+  roleSel.innerHTML = Object.entries(ROLES)
+    .map(([k, r]) => `<option value="${k}"${k === "ops" ? " selected" : ""}>${esc(r.label)}</option>`)
+    .join("");
+
+  const sync = () => {
+    const r = roleSel.value;
+    $("#invRoleBlurb").textContent = ROLES[r]?.blurb || "";
+    $("#invClientWrap").classList.toggle("hide", r !== "client");
+  };
+  roleSel.addEventListener("change", sync);
+  sync();
+
+  $("#invSend").addEventListener("click", sendInvite);
+}
+
+async function sendInvite() {
+  const name = $("#invName").value.trim();
+  const email = $("#invEmail").value.trim().toLowerCase();
+  const role = $("#invRole").value;
+  const clientAccess = [...$("#invClients").selectedOptions].map((o) => o.value);
+
+  if (!name) return toast("Add their name so people know who this is.", "warn");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast("That email doesn't look right.", "warn");
+  if (role === "client" && !clientAccess.length) return toast("Pick which clients they can see.", "warn");
+  if (S.users.some((u) => (u.email || "").toLowerCase() === email)) {
+    return toast("That person already has access.", "warn");
+  }
+
+  const btn = $("#invSend");
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  try {
+    await S.store.createInvite(email, { name, role, clientAccess });
+    await S.store.sendInviteLink(email);
+    $("#invName").value = "";
+    $("#invEmail").value = "";
+    toast(
+      S.store.mode === "demo"
+        ? "Invite recorded. In demo mode no email is actually sent."
+        : `Invite sent to ${email}.`,
+      "good"
+    );
+  } catch (ex) {
+    console.error(ex);
+    toast(inviteError(ex), "bad");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Send invite";
+  }
+}
+
+function inviteError(ex) {
+  const code = ex?.code || "";
+  if (code.includes("operation-not-allowed"))
+    return "Email link sign-in isn't switched on yet. Enable it in Firebase → Authentication → Sign-in method.";
+  if (code.includes("unauthorized-continue-uri") || code.includes("invalid-continue-uri"))
+    return "This site's domain isn't authorised in Firebase → Authentication → Settings → Authorised domains.";
+  if (code.includes("permission-denied")) return "Only admins can invite people.";
+  return ex?.message || "Could not send the invite. Try again.";
+}
+
+function renderInvites() {
+  const host = $("#invList");
+  if (!host) return;
+
+  const opts = S.clients.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+  const sel = $("#invClients");
+  if (sel && sel.innerHTML !== opts) sel.innerHTML = opts;
+
+  const open = S.invites.filter((i) => i.status !== "accepted");
+  host.innerHTML = open.length
+    ? `<div class="eyebrow" style="margin-bottom:8px">Waiting to be accepted</div>
+       <div class="list">${open.map((i) => `
+        <div class="li">
+          <div class="grow">
+            <div class="t">${esc(i.name || i.email)}</div>
+            <div class="s">${esc(i.email)} · ${esc(ROLES[i.role]?.label || i.role)} · invited ${esc(fmtWhen(i.createdAt))}</div>
+          </div>
+          <span class="pill" style="color:#7a5f14;background:#fdf9ec;border-color:#f0e4c0">
+            <span class="dot"></span>${i.status === "sent" ? "Link sent" : "Not sent"}
+          </span>
+          <button class="btn btn-xs btn-ghost" data-resend="${esc(i.email)}">Resend</button>
+          <button class="btn btn-xs btn-danger" data-revoke="${esc(i.email)}">Revoke</button>
+        </div>`).join("")}</div>`
+    : `<p class="muted" style="font-size:12.5px">No invites waiting.</p>`;
+
+  host.onclick = async (e) => {
+    const resend = e.target.closest("[data-resend]");
+    const revoke = e.target.closest("[data-revoke]");
+    if (resend) {
+      try {
+        await S.store.sendInviteLink(resend.dataset.resend);
+        toast("Invite resent.", "good");
+      } catch (ex) { toast(inviteError(ex), "bad"); }
+    }
+    if (revoke) {
+      const email = revoke.dataset.revoke;
+      if (!confirm(`Revoke the invite for ${email}? Their link stops working.`)) return;
+      await S.store.revokeInvite(email);
+      toast("Invite revoked.", "bad");
+    }
+  };
+}
+
+function renderClients() {
+  const host = $("#clientList");
+  if (!host) return;
+  host.innerHTML = S.clients.length
+    ? S.clients.map((c) => {
+        const n = S.leads.filter((l) => l.clientId === c.id).length;
+        return `<div class="li">
+          <div class="grow">
+            <div class="t">${esc(c.name)}</div>
+            <div class="s">${n} lead${n === 1 ? "" : "s"}</div>
+          </div>
+          <span class="pill ${c.active === false ? "pill-neutral" : "pill-accent"}">
+            <span class="dot"></span>${c.active === false ? "Inactive" : "Active"}
+          </span>
+        </div>`;
+      }).join("")
+    : `<p class="muted" style="font-size:13px">No clients yet. Add the first one below.</p>`;
+}
+
+</script>
