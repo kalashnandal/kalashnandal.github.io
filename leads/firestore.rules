@@ -180,10 +180,23 @@ service cloud.firestore {
 
        Keep this in step with BOOTSTRAP_ADMIN in config.js.
     --------------------------------------------------------------------- */
+    /* Microsoft's OIDC token often arrives without a verified-email claim, so
+       Firebase reports email_verified false even though Entra authenticated
+       the mailbox owner. Requiring the flag outright would lock the owner out
+       of their own project.
+
+       So: a federated provider counts as proof, because reaching this point
+       means the identity provider signed the user in. Email/password does NOT
+       — anyone can self-register an address with the public API key, so that
+       route still has to prove the address. */
+    function viaTrustedIdp() {
+      return request.auth.token.firebase.sign_in_provider in ['microsoft.com', 'google.com'];
+    }
+
     function isBootstrapAdmin() {
       return request.auth != null
-          && request.auth.token.email_verified == true
-          && myEmail() == 'kalash.nandal@imarkinfotech.com';
+          && myEmail() == 'kalash.nandal@imarkinfotech.com'
+          && (request.auth.token.email_verified == true || viaTrustedIdp());
     }
 
     /* =====================================================================

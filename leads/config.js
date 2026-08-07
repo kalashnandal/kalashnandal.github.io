@@ -45,11 +45,18 @@ export const isConfigured = () => !firebaseConfig.apiKey.startsWith("PASTE_");
    thing available client-side.
 --------------------------------------------------------------------------- */
 export const AUTH = {
-  google:    true,   // one click, best option for @imarkinfotech.com accounts
+  microsoft: true,   // imarkinfotech.com runs on Microsoft 365 — the main route in
+  google:    true,   // kept for anyone on a Google account, e.g. at Summit
   emailLink: true,   // magic link — Firebase's passwordless email method
   phone:     true,   // SMS one-time code, needs reCAPTCHA
   password:  true,   // classic email + password
 };
+
+/* Leave blank to accept any Microsoft account the app registration allows.
+   Put your Entra directory (tenant) ID here to refuse everyone outside it —
+   worth doing once it is live, since it stops a personal outlook.com account
+   from even reaching the sign-in screen. */
+export const MS_TENANT = "";
 
 /* Break the dashboard out of a page builder's centred column so it uses the
    whole window. Set false if you would rather it sit inside the container.

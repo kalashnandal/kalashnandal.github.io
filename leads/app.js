@@ -279,10 +279,11 @@ function wireLogin() {
      email link are independent — with both on you get a password form plus a
      "send me a link instead" button, not one or the other. */
   const on = (sel, yes) => $(sel)?.classList.toggle("hide", !yes);
+  on("#liMicrosoft", AUTH.microsoft);
   on("#liGoogle", AUTH.google);
   on("#loginForm", AUTH.emailLink || AUTH.password);
   on("#liPhoneBlock", AUTH.phone);
-  on("#liOr", AUTH.google && (AUTH.emailLink || AUTH.password));
+  on("#liOr", (AUTH.microsoft || AUTH.google) && (AUTH.emailLink || AUTH.password));
   on("#liPassWrap", AUTH.password);
   on("#liForgot", AUTH.password);
   on("#liLinkBtn", AUTH.emailLink && AUTH.password);
@@ -304,17 +305,20 @@ function wireLogin() {
   };
   $("#liLinkBtn")?.addEventListener("click", (e) => sendLink(e.currentTarget));
 
-  /* ---- Google ---- */
-  $("#liGoogle")?.addEventListener("click", async () => {
+  /* ---- Microsoft and Google ---- */
+  const federated = (sel, kind) => $(sel)?.addEventListener("click", async (e) => {
     clear();
-    const b = $("#liGoogle");
+    const b = e.currentTarget;
     b.disabled = true;
     try {
-      await S.store.signInWithGoogle();
+      await S.store.signInWithProvider(kind);
     } catch (ex) {
+      // Closing the window is a decision, not an error worth shouting about.
       if (!/popup-closed|cancelled/.test(ex?.code || "")) say(err, loginError(ex));
     } finally { b.disabled = false; }
   });
+  federated("#liMicrosoft", "microsoft");
+  federated("#liGoogle", "google");
 
   /* ---- Email: link, or password when that is the configured method ---- */
   $("#loginForm")?.addEventListener("submit", async (e) => {

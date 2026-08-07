@@ -24,7 +24,7 @@
    document read per entry).
    ========================================================================== */
 
-import { firebaseConfig, isConfigured, BOOTSTRAP_ADMIN } from "./config.js";
+import { firebaseConfig, isConfigured, BOOTSTRAP_ADMIN, MS_TENANT } from "./config.js";
 
 const SDK = "https://www.gstatic.com/firebasejs/10.14.1";
 
@@ -119,24 +119,35 @@ async function firebaseStore() {
     resetPassword: (email) => auth.sendPasswordResetEmail(A, email),
     me: () => profile,
 
-    /* ---- Google ---------------------------------------------------------
+    /* ---- Federated sign-in (Microsoft, Google) --------------------------
        Popup first because it keeps the page state. Embedded contexts (an
        iframe in a page builder, some in-app browsers) block popups, so fall
        back to a full redirect rather than failing. */
-    async signInWithGoogle() {
-      const provider = new auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
+    async signInWithProvider(kind) {
+      let provider;
+      if (kind === "microsoft") {
+        provider = new auth.OAuthProvider("microsoft.com");
+        provider.setCustomParameters({
+          prompt: "select_account",
+          ...(MS_TENANT ? { tenant: MS_TENANT } : {}),
+        });
+      } else {
+        provider = new auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
+      }
+
       try {
         return await auth.signInWithPopup(A, provider);
       } catch (ex) {
         const code = ex?.code || "";
-        if (/popup-blocked|popup-closed-by-user|operation-not-supported|cancelled-popup/.test(code)) {
-          if (code.includes("popup-closed") || code.includes("cancelled")) throw ex;  // user's choice
+        if (code.includes("popup-closed") || code.includes("cancelled")) throw ex;  // user's choice
+        if (/popup-blocked|operation-not-supported/.test(code)) {
           return auth.signInWithRedirect(A, provider);
         }
         throw ex;
       }
     },
+    signInWithGoogle() { return this.signInWithProvider("google"); },
     resolveRedirect: () => auth.getRedirectResult(A).catch(() => null),
 
     /* ---- Phone OTP ------------------------------------------------------
@@ -311,7 +322,14 @@ async function firebaseStore() {
          address pinned in config.js (and in firestore.rules) bootstraps the
          project, so it doesn't need a hand-made Firestore document to start.
          Unverified addresses get nothing — otherwise the check is spoofable. */
-      if (email && email === BOOTSTRAP_ADMIN.toLowerCase() && user.emailVerified) {
+      /* Mirrors viaTrustedIdp() in firestore.rules: Microsoft frequently
+         reports emailVerified false even though Entra just authenticated the
+         mailbox owner, so signing in through a federated provider counts.
+         Email/password does not — that address still has to be proven. */
+      const viaIdp = (user.providerData || [])
+        .some((p) => ["microsoft.com", "google.com"].includes(p.providerId));
+
+      if (email && email === BOOTSTRAP_ADMIN.toLowerCase() && (user.emailVerified || viaIdp)) {
         const admin = { name: user.displayName || email, email, role: "admin", active: true };
         await setDoc(doc(D, "users", user.uid), admin);
         return admin;
@@ -574,6 +592,7 @@ function demoStore() {
     },
 
     isInviteLink: () => false,
+    signInWithProvider: async () => profile,
     signInWithLink: async () => profile,
     claimInvite: async () => null,
     sendSignInLink: async () => {},

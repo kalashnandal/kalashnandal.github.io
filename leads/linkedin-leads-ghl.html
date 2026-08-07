@@ -529,8 +529,19 @@ position:relative; isolation:isolate;}
     <div id="loginErr" class="login-err hide"></div>
     <div id="loginOk" class="login-ok hide"></div>
 
-    <!-- Google first: one click, and everyone here already has a work
-         Google account. -->
+    <!-- Microsoft first: the company runs on Microsoft 365, so this is the
+         route almost everyone takes. -->
+    <button class="btn btn-ghost btn-google hide" id="liMicrosoft" type="button">
+      <svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">
+        <rect x="0" y="0" width="8.4" height="8.4" fill="#F25022"/>
+        <rect x="9.6" y="0" width="8.4" height="8.4" fill="#7FBA00"/>
+        <rect x="0" y="9.6" width="8.4" height="8.4" fill="#00A4EF"/>
+        <rect x="9.6" y="9.6" width="8.4" height="8.4" fill="#FFB900"/>
+      </svg>
+      Continue with Microsoft
+    </button>
+
+    <!-- Google, for anyone on a Google account instead. -->
     <button class="btn btn-ghost btn-google hide" id="liGoogle" type="button">
       <svg viewBox="0 0 18 18" width="16" height="16" aria-hidden="true">
         <path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.3-.2-1.9H9v3.5h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/>
@@ -879,11 +890,18 @@ const isConfigured = () => !firebaseConfig.apiKey.startsWith("PASTE_");
    thing available client-side.
 --------------------------------------------------------------------------- */
 const AUTH = {
-  google:    true,   // one click, best option for @imarkinfotech.com accounts
+  microsoft: true,   // imarkinfotech.com runs on Microsoft 365 — the main route in
+  google:    true,   // kept for anyone on a Google account, e.g. at Summit
   emailLink: true,   // magic link — Firebase's passwordless email method
   phone:     true,   // SMS one-time code, needs reCAPTCHA
   password:  true,   // classic email + password
 };
+
+/* Leave blank to accept any Microsoft account the app registration allows.
+   Put your Entra directory (tenant) ID here to refuse everyone outside it —
+   worth doing once it is live, since it stops a personal outlook.com account
+   from even reaching the sign-in screen. */
+const MS_TENANT = "";
 
 /* Break the dashboard out of a page builder's centred column so it uses the
    whole window. Set false if you would rather it sit inside the container.
@@ -1449,24 +1467,35 @@ async function firebaseStore() {
     resetPassword: (email) => auth.sendPasswordResetEmail(A, email),
     me: () => profile,
 
-    /* ---- Google ---------------------------------------------------------
+    /* ---- Federated sign-in (Microsoft, Google) --------------------------
        Popup first because it keeps the page state. Embedded contexts (an
        iframe in a page builder, some in-app browsers) block popups, so fall
        back to a full redirect rather than failing. */
-    async signInWithGoogle() {
-      const provider = new auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
+    async signInWithProvider(kind) {
+      let provider;
+      if (kind === "microsoft") {
+        provider = new auth.OAuthProvider("microsoft.com");
+        provider.setCustomParameters({
+          prompt: "select_account",
+          ...(MS_TENANT ? { tenant: MS_TENANT } : {}),
+        });
+      } else {
+        provider = new auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
+      }
+
       try {
         return await auth.signInWithPopup(A, provider);
       } catch (ex) {
         const code = ex?.code || "";
-        if (/popup-blocked|popup-closed-by-user|operation-not-supported|cancelled-popup/.test(code)) {
-          if (code.includes("popup-closed") || code.includes("cancelled")) throw ex;  // user's choice
+        if (code.includes("popup-closed") || code.includes("cancelled")) throw ex;  // user's choice
+        if (/popup-blocked|operation-not-supported/.test(code)) {
           return auth.signInWithRedirect(A, provider);
         }
         throw ex;
       }
     },
+    signInWithGoogle() { return this.signInWithProvider("google"); },
     resolveRedirect: () => auth.getRedirectResult(A).catch(() => null),
 
     /* ---- Phone OTP ------------------------------------------------------
@@ -1641,7 +1670,14 @@ async function firebaseStore() {
          address pinned in config.js (and in firestore.rules) bootstraps the
          project, so it doesn't need a hand-made Firestore document to start.
          Unverified addresses get nothing — otherwise the check is spoofable. */
-      if (email && email === BOOTSTRAP_ADMIN.toLowerCase() && user.emailVerified) {
+      /* Mirrors viaTrustedIdp() in firestore.rules: Microsoft frequently
+         reports emailVerified false even though Entra just authenticated the
+         mailbox owner, so signing in through a federated provider counts.
+         Email/password does not — that address still has to be proven. */
+      const viaIdp = (user.providerData || [])
+        .some((p) => ["microsoft.com", "google.com"].includes(p.providerId));
+
+      if (email && email === BOOTSTRAP_ADMIN.toLowerCase() && (user.emailVerified || viaIdp)) {
         const admin = { name: user.displayName || email, email, role: "admin", active: true };
         await setDoc(doc(D, "users", user.uid), admin);
         return admin;
@@ -1904,6 +1940,7 @@ function demoStore() {
     },
 
     isInviteLink: () => false,
+    signInWithProvider: async () => profile,
     signInWithLink: async () => profile,
     claimInvite: async () => null,
     sendSignInLink: async () => {},
@@ -2233,10 +2270,11 @@ function wireLogin() {
      email link are independent — with both on you get a password form plus a
      "send me a link instead" button, not one or the other. */
   const on = (sel, yes) => $(sel)?.classList.toggle("hide", !yes);
+  on("#liMicrosoft", AUTH.microsoft);
   on("#liGoogle", AUTH.google);
   on("#loginForm", AUTH.emailLink || AUTH.password);
   on("#liPhoneBlock", AUTH.phone);
-  on("#liOr", AUTH.google && (AUTH.emailLink || AUTH.password));
+  on("#liOr", (AUTH.microsoft || AUTH.google) && (AUTH.emailLink || AUTH.password));
   on("#liPassWrap", AUTH.password);
   on("#liForgot", AUTH.password);
   on("#liLinkBtn", AUTH.emailLink && AUTH.password);
@@ -2258,17 +2296,20 @@ function wireLogin() {
   };
   $("#liLinkBtn")?.addEventListener("click", (e) => sendLink(e.currentTarget));
 
-  /* ---- Google ---- */
-  $("#liGoogle")?.addEventListener("click", async () => {
+  /* ---- Microsoft and Google ---- */
+  const federated = (sel, kind) => $(sel)?.addEventListener("click", async (e) => {
     clear();
-    const b = $("#liGoogle");
+    const b = e.currentTarget;
     b.disabled = true;
     try {
-      await S.store.signInWithGoogle();
+      await S.store.signInWithProvider(kind);
     } catch (ex) {
+      // Closing the window is a decision, not an error worth shouting about.
       if (!/popup-closed|cancelled/.test(ex?.code || "")) say(err, loginError(ex));
     } finally { b.disabled = false; }
   });
+  federated("#liMicrosoft", "microsoft");
+  federated("#liGoogle", "google");
 
   /* ---- Email: link, or password when that is the configured method ---- */
   $("#loginForm")?.addEventListener("submit", async (e) => {
