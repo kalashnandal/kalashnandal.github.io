@@ -1,124 +1,64 @@
-
+ 
 <!-- ==========================================================================
      LinkedIn Leads dashboard — iMark Infotech × Summit Sales & Marketing.
      Paste this whole block into a GHL custom HTML element. It is
      self-contained: no build step, no files to upload. Everything is scoped
      to #llb-root, so GHL's page styles cannot reach in and these styles
      cannot leak out.
+
      LIVE: wired to Firebase project leads-dashboard-9d76f. Sign in with
      Microsoft 365, Google, or email + password — all three reach the SAME
      account when they share an email address. Add ?demo=1 to the page URL
      to show sample data instead of the live project.
-     Height: the app fills the viewport by default. To fit it inside a GHL
-     page that has its own header and footer, change --app-height on the
-     first CSS rule (e.g. --app-height:900px).
 
      ══════════════════════ WHAT CHANGED IN THIS REVISION ═══════════════════
 
-     1. SYNC FIX — "leads don't show up on other accounts". Every live query
-        now degrades to an index-free variant: Firestore silently rejects any
-        query that needs a composite index it doesn't have (where + orderBy),
-        and the old code swallowed that error and showed an empty dashboard.
-        Now sorting happens client-side, equality-only queries need no
-        composite indexes at all, and if Firestore still refuses (usually
-        security rules), a visible red notice explains it instead of nothing
-        loading. New comments also render instantly via estimated timestamps.
+     1. PIPELINE IS SUMMIT SALES ONLY. Client-delivery leads have their own
+        life cycle; dragging them through the same funnel made both numbers
+        mean less. The Review pipeline, its conversion figures, the outcome
+        pills and the win rate all now count `stream === "sales_partner"`.
 
-     2. COMMENTS FIX — same root cause. The per-lead activity query needed a
-        composite index (leadId + at desc); without it, every comment saved
-        fine but the list never loaded. The query no longer requires one.
+     2. HERO SPLITS THE NEW-LEAD COUNT. The line the review call opens on now
+        reads "Since the last call: N leads for Summit Sales and N for
+        clients", with two matching tiles underneath, because those are two
+        different conversations.
 
-     3. LOGIN — the sign-in card now shows exactly three doors in: Microsoft
-        365, Google, and email + password. All three land in one account per
-        email address.
+     3. SOURCE now offers Upwork and Cold Calling alongside the LinkedIn ones.
 
-     4. PASSWORDS ALONGSIDE SSO — Admin → People has a "Password" button per
-        person: it emails them a secure set-password link. Once they choose
-        one, email + password works for them in addition to Microsoft/Google.
-        (A browser app cannot write someone else's password directly — that
-        needs a server — so the emailed link is the sanctioned route. People
-        can also do it themselves from Settings or "Forgot your password?".)
+     4. ONE LEVEL OF ACCESS. Any signed-in account works the whole board:
+        both streams, create, edit, comment, stage changes, export, the full
+        export history. Roles survive only to decide who sees the Admin panel
+        — and who can pull the trigger on a delete.
 
-     5. ADMIN USER MANAGEMENT — edit name/role/client access, disable or
-        re-enable, remove access, straight from the People panel.
+     5. DELETION IS A REQUEST, NOT AN ACTION. Non-admins get "Request
+        deletion" on a lead, with an optional reason that is written to that
+        lead's activity trail. The ask lands in Admin → Deletion requests,
+        where an admin approves (lead goes) or declines (lead stays).
 
-     6. PROFILE PICTURES + THEME — everyone gets a Settings tab: upload a
-        photo (resized in-browser, stored on their user profile) and pick the
-        accent colour the whole dashboard uses for them.
+     6. NOTHING ON THE LEAD FORM IS REQUIRED. A half-filled lead beats a lead
+        nobody bothered to log. Email and URL formats are still tidied up on
+        save; they are just no longer gates.
 
-     7. PARTNERSHIP BRANDING — the iMark Infotech and Summit logos appear as
-        a joined "A × B" lockup on the sign-in card and in the sidebar. URLs
-        live in BRAND inside config.
-
-     8. TOP BAR — a live clock plus a motivational quote that changes every
-        few seconds, drawn from a 100+ quote list in config.
+     7. SCREENSHOT GUARD. The data blurs whenever this window is not the one
+        being looked at, printing and PDF export are blanked, and Print Screen
+        wipes the clipboard. See the long note above the CSS for exactly what
+        that can and cannot do — a phone camera still beats it, which is why
+        the tracked Excel export stays the easy path.
 
      ═══════════════════════ FIREBASE CONSOLE CHECKLIST ═════════════════════
 
      Authentication → Sign-in method: enable Microsoft, Google, AND
        Email/Password (Email/Password must be ON or the password boxes and
-       every set-password email will fail with operation-not-allowed).
+       every set-password email will fail with operation-not-allowed). Keep
+       "Email link (passwordless sign-in)" on as well — invites use it.
      Authentication → Settings → Authorised domains: add the domain this
        page is served from.
-     Firestore → Rules: see the starting point below. Two rules matter for
-       the new features — admins may write/delete user documents, and each
-       person may update the name/photo/accent fields of their OWN document
-       (that is what lets profile pictures and colours save).
-
-     ══════════════ FIRESTORE RULES — A WORKING STARTING POINT ══════════════
-     Merge with your existing rules; deliberately left out below are your
-     current invite-claim and bootstrap-admin clauses — KEEP THOSE.
-
-     rules_version = '2';
-     service cloud.firestore {
-       match /databases/{db}/documents {
-         function signedIn()   { return request.auth != null; }
-         function myDoc()      { return get(/databases/$(db)/documents/users/$(request.auth.uid)); }
-         function hasProfile() { return signedIn() && exists(/databases/$(db)/documents/users/$(request.auth.uid)); }
-         function myRole()     { return hasProfile() ? myDoc().data.role : ''; }
-         function isActive()   { return hasProfile() && myDoc().data.get('active', true) != false; }
-         function isAdmin()    { return isActive() && myRole() == 'admin'; }
-         function isStaff()    { return isActive() && myRole() in ['admin', 'ops']; }
-         function isSales()    { return isActive() && myRole() == 'sales'; }
-         function isClient()   { return isActive() && myRole() == 'client'; }
-         function myClients()  { return myDoc().data.get('clientAccess', []); }
-
-         match /leads/{id} {
-           allow read: if isStaff()
-             || (isSales()  && resource.data.stream == 'sales_partner')
-             || (isClient() && resource.data.clientId in myClients());
-           allow create: if isStaff();
-           allow update: if isStaff() || (isSales() && resource.data.stream == 'sales_partner');
-           allow delete: if isAdmin();
-         }
-         match /activity/{id} {
-           allow read: if isStaff()
-             || (isSales()  && resource.data.stream == 'sales_partner')
-             || (isClient() && resource.data.clientId in myClients());
-           allow create: if isActive();
-         }
-         match /clients/{id} {
-           allow read: if isActive();
-           allow write: if isAdmin();
-         }
-         match /users/{uid} {
-           allow read: if isActive() || request.auth.uid == uid;
-           allow create, delete: if isAdmin();
-           allow update: if isAdmin()
-             || (request.auth.uid == uid
-                 && request.resource.data.diff(resource.data).affectedKeys()
-                    .hasOnly(['name', 'photo', 'accent']));
-         }
-         match /invites/{id} {
-           allow read, write: if isAdmin();
-           // + your existing claim-on-first-sign-in clauses
-         }
-         match /exports/{id} {
-           allow create: if isActive();
-           allow read: if isAdmin() || (signedIn() && resource.data.by == request.auth.uid);
-         }
-       }
-     }
+     Firestore → Rules: the rules, not this file, decide what loads. Paste
+       the ruleset that shipped alongside this revision (firestore.rules) or
+       every non-admin gets an empty dashboard. It has to allow: any active
+       account to read/write leads and activity, admins only to delete a
+       lead, and the new deleteRequests collection — create by anyone active,
+       update/delete by admins.
      ========================================================================== -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -130,7 +70,7 @@
 html, body, #preview-container, .hl_page-preview--content {
     margin: 0 !important;
     padding: 0 !important;
-    overflow-x: hidden !important; 
+    overflow-x: hidden !important;
 }
 
 #llb-root {
@@ -140,7 +80,7 @@ html, body, #preview-container, .hl_page-preview--content {
     margin-right: calc(50% - 50vw) !important;
     position: relative !important;
     isolation: isolate !important;
-    overflow-x: hidden !important; 
+    overflow-x: hidden !important;
 }
 
 @media (min-width: 901px) {
@@ -152,7 +92,7 @@ html, body, #preview-container, .hl_page-preview--content {
     #llb-root .shell {
         height: 100vh !important;
         min-height: 100vh !important;
-        overflow: hidden !important; 
+        overflow: hidden !important;
     }
     #llb-root .main {
         overflow-y: auto !important;
@@ -341,7 +281,7 @@ html, body, #preview-container, .hl_page-preview--content {
   max-width:34ch !important; text-wrap:balance !important; position:relative !important; line-height:1.25 !important;
 }
 #llb-root .hero-line b{color:#b3bdf4 !important; font-weight:600 !important}
-/* Plain counts. Same five figures, sitting on the hero instead of in a
+/* Plain counts. The same figures, sitting on the hero instead of in a
    separate row of white boxes. */
 #llb-root .hero-figs{
   display:flex !important; gap:30px !important; flex-wrap:wrap !important; position:relative !important;
@@ -706,6 +646,41 @@ html, body, #preview-container, .hl_page-preview--content {
   background:var(--line-3) !important; border:1px solid var(--line) !important; border-radius:var(--r-m) !important;
   padding:12px !important; margin:2px 0 10px !important;
 }
+/* ============ SCREENSHOT GUARD ============
+   An honest note on what this can and cannot do. A web page cannot forbid a
+   screenshot — the operating system takes it, not the browser. What it CAN do
+   is make sure that by the time a capture tool is in front, the data is no
+   longer on screen: every OS screenshot tool either steals focus or hides the
+   window first, and both fire events this page listens for. It also blanks
+   printing and PDF export, and wipes the clipboard on Print Screen. Someone
+   determined with a phone camera still wins; the tracked Excel export stays
+   the easy path, which is the point. */
+#llb-root.guarded .shell,
+#llb-root.guarded #login,
+#llb-root.guarded .drawer{
+  filter:blur(26px) !important; pointer-events:none !important;
+  -webkit-user-select:none !important; user-select:none !important;
+}
+#llb-root .veil{
+  position:fixed !important; inset:0 !important; z-index:9998 !important;
+  display:grid !important; place-items:center !important; cursor:pointer !important;
+  background:rgba(247,248,250,.62) !important;
+  -webkit-backdrop-filter:blur(8px) !important; backdrop-filter:blur(8px) !important;
+}
+#llb-root .veil-card{
+  background:var(--card) !important; border:1px solid var(--line) !important;
+  border-radius:var(--r-l) !important; padding:18px 24px !important; text-align:center !important;
+  display:grid !important; gap:5px !important; font-size:12.5px !important; color:var(--ink-3) !important;
+  box-shadow:0 14px 40px -22px rgba(14,17,22,.5) !important;
+}
+#llb-root .veil-card b{font-size:15px !important; color:var(--ink) !important; font-family:var(--disp) !important}
+@media print{
+  #llb-root .shell, #llb-root #login, #llb-root .drawer, #llb-root .scrim, #llb-root .veil{display:none !important}
+  #llb-root::after{
+    content:"This dashboard cannot be printed. Use Export to Excel — every export is logged.";
+    display:block !important; padding:48px !important; font:600 14px var(--sans) !important; color:#000 !important;
+  }
+}
 /* .hide must outrank the ID rules armoured above. */
 #llb-root #login.hide,
 #llb-root #recaptcha.hide,
@@ -842,7 +817,7 @@ html, body, #preview-container, .hl_page-preview--content {
           <section class="card">
             <div class="card-head">
               <h2>Pipeline</h2>
-              <span class="hint">Open leads by stage. The figure between two stages is how many got past the first.</span>
+              <span class="hint">Summit Sales only, by stage. The figure between two stages is how many got past the first.</span>
             </div>
             <div class="card-body">
               <div class="pipe" id="pipeChart"></div>
@@ -979,7 +954,7 @@ html, body, #preview-container, .hl_page-preview--content {
           <header class="page-head">
             <div>
               <h1>Admin</h1>
-              <p class="page-sub">People, roles and client accounts.</p>
+              <p class="page-sub">People, roles, client accounts, and anything waiting on your say-so.</p>
             </div>
           </header>
           <div class="grid-2">
@@ -1007,6 +982,14 @@ html, body, #preview-container, .hl_page-preview--content {
               <div class="card-body"><div class="list" id="userList"></div></div>
             </section>
           </div>
+          <section class="card attn" id="delCard">
+            <div class="card-head">
+              <span class="attn-badge" id="delIcon">!</span>
+              <h2>Deletion requests</h2>
+              <span class="hint">Only an admin can delete a lead. Everyone else asks here.</span>
+            </div>
+            <div class="card-body"><div class="list" id="delList"></div></div>
+          </section>
           <section class="card">
             <div class="card-head">
               <h2>Invite someone</h2>
@@ -1079,13 +1062,10 @@ html, body, #preview-container, .hl_page-preview--content {
    ========================================================================== */
 /* ---------------------------------------------------------------------------
    1. FIREBASE
-   Replace the placeholder values with the config from:
-   Firebase console -> Project settings -> Your apps -> Web app -> SDK setup.
    These values are NOT secrets — a web Firebase config is public by design.
    Access is enforced by firestore.rules, not by hiding this object.
    While apiKey is still "PASTE_...", the app runs in DEMO MODE: the same UI
-   backed by localStorage with seeded sample data, so you can walk the team
-   through it before the Firebase project exists.
+   backed by localStorage with seeded sample data.
 --------------------------------------------------------------------------- */
 const firebaseConfig = {
   apiKey:            "AIzaSyCSnCg1B-zdrCKE44PPBHf177P8KLPVZR0",
@@ -1099,18 +1079,16 @@ const firebaseConfig = {
 const isConfigured = () => !firebaseConfig.apiKey.startsWith("PASTE_");
 /* ---------------------------------------------------------------------------
    1b. SIGN-IN METHODS
-   The sign-in screen shows exactly three doors in: Microsoft 365, Google,
-   and email + password. All three reach the SAME Firebase account when they
-   share an email address — which is what lets an admin (People → Password)
-   or the person themselves (Settings, or "Forgot your password?") add a
-   password to an account that started life on Microsoft or Google.
+   Three doors in: Microsoft 365, Google, and email + password. All three
+   reach the SAME Firebase account when they share an email address — which is
+   what lets an admin (People → Password) or the person themselves (Settings,
+   or "Forgot your password?") add a password to an account that started life
+   on Microsoft or Google.
    Each method still has to be enabled in Firebase console → Authentication →
-   Sign-in method: Microsoft, Google, AND Email/Password. If Email/Password
-   is off, the password boxes and every set-password email will fail with
-   operation-not-allowed.
+   Sign-in method: Microsoft, Google, AND Email/Password.
    `emailLink` no longer appears on the sign-in screen but the invite flow
-   (Admin → Invite someone) still sends Firebase email links under the hood,
-   so keep "Email link (passwordless sign-in)" enabled for invites to work.
+   still sends Firebase email links, so keep "Email link (passwordless
+   sign-in)" enabled for invites to work.
 --------------------------------------------------------------------------- */
 const AUTH = {
   microsoft: true,   // imarkinfotech.com runs on Microsoft 365 — the main route in
@@ -1120,16 +1098,12 @@ const AUTH = {
   phone:     false,  // retired from the sign-in screen
 };
 /* Leave blank to accept any Microsoft account the app registration allows.
-   Put your Entra directory (tenant) ID here to refuse everyone outside it —
-   worth doing once it is live, since it stops a personal outlook.com account
-   from even reaching the sign-in screen. */
+   Put your Entra directory (tenant) ID here to refuse everyone outside it. */
 const MS_TENANT = "";
 /* ---------------------------------------------------------------------------
    1c. PARTNERSHIP BRANDING
-   Two companies, one dashboard. Both logos appear as a joined "A × B"
-   lockup on the sign-in card and in the sidebar — plates side by side with
-   a gradient × medallion overlapping both. Swap the URLs here if a logo
-   moves; a URL that fails to load hides itself and the alt text shows.
+   Both logos appear as a joined "A × B" lockup on the sign-in card and in the
+   sidebar. A URL that fails to load hides itself and the alt text shows.
 --------------------------------------------------------------------------- */
 const BRAND = {
   a: {
@@ -1142,40 +1116,37 @@ const BRAND = {
   },
 };
 /* Break the dashboard out of a page builder's centred column so it uses the
-   whole window. Set false if you would rather it sit inside the container.
-   If this leaves a horizontal scrollbar, the host row has padding that cannot
-   be reached from here — set that GHL section/row to full width as well. */
+   whole window. Set false if you would rather it sit inside the container. */
 const FULL_BLEED = true;
 /* Whoever holds this address can bootstrap themselves as the first admin the
    first time they sign in, so the project does not need a hand-made Firestore
    document to get started. The same address is pinned in firestore.rules —
-   change it in BOTH places or the rules will reject the profile.
-   Only ever grants admin to a VERIFIED email, so an unverified sign-in
-   claiming this address gets nothing. */
+   change it in BOTH places or the rules will reject the profile. */
 const BOOTSTRAP_ADMIN = "kalash14sept2001@gmail.com";
 /* ---------------------------------------------------------------------------
    1d. KEEPING THE PAGE OUT OF SEARCH
-   The dashboard is internal. When embedded in a page builder there is no
-   <head> to put a robots meta in, so it is injected at runtime instead.
-   TWO THINGS TO KNOW:
-   1. It is a PAGE-level directive. It de-indexes the whole page the block is
-      pasted into, not just the block. That is right for a dedicated dashboard
-      page and wrong for a marketing page — set this to false if the block ever
-      shares a page you want found.
-   2. A meta tag added by JavaScript is honoured by Google, which renders
-      pages before indexing, but not by every crawler. The reliable control is
-      your page builder's own SEO setting. Use that as well, not instead.
+   The dashboard is internal. Embedded in a page builder there is no <head> to
+   put a robots meta in, so it is injected at runtime instead.
+   1. It is a PAGE-level directive — it de-indexes the whole page the block is
+      pasted into, which is right for a dedicated dashboard page and wrong for
+      a marketing page.
+   2. A meta tag added by JavaScript is honoured by Google but not by every
+      crawler. Your page builder's own SEO setting is the reliable control.
+      Use that as well, not instead.
 --------------------------------------------------------------------------- */
 const NOINDEX = true;
 /* ---------------------------------------------------------------------------
    2. ROLES
-   Set on each user's document in the `users` collection (see README).
+   Set on each user's document in the `users` collection.
+   Since this revision the role no longer decides what leads you can see or
+   touch — everybody works the whole board. It decides two things only: who
+   sees the Admin panel, and who can approve a deletion.
 --------------------------------------------------------------------------- */
 const ROLES = {
-  admin:  { label: "Admin",         blurb: "Full access. Manages people, clients and sees every export." },
-  ops:    { label: "LinkedIn Team", blurb: "Creates and edits leads, comments, exports." },
-  sales:  { label: "Summit Sales",  blurb: "Sees leads shared with Summit. Updates stage, comments, exports." },
-  client: { label: "Client",        blurb: "Read-only, and only the leads for their own client account." },
+  admin:  { label: "Admin",         blurb: "Everything, plus the Admin panel: people, clients, and approving deletions." },
+  ops:    { label: "LinkedIn Team", blurb: "Full access to every lead in both streams. Cannot delete or manage people." },
+  sales:  { label: "Summit Sales",  blurb: "Full access to every lead in both streams. Cannot delete or manage people." },
+  client: { label: "Client",        blurb: "Full access to every lead in both streams. Cannot delete or manage people." },
 };
 /* ---------------------------------------------------------------------------
    3. STREAMS — the two spreadsheets this dashboard replaces
@@ -1203,9 +1174,7 @@ const STREAMS = {
    COLOUR — each stage owns exactly one `ink`, used for its pill text, its dot,
    its row stripe and its pipeline block, over a matching `tint`.
    The five pipeline stages walk an ordinal indigo ramp that gets darker at
-   every step, so a lead further along *looks* further along at a glance —
-   which is the whole job on a review call. The ramp's lightness was checked to
-   fall monotonically; that depth, not hue, is what carries progress.
+   every step, so a lead further along *looks* further along at a glance.
    Green and red are held back exclusively for Won and Lost, so an outcome can
    never be mistaken for a step. Nurture sits outside the system entirely as an
    outline — parked, not progressing.
@@ -1219,7 +1188,7 @@ const STAGES = [
   { key: "meeting",   label: "Meeting Booked",  short: "Meeting",  funnel: true,  ink: "#2e3688", tint: "#e4e7f7", line: "#bcc3ee", blurb: "A call is on the calendar." },
   { key: "proposal",  label: "Proposal Sent",   short: "Proposal", funnel: true,  ink: "#232969", tint: "#dfe3f4", line: "#b0b8e8", blurb: "Commercials are out." },
   { key: "won",       label: "Won",             short: "Won",      funnel: false, ink: "#15703f", tint: "#e7f3ec", line: "#b9dcc7", blurb: "Closed. Revenue booked." },
-  { key: "lost",      label: "Lost",            short: "Lost",     funnel: false, ink: "#a8271d", tint: "#fbeae8", line: "#eec6c2", blurb: "Dead. Reason required." },
+  { key: "lost",      label: "Lost",            short: "Lost",     funnel: false, ink: "#a8271d", tint: "#fbeae8", line: "#eec6c2", blurb: "Dead. Reason worth writing down." },
   { key: "nurture",   label: "Nurture / Later", short: "Nurture",  funnel: false, ink: "#6b7684", tint: "#ffffff", line: "#d6dbe1", blurb: "Real, but not now. Revisit later.", outline: true },
 ];
 const stage = (key) => STAGES.find((s) => s.key === key) || STAGES[0];
@@ -1260,22 +1229,23 @@ const calUrl = (lead) => {
    type:     text | email | tel | url | date | number | textarea | select
    group:    which fieldset it sits in on the form
    table:    show as a column in the leads table
-   required: enforced on save
-   export:   included in the Excel export (defaults to true)
+   NOTHING IS REQUIRED. A half-filled lead beats a lead nobody bothered to
+   log, and the person typing usually knows which blanks matter. Email and URL
+   formats are still tidied up on save — that is a courtesy, not a gate.
 --------------------------------------------------------------------------- */
 const LEAD_FIELDS = [
   /* --- The person ------------------------------------------------------- */
-  { key: "firstName",     label: "First Name",        type: "text",     group: "Person",  required: true, table: true, width: 16 },
+  { key: "firstName",     label: "First Name",        type: "text",     group: "Person",  table: true, width: 16 },
   { key: "lastName",      label: "Last Name",         type: "text",     group: "Person",  table: true, width: 16 },
   { key: "jobTitle",      label: "Job Title",         type: "text",     group: "Person",  table: true, width: 26 },
-  { key: "linkedinUrl",   label: "LinkedIn Profile",  type: "url",      group: "Person",  required: true, width: 40, placeholder: "https://linkedin.com/in/..." },
+  { key: "linkedinUrl",   label: "LinkedIn Profile",  type: "url",      group: "Person",  width: 40, placeholder: "https://linkedin.com/in/..." },
   { key: "email",         label: "Email",             type: "email",    group: "Person",  table: true, width: 30 },
   { key: "phone",         label: "Phone",             type: "tel",      group: "Person",  width: 18 },
   { key: "whatsapp",      label: "WhatsApp",          type: "tel",      group: "Person",  width: 18 },
   { key: "city",          label: "City",              type: "text",     group: "Person",  width: 16 },
   { key: "country",       label: "Country",           type: "text",     group: "Person",  table: true, width: 16 },
   /* --- The company ------------------------------------------------------ */
-  { key: "company",        label: "Company",          type: "text",     group: "Company", required: true, table: true, width: 26 },
+  { key: "company",        label: "Company",          type: "text",     group: "Company", table: true, width: 26 },
   { key: "companyWebsite", label: "Company Website",  type: "url",      group: "Company", width: 32 },
   { key: "companyLinkedin",label: "Company LinkedIn", type: "url",      group: "Company", width: 36 },
   { key: "industry",       label: "Industry",         type: "text",     group: "Company", table: true, width: 22 },
@@ -1284,7 +1254,7 @@ const LEAD_FIELDS = [
   { key: "revenue",        label: "Est. Revenue",     type: "text",     group: "Company", width: 16 },
   /* --- Where it came from ----------------------------------------------- */
   { key: "source",        label: "Source",            type: "select",   group: "Source",  table: true, width: 20,
-    options: ["LinkedIn Outreach", "LinkedIn Inbound", "Content / Post", "Referral", "Event", "Other"] },
+    options: ["", "LinkedIn Outreach", "LinkedIn Inbound", "Content / Post", "Upwork", "Cold Calling", "Referral", "Event", "Other"] },
   { key: "campaign",      label: "Campaign",          type: "text",     group: "Source",  width: 22 },
   { key: "connectedOn",   label: "Connected On",      type: "date",     group: "Source",  width: 14 },
   { key: "repliedOn",     label: "Replied On",        type: "date",     group: "Source",  width: 14 },
@@ -1308,8 +1278,8 @@ const field = (key) => LEAD_FIELDS.find((f) => f.key === key);
 /* ---------------------------------------------------------------------------
    6. CHART COLOUR
    Counts-by-person, by-client and by-week are single-series charts: bar length
-   carries the magnitude, so they need one hue and no legend. Mirrored in
-   style.css as --viz; checked at 3.6:1 against a white surface.
+   carries the magnitude, so they need one hue and no legend. Mirrored in the
+   CSS as --viz.
    The pipeline funnel is the exception — it is ordinal, so each bar takes its
    own stage's `ink` from STAGES above rather than a colour from here.
 --------------------------------------------------------------------------- */
@@ -1340,7 +1310,7 @@ const THEME_PRESETS = [
    7. TOP BAR QUOTES
    The bar above the dashboard shows a live clock and one of these, fading to
    the next every QUOTE_SECONDS. The starting point is seeded from the time
-   of day so two people rarely see the same one. 100+ entries, [text, who].
+   of day so two people rarely see the same one. [text, who].
 --------------------------------------------------------------------------- */
 const QUOTE_SECONDS = 12;
 const QUOTES = [
@@ -1456,12 +1426,12 @@ const QUOTES = [
 /* ===== xlsx.js ===================================================== */
 /* ============================================================================
    xlsx.js — a minimal, dependency-free .xlsx writer.
-   Why not a library? This dashboard is a static page on GitHub Pages, and the
-   export is the one feature that absolutely has to work: it is the only
-   sanctioned way data leaves the system. Pulling a spreadsheet library off a
-   CDN at click time means the export breaks whenever an office network blocks
-   the CDN or the CDN has a bad day. Everything needed here is a flat grid of
-   strings and numbers, which is a small enough slice of OOXML to just write.
+   Why not a library? The export is the one feature that absolutely has to
+   work: it is the only sanctioned way data leaves the system. Pulling a
+   spreadsheet library off a CDN at click time means the export breaks whenever
+   an office network blocks the CDN or the CDN has a bad day. Everything needed
+   here is a flat grid of strings and numbers, which is a small enough slice of
+   OOXML to just write.
    An .xlsx is a ZIP of XML parts. Entries are STORED (no compression) so no
    deflate implementation is needed — the files are small and Excel does not
    care.
@@ -1660,30 +1630,24 @@ function downloadXlsx(sheets, filename) {
    Exposes one interface used by app.js. Behind it sit two implementations:
      firebaseStore  real Firebase Auth + Firestore (once config.js is filled in)
      demoStore      localStorage, seeded with sample rows, so the UI can be
-                    demoed to the team before the Firebase project exists
+                    demoed without touching the live project
    Both are live: every watch* function takes a callback, fires immediately
    with current data, and re-fires on every change.
-   ── Why the queries look different in this revision ──────────────────────
+
+   ── Why the queries look the way they do ─────────────────────────────────
    Firestore refuses any query that needs a COMPOSITE index it doesn't have
-   (any `where` on one field combined with `orderBy` on another), and it
-   refuses at runtime, not at deploy time. The old code put orderBy on almost
-   every query and swallowed the rejection — which read, from a chair, as
-   "leads don't sync on other accounts" and "comments never show up":
-   admin/ops saw data (their queries had no where-clause) while sales and
-   client roles, whose queries carried both, saw nothing at all. The per-lead
-   activity query (where leadId + orderBy at) failed for EVERYONE without a
-   hand-made index, which is why comments saved but never appeared.
-   Now every watcher tries its ordered query first (fast path when the index
-   exists) and falls back to an equality-only query — which needs NO composite
-   index, ever — with sorting done client-side. If Firestore still refuses
-   (that means security rules), the error surfaces as a visible banner via
-   reportSyncProblem() instead of an empty dashboard.
-   ── A note on rules ──────────────────────────────────────────────────────
-   Firestore evaluates security rules against a query's POTENTIAL result set,
-   so the watchers still narrow their queries by role to exactly mirror
-   firestore.rules. Change one, change the other. `activity` documents carry a
-   denormalised copy of the parent lead's `stream` and `clientId` for the same
-   reason.
+   (a `where` on one field combined with `orderBy` on another), and it refuses
+   at runtime, not at deploy time. Every watcher therefore tries its ordered
+   query first (fast path when the index exists) and falls back to a query
+   that needs no composite index at all, sorting client-side. If Firestore
+   still refuses — that means security rules — the error surfaces as a visible
+   banner via reportSyncProblem() instead of an empty dashboard.
+
+   ── Scope ────────────────────────────────────────────────────────────────
+   There is no per-role scoping any more. Every signed-in, active account
+   reads the whole board, which is exactly what firestore.rules now allows.
+   The only thing the rules still hold back is deleting a lead, and that has
+   its own request queue (deleteRequests) so the rest of the team can ask.
    ========================================================================== */
 const SDK = "https://www.gstatic.com/firebasejs/10.14.1";
 /* ==========================================================================
@@ -1704,9 +1668,9 @@ async function firebaseStore() {
   } = fs;
   /* Firestore Timestamps -> plain ISO strings the UI can sort and format.
      serverTimestamps:"estimate" matters: a freshly written comment carries a
-     null timestamp until the server confirms it, and null used to sort the
-     newest comment to the bottom (or nowhere). An estimate renders it
-     instantly in the right place, then self-corrects on the server echo. */
+     null timestamp until the server confirms it, and null sorts the newest
+     comment to the bottom (or nowhere). An estimate renders it instantly in
+     the right place, then self-corrects on the server echo. */
   const norm = (snap) => {
     const o = { id: snap.id, ...snap.data({ serverTimestamps: "estimate" }) };
     for (const k of Object.keys(o)) {
@@ -1744,27 +1708,19 @@ async function firebaseStore() {
   };
   let profile = null;
   let phoneVerifier = null, phoneConfirmation = null;
-  /* The where() clause that makes a query provably safe for this user's role.
-     null means "no clause needed" (staff see everything);
-     false means "this user can see nothing". */
-  const scopeClause = () => {
-    const r = profile?.role;
-    if (r === "admin" || r === "ops") return null;
-    if (r === "sales") return where("stream", "==", "sales_partner");
-    if (r === "client") {
-      const ids = (profile.clientAccess || []).slice(0, 30);
-      return ids.length ? where("clientId", "in", ids) : false;
-    }
-    return false;
-  };
+  /* Nobody is scoped any more — every active account reads the whole board.
+     Kept as a function so the watchers below stay unchanged if that ever
+     needs to narrow again. null means "no where-clause needed". */
+  const scopeClause = () => null;
+
   const store = {
     mode: "firebase",
     /* ---- auth ---------------------------------------------------------- */
     onAuth(cb) {
       return auth.onAuthStateChanged(A, async (user) => {
         if (!user) { profile = null; return cb(null); }
-        // The users/{uid} document carries the role and client scoping. No
-        // document means the login exists but access hasn't been granted.
+        // The users/{uid} document carries the role. No document means the
+        // login exists but access hasn't been granted.
         try {
           const snap = await getDoc(doc(D, "users", user.uid));
           if (snap.exists()) {
@@ -1902,9 +1858,8 @@ async function firebaseStore() {
       const base = clause
         ? [clause, where("leadId", "==", leadId)]
         : [where("leadId", "==", leadId)];
-      /* The equality-only fallback is the comments fix: it needs no composite
-         index, so the thread loads on a project where nobody ever created
-         the (leadId, at desc) index the old query silently demanded. */
+      /* The equality-only fallback is what makes comments load on a project
+         where nobody ever created the (leadId, at desc) composite index. */
       return live(
         [query(col, ...base, orderBy("at", "desc")), query(col, ...base)],
         cb,
@@ -1915,9 +1870,6 @@ async function firebaseStore() {
       const clause = scopeClause();
       if (clause === false) { cb([]); return () => {}; }
       const col = collection(D, "activity");
-      /* For scoped roles the ordered query needs a composite index. The
-         fallback drops orderBy (so it always works) at the cost of an
-         approximate window — fine for a recent-activity feed. */
       const variants = clause
         ? [query(col, clause, orderBy("at", "desc"), limit(n)), query(col, clause, limit(500))]
         : [query(col, orderBy("at", "desc"), limit(n))];
@@ -1939,8 +1891,7 @@ async function firebaseStore() {
        them nothing and the app signs them straight back out. Their Firebase
        Auth login itself can only be deleted from the console or a server. */
     deleteUser: (uid) => deleteDoc(doc(D, "users", uid)),
-    /* The signed-in person updating their own profile (photo, accent, name).
-       Needs the matching self-update rule — see the header of this file. */
+    /* The signed-in person updating their own profile (photo, accent, name). */
     async saveMyPrefs(patch) {
       if (!profile?.uid) throw new Error("Not signed in.");
       await setDoc(doc(D, "users", profile.uid), patch, { merge: true });
@@ -1951,14 +1902,12 @@ async function firebaseStore() {
        An invite is keyed by the person's email, so it can be looked up
        before they have a uid. The admin decides the role here; when the
        invitee signs in, their users/{uid} document is created from this
-       record, and firestore.rules enforces that the role they end up with is
-       exactly the one the admin wrote. Nobody can invite themselves upward.
+       record. Nobody can invite themselves upward.
     --------------------------------------------------------------------- */
     watchInvites: (cb) => live(collection(D, "invites"), cb, byNewest("createdAt")),
     /* Written under the email, and again under the phone number when one is
        given, so the invite can be claimed by whichever method the person ends
-       up signing in with. Two small documents beats a lookup query, which the
-       rules would have to open up to make work. */
+       up signing in with. */
     async createInvite(email, data) {
       const key = email.trim().toLowerCase();
       const phone = (data.phone || "").trim();
@@ -2009,13 +1958,11 @@ async function firebaseStore() {
     async claimInvite(user) {
       const email = (user.email || "").toLowerCase();
       /* The first admin has nobody to invite them. A verified match on the
-         address pinned in config.js (and in firestore.rules) bootstraps the
-         project, so it doesn't need a hand-made Firestore document to start.
-         Unverified addresses get nothing — otherwise the check is spoofable. */
-      /* Mirrors viaTrustedIdp() in firestore.rules: Microsoft frequently
-         reports emailVerified false even though Entra just authenticated the
-         mailbox owner, so signing in through a federated provider counts.
-         Email/password does not — that address still has to be proven. */
+         address pinned in config (and in firestore.rules) bootstraps the
+         project. Unverified addresses get nothing — otherwise the check is
+         spoofable. Microsoft frequently reports emailVerified false even
+         though Entra just authenticated the mailbox owner, so signing in
+         through a federated provider counts. Email/password does not. */
       const viaIdp = (user.providerData || [])
         .some((p) => ["microsoft.com", "google.com"].includes(p.providerId));
       if (email && email === BOOTSTRAP_ADMIN.toLowerCase() && (user.emailVerified || viaIdp)) {
@@ -2054,15 +2001,50 @@ async function firebaseStore() {
         byEmail: profile.email,
       });
     },
+    /* Everyone sees the whole history now. An export log that only its author
+       can read deters nobody; one the whole team can read does. */
     watchExports(cb) {
       const base = collection(D, "exports");
-      /* Admin's orderBy is single-field (never needs a composite index); the
-         per-user query does, so it gets the same equality-only fallback. */
-      const variants = profile?.role === "admin"
-        ? [query(base, orderBy("at", "desc"), limit(300))]
-        : [query(base, where("by", "==", profile.uid), orderBy("at", "desc"), limit(300)),
-           query(base, where("by", "==", profile.uid))];
-      return live(variants, (rows, err) => cb(rows.slice(0, 300), err), byNewest("at"));
+      return live(
+        [query(base, orderBy("at", "desc"), limit(300)), query(base, limit(300))],
+        (rows, err) => cb(rows.slice(0, 300), err),
+        byNewest("at")
+      );
+    },
+    /* ---- deletion requests ---------------------------------------------
+       Anyone can ask for a lead to go; only an admin can actually remove it.
+       The ask is a document, so it survives a refresh and is waiting in the
+       Admin panel for whoever is on next.
+    --------------------------------------------------------------------- */
+    requestDelete(lead, reason) {
+      return addDoc(collection(D, "deleteRequests"), {
+        leadId: lead.id,
+        leadName: `${lead.firstName || ""} ${lead.lastName || ""}`.trim(),
+        company: lead.company || "",
+        stream: lead.stream || "",
+        clientId: lead.clientId || "",
+        reason: reason || "",
+        status: "pending",
+        at: serverTimestamp(),
+        by: profile.uid,
+        byName: profile.name || profile.email,
+        byEmail: profile.email || "",
+      });
+    },
+    watchDeleteRequests: (cb) =>
+      live(
+        [query(collection(D, "deleteRequests"), orderBy("at", "desc"), limit(200)),
+         query(collection(D, "deleteRequests"), limit(200))],
+        cb,
+        byNewest("at")
+      ),
+    resolveDeleteRequest(id, status) {
+      return updateDoc(doc(D, "deleteRequests", id), {
+        status,
+        resolvedAt: serverTimestamp(),
+        resolvedBy: profile.uid,
+        resolvedByName: profile.name || profile.email,
+      });
     },
   };
   return store;
@@ -2073,7 +2055,7 @@ async function firebaseStore() {
 function demoStore() {
   const KEY = "linkedin-leads-demo-v1";
   const listeners = new Set();
-  const blank = () => ({ leads: [], activity: [], clients: [], users: [], exports: [] });
+  const blank = () => ({ leads: [], activity: [], clients: [], users: [], exports: [], deleteRequests: [] });
   const read = () => {
     try { return { ...blank(), ...JSON.parse(localStorage.getItem(KEY) || "{}") }; }
     catch { return blank(); }
@@ -2286,6 +2268,30 @@ function demoStore() {
     resolveRedirect: async () => null,
     sendPhoneCode: async () => true,
     confirmPhoneCode: async () => profile,
+    async requestDelete(lead, reason) {
+      const db = read();
+      db.deleteRequests = db.deleteRequests || [];
+      db.deleteRequests.push({
+        id: uid(), leadId: lead.id,
+        leadName: `${lead.firstName || ""} ${lead.lastName || ""}`.trim(),
+        company: lead.company || "", stream: lead.stream || "", reason: reason || "",
+        status: "pending", at: now(), by: profile.uid, byName: profile.name,
+      });
+      write(db);
+    },
+    watchDeleteRequests: (cb) =>
+      watch((db) => [...(db.deleteRequests || [])]
+        .sort((a, b) => (b.at || "").localeCompare(a.at || "")), cb),
+    async resolveDeleteRequest(id, status) {
+      const db = read();
+      const i = (db.deleteRequests || []).findIndex((r) => r.id === id);
+      if (i >= 0) {
+        db.deleteRequests[i].status = status;
+        db.deleteRequests[i].resolvedAt = now();
+        db.deleteRequests[i].resolvedByName = profile.name;
+      }
+      write(db);
+    },
     async logExport(rec) {
       const db = read();
       db.exports.push({
@@ -2380,22 +2386,21 @@ function lastReviewStart() {
 }
 /* ==========================================================================
    PERMISSIONS
-   Mirrors firestore.rules. The rules are what actually enforce this — these
-   checks only keep the UI honest.
+   One rule now: if you have a login, you can work the leads — both streams,
+   create, edit, comment, change stage, export. Roles survive to decide two
+   things only: who sees the Admin panel, and who can approve a deletion.
+   Everyone else asks, and the ask lands in Admin → Deletion requests.
+   firestore.rules is what actually enforces this; these checks only keep the
+   UI honest.
    ========================================================================== */
-const SALES_EDITABLE = ["status", "salesOwner", "ghlUrl", "dealValue", "nextFollowUp", "lostReason", "notes", "sharedOn"];
 const can = {
-  create:  (r) => ["admin", "ops"].includes(r),
-  editAll: (r) => ["admin", "ops"].includes(r),
-  edit:    (r) => ["admin", "ops", "sales"].includes(r),
-  remove:  (r) => r === "admin",
-  admin:   (r) => r === "admin",
-  comment: (r) => r !== null,
-  editable(r, key) {
-    if (this.editAll(r)) return true;
-    if (r === "sales") return SALES_EDITABLE.includes(key);
-    return false;
-  },
+  create:   (r) => !!r,
+  editAll:  (r) => !!r,
+  edit:     (r) => !!r,
+  comment:  (r) => !!r,
+  remove:   (r) => r === "admin",   // the one irreversible action
+  admin:    (r) => r === "admin",
+  editable: () => true,
 };
 /* ==========================================================================
    STATE
@@ -2420,6 +2425,7 @@ const S = {
   unsubActivity: null,
   drawerActivity: [],
   editingUser: null,  // uid whose inline editor is open in Admin → People
+  delReqs: [],        // pending "please delete this lead" asks
 };
 const clientName = (id) => S.clients.find((c) => c.id === id)?.name || "";
 /* ==========================================================================
@@ -2450,23 +2456,69 @@ function installCopyGuard() {
     }
   });
 }
+/* ==========================================================================
+   SCREENSHOT GUARD
+   Blur the data whenever this window is not the one being looked at. Every
+   screenshot route worth worrying about trips one of these:
+     • Snipping Tool / Shift+Win+S, macOS Cmd+Shift+4, Greenshot, ShareX —
+       all take focus or raise an overlay, so `blur` fires first.
+     • Alt-tabbing to a capture app, or minimising — `visibilitychange`.
+     • Print Screen — caught on keyup (Windows does not fire keydown for it),
+       clipboard overwritten, screen held blank until the person clicks.
+     • Ctrl/Cmd+P and Save-as-PDF — blanked by `beforeprint` and the print CSS.
+   A phone pointed at the monitor still beats all of it. Nothing in a browser
+   can stop that, which is why the export stays logged.
+   ========================================================================== */
+function installScreenshotGuard() {
+  const root = document.getElementById("llb-root");
+  if (!root) return;
+  const veil = document.createElement("div");
+  veil.className = "veil hide";
+  veil.innerHTML = `<div class="veil-card">
+      <b>Hidden</b>
+      <span>The data comes back when you click here.</span>
+    </div>`;
+  root.appendChild(veil);
+  let locked = false;   // set by Print Screen; a click is needed to clear it
+  const hide = () => { root.classList.add("guarded"); veil.classList.remove("hide"); };
+  const show = () => { if (locked) return; root.classList.remove("guarded"); veil.classList.add("hide"); };
+  addEventListener("blur", hide);
+  addEventListener("focus", show);
+  document.addEventListener("visibilitychange", () => (document.hidden ? hide() : show()));
+  addEventListener("beforeprint", hide);
+  addEventListener("afterprint", show);
+  veil.addEventListener("click", () => { locked = false; show(); });
+  const wipe = () => {
+    hide();
+    locked = true;
+    try { navigator.clipboard?.writeText("Screenshots of the leads dashboard are not permitted."); } catch {}
+    toast("Screenshots are off. Use Export to Excel — every export is logged.", "warn");
+  };
+  const onKey = (e) => {
+    const k = (e.key || "").toLowerCase();
+    if (e.key === "PrintScreen" || e.code === "PrintScreen") { e.preventDefault(); wipe(); return; }
+    if ((e.ctrlKey || e.metaKey) && k === "p") {
+      e.preventDefault();
+      toast("Printing is off. Use Export to Excel — every export is logged.", "warn");
+      return;
+    }
+    if (e.metaKey && e.shiftKey && ["3", "4", "5"].includes(k)) { e.preventDefault(); wipe(); }
+  };
+  document.addEventListener("keydown", onKey, true);
+  document.addEventListener("keyup", onKey, true);
+}
 /* Set when a redirect sign-in fails, so the message survives long enough to
    be shown once the login screen renders. */
 let pendingAuthError = "";
 /* ==========================================================================
    BOOT
    ========================================================================== */
-/* Embedded in a page builder there is no <head> of ours to carry a robots
-   meta, so it is added at runtime. See NOINDEX in config.js for the two
-   caveats: it applies to the whole host page, and a JS-injected tag is
-   honoured by Google but not by every crawler. */
 /* Pin the embedded block to the window's edges.
-   The CSS in the GHL build does this with calc(50% - 50vw), which gets it
-   right immediately but is off by the scrollbar width — 100vw counts the
-   scrollbar, the usable width doesn't, and the difference shows up as a
-   horizontal scrollbar on mobile. Measuring gives the exact number, so the
-   CSS handles the first paint and this corrects it. No-ops on the standalone
-   page, which has no #llb-root to break out of. */
+   The CSS does this with calc(50% - 50vw), which gets it right immediately but
+   is off by the scrollbar width — 100vw counts the scrollbar, the usable width
+   doesn't, and the difference shows up as a horizontal scrollbar on mobile.
+   Measuring gives the exact number, so the CSS handles the first paint and
+   this corrects it. */
 function applyFullBleed() {
   const root = document.getElementById("llb-root");
   if (!root) return;
@@ -2509,6 +2561,7 @@ function applyBrand() {
   if (FULL_BLEED) applyFullBleed();
   applyBrand();
   installCopyGuard();
+  installScreenshotGuard();
   try {
     S.store = await openStore();
   } catch (ex) {
@@ -2717,6 +2770,7 @@ function showApp() {
     wireInvites();
     S.store.watchUsers((rows) => { S.users = rows; renderUsers(); });
     S.store.watchInvites((rows) => { S.invites = rows; renderInvites(); });
+    S.store.watchDeleteRequests((rows) => { S.delReqs = rows; renderDeleteRequests(); });
   }
 }
 function wireChrome() {
@@ -2743,7 +2797,7 @@ function renderAll() {
   renderReview();
   renderClients();
   renderFeed();
-  if (can.admin(S.me?.role)) { renderInvites(); renderUsers(); }
+  if (can.admin(S.me?.role)) { renderInvites(); renderUsers(); renderDeleteRequests(); }
   renderStream("sales_partner");
   renderStream("client");
   $("#cntSales").textContent = S.leads.filter((l) => l.stream === "sales_partner").length;
@@ -2766,12 +2820,15 @@ function renderReview() {
     `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
   const meetings = L.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
   const won = L.filter((l) => l.status === "won").length;
-  $("#reviewLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
+  const newSummit = newSince.filter((l) => l.stream === "sales_partner").length;
+  const newClient = newSince.filter((l) => l.stream === "client").length;
+  $("#reviewLine").innerHTML = heroSentence(L, newSummit, newClient, stale.length, meetings);
   /* Plain counts. Every one of these is just "how many leads are in this
-     state" — nothing averaged, nothing derived. The label carries its own
-     timeframe, since "new" alone reads as all-time at a glance. */
+     state" — nothing averaged, nothing derived. The two new-lead figures are
+     split by stream because they are two different conversations. */
   $("#statTiles").innerHTML = [
-    { k: "New since last call", v: newSince.length, d: `${L.length} leads all time` },
+    { k: "New — Summit Sales", v: newSummit, d: "since the last call" },
+    { k: "New — Clients", v: newClient, d: "since the last call" },
     { k: "Open pipeline", v: open.length, d: "not won or lost" },
     { k: "Meetings booked", v: meetings, d: "meeting or proposal", cls: meetings ? "good" : "" },
     { k: "Won", v: won, d: "closed and won", cls: won ? "good" : "" },
@@ -2783,9 +2840,12 @@ function renderReview() {
       <div class="d">${esc(t.d)}</div>
     </div>`).join("");
   /* ---- pipeline strip: stages left to right, with the conversion between
-         each pair in the gap ---- */
+         each pair in the gap.
+         Summit Sales only. Client delivery has its own life cycle and dragging
+         it through this funnel just makes both numbers mean less. ---- */
+  const P = L.filter((l) => l.stream === "sales_partner");
   const fs = STAGES.filter((s) => s.funnel);
-  const counts = fs.map((s) => L.filter((l) => l.status === s.key).length);
+  const counts = fs.map((s) => P.filter((l) => l.status === s.key).length);
   const openTotal = counts.reduce((a, b) => a + b, 0);
   const blocks = fs.map((s, i) => {
     const n = counts[i];
@@ -2807,17 +2867,17 @@ function renderReview() {
       <div class="g">›</div><div class="c">${from ? pct + "%" : "—"}</div>
     </div>`;
   });
-  $("#pipeChart").innerHTML = openTotal || L.length
+  $("#pipeChart").innerHTML = openTotal || P.length
     ? blocks.map((b, i) => b + (arrows[i] || "")).join("")
-    : emptyChart("No leads yet.");
+    : emptyChart("No Summit Sales leads yet.");
   $("#outcomeChart").innerHTML = STAGES.filter((s) => !s.funnel).map((s) => {
-    const n = L.filter((l) => l.status === s.key).length;
+    const n = P.filter((l) => l.status === s.key).length;
     return `<span class="outcome" style="border-color:${s.line};background:${s.outline ? "transparent" : s.tint}">
       <span class="n" style="color:${s.ink}">${n}</span>
       <span class="k">${esc(s.label)}</span>
     </span>`;
   }).join("") + `<span class="outcome" style="border-style:dashed">
-      <span class="k">${esc(winRateLabel(L))}</span></span>`;
+      <span class="k">${esc(winRateLabel(P))}</span></span>`;
   /* ---- needs attention ---- */
   const attn = [...stale].sort(
     (a, b) => daysSince(b.lastActivityAt || b.createdAt) - daysSince(a.lastActivityAt || a.createdAt)
@@ -2857,17 +2917,19 @@ function renderReview() {
   /* ---- per week, last 8 weeks ---- */
   $("#byWeekChart").innerHTML = weekChart(L);
 }
-/* One plain sentence naming the thing that most deserves attention right now.
-   Ordered by what would actually change the conversation on the call. */
-function heroSentence(L, created, stale, meetings) {
+/* The line the review call opens on. Whoever asks "how did we do since
+   Tuesday?" wants the split, not the total — Summit's number and the clients'
+   number are two different conversations. */
+function heroSentence(L, newSummit, newClient, stale, meetings) {
   if (!L.length) return "No leads yet — add the first one from the Summit Sales tab.";
+  const s = (n) => (n === 1 ? "" : "s");
+  if (newSummit || newClient) {
+    return `Since the last call: <b>${newSummit}</b> lead${s(newSummit)} for Summit Sales ` +
+           `and <b>${newClient}</b> for clients.`;
+  }
   if (stale) {
-    return `<b>${stale}</b> open lead${stale > 1 ? "s have" : " has"} gone quiet for ${STALE_DAYS}+ days.`;
+    return `Nothing new since the last call, and <b>${stale}</b> open lead${stale > 1 ? "s have" : " has"} gone quiet for ${STALE_DAYS}+ days.`;
   }
-  if (created && meetings) {
-    return `<b>${created}</b> new lead${created > 1 ? "s" : ""} since the last call, and <b>${meetings}</b> in play.`;
-  }
-  if (created) return `<b>${created}</b> new lead${created > 1 ? "s" : ""} logged since the last call.`;
   if (meetings) return `Nothing new since the last call, but <b>${meetings}</b> still in play.`;
   return "Nothing new since the last call.";
 }
@@ -2917,9 +2979,9 @@ function weekChart(L) {
 /* ==========================================================================
    PILLS
    ========================================================================== */
-/* Each stage owns one ink and one tint (see STAGES in config.js), applied
-   inline so the pill, the dot, the row stripe and the funnel bar can never
-   drift apart into separate colour systems. */
+/* Each stage owns one ink and one tint (see STAGES in config), applied inline
+   so the pill, the dot, the row stripe and the funnel bar can never drift
+   apart into separate colour systems. */
 function pill(statusKey) {
   const s = stage(statusKey);
   const bg = s.outline ? "transparent" : s.tint;
@@ -3166,7 +3228,9 @@ function renderDrawer() {
         ${STAGES.map((s) => `<option value="${s.key}"${lead.status === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
       </select>` : ""}
     <div style="flex:1"></div>
-    ${can.remove(S.me.role) ? `<button class="btn btn-sm btn-danger" id="drDel">Delete</button>` : ""}`;
+    ${can.remove(S.me.role)
+      ? `<button class="btn btn-sm btn-danger" id="drDel">Delete</button>`
+      : `<button class="btn btn-sm btn-danger" id="drReq">Request deletion</button>`}`;
   if (canEdit) {
     $("#drEdit").addEventListener("click", () => { S.drawer.mode = "edit"; renderDrawer(); });
     $("#drStage").addEventListener("change", (e) => changeStage(lead, e.target.value));
@@ -3174,6 +3238,25 @@ function renderDrawer() {
     // booking can be attached to the right record.
     $("#drBook")?.addEventListener("click", () => { S.bookingFor = lead.id; });
   }
+  /* Non-admins can ask. The lead stays put until an admin says yes in the
+     Admin panel, so nothing disappears on someone else's judgement. */
+  $("#drReq")?.addEventListener("click", async () => {
+    const reason = prompt(`Ask an admin to delete ${fullName(lead)}?\n\nWhy should it go? (optional)`);
+    if (reason === null) return;
+    const btn = $("#drReq");
+    btn.disabled = true;
+    try {
+      await S.store.requestDelete(lead, reason.trim());
+      await S.store.logActivity(lead, {
+        type: "comment",
+        text: `Deletion requested${reason.trim() ? ` — ${reason.trim()}` : ""}`,
+      });
+      toast("Sent to the admins. The lead stays until one of them approves.", "good");
+    } catch (ex) {
+      console.error(ex);
+      toast("Couldn't send that request. Try again.", "bad");
+    } finally { btn.disabled = false; }
+  });
   if (can.remove(S.me.role)) {
     $("#drDel").addEventListener("click", async () => {
       if (!confirm(`Delete ${fullName(lead)} for everyone?\n\nThe lead row goes; its activity entries stay in the audit trail. Consider marking it Lost instead.`)) return;
@@ -3264,8 +3347,8 @@ function wireCommentBox(lead) {
       box.value = "";
       toast("Comment added.", "good");
     } catch (ex) {
-      /* A comment that fails to WRITE (rules) used to vanish silently too —
-         the box emptied, nothing appeared. Now it says so and keeps the text. */
+      /* A comment that fails to WRITE (rules) used to vanish silently — the
+         box emptied, nothing appeared. Now it says so and keeps the text. */
       console.error(ex);
       toast("Couldn't save that comment — check your access with an admin.", "bad");
     } finally {
@@ -3367,20 +3450,18 @@ function renderForm(lead, streamKey) {
   const role = S.me.role;
   const control = (f) => {
     const val = lead?.[f.key] ?? "";
-    const locked = !isNew && !can.editable(role, f.key);
-    const dis = locked ? " disabled" : "";
     const wide = ["notes", "linkedinUrl", "companyLinkedin", "companyWebsite", "lostReason"].includes(f.key) ? " wide" : "";
     let input;
     if (f.type === "textarea")
-      input = `<textarea class="inp" id="f_${f.key}"${dis} placeholder="${esc(f.placeholder || "")}">${esc(val)}</textarea>`;
+      input = `<textarea class="inp" id="f_${f.key}" placeholder="${esc(f.placeholder || "")}">${esc(val)}</textarea>`;
     else if (f.type === "select")
-      input = `<select class="inp" id="f_${f.key}"${dis}>
+      input = `<select class="inp" id="f_${f.key}">
         ${f.options.map((o) => `<option value="${esc(o)}"${val === o ? " selected" : ""}>${esc(o || "—")}</option>`).join("")}
       </select>`;
     else
-      input = `<input class="inp" type="${f.type}" id="f_${f.key}" value="${esc(val)}"${dis} placeholder="${esc(f.placeholder || "")}">`;
+      input = `<input class="inp" type="${f.type}" id="f_${f.key}" value="${esc(val)}" placeholder="${esc(f.placeholder || "")}">`;
     return `<div class="fld${wide}">
-      <label for="f_${f.key}">${esc(f.label)}${f.required ? ` <span class="req">*</span>` : ""}${locked ? ` <span class="muted">(locked)</span>` : ""}</label>
+      <label for="f_${f.key}">${esc(f.label)}</label>
       ${input}
       <div class="err-msg hide" id="e_${f.key}"></div>
     </div>`;
@@ -3390,14 +3471,14 @@ function renderForm(lead, streamKey) {
       <legend>Routing</legend>
       <div class="frm">
         <div class="fld">
-          <label for="f_stream">Stream <span class="req">*</span></label>
-          <select class="inp" id="f_stream"${can.editAll(role) ? "" : " disabled"}>
+          <label for="f_stream">Stream</label>
+          <select class="inp" id="f_stream">
             ${Object.entries(STREAMS).map(([k, s]) => `<option value="${k}"${stream === k ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
           </select>
         </div>
         <div class="fld" id="clientWrap">
           <label for="f_clientId">Client</label>
-          <select class="inp" id="f_clientId"${can.editAll(role) ? "" : " disabled"}>
+          <select class="inp" id="f_clientId">
             <option value="">— select client —</option>
             ${S.clients.map((c) => `<option value="${esc(c.id)}"${lead?.clientId === c.id ? " selected" : ""}>${esc(c.name)}</option>`).join("")}
           </select>
@@ -3423,7 +3504,7 @@ function renderForm(lead, streamKey) {
     <button class="btn btn-sm btn-primary" id="frmSave">${isNew ? "Create lead" : "Save changes"}</button>
     <button class="btn btn-sm btn-ghost" id="frmCancel">Cancel</button>
     <div style="flex:1"></div>
-    <span class="muted" style="font-size:11.5px; font-weight:600">* required</span>`;
+    <span class="muted" style="font-size:11.5px; font-weight:600">Nothing here is required</span>`;
   $("#frmCancel").addEventListener("click", () => {
     if (isNew) closeDrawer();
     else { S.drawer.mode = "read"; renderDrawer(); }
@@ -3432,7 +3513,6 @@ function renderForm(lead, streamKey) {
 }
 async function saveForm(lead) {
   const isNew = !lead;
-  const role = S.me.role;
   const data = {};
   let bad = null;
   $$(".err-msg").forEach((e) => e.classList.add("hide"));
@@ -3446,13 +3526,12 @@ async function saveForm(lead) {
   data.stream = $("#f_stream").value;
   data.status = $("#f_status").value;
   data.clientId = data.stream === "client" ? $("#f_clientId").value : "";
-  if (data.stream === "client" && !data.clientId) fail("clientId", "Pick which client this lead is for.");
+  /* Nothing on this form is required — a half-filled lead beats a lead nobody
+     bothered to log, and the person typing knows which blanks matter. */
   for (const f of LEAD_FIELDS) {
     const el = $(`#f_${f.key}`);
     if (!el) continue;
-    if (!isNew && !can.editable(role, f.key)) continue; // never send locked fields
     let v = el.value.trim();
-    if (f.required && !v) { fail(f.key, `${f.label} is required.`); continue; }
     if (v && f.type === "url" && !/^https?:\/\//i.test(v)) v = "https://" + v;
     if (v && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { fail(f.key, "That doesn't look like an email."); continue; }
     if (f.type === "number") v = v === "" ? "" : Number(v);
@@ -3592,10 +3671,9 @@ async function exportLeads(streamKey, rows) {
    EXPORT HISTORY / ACTIVITY / ADMIN PANELS
    ========================================================================== */
 function renderExports() {
-  const mine = !can.admin(S.me.role);
-  $("#expHint").textContent = mine
-    ? "Your downloads. Admins can see everyone's."
-    : "Every download across the team — who, when, which leads.";
+  /* Everyone sees the whole history. An export log only its author can read
+     deters nobody; one the whole team can read does. */
+  $("#expHint").textContent = "Every download across the team — who, when, which leads.";
   $("#expList").innerHTML = S.exports.length
     ? S.exports.map((e) => `
       <div class="exp-row">
@@ -3614,9 +3692,8 @@ function renderFeed() {
   host.innerHTML = S.feed.length
     ? S.feed.map((a) => {
         const l = byLead.get(a.leadId);
-        /* A feed entry whose lead is gone (deleted, or outside this viewer's
-           scope) just renders without the lead line — the old code pasted a
-           stray card here, which broke the feed's layout. */
+        /* A feed entry whose lead is gone (deleted) just renders without the
+           lead line rather than pasting a stray card into the feed. */
         const tag = l
           ? `<div class="fe-when" style="margin-top:3px; cursor:pointer">
                on <b style="color:var(--ink-2)">${esc(fullName(l))}</b> · ${esc(l.company || "")}</div>`
@@ -3631,11 +3708,11 @@ function renderFeed() {
 }
 /* ---------------------------------------------------------------------------
    PEOPLE — the admin's user management panel.
-   Edit (name / role / client access / active), Password (emails a
-   set-password link — the browser-side route to giving a Microsoft or Google
-   person an email+password login too), and Remove (deletes their profile
-   document, which is what grants access; their underlying login can only be
-   deleted from the Firebase console).
+   Edit (name / role / active), Password (emails a set-password link — the
+   browser-side route to giving a Microsoft or Google person an email+password
+   login too), and Remove (deletes their profile document, which is what grants
+   access; their underlying login can only be deleted from the Firebase
+   console).
 --------------------------------------------------------------------------- */
 function renderUsers() {
   const host = $("#userList");
@@ -3653,10 +3730,7 @@ function renderUsers() {
         }</div>
         <div class="grow">
           <div class="t">${esc(u.name || u.email)}${self ? ` <span class="muted">(you)</span>` : ""}</div>
-          <div class="s">${esc(u.email || "")} · ${esc(ROLES[u.role]?.label || "no role")}${
-            u.role === "client" && (u.clientAccess || []).length
-              ? ` · ${(u.clientAccess || []).map(clientName).filter(Boolean).join(", ")}` : ""
-          }</div>
+          <div class="s">${esc(u.email || "")} · ${esc(ROLES[u.role]?.label || "no role")}</div>
         </div>
         ${u.active === false ? `<span class="pill pill-neutral">Disabled</span>` : ""}
         <button class="btn btn-xs btn-ghost" data-uedit="${esc(u.id)}">${S.editingUser === u.id ? "Close" : "Edit"}</button>
@@ -3666,10 +3740,6 @@ function renderUsers() {
       </div>`;
     return row + (S.editingUser === u.id ? userEditor(u) : "");
   }).join("");
-  /* Role select toggles the client picker inside the open editor. */
-  $("#ue_role")?.addEventListener("change", (e) => {
-    $("#ue_cwrap")?.classList.toggle("hide", e.target.value !== "client");
-  });
   host.onclick = onUserAction;
 }
 function userEditor(u) {
@@ -3685,12 +3755,6 @@ function userEditor(u) {
           ${Object.entries(ROLES).map(([k, r]) => `<option value="${k}"${u.role === k ? " selected" : ""}>${esc(r.label)}</option>`).join("")}
         </select>
       </div>
-      <div class="fld${u.role === "client" ? "" : " hide"}" id="ue_cwrap">
-        <label for="ue_clients">Which clients</label>
-        <select class="inp" id="ue_clients" multiple size="3">
-          ${S.clients.map((c) => `<option value="${esc(c.id)}"${(u.clientAccess || []).includes(c.id) ? " selected" : ""}>${esc(c.name)}</option>`).join("")}
-        </select>
-      </div>
       <div class="fld">
         <label for="ue_active">Access</label>
         <select class="inp" id="ue_active">
@@ -3699,6 +3763,7 @@ function userEditor(u) {
         </select>
       </div>
     </div>
+    <p class="muted mt-8">Everyone works the whole board. The role only decides who sees this Admin panel and who can approve a deletion.</p>
     <div class="mt-12" style="display:flex; gap:8px">
       <button class="btn btn-sm btn-primary" data-usave="${esc(u.id)}">Save</button>
       <button class="btn btn-sm btn-ghost" data-ucancel="1">Cancel</button>
@@ -3728,14 +3793,10 @@ async function onUserAction(e) {
       name: $("#ue_name").value.trim(),
       role,
       active: $("#ue_active").value === "1",
-      clientAccess: role === "client" ? [...$("#ue_clients").selectedOptions].map((o) => o.value) : [],
     };
     if (!patch.name) return toast("Give them a name.", "warn");
     if (uid === S.me.uid && (role !== "admin" || patch.active === false)) {
       return toast("You can't remove your own admin access — ask another admin.", "warn");
-    }
-    if (role === "client" && !patch.clientAccess.length) {
-      return toast("Pick at least one client for a client login.", "warn");
     }
     try {
       await S.store.saveUser(uid, patch);
@@ -3783,6 +3844,59 @@ async function onUserAction(e) {
   }
 }
 /* ---------------------------------------------------------------------------
+   DELETION REQUESTS — the admin's yes/no queue.
+   "Delete it" removes the lead and closes the request in one go; "Keep it"
+   closes the request and leaves the lead alone. Either way the activity trail
+   on the lead keeps the record of who asked and why.
+--------------------------------------------------------------------------- */
+function renderDeleteRequests() {
+  const host = $("#delList");
+  if (!host) return;
+  const pending = (S.delReqs || []).filter((r) => r.status === "pending");
+  const card = $("#delCard");
+  const icon = $("#delIcon");
+  if (icon) icon.textContent = pending.length ? String(pending.length) : "✓";
+  if (card) card.classList.toggle("clear", pending.length === 0);
+  host.innerHTML = pending.length
+    ? pending.map((r) => {
+        const gone = !S.leads.some((l) => l.id === r.leadId);
+        return `<div class="li">
+          <div class="grow">
+            <div class="t">${esc(r.leadName || "(no name)")}${r.company ? ` <span class="muted" style="font-weight:600">· ${esc(r.company)}</span>` : ""}</div>
+            <div class="s">asked by ${esc(r.byName || "someone")} ${esc(fmtWhen(r.at))}${r.reason ? ` — “${esc(r.reason)}”` : ""}</div>
+          </div>
+          ${gone ? `<span class="pill pill-neutral">Already gone</span>` : ""}
+          <button class="btn btn-xs btn-ghost" data-dropen="${esc(r.leadId)}"${gone ? " disabled" : ""}>Open</button>
+          <button class="btn btn-xs btn-danger" data-dryes="${esc(r.id)}">Delete it</button>
+          <button class="btn btn-xs btn-ghost" data-drno="${esc(r.id)}">Keep it</button>
+        </div>`;
+      }).join("")
+    : `<p class="muted" style="font-size:13px">Nothing waiting. Anyone who wants a lead gone asks from the lead itself.</p>`;
+  host.onclick = async (e) => {
+    const open = e.target.closest("[data-dropen]");
+    const yes  = e.target.closest("[data-dryes]");
+    const no   = e.target.closest("[data-drno]");
+    if (open) return openDrawer(open.dataset.dropen);
+    if (no) {
+      try {
+        await S.store.resolveDeleteRequest(no.dataset.drno, "declined");
+        toast("Request closed. The lead stays.");
+      } catch (ex) { console.error(ex); toast("Couldn't close that request.", "bad"); }
+      return;
+    }
+    if (yes) {
+      const req = (S.delReqs || []).find((r) => r.id === yes.dataset.dryes);
+      if (!req) return;
+      if (!confirm(`Delete ${req.leadName || "this lead"} for everyone?\n\nThe lead row goes; its activity entries stay in the audit trail.`)) return;
+      try {
+        if (S.leads.some((l) => l.id === req.leadId)) await S.store.deleteLead(req.leadId);
+        await S.store.resolveDeleteRequest(req.id, "approved");
+        toast("Lead deleted.", "bad");
+      } catch (ex) { console.error(ex); toast("Couldn't delete that one. Check your access.", "bad"); }
+    }
+  };
+}
+/* ---------------------------------------------------------------------------
    INVITES
    The admin picks the role here; the invitee never chooses their own. The
    matching rule in firestore.rules copies that role across verbatim when they
@@ -3812,7 +3926,6 @@ async function sendInvite() {
   const phone = $("#invPhone").value.trim().replace(/[\s()-]/g, "");
   if (!name) return toast("Add their name so people know who this is.", "warn");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast("That email doesn't look right.", "warn");
-  if (role === "client" && !clientAccess.length) return toast("Pick which clients they can see.", "warn");
   if (phone && !/^\+[1-9]\d{7,14}$/.test(phone))
     return toast("Include the country code on the mobile, like +91 98765 43210.", "warn");
   if (S.users.some((u) => (u.email || "").toLowerCase() === email)) {
@@ -3858,7 +3971,7 @@ function renderInvites() {
   if (sel && sel.innerHTML !== opts) sel.innerHTML = opts;
   const open = S.invites.filter((i) => i.status !== "accepted");
   host.innerHTML = open.length
-    ? `<div class="eyebrow" style="margin-bottom:8px">Waiting to be accepted</div>
+    ? `<div class="muted" style="margin-bottom:8px">Waiting to be accepted</div>
        <div class="list">${open.map((i) => `
         <div class="li">
           <div class="grow">
@@ -3908,7 +4021,7 @@ function renderClients() {
     : `<p class="muted" style="font-size:13px">No clients yet. Add the first one below.</p>`;
 }
 /* ==========================================================================
-   TOP BAR — live clock + rotating quotes (new in this revision)
+   TOP BAR — live clock + rotating quotes
    ========================================================================== */
 function startTopbar() {
   if (startTopbar.on) return;
@@ -4097,7 +4210,7 @@ function reportSyncProblem(err) {
   let msg;
   if (code.includes("permission-denied")) {
     msg = "Firestore's security rules refused a read for this account, so part of the dashboard can't load. " +
-          "An admin needs to bring firestore.rules in line with the app — a working starting point is in the comment at the very top of this file.";
+          "An admin needs to bring firestore.rules in line with the app — this revision needs any active account to read leads and activity, and a deleteRequests collection.";
   } else if (code.includes("failed-precondition")) {
     msg = "Firestore wants an index it doesn't have. The dashboard already fell back to an index-free query where it could; " +
           "the browser console has Firebase's one-click create-index link if you want the fast path back.";
