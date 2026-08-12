@@ -64,6 +64,22 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 }
 #confetti{position:fixed;inset:0;z-index:120;pointer-events:none}
 
+/* ---------- floating hearts ---------- */
+#hearts{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;transition:opacity 1.2s ease}
+#hearts.hush{opacity:.12}
+#hearts span{
+  position:absolute;bottom:-40px;color:var(--rose);opacity:0;
+  animation:float linear infinite;will-change:transform,opacity;
+}
+#hearts span:nth-child(even){color:var(--gold)}
+@keyframes float{
+  0%{transform:translateY(0) translateX(0) rotate(0deg) scale(.9);opacity:0}
+  12%{opacity:var(--o)}
+  50%{transform:translateY(-52svh) translateX(var(--drift)) rotate(14deg) scale(1)}
+  88%{opacity:var(--o)}
+  100%{transform:translateY(-108svh) translateX(calc(var(--drift) * -.6)) rotate(-10deg) scale(.94);opacity:0}
+}
+
 /* ---------- loader ---------- */
 #loader{
   position:fixed;inset:0;z-index:200;background:#07060A;display:grid;place-items:center;
@@ -177,47 +193,61 @@ h2.big em{font-style:italic}
 .stat .val{font-family:var(--display);font-size:clamp(30px,5vw,50px);font-weight:300;letter-spacing:-.02em}
 .stat .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--faint);margin-top:10px}
 
-/* ---------- corridor (3D infinite gallery) ---------- */
+/* ---------- corridor (scroll-driven 3D gallery) ----------
+   The track is tall; the viewport inside it is sticky. The page scrolls
+   normally the whole way through — nothing is ever hijacked or trapped. */
 .corridor-sec{position:relative}
+.corridor-track{position:relative;height:calc(100svh + 30 * 24svh)}
+.corridor-pin{position:sticky;top:0;height:100svh}
 #corridor{
   position:relative;height:100svh;width:100%;overflow:hidden;
   perspective:1400px;perspective-origin:50% 46%;
-  background:radial-gradient(70% 60% at 50% 45%, #140E1D 0%, #07060A 78%);
-  touch-action:pan-y;cursor:grab;
+  background:radial-gradient(70% 60% at 50% 45%, #150F1F 0%, #07060A 76%);
 }
-#corridor.drag{cursor:grabbing}
 #corridor .stage{position:absolute;inset:0;transform-style:preserve-3d}
+/* depth fog: the far end of the corridor dissolves instead of popping */
+#corridor .fog{
+  position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:radial-gradient(58% 52% at 50% 46%, rgba(7,6,10,0) 40%, rgba(7,6,10,.55) 78%, rgba(7,6,10,.92) 100%);
+}
 .frame{
-  position:absolute;left:50%;top:50%;width:min(50vw,440px);
+  position:absolute;left:50%;top:50%;width:min(46vw,430px);
   transform-style:preserve-3d;will-change:transform,opacity;
-  display:none;
+  display:none;cursor:zoom-in;
 }
 .frame.show{display:block}
 .frame .shot{
-  position:relative;border-radius:3px;overflow:hidden;background:#120D18;
-  box-shadow:0 30px 80px rgba(0,0,0,.65);
-  border:1px solid rgba(246,241,234,.09);
+  position:relative;border-radius:2px;overflow:hidden;background:#120D18;
+  box-shadow:0 40px 90px rgba(0,0,0,.7);
+  border:1px solid rgba(246,241,234,.1);
+  outline:6px solid rgba(7,6,10,.55);outline-offset:-1px;
 }
 .frame .shot img{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover}
-.frame .meta{
-  display:flex;gap:10px;align-items:baseline;margin-top:11px;
+.frame .tag{
+  position:absolute;top:9px;left:10px;z-index:2;
+  font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:rgba(246,241,234,.75);
+  text-shadow:0 1px 10px #000;
 }
-.frame .meta .i{font-family:var(--mono);font-size:9px;color:var(--rose-deep);letter-spacing:.14em}
-.frame .meta .c{font-family:var(--display);font-style:italic;font-size:14px;line-height:1.45;color:rgba(246,241,234,.82)}
-.corridor-ui{position:absolute;inset:0;pointer-events:none;z-index:5;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(18px,4vw,38px)}
-.corridor-title{
-  position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none;
-  mix-blend-mode:exclusion;padding:0 20px;
+.corridor-ui{
+  position:absolute;inset:0;pointer-events:none;z-index:5;display:flex;flex-direction:column;
+  justify-content:space-between;padding:clamp(18px,4vw,40px);
+  padding-bottom:clamp(34px,6vw,58px); /* headroom so a long caption never clips */
 }
-.corridor-title h3{font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(30px,7vw,92px);color:#fff;letter-spacing:-.02em;opacity:.85}
 .corridor-top{display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--faint)}
-.corridor-bot{display:flex;justify-content:space-between;align-items:flex-end;gap:20px}
-.now{max-width:min(560px,72vw)}
-.now .idx{font-family:var(--mono);font-size:10px;color:var(--rose);letter-spacing:.2em}
-.now .txt{font-family:var(--display);font-style:italic;font-size:clamp(15px,2.4vw,24px);line-height:1.4;margin-top:8px;color:var(--ivory);text-shadow:0 2px 24px rgba(0,0,0,.9)}
-.hint{text-align:right;font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);line-height:2}
-.hint b{display:block;color:var(--muted);font-weight:400}
-.progress{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(246,241,234,.08)}
+.corridor-bot{text-align:center;display:flex;flex-direction:column;align-items:center;gap:9px}
+.now{max-width:min(620px,86vw);transition:opacity .45s ease}
+.now.swap{opacity:0}
+.now .idx{font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.28em;text-transform:uppercase}
+.now .txt{
+  font-family:var(--display);font-style:italic;font-size:clamp(15px,2.1vw,23px);line-height:1.45;
+  margin-top:9px;color:var(--ivory);text-shadow:0 2px 30px rgba(0,0,0,.95),0 0 60px rgba(0,0,0,.7);
+}
+.hint{font-family:var(--mono);font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
+/* vertical index rail on the right edge */
+.rail{position:absolute;right:clamp(14px,3vw,30px);top:50%;transform:translateY(-50%);z-index:5;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.rail i{display:block;width:14px;height:1px;background:rgba(246,241,234,.18);transition:background .35s,width .35s}
+.rail i.on{background:var(--rose);width:26px}
+.progress{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(246,241,234,.08);z-index:6}
 .progress i{display:block;height:100%;width:0;background:var(--shine)}
 
 /* ---------- contact sheet (collage) ---------- */
@@ -274,6 +304,46 @@ h2.big em{font-style:italic}
 .finding .ref{font-family:var(--mono);font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--rose-deep)}
 .finding h4{font-family:var(--display);font-weight:400;font-size:19px;margin:12px 0 9px}
 .finding p{font-size:14px;line-height:1.8;color:var(--muted)}
+
+/* ---------- thirty reasons ---------- */
+.reasons{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-top:44px;
+  perspective:1000px;
+}
+.reason{
+  position:relative;aspect-ratio:1/1;transform-style:preserve-3d;
+  transition:transform .7s cubic-bezier(.3,.8,.3,1);cursor:pointer;
+}
+.reason.open{transform:rotateY(180deg)}
+.reason .side{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border:1px solid var(--line);border-radius:4px;display:grid;place-items:center;
+  padding:16px;text-align:center;
+}
+.reason .front{
+  background:linear-gradient(150deg,rgba(240,184,196,.07),rgba(233,201,131,.02));
+  transition:border-color .4s,background .4s;
+}
+.reason:hover .front{border-color:rgba(240,184,196,.42);background:rgba(240,184,196,.12)}
+.reason .front b{font-family:var(--display);font-size:26px;font-weight:300;color:var(--rose)}
+.reason .front s{display:block;text-decoration:none;font-family:var(--mono);font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint);margin-top:8px}
+.reason .back{
+  transform:rotateY(180deg);background:#120C18;border-color:rgba(240,184,196,.34);
+  font-family:var(--display);font-style:italic;font-size:14.5px;line-height:1.5;color:rgba(246,241,234,.92);
+}
+.reasons-bar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-top:26px}
+.reasons-bar .count{font-family:var(--mono);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--faint)}
+.ghost-btn{
+  border:1px solid var(--line);border-radius:100px;padding:12px 26px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);
+  transition:color .4s,border-color .4s,background .4s;
+}
+.ghost-btn:hover{color:var(--ivory);border-color:rgba(240,184,196,.5);background:rgba(240,184,196,.08)}
+@media (max-width:640px){
+  .reasons{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:7px}
+  .reason .front b{font-size:20px}
+  .reason .back{font-size:11.5px;padding:10px;line-height:1.42}
+}
 
 /* ---------- cake ---------- */
 .cake-sec{text-align:center}
@@ -352,8 +422,7 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   .ledger .v{grid-column:2;margin-top:6px}
   .eyebrow,.hero .sub{letter-spacing:.22em}
   .hint{display:none}
-  .frame{width:min(78vw,340px)}
-  .frame .meta{display:none}
+  .frame{width:min(74vw,330px)}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
@@ -363,6 +432,7 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 </head>
 <body>
 <div class="backdrop"></div>
+<div id="hearts" aria-hidden="true"></div>
 <div class="grain"></div>
 <canvas id="confetti"></canvas>
 
@@ -435,29 +505,31 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   <div class="wrap" style="padding-bottom:0">
     <div class="kicker reveal">Gallery I · The long corridor</div>
     <h2 class="big reveal">Thirty frames. <em>Walk through them.</em></h2>
-    <p class="lede reveal">Nothing here is a slideshow. It's a corridor — the photos come toward you, and you set the pace.</p>
+    <p class="lede reveal">Nothing here is a slideshow. It's a corridor — keep scrolling and the photos walk toward you, one at a time. Tap any of them to open it.</p>
   </div>
 
-  <div id="corridor" aria-label="3D photo corridor">
-    <div class="stage" id="stage"></div>
-    <div class="corridor-title"><h3>Niharika</h3></div>
-    <div class="corridor-ui">
-      <div class="corridor-top">
-        <span id="cCount">01 / 30</span>
-        <span id="cState">Auto-play</span>
-      </div>
-      <div class="corridor-bot">
-        <div class="now">
-          <div class="idx" id="nowIdx">Frame 01</div>
-          <div class="txt" id="nowCap"></div>
+  <div class="corridor-track" id="track">
+    <div class="corridor-pin">
+      <div id="corridor" aria-label="Photo corridor">
+        <div class="stage" id="stage"></div>
+        <div class="fog"></div>
+        <div class="rail" id="rail" aria-hidden="true"></div>
+        <div class="corridor-ui">
+          <div class="corridor-top">
+            <span id="cCount">01 / 30</span>
+            <span>The long corridor</span>
+          </div>
+          <div class="corridor-bot">
+            <div class="now" id="now">
+              <div class="idx" id="nowIdx">Frame 01</div>
+              <div class="txt" id="nowCap"></div>
+            </div>
+            <div class="hint">Keep scrolling</div>
+          </div>
         </div>
-        <div class="hint">
-          <b>Wheel · Drag · Arrows</b>
-          Auto-play resumes after 3s
-        </div>
+        <div class="progress"><i id="cProg"></i></div>
       </div>
     </div>
-    <div class="progress"><i id="cProg"></i></div>
   </div>
 </section>
 
@@ -486,6 +558,20 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
     <div class="kicker reveal">Audit findings · No qualifications</div>
     <h2 class="big reveal">Material observations, <em>reported honestly.</em></h2>
     <div class="findings reveal" id="findings"></div>
+  </div>
+</section>
+
+<!-- ============ REASONS ============ -->
+<section>
+  <div class="wrap">
+    <div class="kicker reveal">Thirty reasons · One for each frame</div>
+    <h2 class="big reveal">Turn them over, <em>one at a time.</em></h2>
+    <p class="lede reveal">No particular order. There are more, but thirty felt like the right number today.</p>
+    <div class="reasons" id="reasons"></div>
+    <div class="reasons-bar reveal">
+      <div class="count" id="reasonCount">0 of 30 turned over</div>
+      <button class="ghost-btn" id="revealAll">Turn them all over</button>
+    </div>
   </div>
 </section>
 
@@ -594,6 +680,39 @@ var CONFIG = {
     { ref:"Finding 04", h:"Provision for overthinking", p:"Adequate. Usually resolved by food, a drive after 10pm, or being told the thing she already knew." },
     { ref:"Finding 05", h:"Revenue from ordinary days", p:"Recognised continuously. Highest margin line item in the entire business. Nobody else can produce it." },
     { ref:"Finding 06", h:"No qualification", p:"In my opinion, the accompanying life gives a true and fair view of a person who deserves far more than one page on the internet." }
+  ],
+
+  reasons: [
+    "You laugh with your whole face. No held-back version of it exists.",
+    "You cleared the hardest exam in the country and still say you got lucky.",
+    "You argue like a professional and apologise like a child.",
+    "You'd rather be honest than be liked.",
+    "You greet the dog before you greet me, every single time.",
+    "You remember what everyone else forgot to mention.",
+    "You get excited about ice cream in the middle of winter.",
+    "Your first instinct in any photo is to make it funnier.",
+    "You made the gym mornings non-negotiable, for both of us.",
+    "You never once made carrying half my life sound like a favour.",
+    "You cry at the ads. Every time. Without embarrassment.",
+    "You're softest at 2AM and sharpest at 9AM.",
+    "You fall asleep before the first toll booth and I drive slower on purpose.",
+    "You say the hard thing kindly, which almost nobody manages.",
+    "Your family knows they can call you first.",
+    "You wear red lipstick like it's a personality trait, and honestly it is.",
+    "You overthink everything and still choose the brave option.",
+    "You made a Stitch plushie a member of this household.",
+    "You have never once let me get away with the easy answer.",
+    "Audit season doesn't scare you. It's the other way round.",
+    "You're the only person whose advice I take without arguing first.",
+    "You make the same three restaurants feel like an occasion.",
+    "You are physically incapable of leaving a stray dog unpetted.",
+    "You didn't leave on the days I was very hard to stay with.",
+    "You hold the FaceTime at 1% because hanging up first is beneath you.",
+    "You are proud of me out loud, to other people.",
+    "You know exactly which silence needs talking and which needs sitting.",
+    "You've been the smartest person in the room since the two-braids photo.",
+    "You turn a traffic jam into the best part of the day.",
+    "You picked this. Ordinary, unglamorous, everyday this. And you keep picking it."
   ],
 
   letter: {
@@ -809,6 +928,74 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   });
 })();
 
+/* ---------------- thirty reasons ---------------- */
+(function(){
+  var box = document.getElementById("reasons"),
+      counter = document.getElementById("reasonCount"),
+      all = document.getElementById("revealAll"),
+      list = CONFIG.reasons, opened = 0;
+
+  function tally(){
+    counter.textContent = opened + " of " + list.length + " turned over";
+    if(opened === list.length) all.textContent = "All thirty. And counting.";
+  }
+
+  list.forEach(function(text, i){
+    var card = document.createElement("div");
+    card.className = "reason";
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.innerHTML =
+      '<div class="side front"><div><b>' + pad2(i + 1) + '</b><s>Turn over</s></div></div>' +
+      '<div class="side back">' + text + '</div>';
+    function flip(){
+      if(card.classList.contains("open")) return;
+      card.classList.add("open");
+      opened++;
+      tally();
+    }
+    card.addEventListener("click", flip);
+    card.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); flip(); }
+    });
+    box.appendChild(card);
+  });
+  tally();
+
+  all.addEventListener("click", function(){
+    Array.prototype.forEach.call(box.querySelectorAll(".reason:not(.open)"), function(c, k){
+      setTimeout(function(){ c.classList.add("open"); }, reduce ? 0 : k * 45);
+    });
+    opened = list.length;
+    tally();
+  });
+})();
+
+/* ---------------- floating hearts ---------------- */
+(function(){
+  var box = document.getElementById("hearts");
+  if(reduce) return;
+  var COUNT = window.innerWidth < 700 ? 9 : 16;
+  for(var i = 0; i < COUNT; i++){
+    var s = document.createElement("span"),
+        size = 9 + Math.random() * 16;
+    s.textContent = "♥";
+    s.style.left = (Math.random() * 100).toFixed(2) + "%";
+    s.style.fontSize = size.toFixed(1) + "px";
+    s.style.setProperty("--o", (0.10 + Math.random() * 0.2).toFixed(2));
+    s.style.setProperty("--drift", ((Math.random() - .5) * 160).toFixed(0) + "px");
+    s.style.animationDuration = (17 + Math.random() * 20).toFixed(1) + "s";
+    s.style.animationDelay = (-Math.random() * 30).toFixed(1) + "s";
+    box.appendChild(s);
+  }
+  // Hush them over the corridor so they never compete with the photos.
+  if("IntersectionObserver" in window){
+    new IntersectionObserver(function(e){
+      box.classList.toggle("hush", e[0].isIntersecting);
+    }, { threshold:.02 }).observe(document.getElementById("track"));
+  }
+})();
+
 /* ---------------- letter ---------------- */
 (function(){
   var L = CONFIG.letter;
@@ -824,154 +1011,148 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
 })();
 
 /* ================================================================
-   THE CORRIDOR — infinite 3D gallery (wheel / drag / keys / touch)
+   THE CORRIDOR — the page's own scroll walks you through the frames.
+   No wheel interception, no drag handlers, nothing to get stuck in.
    ================================================================ */
 var LB;
 (function(){
-  var root = document.getElementById("corridor"),
-      stage = document.getElementById("stage"),
+  var track  = document.getElementById("track"),
+      root   = document.getElementById("corridor"),
+      stage  = document.getElementById("stage"),
+      rail   = document.getElementById("rail"),
+      now    = document.getElementById("now"),
       nowIdx = document.getElementById("nowIdx"),
       nowCap = document.getElementById("nowCap"),
       cCount = document.getElementById("cCount"),
-      cState = document.getElementById("cState"),
       cProg  = document.getElementById("cProg");
 
   var N = frames.length,
-      SPACING = 3,                    // world units between frames
-      TOTAL = N * SPACING,
-      NEAR = 0.9, FAR = 14,           // falloff window
-      UNIT = 132,                     // px per world unit
-      SPEED = 1.2,                    // units per second
-      IDLE = 3000;                    // ms before auto-play resumes
+      SPACING = 3,            // world units between frames
+      NEAR = 0.85, FAR = 15,  // visible depth window
+      UNIT = 132;             // px per world unit
 
-  var z = 0, zTarget = 0, lastInput = 0, visible = true, built = [];
+  /* z travels from "the first frames are already glowing at the far end"
+     (starting flush at -FAR would pin an empty corridor) to "the last frame
+     has walked past". */
+  var Z0 = -(FAR - 3.5), Z1 = (N - 1) * SPACING + NEAR + 1;
 
-  // Narrow screens get a tighter spread so nothing drifts off the edge.
-  function spread(){ return W < 700 ? 0.085 : 0.19; }
-  function offX(i){ return Math.sin(i * 2.1) * spread(); }
-  function offY(i){ return Math.cos(i * 1.37) * (W < 700 ? 0.09 : 0.12); }
-  function rot(i){ return Math.sin(i * 0.9) * 6; }
+  /* Distance from the top of the document — the track sits inside a
+     positioned section, so offsetTop alone would be measured from there. */
+  function docTop(el){ return el.getBoundingClientRect().top + window.scrollY; }
+
+  var W = 0, H = 0, built = [], ticks = [], z = Z0, active = -1, running = false;
+
+  /* A calm alternating drift rather than scatter — each frame steps to one
+     side of centre and back, so the corridor reads as a path, not a pile. */
+  function offX(i){ return Math.sin(i * 0.85) * (W < 700 ? 0.10 : 0.21); }
+  function offY(i){ return Math.sin(i * 0.47 + 1.1) * (W < 700 ? 0.07 : 0.10); }
+  function rot(i){ return Math.sin(i * 0.85) * -5; }
 
   frames.forEach(function(f, i){
     var el = document.createElement("div");
     el.className = "frame";
     el.innerHTML =
-      '<div class="shot"><img src="' + urlOf(f) + '" alt="Niharika, frame ' + f.n + '" ' +
-      (i < 6 ? '' : 'loading="lazy"') + ' draggable="false"></div>' +
-      '<div class="meta"><span class="i">' + pad2(i + 1) + '</span><span class="c">' + f.cap + '</span></div>';
-    el.addEventListener("click", function(){ if(!moved) LB.open(i); });
+      '<div class="shot"><span class="tag">' + pad2(i + 1) + '</span>' +
+      '<img src="' + urlOf(f) + '" alt="Niharika, frame ' + f.n + '"' +
+      (i < 5 ? '' : ' loading="lazy"') + ' draggable="false"></div>';
+    el.addEventListener("click", function(){ LB.open(i, true); });
     stage.appendChild(el);
     built.push(el);
+
+    var t = document.createElement("i");
+    rail.appendChild(t);
+    ticks.push(t);
   });
 
-  var W = 0, H = 0;
   function measure(){ W = root.clientWidth; H = root.clientHeight; }
   measure();
   window.addEventListener("resize", measure);
 
+  /* How far through the sticky track we are, 0 → 1. */
+  function progress(){
+    var r = track.getBoundingClientRect(),
+        span = track.offsetHeight - window.innerHeight;
+    if(span <= 0) return 0;
+    return Math.max(0, Math.min(1, -r.top / span));
+  }
+
   function render(){
+    var p = progress();
+    z = Z0 + p * (Z1 - Z0);
+
     var nearest = -1, nearestD = 1e9;
     for(var i = 0; i < N; i++){
-      var d = (i * SPACING - z) % TOTAL;
-      if(d < 0) d += TOTAL;                    // distance ahead of the camera
-      var el = built[i];
-      if(d > FAR){ if(el.classList.contains("show")) el.classList.remove("show"); continue; }
+      var d = i * SPACING - z, el = built[i];
+      if(d < -0.6 || d > FAR){
+        if(el.classList.contains("show")) el.classList.remove("show");
+        continue;
+      }
       if(!el.classList.contains("show")) el.classList.add("show");
 
       var op = 1;
-      if(d < NEAR) op = Math.max(0, d / NEAR);           // fading past the camera
-      if(d > FAR - 4) op = Math.min(op, (FAR - d) / 4);  // fading in from the deep
+      // Passing frames clear out quickly so they don't smear over the next one.
+      if(d < NEAR) op = Math.pow(Math.max(0, d / NEAR), 2.2);
+      if(d > FAR - 5) op = Math.min(op, (FAR - d) / 5);     // still deep in the dark
+
+      /* Frames fan out at the far end and converge as they arrive, so the
+         one she's actually looking at lands centred and face-on. */
+      var conv = Math.pow(Math.max(0, Math.min(1, (d - NEAR) / 6.5)), 1.5);
 
       el.style.opacity = op.toFixed(3);
       el.style.zIndex = String(1000 - Math.round(d * 10));
       el.style.transform =
         "translate(-50%,-50%) translate3d(" +
-        (offX(i) * W).toFixed(1) + "px," + (offY(i) * H).toFixed(1) + "px," +
-        (-d * UNIT).toFixed(1) + "px) rotateY(" + rot(i).toFixed(1) + "deg)";
+        (offX(i) * W * conv).toFixed(1) + "px," + (offY(i) * H * conv).toFixed(1) + "px," +
+        (-d * UNIT).toFixed(1) + "px) rotateY(" + (rot(i) * conv).toFixed(1) + "deg)";
 
       if(d >= NEAR && d < nearestD){ nearestD = d; nearest = i; }
     }
-    if(nearest > -1 && nearest !== render.last){
-      render.last = nearest;
-      nowIdx.textContent = "Frame " + pad2(nearest + 1);
-      nowCap.textContent = frames[nearest].cap;
-      cCount.textContent = pad2(nearest + 1) + " / " + N;
-      cProg.style.width = (((nearest + 1) / N) * 100) + "%";
-    }
-  }
-  render.last = -1;
 
-  var prevT = 0;
-  function loop(t){
-    var dt = prevT ? Math.min((t - prevT) / 1000, .05) : 0;
-    prevT = t;
-    if(visible){
-      var idleFor = performance.now() - lastInput;
-      if(idleFor > IDLE){
-        zTarget += SPEED * dt;
-        cState.textContent = "Auto-play";
-      } else {
-        cState.textContent = "Manual";
-      }
-      z += (zTarget - z) * Math.min(1, dt * 7);
-      render();
+    if(nearest > -1 && nearest !== active){
+      active = nearest;
+      // fade the caption out, swap the words, fade it back
+      now.classList.add("swap");
+      setTimeout(function(){
+        nowIdx.textContent = "Frame " + pad2(active + 1);
+        nowCap.textContent = frames[active].cap;
+        now.classList.remove("swap");
+      }, reduce ? 0 : 190);
+      cCount.textContent = pad2(active + 1) + " / " + N;
+      for(var k = 0; k < N; k++) ticks[k].classList.toggle("on", k === active);
     }
-    requestAnimationFrame(loop);
+    cProg.style.width = (p * 100).toFixed(2) + "%";
   }
-  requestAnimationFrame(loop);
+
+  /* Render on scroll via rAF; idle when the section is off screen. */
+  var queued = false;
+  function onScroll(){
+    if(!running || queued) return;
+    queued = true;
+    requestAnimationFrame(function(){ queued = false; render(); });
+  }
+  window.addEventListener("scroll", onScroll, { passive:true });
+  window.addEventListener("resize", onScroll);
 
   if("IntersectionObserver" in window){
-    new IntersectionObserver(function(e){ visible = e[0].isIntersecting; }, { threshold:.05 }).observe(root);
-  }
+    new IntersectionObserver(function(e){
+      running = e[0].isIntersecting;
+      if(running) onScroll();
+    }, { rootMargin:"120px" }).observe(track);
+  } else running = true;
 
-  function push(delta){ zTarget += delta; lastInput = performance.now(); }
+  render();
 
-  root.addEventListener("wheel", function(e){
-    // Only hijack the wheel while the corridor fills the screen.
-    var r = root.getBoundingClientRect();
-    if(r.top > 4 || r.bottom < window.innerHeight - 4) return;
-    e.preventDefault();
-    push(e.deltaY * 0.0055);
-  }, { passive:false });
-
-  var down = false, startY = 0, startZ = 0, moved = false;
-  function pDown(y){ down = true; moved = false; startY = y; startZ = zTarget; root.classList.add("drag"); lastInput = performance.now(); }
-  function pMove(y){
-    if(!down) return;
-    var dy = startY - y;
-    if(Math.abs(dy) > 6) moved = true;
-    zTarget = startZ + dy / 90;
-    lastInput = performance.now();
-  }
-  function pUp(){ down = false; root.classList.remove("drag"); lastInput = performance.now(); }
-
-  root.addEventListener("mousedown", function(e){ pDown(e.clientY); });
-  window.addEventListener("mousemove", function(e){ pMove(e.clientY); });
-  window.addEventListener("mouseup", pUp);
-  root.addEventListener("touchstart", function(e){ pDown(e.touches[0].clientY); }, { passive:true });
-  root.addEventListener("touchmove", function(e){
-    pMove(e.touches[0].clientY);
-    if(moved) e.preventDefault();
-  }, { passive:false });
-  root.addEventListener("touchend", pUp);
-
-  window.addEventListener("keydown", function(e){
-    if(document.getElementById("lb").classList.contains("on")) return;
-    var r = root.getBoundingClientRect();
-    if(r.bottom < 100 || r.top > window.innerHeight - 100) return;
-    if(e.key === "ArrowDown" || e.key === "ArrowRight"){ e.preventDefault(); push(SPACING); }
-    if(e.key === "ArrowUp" || e.key === "ArrowLeft"){ e.preventDefault(); push(-SPACING); }
-  });
-
-  // Jump the corridor to a given frame (used by the lightbox).
+  /* Closing the lightbox scrolls the corridor to whichever frame you were
+     looking at, so you come back to the right place. */
   window.__corridorGoto = function(i){
-    var cur = ((z % TOTAL) + TOTAL) % TOTAL;
-    var want = (i * SPACING) % TOTAL;
-    var delta = want - cur;
-    if(delta > TOTAL / 2) delta -= TOTAL;
-    if(delta < -TOTAL / 2) delta += TOTAL;
-    zTarget = z + delta;
-    lastInput = performance.now();
+    var span = track.offsetHeight - window.innerHeight;
+    if(span <= 0) return;
+    var wantZ = i * SPACING - NEAR - 0.4,
+        p = (wantZ - Z0) / (Z1 - Z0);
+    window.scrollTo({
+      top: docTop(track) + Math.max(0, Math.min(1, p)) * span,
+      behavior: reduce ? "auto" : "smooth"
+    });
   };
 })();
 
@@ -1005,7 +1186,7 @@ LB = (function(){
       img = document.getElementById("lbImg"),
       cap = document.getElementById("lbCap"),
       idx = document.getElementById("lbIdx"),
-      cur = 0;
+      cur = 0, cameFromCorridor = false;
   function show(i){
     cur = (i + frames.length) % frames.length;
     var f = frames[cur];
@@ -1014,7 +1195,8 @@ LB = (function(){
     cap.textContent = f.cap;
     idx.textContent = "Frame " + pad2(cur + 1) + " of " + frames.length;
   }
-  function open(i){
+  function open(i, fromCorridor){
+    cameFromCorridor = !!fromCorridor;
     show(i);
     box.classList.add("on");
     document.body.classList.add("locked");
@@ -1022,7 +1204,9 @@ LB = (function(){
   function close(){
     box.classList.remove("on");
     document.body.classList.remove("locked");
-    if(window.__corridorGoto) window.__corridorGoto(cur);
+    // Only re-aim the corridor if that's where she opened the photo from —
+    // closing one opened from the contact sheet should leave the page put.
+    if(cameFromCorridor && window.__corridorGoto) window.__corridorGoto(cur);
   }
   document.getElementById("lbX").addEventListener("click", close);
   document.getElementById("lbPrev").addEventListener("click", function(){ show(cur - 1); });
