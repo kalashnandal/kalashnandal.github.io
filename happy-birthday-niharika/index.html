@@ -387,7 +387,7 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   <button class="sound" id="soundBtn" aria-pressed="false"><b></b> Sound off</button>
 
   <div class="inner">
-    <div class="eyebrow">A private exhibit · For her only</div>
+    <div class="eyebrow" id="eyebrow">A private exhibit · For her only</div>
     <h1 id="headline" aria-label="Niharika">Niharika</h1>
     <h2>Happy birthday, my favourite person.</h2>
     <div class="sub">CA Niharika Shangari &nbsp;·&nbsp; Thirty frames &amp; one heart</div>
@@ -554,9 +554,9 @@ var CONFIG = {
   herName: "Niharika",
   signOff: "Yours, on every single day of it — Kalash",
 
-  /* Optional: her date of birth as "YYYY-MM-DD".
-     Leave "" and the counter gracefully shows a placeholder. */
-  birthDate: "",
+  /* Her birthday. `year` is optional — fill it in and the page adds a
+     live "Days of Niharika" counter alongside everything else. */
+  birthday: { day: 20, month: 8, year: null },
 
   base: "https://kalashnandal.co.in/I-love-you/",
 
@@ -648,6 +648,25 @@ var frames = CONFIG.frames;
 var urlOf = function(f){ return CONFIG.base + f.n + ".webp"; };
 var pad2 = function(v){ return v < 10 ? "0" + v : "" + v; };
 
+/* Where we are relative to the 20th — the page dresses itself accordingly. */
+var DAY = (function(){
+  var b = CONFIG.birthday,
+      now = new Date(),
+      today = new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+      mark = new Date(now.getFullYear(), b.month - 1, b.day),
+      isToday = today.getTime() === mark.getTime(),
+      next = today > mark ? new Date(now.getFullYear() + 1, b.month - 1, b.day) : mark,
+      daysTo = Math.round((next - today) / 86400000),
+      label = new Date(2000, b.month - 1, b.day)
+        .toLocaleDateString("en-IN", { day:"numeric", month:"long" }),
+      age = null;
+  if(b.year){
+    age = mark.getFullYear() - b.year;
+    if(today < mark) age -= 1;
+  }
+  return { isToday:isToday, daysTo:daysTo, label:label, age:age, born:b.year ? new Date(b.year, b.month - 1, b.day) : null };
+})();
+
 /* ---------------- loader ---------------- */
 (function(){
   var el = document.getElementById("sealNum"), t0 = null, dur = 900;
@@ -665,6 +684,10 @@ var pad2 = function(v){ return v < 10 ? "0" + v : "" + v; };
 
 /* ---------------- hero ---------------- */
 (function(){
+  document.getElementById("eyebrow").textContent = DAY.isToday
+    ? DAY.label + " · It's finally today"
+    : DAY.label + " · A private exhibit";
+
   var h = document.getElementById("headline"), txt = h.textContent.trim();
   h.textContent = "";
   for(var i = 0; i < txt.length; i++){
@@ -715,15 +738,12 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
 /* ---------------- stats ---------------- */
 (function(){
   var grid = document.getElementById("statGrid"), stats = CONFIG.stats.slice();
-  if(CONFIG.birthDate){
-    var d0 = new Date(CONFIG.birthDate + "T00:00:00");
-    if(!isNaN(d0)){
-      var days = Math.floor((Date.now() - d0.getTime()) / 86400000);
-      stats.unshift({ n:days, comma:true, l:"Days of Niharika" });
-    }
-  } else {
-    stats.unshift({ text:"∞", l:"Reasons, still counting" });
+  if(DAY.born){
+    stats.unshift({ n:Math.floor((Date.now() - DAY.born.getTime()) / 86400000), comma:true, l:"Days of Niharika" });
   }
+  stats.unshift(DAY.isToday
+    ? { text:"Today", l:DAY.label + " · her day" }
+    : { n:DAY.daysTo, l:"Days until " + DAY.label });
   stats.forEach(function(s){
     var d = document.createElement("div");
     d.className = "stat";
@@ -1072,6 +1092,17 @@ var burst = (function(){
   }
   btn.addEventListener("click", blow);
   cake.addEventListener("click", blow);
+})();
+
+/* On the 20th itself, the page opens with confetti — she shouldn't have to
+   scroll to something before the day announces itself. */
+(function(){
+  if(!DAY.isToday) return;
+  setTimeout(function(){
+    burst(innerWidth * 0.5, innerHeight * 0.32, 150);
+    setTimeout(function(){ burst(innerWidth * 0.16, innerHeight * 0.26, 70); }, 320);
+    setTimeout(function(){ burst(innerWidth * 0.84, innerHeight * 0.3, 70); }, 540);
+  }, 1700);
 })();
 
 })();
