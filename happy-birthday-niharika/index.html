@@ -210,11 +210,15 @@ h2.big em{font-style:italic}
   position:absolute;inset:0;z-index:4;pointer-events:none;
   background:radial-gradient(58% 52% at 50% 46%, rgba(7,6,10,0) 40%, rgba(7,6,10,.55) 78%, rgba(7,6,10,.92) 100%);
 }
+/* Frames carry each photo at its own shape — nothing is cropped, so she is
+   never the half that gets cut off. Width is set by orientation instead. */
 .frame{
-  position:absolute;left:50%;top:50%;width:min(46vw,430px);
+  position:absolute;left:50%;top:50%;
   transform-style:preserve-3d;will-change:transform,opacity;
   display:none;cursor:zoom-in;
 }
+.frame.portrait{width:min(40vw,340px)}
+.frame.land{width:min(58vw,520px)}
 .frame.show{display:block}
 .frame .shot{
   position:relative;border-radius:2px;overflow:hidden;background:#120D18;
@@ -222,7 +226,7 @@ h2.big em{font-style:italic}
   border:1px solid rgba(246,241,234,.1);
   outline:6px solid rgba(7,6,10,.55);outline-offset:-1px;
 }
-.frame .shot img{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover}
+.frame .shot img{width:100%;height:auto;display:block}
 .frame .tag{
   position:absolute;top:9px;left:10px;z-index:2;
   font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:rgba(246,241,234,.75);
@@ -251,20 +255,22 @@ h2.big em{font-style:italic}
 .progress i{display:block;height:100%;width:0;background:var(--shine)}
 
 /* ---------- contact sheet (collage) ---------- */
+/* Masonry: every photo keeps its own proportions and is shown whole.
+   Row spans are computed from each file's real dimensions. */
 .sheet{
-  display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:48px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:48px;
+  grid-auto-rows:6px;align-items:start;
 }
 .tile{
   position:relative;overflow:hidden;border-radius:3px;background:#120D18;
-  border:1px solid rgba(246,241,234,.07);cursor:pointer;
-  grid-column:span 2;aspect-ratio:3/4;
+  border:1px solid rgba(246,241,234,.07);cursor:pointer;grid-row-end:span 40;
   opacity:0;transform:translateY(28px) scale(.98);
   transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),border-color .4s;
 }
 .tile.in{opacity:1;transform:none}
 .tile:hover{border-color:rgba(240,184,196,.45)}
-.tile img{width:100%;height:100%;object-fit:cover;transition:transform 1.1s cubic-bezier(.2,.7,.2,1),filter .6s;filter:saturate(.92)}
-.tile:hover img{transform:scale(1.07);filter:saturate(1.05)}
+.tile img{width:100%;height:auto;display:block;transition:transform 1.1s cubic-bezier(.2,.7,.2,1),filter .6s;filter:saturate(.92)}
+.tile:hover img{transform:scale(1.04);filter:saturate(1.05)}
 .tile .cap{
   position:absolute;left:0;right:0;bottom:0;padding:34px 14px 13px;
   background:linear-gradient(180deg,transparent,rgba(7,6,10,.9) 62%);
@@ -274,11 +280,9 @@ h2.big em{font-style:italic}
   position:absolute;top:10px;left:11px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
   color:rgba(246,241,234,.7);text-shadow:0 1px 8px #000;
 }
-/* wide tiles: half a row, landscape crop — keeps every row exactly full */
-.tile.w3{grid-column:span 3;aspect-ratio:4/3}
-@media (max-width:780px){
+@media (max-width:1000px){ .sheet{grid-template-columns:repeat(3,1fr);gap:9px} }
+@media (max-width:640px){
   .sheet{grid-template-columns:repeat(2,1fr);gap:7px}
-  .tile,.tile.w3{grid-column:span 1;aspect-ratio:3/4}
   .tile .cap{font-size:11px;padding:24px 9px 9px;line-height:1.35}
   .tile .no{font-size:8px}
 }
@@ -422,7 +426,8 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   .ledger .v{grid-column:2;margin-top:6px}
   .eyebrow,.hero .sub{letter-spacing:.22em}
   .hint{display:none}
-  .frame{width:min(74vw,330px)}
+  .frame.portrait{width:min(72vw,300px)}
+  .frame.land{width:min(90vw,350px)}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
@@ -448,10 +453,10 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 <!-- ============ HERO ============ -->
 <header class="hero">
   <video id="heroVid" autoplay muted loop playsinline preload="auto"
-         poster="https://kalashnandal.co.in/I-love-you/6.webp">
+         poster="https://kalashnandal.co.in/I-love-you/22.webp">
     <source src="https://kalashnandal.co.in/I-love-you/IMG_1655.webm" type="video/webm">
   </video>
-  <img class="fallback" id="heroFallback" src="https://kalashnandal.co.in/I-love-you/6.webp" alt="" style="display:none">
+  <img class="fallback" id="heroFallback" src="https://kalashnandal.co.in/I-love-you/22.webp" alt="" style="display:none">
   <div class="veil"></div>
 
   <button class="sound" id="soundBtn" aria-pressed="false"><b></b> Sound off</button>
@@ -728,36 +733,36 @@ var CONFIG = {
 
   /* 30 frames — captions written for these exact photos */
   frames: [
-    { n:1,  cap:"Peace sign, red lips, sunglasses parked in your hair. The whole mood of you in one frame." },
-    { n:2,  cap:"The 2AM video-call face. No filter has ever improved on it, and none ever will." },
-    { n:3,  cap:"Night drive, borrowed cap, no destination. Still the best route we've ever taken." },
-    { n:4,  cap:"Third passenger, first priority. He got the middle seat and neither of us argued." },
-    { n:5,  cap:"Seatbelts on, sunglasses on, absolutely nowhere urgent to be. My favourite kind of afternoon." },
-    { n:6,  cap:"You leaning in from the back seat — the only traffic jam I've ever enjoyed." },
-    { n:7,  cap:"Head on my shoulder, pink on pink. The safest square foot of the world." },
-    { n:8,  cap:"Black on black, your hand on my chest. Some photos are just proof." },
-    { n:9,  cap:"Dinner-date faces, taken exactly one second before the food arrived." },
-    { n:10, cap:"Post-workout glow and a story you were halfway through telling. I let you finish." },
-    { n:11, cap:"Purple, gold streetlight, and a smile that ended the whole day well." },
-    { n:12, cap:"Slow-dancing in a restaurant that had no dance floor. We made one." },
-    { n:13, cap:"Café Hearts, and you greeted the dog before you greeted me. Honestly, fair." },
-    { n:14, cap:"Half-asleep, fully mine. This is the version nobody else gets to see." },
-    { n:15, cap:"You and Stitch. I've made my peace with finishing third in this house." },
-    { n:16, cap:"Audit-season armour: teal blazer, night parking lot, completely undefeated." },
-    { n:17, cap:"Family photo. One of us photobombs beautifully and it isn't me." },
-    { n:18, cap:"Tilak on, playlist loud, winter road ahead. Best-dressed passenger in Rajasthan." },
-    { n:19, cap:"Ice-cream cheers with the whole crew, in weather that absolutely did not call for it." },
-    { n:20, cap:"Dark car, quiet talk, the good kind of tired. Nothing to fix, nowhere to be." },
-    { n:21, cap:"Two heads on one headrest at the end of a very long day. Ten out of ten." },
-    { n:22, cap:"Mount Abu wind, lake behind you, that cardigan you eventually stole back." },
-    { n:23, cap:"FaceTime at 1% battery, and neither of us hung up first. We never do." },
-    { n:24, cap:"Cold morning, warm car, two people grinning like the day owed them something." },
-    { n:25, cap:"Gym mirror, leg day, my favourite spotter. You made the mornings non-negotiable." },
-    { n:26, cap:"Black and white, because colour was getting in the way of the point." },
-    { n:27, cap:"Asleep before the first toll booth. I drove slower on purpose." },
-    { n:28, cap:"Two braids, blue uniform, and a girl who was always going to be a CA." },
-    { n:29, cap:"Red light, loud laugh, no reason required. This is the sound I'd keep." },
-    { n:30, cap:"Big glasses, bigger brain, softest smile in the room. Goodnight, Nihu." }
+    { n:1, w:720, h:1280, cap:"Peace sign, red lips, sunglasses parked in your hair. The whole mood of you in one frame." },
+    { n:2, w:591, h:1280, cap:"The 2AM video-call face. No filter has ever improved on it, and none ever will." },
+    { n:3, w:1280, h:720, cap:"Night drive, borrowed cap, no destination. Still the best route we've ever taken." },
+    { n:4, w:1280, h:720, cap:"Third passenger, first priority. He got the middle seat and neither of us argued." },
+    { n:5, w:1280, h:720, cap:"Seatbelts on, sunglasses on, absolutely nowhere urgent to be. My favourite kind of afternoon." },
+    { n:6, w:1280, h:720, cap:"You leaning in from the back seat — the only traffic jam I've ever enjoyed." },
+    { n:7, w:1280, h:720, cap:"Head on my shoulder, pink on pink. The safest square foot of the world." },
+    { n:8, w:1600, h:1200, cap:"Black on black, your hand on my chest. Some photos are just proof." },
+    { n:9, w:720, h:1280, cap:"Dinner-date faces, taken exactly one second before the food arrived." },
+    { n:10, w:720, h:1280, cap:"Post-workout glow and a story you were halfway through telling. I let you finish." },
+    { n:11, w:720, h:1280, cap:"Purple, gold streetlight, and a smile that ended the whole day well." },
+    { n:12, w:720, h:1280, cap:"Slow-dancing in a restaurant that had no dance floor. We made one." },
+    { n:13, w:720, h:1280, cap:"Café Hearts, and you greeted the dog before you greeted me. Honestly, fair." },
+    { n:14, w:736, h:1600, cap:"Half-asleep, fully mine. This is the version nobody else gets to see." },
+    { n:15, w:736, h:1600, cap:"You and Stitch. I've made my peace with finishing third in this house." },
+    { n:16, w:720, h:1280, cap:"Audit-season armour: teal blazer, night parking lot, completely undefeated." },
+    { n:17, w:960, h:1280, cap:"Family photo. One of us photobombs beautifully and it isn't me." },
+    { n:18, w:720, h:1280, cap:"Tilak on, playlist loud, winter road ahead. Best-dressed passenger in Rajasthan." },
+    { n:19, w:900, h:1600, cap:"Ice-cream cheers with the whole crew, in weather that absolutely did not call for it." },
+    { n:20, w:720, h:1280, cap:"Dark car, quiet talk, the good kind of tired. Nothing to fix, nowhere to be." },
+    { n:21, w:1280, h:720, cap:"Two heads on one headrest at the end of a very long day. Ten out of ten." },
+    { n:22, w:720, h:1280, cap:"Mount Abu wind, lake behind you, that cardigan you eventually stole back." },
+    { n:23, w:591, h:1280, cap:"FaceTime at 1% battery, and neither of us hung up first. We never do." },
+    { n:24, w:1280, h:720, cap:"Cold morning, warm car, two people grinning like the day owed them something." },
+    { n:25, w:900, h:1600, cap:"Gym mirror, leg day, my favourite spotter. You made the mornings non-negotiable." },
+    { n:26, w:720, h:1280, cap:"Black and white, because colour was getting in the way of the point." },
+    { n:27, w:900, h:1600, cap:"Asleep before the first toll booth. I drove slower on purpose." },
+    { n:28, w:720, h:1280, cap:"Two braids, blue uniform, and a girl who was always going to be a CA." },
+    { n:29, w:1280, h:720, cap:"Red light, loud laugh, no reason required. This is the sound I'd keep." },
+    { n:30, w:736, h:1600, cap:"Big glasses, bigger brain, softest smile in the room. Goodnight, Nihu." }
   ]
 };
 /* ================================================================ */
@@ -1050,10 +1055,11 @@ var LB;
 
   frames.forEach(function(f, i){
     var el = document.createElement("div");
-    el.className = "frame";
+    el.className = "frame " + (f.h / f.w > 1.05 ? "portrait" : "land");
     el.innerHTML =
       '<div class="shot"><span class="tag">' + pad2(i + 1) + '</span>' +
       '<img src="' + urlOf(f) + '" alt="Niharika, frame ' + f.n + '"' +
+      ' width="' + f.w + '" height="' + f.h + '"' +
       (i < 5 ? '' : ' loading="lazy"') + ' draggable="false"></div>';
     el.addEventListener("click", function(){ LB.open(i, true); });
     stage.appendChild(el);
@@ -1064,7 +1070,18 @@ var LB;
     ticks.push(t);
   });
 
-  function measure(){ W = root.clientWidth; H = root.clientHeight; }
+  /* A tall photo has to be narrower than a wide one to fit the same height,
+     so each frame is capped by the vertical room it actually has. */
+  function measure(){
+    W = root.clientWidth;
+    H = root.clientHeight;
+    var room = H * 0.66;
+    built.forEach(function(el, i){
+      var f = frames[i],
+          cap = Math.round(room / (f.h / f.w));
+      el.style.maxWidth = cap + "px";
+    });
+  }
   measure();
   window.addEventListener("resize", measure);
 
@@ -1158,26 +1175,39 @@ var LB;
 
 /* ---------------- contact sheet ---------------- */
 (function(){
-  var sheet = document.getElementById("sheet");
-  /* Rows alternate between three portraits and two landscapes, so every row
-     fills its six columns exactly — a contact sheet with rhythm, no holes.
-     3+3+2+3+3+2+3+3+2+3+3 = 30 */
-  var rows = [3,3,2,3,3,2,3,3,2,3,3], shapes = [];
-  rows.forEach(function(count){
-    for(var k = 0; k < count; k++) shapes.push(count === 2 ? "w3" : "");
-  });
+  var sheet = document.getElementById("sheet"), tiles = [];
+
   frames.forEach(function(f, i){
     var t = document.createElement("figure");
-    t.className = "tile " + (shapes[i] || "");
+    t.className = "tile";
     t.innerHTML =
-      '<img src="' + urlOf(f) + '" alt="Niharika, frame ' + f.n + '" loading="lazy" decoding="async">' +
+      '<img src="' + urlOf(f) + '" alt="Niharika, frame ' + f.n + '"' +
+      ' width="' + f.w + '" height="' + f.h + '" loading="lazy" decoding="async">' +
       '<span class="no">' + pad2(i + 1) + '</span>' +
       '<figcaption class="cap">' + f.cap + '</figcaption>';
     t.addEventListener("click", function(){ LB.open(i); });
-    t.style.transitionDelay = ((i % 6) * 0.05) + "s";
+    t.style.transitionDelay = ((i % 4) * 0.05) + "s";
     sheet.appendChild(t);
+    tiles.push(t);
     watch(t);
   });
+
+  /* Each tile spans however many 6px rows its own proportions need, which is
+     what makes the columns stagger without a single photo being cropped. */
+  function layout(){
+    var cs = getComputedStyle(sheet),
+        gap = parseFloat(cs.rowGap) || 12,
+        row = parseFloat(cs.gridAutoRows) || 6;
+    tiles.forEach(function(t, i){
+      var f = frames[i],
+          h = t.clientWidth * (f.h / f.w) + 2; // + the tile's own hairline border
+      t.style.gridRowEnd = "span " + Math.max(1, Math.ceil((h + gap) / (row + gap)));
+    });
+  }
+  layout();
+  window.addEventListener("resize", layout);
+  window.addEventListener("load", layout);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
 })();
 
 /* ---------------- lightbox ---------------- */
