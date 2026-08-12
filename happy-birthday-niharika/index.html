@@ -188,7 +188,13 @@ h2.big em{font-style:italic}
 .networth .r{font-family:var(--display);font-style:italic;font-size:clamp(20px,3.2vw,34px)}
 
 /* ---------- stats ---------- */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+@media (max-width:1080px){ .stats{grid-template-columns:repeat(3,1fr)} }
+@media (max-width:560px){ .stats{grid-template-columns:repeat(2,1fr)} }
+/* If the tile count is ever odd, the last one takes the whole row rather
+   than sitting next to a hole. */
+.stat:last-child:nth-child(odd){grid-column:1/-1}
+@media (min-width:561px){ .stat:last-child:nth-child(odd){grid-column:auto} }
 .stat{background:var(--ink);padding:34px 22px;text-align:center}
 .stat .val{font-family:var(--display);font-size:clamp(30px,5vw,50px);font-weight:300;letter-spacing:-.02em}
 .stat .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--faint);margin-top:10px}
@@ -299,7 +305,11 @@ h2.big em{font-style:italic}
 .chapter p{color:var(--muted);line-height:1.9;max-width:60ch;font-size:15px}
 
 /* ---------- findings ---------- */
-.findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:46px}
+/* Fixed three across so the six findings fill two complete rows — an
+   auto-fit track went to four columns on wide screens and left two holes. */
+.findings{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:46px}
+@media (max-width:1000px){ .findings{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:620px){ .findings{grid-template-columns:1fr} }
 .finding{
   border:1px solid var(--line);border-radius:4px;padding:26px 24px;background:rgba(246,241,234,.02);
   transition:transform .5s cubic-bezier(.2,.7,.2,1),border-color .5s,background .5s;
@@ -479,7 +489,7 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
     <p class="lede reveal">
       This isn't a card. It's an exhibit — thirty frames pulled out of our camera rolls, each one
       still holding the exact temperature of the day it was taken. Car seats and late drives.
-      A husky who thinks he's the main character. Ice cream in winter. Audit season armour.
+      Soul, who is convinced he is the main character. Ice cream in winter. Audit season armour.
       Scroll slowly. Every photo has something to say, and I finally wrote it down.
     </p>
   </div>
@@ -656,7 +666,7 @@ var CONFIG = {
     { t:"That discipline",      s:"Articleship, attempts, audits, and gym mornings — she has never once needed to be pushed. Only fed.", v:"Fixed asset" },
     { t:"Patience with me",     s:"Extended generously, drawn down heavily, never once charged interest.", v:"Interest-free" },
     { t:"The 2AM overthinking", s:"Recognised as a liability by her. Recorded as a footnote by me. Fully provided for either way.", v:"Provisioned" },
-    { t:"Loyalty",              s:"To her people, her dog, and her word — in that order, and without exception.", v:"Unimpaired" },
+    { t:"Loyalty",              s:"To her people, to Soul, and to her word — in that order, and without exception.", v:"Unimpaired" },
     { t:"Every ordinary day",   s:"Car rides, chai runs, tired 11pm messages. The cheapest inputs, the highest returns.", v:"Compounding" }
   ],
 
@@ -664,6 +674,7 @@ var CONFIG = {
     { n:30,  l:"Frames on display" },
     { n:1,   l:"Edition of her" },
     { n:0,   l:"Arguments I've won" },
+    { text:"Soul", l:"Third passenger, undefeated" },
     { n:100, suffix:"%", l:"Certain about you" }
   ],
 
@@ -672,16 +683,16 @@ var CONFIG = {
       m:"Two plaits, blue uniform, a school photo taped into a notebook. She already had the face of someone who finishes what she starts. Nothing about the last decade would have surprised that girl." },
     { num:"II",  yr:"The grind", title:"Attempts, articleship, and those two letters",
       m:"Everyone sees the CA before the name. I saw the nights before it — the panic, the re-reading, the silence, the refusal to quit. The title is hers. The stubbornness that earned it is my favourite thing about her." },
-    { num:"III", yr:"Us", title:"Car seats, late drives, and a very loud husky",
-      m:"Turns out our best chapter has no landmarks in it. It has a passenger seat, a playlist, a dog who insists on the middle, ice cream in December, and a lake in Mount Abu. Ordinary, on repeat, forever." },
+    { num:"III", yr:"Us", title:"Car seats, late drives, and a very loud husky called Soul",
+      m:"Turns out our best chapter has no landmarks in it. It has a passenger seat, a playlist, Soul insisting on the middle seat, ice cream in December, and a lake in Mount Abu. Ordinary, on repeat, forever." },
     { num:"IV",  yr:"Now → always", title:"The part I'm not letting go of",
-      m:"Every year from here is just more of this, better lit. Louder laughs, longer drives, bigger wins. I'm not going anywhere, and I've made peace with always being her second favourite after the dog." }
+      m:"Every year from here is just more of this, better lit. Louder laughs, longer drives, bigger wins. I'm not going anywhere, and I've made peace with always being her second favourite, after Soul." }
   ],
 
   findings: [
     { ref:"Finding 01", h:"Understated by everyone", p:"Including herself. She routinely records her own achievements at a fraction of fair value. Restatement recommended, annually." },
     { ref:"Finding 02", h:"Going concern: confirmed", p:"No material uncertainty exists. This one runs for life, and I've signed off on it without a single reservation." },
-    { ref:"Finding 03", h:"Related party: the husky", p:"Significant influence exercised over all seating arrangements, travel plans, and photographs. Disclosure made. Objection withdrawn." },
+    { ref:"Finding 03", h:"Related party: Soul", p:"Significant influence exercised by one husky over all seating arrangements, travel plans, and photographs. Disclosure made. Objection withdrawn." },
     { ref:"Finding 04", h:"Provision for overthinking", p:"Adequate. Usually resolved by food, a drive after 10pm, or being told the thing she already knew." },
     { ref:"Finding 05", h:"Revenue from ordinary days", p:"Recognised continuously. Highest margin line item in the entire business. Nobody else can produce it." },
     { ref:"Finding 06", h:"No qualification", p:"In my opinion, the accompanying life gives a true and fair view of a person who deserves far more than one page on the internet." }
@@ -692,7 +703,7 @@ var CONFIG = {
     "You cleared the hardest exam in the country and still say you got lucky.",
     "You argue like a professional and apologise like a child.",
     "You'd rather be honest than be liked.",
-    "You greet the dog before you greet me, every single time.",
+    "You greet Soul before you greet me, every single time.",
     "You remember what everyone else forgot to mention.",
     "You get excited about ice cream in the middle of winter.",
     "Your first instinct in any photo is to make it funnier.",
@@ -724,7 +735,7 @@ var CONFIG = {
     salutation: "Nihu,",
     paragraphs: [
       "Thirty-odd photos in and I still can't get the order right, because there's no ranking system for this. Every one of them is my favourite for a different reason — the pink swirl top and the peace sign, the purple suit under yellow streetlight, the black-and-white one where you're laughing with your eyes closed. I built a whole corridor just so they'd get the room they deserve.",
-      "Here's what I actually want to say. You are the most <em>steady</em> person I know. You did the hardest exam in the country while holding half my life together, and you never once made it sound like a favour. You show up — for your family, for your friends, for a dog who does not deserve you, and for me on the days I was very hard to show up for.",
+      "Here's what I actually want to say. You are the most <em>steady</em> person I know. You did the hardest exam in the country while holding half my life together, and you never once made it sound like a favour. You show up — for your family, for your friends, for Soul, who does not deserve you, and for me on the days I was very hard to show up for.",
       "I love that you're softest at 2AM and sharpest at 9AM. I love that you argue like a professional and apologise like a child. I love that you'd rather be honest than be liked. I love that you get excited about ice cream in the middle of winter, and that your first instinct in any photo is to make it funnier.",
       "Thank you for choosing this — the ordinary version of it. The traffic, the tiredness, the same three restaurants. You made all of it feel like somewhere I want to be.",
       "You never needed a birthday to be celebrated. Today I just get to do it in public, loudly, with receipts."
@@ -736,7 +747,7 @@ var CONFIG = {
     { n:1, w:720, h:1280, cap:"Peace sign, red lips, sunglasses parked in your hair. The whole mood of you in one frame." },
     { n:2, w:591, h:1280, cap:"The 2AM video-call face. No filter has ever improved on it, and none ever will." },
     { n:3, w:1280, h:720, cap:"Night drive, borrowed cap, no destination. Still the best route we've ever taken." },
-    { n:4, w:1280, h:720, cap:"Third passenger, first priority. He got the middle seat and neither of us argued." },
+    { n:4, w:1280, h:720, cap:"Soul got the middle seat, obviously. Third passenger, first priority." },
     { n:5, w:1280, h:720, cap:"Seatbelts on, sunglasses on, absolutely nowhere urgent to be. My favourite kind of afternoon." },
     { n:6, w:1280, h:720, cap:"You leaning in from the back seat — the only traffic jam I've ever enjoyed." },
     { n:7, w:1280, h:720, cap:"Head on my shoulder, pink on pink. The safest square foot of the world." },
@@ -745,11 +756,11 @@ var CONFIG = {
     { n:10, w:720, h:1280, cap:"Post-workout glow and a story you were halfway through telling. I let you finish." },
     { n:11, w:720, h:1280, cap:"Purple, gold streetlight, and a smile that ended the whole day well." },
     { n:12, w:720, h:1280, cap:"Slow-dancing in a restaurant that had no dance floor. We made one." },
-    { n:13, w:720, h:1280, cap:"Café Hearts, and you greeted the dog before you greeted me. Honestly, fair." },
+    { n:13, w:720, h:1280, cap:"Café Hearts, and you greeted Soul before you greeted me. Honestly, fair." },
     { n:14, w:736, h:1600, cap:"Half-asleep, fully mine. This is the version nobody else gets to see." },
-    { n:15, w:736, h:1600, cap:"You and Stitch. I've made my peace with finishing third in this house." },
+    { n:15, w:736, h:1600, cap:"You and Stitch. I've made my peace with finishing third, behind you and Soul." },
     { n:16, w:720, h:1280, cap:"Audit-season armour: teal blazer, night parking lot, completely undefeated." },
-    { n:17, w:960, h:1280, cap:"Family photo. One of us photobombs beautifully and it isn't me." },
+    { n:17, w:960, h:1280, cap:"Family photo with Soul. One of us photobombs beautifully and it isn't me." },
     { n:18, w:720, h:1280, cap:"Tilak on, playlist loud, winter road ahead. Best-dressed passenger in Rajasthan." },
     { n:19, w:900, h:1600, cap:"Ice-cream cheers with the whole crew, in weather that absolutely did not call for it." },
     { n:20, w:720, h:1280, cap:"Dark car, quiet talk, the good kind of tired. Nothing to fix, nowhere to be." },
@@ -1010,7 +1021,7 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
     var p = document.createElement("p"); p.innerHTML = t; body.appendChild(p);
   });
   document.getElementById("sign").textContent = "— " + CONFIG.signOff;
-  document.getElementById("ps").textContent = "P.S. The dog still comes second. You're first.";
+  document.getElementById("ps").textContent = "P.S. Soul still comes second. You're first.";
   document.getElementById("stamp").textContent =
     new Date().toLocaleDateString("en-IN", { day:"2-digit", month:"long", year:"numeric" });
 })();
