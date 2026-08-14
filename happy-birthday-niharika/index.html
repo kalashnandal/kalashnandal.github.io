@@ -104,11 +104,19 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:100svh;display:grid;place-items:center;overflow:hidden;z-index:1}
-.hero video,.hero .fallback{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
-  filter:saturate(.85) contrast(1.05) brightness(.62);
-  transform:scale(1.04);
+/* The clip is shot vertically. Cropping it to a wide screen cut our heads
+   off, so the real video is contained and a blurred copy fills the room
+   around it. Nothing is ever cut, at any aspect ratio. */
+.hero video,.hero .fallback{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.hero .vid-main{
+  object-fit:contain;
+  filter:saturate(.9) contrast(1.04) brightness(.72);
 }
+.hero .vid-bg{
+  object-fit:cover;transform:scale(1.18);
+  filter:blur(34px) saturate(.7) brightness(.42);
+}
+.hero .fallback{object-fit:contain;filter:saturate(.9) brightness(.72)}
 .hero .veil{
   position:absolute;inset:0;z-index:1;pointer-events:none;
   background:
@@ -150,6 +158,31 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 }
 .sound b{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--rose-deep)}
 .sound.on b{background:var(--rose);box-shadow:0 0 10px var(--rose)}
+
+/* ---------- scroll progress ---------- */
+#scrollbar{position:fixed;top:0;left:0;right:0;height:2px;z-index:130;pointer-events:none}
+#scrollbar i{display:block;height:100%;width:100%;background:var(--shine);transform:scaleX(0);transform-origin:0 50%}
+
+/* ---------- word-split headings ---------- */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.14em;margin-bottom:-.14em}
+.wi{display:inline-block;will-change:transform}
+
+/* ---------- marquee ---------- */
+.marquee{
+  overflow:hidden;padding:clamp(22px,4vw,40px) 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  background:linear-gradient(90deg,rgba(240,184,196,.06),rgba(233,201,131,.02),rgba(240,184,196,.06));
+}
+.marquee .row{display:flex;gap:44px;width:max-content;animation:slide 34s linear infinite}
+.marquee:hover .row{animation-play-state:paused}
+.marquee b{
+  font-family:var(--display);font-style:italic;font-weight:300;white-space:nowrap;
+  font-size:clamp(26px,5.4vw,62px);color:transparent;
+  -webkit-text-stroke:1px rgba(240,184,196,.5);
+}
+.marquee b.solid{color:var(--rose);-webkit-text-stroke:0}
+.marquee i{align-self:center;font-style:normal;color:var(--gold);font-size:clamp(13px,2vw,20px)}
+@keyframes slide{to{transform:translateX(-50%)}}
 
 /* ---------- generic section ---------- */
 section{position:relative;z-index:1}
@@ -447,6 +480,7 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 </head>
 <body>
 <div class="backdrop"></div>
+<div id="scrollbar" aria-hidden="true"><i></i></div>
 <div id="hearts" aria-hidden="true"></div>
 <div class="grain"></div>
 <canvas id="confetti"></canvas>
@@ -462,14 +496,21 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 
 <!-- ============ HERO ============ -->
 <header class="hero">
-  <video id="heroVid" autoplay muted loop playsinline preload="auto"
+  <video class="vid-bg" id="heroBg" autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1">
+    <source src="https://kalashnandal.co.in/I-love-you/IMG_1655.webm" type="video/webm">
+  </video>
+  <video class="vid-main" id="heroVid" autoplay muted loop playsinline preload="auto"
          poster="https://kalashnandal.co.in/I-love-you/22.webp">
     <source src="https://kalashnandal.co.in/I-love-you/IMG_1655.webm" type="video/webm">
   </video>
   <img class="fallback" id="heroFallback" src="https://kalashnandal.co.in/I-love-you/22.webp" alt="" style="display:none">
   <div class="veil"></div>
 
-  <button class="sound" id="soundBtn" aria-pressed="false"><b></b> Sound off</button>
+  <audio id="song" loop preload="metadata">
+    <source src="https://kalashnandal.co.in/Remember-the-penguine%3F/song.mp3" type="audio/mpeg">
+  </audio>
+
+  <button class="sound" id="soundBtn" aria-pressed="false"><b></b> Music off</button>
 
   <div class="inner">
     <div class="eyebrow" id="eyebrow">A private exhibit · For her only</div>
@@ -558,6 +599,11 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   </div>
 </section>
 
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="row" id="marqueeRow"></div>
+</div>
+
 <!-- ============ CHAPTERS ============ -->
 <section>
   <div class="wrap">
@@ -644,6 +690,10 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   </figure>
 </div>
 
+<!-- GSAP is served from this repo rather than a CDN: one less thing that can
+     be down or blocked on the day. -->
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -831,31 +881,130 @@ var DAY = (function(){
     s.style.animationDelay = (0.45 + i * 0.075) + "s";
     h.appendChild(s);
   }
-  var v = document.getElementById("heroVid"), btn = document.getElementById("soundBtn");
+  var v = document.getElementById("heroVid"),
+      bg = document.getElementById("heroBg"),
+      btn = document.getElementById("soundBtn");
+
   v.addEventListener("error", function(){
     v.style.display = "none";
+    bg.style.display = "none";
     document.getElementById("heroFallback").style.display = "block";
-    btn.style.display = "none";
   });
-  var p = v.play();
-  if(p && p.catch) p.catch(function(){});
+  [v, bg].forEach(function(el){
+    var pr = el.play();
+    if(pr && pr.catch) pr.catch(function(){});
+  });
+
+  /* ---- the song ----
+     Browsers refuse to start audio before the visitor has touched the page,
+     so we try, and if we're blocked we start on her first interaction. */
+  var song = document.getElementById("song"),
+      TARGET = 0.10,               // 10% — it sits under the page, not on it
+      fadeTimer = null, wanted = true;
+
+  song.volume = 0;
+
+  function fade(to, ms){
+    clearInterval(fadeTimer);
+    var from = song.volume, t0 = Date.now();
+    fadeTimer = setInterval(function(){
+      var p = Math.min((Date.now() - t0) / ms, 1);
+      song.volume = Math.max(0, Math.min(1, from + (to - from) * p));
+      if(p >= 1){
+        clearInterval(fadeTimer);
+        if(to === 0) song.pause();
+      }
+    }, 40);
+  }
+
+  function label(on){
+    btn.classList.toggle("on", on);
+    btn.setAttribute("aria-pressed", String(on));
+    btn.innerHTML = '<b></b> Music ' + (on ? "on" : "off");
+  }
+
+  function start(){
+    if(!wanted) return;
+    var pr = song.play();
+    // One chain — branching .then and .catch off the same promise leaves the
+    // blocked-autoplay rejection unhandled, which surfaces as a page error.
+    if(pr && pr.then){
+      pr.then(function(){ fade(TARGET, 2600); label(true); })
+        .catch(function(){ arm(); });
+    }
+  }
+
+  var armed = false;
+  function arm(){
+    if(armed) return;
+    armed = true;
+    var evts = ["pointerdown", "touchstart", "keydown", "wheel", "scroll"];
+    function go(){
+      evts.forEach(function(e){ window.removeEventListener(e, go); });
+      armed = false;
+      start();
+    }
+    evts.forEach(function(e){ window.addEventListener(e, go, { once:true, passive:true }); });
+  }
+
+  song.addEventListener("error", function(){ btn.style.display = "none"; });
+  start();
+
   btn.addEventListener("click", function(){
-    v.muted = !v.muted;
-    if(!v.muted){ v.play().catch(function(){}); }
-    btn.classList.toggle("on", !v.muted);
-    btn.setAttribute("aria-pressed", String(!v.muted));
-    btn.innerHTML = '<b></b> Sound ' + (v.muted ? "off" : "on");
+    if(song.paused || song.volume === 0){
+      wanted = true;
+      song.play().catch(function(){});
+      fade(TARGET, 900);
+      label(true);
+    } else {
+      wanted = false;
+      fade(0, 700);
+      label(false);
+    }
   });
 })();
 
 /* ---------------- reveal on scroll ---------------- */
+var watched = [];
 var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function(entries){
   entries.forEach(function(e){
     if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
   });
 }, { threshold:.12, rootMargin:"0px 0px -8% 0px" }) : null;
-function watch(el){ if(io) io.observe(el); else el.classList.add("in"); }
+function watch(el){
+  if(io){ io.observe(el); watched.push(el); }
+  else el.classList.add("in");
+}
 Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
+
+/* Safety net. An observer only fires for elements that are on screen during
+   a rendered frame — flick hard, or drag the scrollbar, and whole sections
+   can be jumped over and stay invisible forever. This sweeps up anything
+   the viewport has already reached. */
+(function(){
+  var queued = false;
+  function sweep(){
+    queued = false;
+    var h = window.innerHeight, still = [];
+    for(var i = 0; i < watched.length; i++){
+      var el = watched[i];
+      if(el.classList.contains("in")) continue;
+      if(el.getBoundingClientRect().top < h * 0.95){
+        el.classList.add("in");
+        if(io) io.unobserve(el);
+      } else still.push(el);
+    }
+    watched = still;
+  }
+  function ask(){
+    if(queued) return;
+    queued = true;
+    setTimeout(sweep, 160);
+  }
+  window.addEventListener("scroll", ask, { passive:true });
+  window.addEventListener("resize", ask);
+  window.addEventListener("load", ask);
+})();
 
 /* ---------------- ledger ---------------- */
 (function(){
@@ -1260,6 +1409,123 @@ LB = (function(){
     if(e.key === "ArrowLeft") show(cur - 1);
   });
   return { open:open };
+})();
+
+/* ---------------- marquee ---------------- */
+(function(){
+  var row = document.getElementById("marqueeRow"),
+      words = ["Happy birthday, Niharika", "20 August", "Thirty frames", "One heart"],
+      html = "";
+  // twice through, so the loop meets itself seamlessly at -50%
+  for(var pass = 0; pass < 2; pass++){
+    words.forEach(function(w, i){
+      html += '<b' + (i % 2 ? ' class="solid"' : '') + '>' + w + '</b><i>✦</i>';
+    });
+  }
+  row.innerHTML = html;
+})();
+
+/* ================================================================
+   MOTION — GSAP where it's available, and the page stands on its own
+   without it. Every tween animates *from* a state GSAP itself sets,
+   so if the CDN is unreachable nothing is left invisible.
+   ================================================================ */
+(function(){
+  if(reduce || !window.gsap || !window.ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  var ease = "power3.out";
+
+  /* Wrap every word in its own overflow-hidden box so headings can rise
+     into place a word at a time. Walks the nodes rather than using
+     textContent, so the italic <em> spans survive. */
+  function wrapWords(node){
+    var found = [];
+    Array.prototype.slice.call(node.childNodes).forEach(function(child){
+      if(child.nodeType === 3){
+        if(!child.textContent.trim()) return;
+        var frag = document.createDocumentFragment();
+        child.textContent.split(/(\s+)/).forEach(function(part){
+          if(!part) return;
+          if(!part.trim()){ frag.appendChild(document.createTextNode(part)); return; }
+          var box = document.createElement("span"), inner = document.createElement("span");
+          box.className = "w"; inner.className = "wi"; inner.textContent = part;
+          box.appendChild(inner); frag.appendChild(box); found.push(inner);
+        });
+        node.replaceChild(frag, child);
+      } else if(child.nodeType === 1){
+        found = found.concat(wrapWords(child));
+      }
+    });
+    return found;
+  }
+
+  // Headings rise word by word.
+  gsap.utils.toArray("h2.big").forEach(function(h){
+    h.classList.remove("reveal"); h.classList.add("in");
+    var words = wrapWords(h);
+    gsap.from(words, {
+      yPercent:115, duration:.9, ease:ease, stagger:.045,
+      scrollTrigger:{ trigger:h, start:"top 84%" }
+    });
+  });
+
+  // Hero drifts and fades as she scrolls off it.
+  gsap.to(".hero .inner", {
+    yPercent:-16, opacity:0, ease:"none",
+    scrollTrigger:{ trigger:".hero", start:"top top", end:"bottom top", scrub:true }
+  });
+  gsap.to(".hero .vid-main", {
+    scale:1.07, ease:"none",
+    scrollTrigger:{ trigger:".hero", start:"top top", end:"bottom top", scrub:true }
+  });
+
+  // Grids and lists deal themselves in.
+  function stagger(container, items, opts){
+    var box = document.querySelector(container);
+    if(!box) return;
+    box.classList.remove("reveal"); box.classList.add("in");
+    gsap.from(box.querySelectorAll(items), Object.assign({
+      y:34, opacity:0, duration:.75, ease:ease, stagger:.07,
+      scrollTrigger:{ trigger:box, start:"top 82%" }
+    }, opts || {}));
+  }
+  stagger(".ledger", ".row", { x:-18, y:0, stagger:.06 });
+  stagger("#statGrid", ".stat", { y:26, stagger:.06 });
+  stagger("#findings", ".finding", { y:40, stagger:.08 });
+  stagger("#reasons", ".reason", { y:26, scale:.94, stagger:.02, duration:.6 });
+
+  // Chapter numerals drift against the scroll.
+  gsap.utils.toArray(".chapter").forEach(function(ch){
+    var rn = ch.querySelector(".rn");
+    if(!rn) return;
+    gsap.fromTo(rn, { y:26 }, {
+      y:-26, ease:"none",
+      scrollTrigger:{ trigger:ch, start:"top bottom", end:"bottom top", scrub:true }
+    });
+  });
+
+  // The letter arrives a paragraph at a time.
+  var letter = document.querySelector(".letter");
+  if(letter){
+    gsap.from(letter.querySelectorAll(".sal, #noteBody p, .sign, .ps"), {
+      y:26, opacity:0, duration:.8, ease:ease, stagger:.12,
+      scrollTrigger:{ trigger:letter, start:"top 78%" }
+    });
+  }
+
+  /* The thirty contact-sheet tiles keep their own CSS reveal. Handing them
+     to GSAP as well meant a fast scroll could leave a dozen of them caught
+     mid-fade, and the plain observer never has that problem. */
+
+  // Reading progress across the whole page.
+  gsap.to("#scrollbar i", {
+    scaleX:1, ease:"none",
+    scrollTrigger:{ start:0, end:"max", scrub:.3 }
+  });
+
+  // The corridor changes the document height as images settle.
+  window.addEventListener("load", function(){ ScrollTrigger.refresh(); });
 })();
 
 /* ---------------- confetti + candles ---------------- */
