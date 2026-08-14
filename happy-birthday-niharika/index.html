@@ -81,12 +81,19 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 }
 
 /* ---------- loader ---------- */
-#loader{
-  position:fixed;inset:0;z-index:200;background:#07060A;display:grid;place-items:center;
-  transition:opacity .9s ease,visibility .9s;
+#loader{position:fixed;inset:0;z-index:200;pointer-events:auto}
+#loader .half{
+  position:absolute;left:0;right:0;height:50.5%;background:#07060A;
+  transition:transform 1.15s cubic-bezier(.76,0,.24,1);
 }
-#loader.gone{opacity:0;visibility:hidden}
-.seal{text-align:center}
+#loader .half.t{top:0}
+#loader .half.b{bottom:0}
+#loader.gone{pointer-events:none}
+#loader.gone .half.t{transform:translateY(-101%)}
+#loader.gone .half.b{transform:translateY(101%)}
+#loader.done{visibility:hidden}
+.seal{position:absolute;inset:0;display:grid;place-items:center;text-align:center;transition:opacity .45s ease,transform .8s cubic-bezier(.76,0,.24,1)}
+#loader.gone .seal{opacity:0;transform:scale(.94)}
 .seal .ring{
   width:104px;height:104px;margin:0 auto 20px;border-radius:50%;
   border:1px solid rgba(240,184,196,.3);display:grid;place-items:center;position:relative;
@@ -99,8 +106,7 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 .seal .num{font-family:var(--display);font-size:34px;letter-spacing:.02em}
 .seal .cap{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
 .bar{width:150px;height:1px;background:rgba(246,241,234,.12);margin:18px auto 0;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--shine);animation:load 1.5s ease forwards}
-@keyframes load{to{width:100%}}
+.bar i{display:block;height:100%;width:0;background:var(--shine);transition:width .4s ease}
 
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:100svh;display:grid;place-items:center;overflow:hidden;z-index:1}
@@ -108,15 +114,23 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
    off, so the real video is contained and a blurred copy fills the room
    around it. Nothing is ever cut, at any aspect ratio. */
 .hero video,.hero .fallback{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+/* The clip is 9:16. On a screen taller than that (every phone) cover only
+   trims the sides, so it fills edge to edge with our heads intact. Only on
+   screens wider than the clip does cover start eating faces — there we
+   contain it and let the blurred copy fill the room. */
 .hero .vid-main{
-  object-fit:contain;
+  object-fit:cover;
   filter:saturate(.9) contrast(1.04) brightness(.72);
+}
+@media (min-aspect-ratio: 9/16){
+  .hero .vid-main{object-fit:contain}
 }
 .hero .vid-bg{
   object-fit:cover;transform:scale(1.18);
   filter:blur(34px) saturate(.7) brightness(.42);
 }
-.hero .fallback{object-fit:contain;filter:saturate(.9) brightness(.72)}
+.hero .fallback{object-fit:cover;filter:saturate(.9) brightness(.72)}
+@media (min-aspect-ratio: 9/16){ .hero .fallback{object-fit:contain} }
 .hero .veil{
   position:absolute;inset:0;z-index:1;pointer-events:none;
   background:
@@ -126,27 +140,38 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 .hero .inner{position:relative;z-index:2;text-align:center;padding:120px var(--pad) 130px;width:100%}
 .eyebrow{
   font-family:var(--mono);font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:var(--rose);
-  opacity:0;animation:up 1s .35s ease forwards;
+  opacity:0;transform:translateY(14px);transition:opacity .9s ease 80ms,transform .9s ease 80ms;
 }
+.hero.go .eyebrow{opacity:1;transform:none}
 .hero h1{
   font-family:var(--display);font-weight:300;font-size:clamp(58px,16vw,190px);line-height:.9;
   letter-spacing:-.03em;margin:.14em 0 .1em;
 }
-.hero h1 .ch{display:inline-block;opacity:0;transform:translateY(.5em) rotate(2deg);animation:chin .95s cubic-bezier(.2,.7,.2,1) forwards}
-@keyframes chin{to{opacity:1;transform:none}}
+.hero h1 .chm{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.1em;margin-bottom:-.1em}
+.hero h1 .ch{
+  display:inline-block;transform:translateY(115%) rotate(3deg);
+  transition:transform 1.05s cubic-bezier(.16,1,.3,1);
+  transition-delay:calc(var(--i) * 55ms + 120ms);
+}
+.hero.go h1 .ch{transform:none}
 .hero h2{
   font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(17px,2.6vw,27px);
-  color:var(--muted);opacity:0;animation:up 1s 1.15s ease forwards;
+  color:var(--muted);opacity:0;transform:translateY(14px);
+  transition:opacity .9s ease 700ms,transform .9s ease 700ms;
 }
+.hero.go h2{opacity:1;transform:none}
 .hero .sub{
   margin-top:22px;font-family:var(--mono);font-size:10px;letter-spacing:.3em;text-transform:uppercase;
-  color:var(--faint);opacity:0;animation:up 1s 1.35s ease forwards;
+  color:var(--faint);opacity:0;transform:translateY(14px);
+  transition:opacity .9s ease 860ms,transform .9s ease 860ms;
 }
+.hero.go .sub{opacity:1;transform:none}
 @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .scrollcue{
   position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:3;text-align:center;
-  opacity:0;animation:up 1s 1.7s ease forwards;
+  opacity:0;transition:opacity 1s ease 1150ms;
 }
+.hero.go .scrollcue{opacity:1}
 .scrollcue span{font-family:var(--mono);font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--faint)}
 .scrollcue i{display:block;width:1px;height:44px;margin:10px auto 0;background:linear-gradient(180deg,var(--rose),transparent);animation:drop 2.2s ease-in-out infinite}
 @keyframes drop{0%,100%{transform:scaleY(.4);transform-origin:top;opacity:.4}50%{transform:scaleY(1);opacity:1}}
@@ -154,8 +179,9 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
   position:absolute;right:var(--pad);top:26px;z-index:4;display:flex;align-items:center;gap:9px;
   border:1px solid var(--line);border-radius:100px;padding:9px 15px;background:rgba(7,6,10,.42);
   backdrop-filter:blur(8px);font-family:var(--mono);font-size:9px;letter-spacing:.24em;text-transform:uppercase;
-  color:var(--muted);opacity:0;animation:up 1s 1.9s ease forwards;
+  color:var(--muted);opacity:0;transition:opacity 1s ease 1300ms;
 }
+.hero.go .sound{opacity:1}
 .sound b{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--rose-deep)}
 .sound.on b{background:var(--rose);box-shadow:0 0 10px var(--rose)}
 
@@ -183,6 +209,39 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 .marquee b.solid{color:var(--rose);-webkit-text-stroke:0}
 .marquee i{align-self:center;font-style:normal;color:var(--gold);font-size:clamp(13px,2vw,20px)}
 @keyframes slide{to{transform:translateX(-50%)}}
+
+/* ---------- custom cursor (fine pointers only) ---------- */
+#cursor,#cursorDot{position:fixed;top:0;left:0;z-index:140;pointer-events:none;opacity:0;transition:opacity .3s}
+#cursor{
+  width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;
+  border:1px solid rgba(240,184,196,.55);
+  transition:width .3s cubic-bezier(.2,.8,.2,1),height .3s cubic-bezier(.2,.8,.2,1),
+             margin .3s cubic-bezier(.2,.8,.2,1),background .3s,opacity .3s,border-color .3s;
+}
+#cursor.hot{width:62px;height:62px;margin:-31px 0 0 -31px;background:rgba(240,184,196,.12);border-color:rgba(240,184,196,.9)}
+#cursorDot{width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--rose)}
+@media (pointer:fine){ body.cursor-on #cursor,body.cursor-on #cursorDot{opacity:1} }
+@media (pointer:fine){ body.cursor-on,body.cursor-on a,body.cursor-on button,body.cursor-on .tile,body.cursor-on .frame{cursor:none} }
+
+/* ---------- chapters as a horizontal track (only once JS pins it) ---------- */
+.hpin{position:relative}
+.hpin.h-on{height:100svh;display:flex;align-items:center;overflow:hidden}
+.hpin.h-on .chapters{display:flex;flex-direction:row;gap:clamp(16px,3vw,34px);padding:0 clamp(20px,8vw,140px);width:max-content;will-change:transform}
+.hpin.h-on .chapter{
+  flex:0 0 auto;width:min(82vw,560px);grid-template-columns:1fr;gap:10px;
+  border:1px solid var(--line);border-radius:6px;padding:clamp(26px,4vw,44px);
+  background:linear-gradient(155deg,rgba(240,184,196,.07),rgba(233,201,131,.02));
+  box-shadow:0 30px 70px rgba(0,0,0,.45);
+}
+.hpin.h-on .chapter .rn{font-size:clamp(44px,7vw,84px);line-height:1}
+.hrail{position:absolute;left:0;right:0;bottom:clamp(18px,4vw,40px);display:flex;justify-content:center;gap:8px;z-index:3}
+.hpin:not(.h-on) .hrail{display:none}
+.hrail i{width:26px;height:2px;background:rgba(246,241,234,.16);transition:background .4s}
+.hrail i.on{background:var(--rose)}
+
+/* ---------- tilt ---------- */
+.findings{perspective:1200px}
+.finding{transform-style:preserve-3d;will-change:transform}
 
 /* ---------- generic section ---------- */
 section{position:relative;z-index:1}
@@ -481,12 +540,16 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 <body>
 <div class="backdrop"></div>
 <div id="scrollbar" aria-hidden="true"><i></i></div>
+<div id="cursor" aria-hidden="true"></div>
+<div id="cursorDot" aria-hidden="true"></div>
 <div id="hearts" aria-hidden="true"></div>
 <div class="grain"></div>
 <canvas id="confetti"></canvas>
 
 <!-- ============ LOADER ============ -->
 <div id="loader">
+  <div class="half t"></div>
+  <div class="half b"></div>
   <div class="seal">
     <div class="ring"><div class="num shine" id="sealNum">00</div></div>
     <div class="cap">Opening the archive</div>
@@ -609,7 +672,10 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   <div class="wrap">
     <div class="kicker reveal">The record</div>
     <h2 class="big reveal">How the story got <em>this good.</em></h2>
+  </div>
+  <div class="hpin" id="hpin">
     <div class="chapters" id="chapterList"></div>
+    <div class="hrail" id="hrail" aria-hidden="true"></div>
   </div>
 </section>
 
@@ -854,17 +920,42 @@ var DAY = (function(){
 
 /* ---------------- loader ---------------- */
 (function(){
-  var el = document.getElementById("sealNum"), t0 = null, dur = 900;
-  function step(t){
-    if(!t0) t0 = t;
-    var p = Math.min((t - t0)/dur, 1);
-    el.textContent = pad2(Math.round(30 * (1 - Math.pow(1 - p, 3))));
-    if(p < 1) requestAnimationFrame(step);
+  var num = document.getElementById("sealNum"),
+      bar = document.querySelector(".bar i"),
+      loader = document.getElementById("loader"),
+      hero = document.querySelector(".hero"),
+      opened = false;
+
+  /* Real progress: we actually wait on the first frames of the corridor so
+     the curtain doesn't open onto empty boxes. */
+  var queue = frames.slice(0, 10).map(urlOf), loaded = 0, total = queue.length;
+
+  function tick(){
+    loaded++;
+    var pct = Math.min(loaded / total, 1);
+    num.textContent = pad2(Math.round(30 * pct));
+    bar.style.width = (pct * 100) + "%";
+    if(loaded >= total) setTimeout(open, 260);
   }
-  if(reduce) el.textContent = "30"; else requestAnimationFrame(step);
-  function done(){ document.getElementById("loader").classList.add("gone"); }
-  window.addEventListener("load", function(){ setTimeout(done, 500); });
-  setTimeout(done, 3200);
+
+  queue.forEach(function(src){
+    var im = new Image();
+    im.onload = im.onerror = tick;
+    im.src = src;
+  });
+
+  function open(){
+    if(opened) return;
+    opened = true;
+    num.textContent = "30";
+    bar.style.width = "100%";
+    loader.classList.add("gone");
+    hero.classList.add("go");
+    setTimeout(function(){ loader.classList.add("done"); }, 1400);
+  }
+
+  // Never let a stalled image keep the curtain shut.
+  setTimeout(open, 4200);
 })();
 
 /* ---------------- hero ---------------- */
@@ -876,10 +967,26 @@ var DAY = (function(){
   var h = document.getElementById("headline"), txt = h.textContent.trim();
   h.textContent = "";
   for(var i = 0; i < txt.length; i++){
-    var s = document.createElement("span");
-    s.className = "ch"; s.textContent = txt[i];
-    s.style.animationDelay = (0.45 + i * 0.075) + "s";
-    h.appendChild(s);
+    var mask = document.createElement("span"), ch = document.createElement("span");
+    mask.className = "chm"; ch.className = "ch"; ch.textContent = txt[i];
+    ch.style.setProperty("--i", i);
+    mask.appendChild(ch); h.appendChild(mask);
+  }
+
+  /* The hero leans very slightly toward the pointer. */
+  /* Drift the headline itself, not .inner — GSAP owns that one's transform
+     for the scroll-away, and two writers on one property means neither wins. */
+  if(!reduce && window.matchMedia("(pointer:fine)").matches){
+    var hx = 0, hy = 0, cx = 0, cy = 0;
+    document.querySelector(".hero").addEventListener("mousemove", function(e){
+      hx = (e.clientX / window.innerWidth - .5) * 30;
+      hy = (e.clientY / window.innerHeight - .5) * 18;
+    });
+    (function drift(){
+      cx += (hx - cx) * .06; cy += (hy - cy) * .06;
+      h.style.transform = "translate3d(" + cx.toFixed(2) + "px," + cy.toFixed(2) + "px,0)";
+      requestAnimationFrame(drift);
+    })();
   }
   var v = document.getElementById("heroVid"),
       bg = document.getElementById("heroBg"),
@@ -1425,6 +1532,83 @@ LB = (function(){
   row.innerHTML = html;
 })();
 
+/* ---------------- pointer flourishes (fine pointers only) ---------------- */
+(function(){
+  if(reduce || !window.matchMedia("(pointer:fine)").matches) return;
+  var ring = document.getElementById("cursor"), dot = document.getElementById("cursorDot"),
+      tx = innerWidth / 2, ty = innerHeight / 2, rx = tx, ry = ty;
+
+  document.body.classList.add("cursor-on");
+  window.addEventListener("mousemove", function(e){
+    tx = e.clientX; ty = e.clientY;
+    dot.style.transform = "translate3d(" + tx + "px," + ty + "px,0)";
+  });
+  (function loop(){
+    rx += (tx - rx) * .16; ry += (ty - ry) * .16;
+    ring.style.transform = "translate3d(" + rx.toFixed(1) + "px," + ry.toFixed(1) + "px,0)";
+    requestAnimationFrame(loop);
+  })();
+
+  var hot = "a,button,.tile,.frame,.reason,.finding";
+  document.addEventListener("mouseover", function(e){
+    if(e.target.closest && e.target.closest(hot)) ring.classList.add("hot");
+  });
+  document.addEventListener("mouseout", function(e){
+    if(e.target.closest && e.target.closest(hot)) ring.classList.remove("hot");
+  });
+
+  /* Buttons lean toward the pointer when it comes near. */
+  Array.prototype.forEach.call(document.querySelectorAll(".wish-btn,.ghost-btn,.sound"), function(btn){
+    btn.style.transition = "transform .35s cubic-bezier(.2,.8,.2,1)";
+    btn.addEventListener("mousemove", function(e){
+      var r = btn.getBoundingClientRect();
+      btn.style.transform = "translate(" +
+        ((e.clientX - r.left - r.width / 2) * .25).toFixed(1) + "px," +
+        ((e.clientY - r.top - r.height / 2) * .35).toFixed(1) + "px)";
+    });
+    btn.addEventListener("mouseleave", function(){ btn.style.transform = ""; });
+  });
+
+  /* Finding cards tip in 3D under the pointer. */
+  Array.prototype.forEach.call(document.querySelectorAll(".finding"), function(card){
+    card.addEventListener("mousemove", function(e){
+      var r = card.getBoundingClientRect(),
+          px = (e.clientX - r.left) / r.width - .5,
+          py = (e.clientY - r.top) / r.height - .5;
+      card.style.transform = "perspective(1000px) rotateY(" + (px * 9).toFixed(2) +
+        "deg) rotateX(" + (-py * 9).toFixed(2) + "deg) translateY(-5px)";
+    });
+    card.addEventListener("mouseleave", function(){ card.style.transform = ""; });
+  });
+})();
+
+/* ---------------- scramble the section labels on arrival ---------------- */
+(function(){
+  if(reduce) return;
+  var pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789·×+/";
+  function scramble(el){
+    var final = el.textContent, len = final.length, step = 0;
+    var id = setInterval(function(){
+      var out = "";
+      for(var i = 0; i < len; i++){
+        if(i < step / 1.6) out += final[i];
+        else if(final[i] === " ") out += " ";
+        else out += pool[(Math.random() * pool.length) | 0];
+      }
+      el.textContent = out;
+      if(step / 1.6 >= len){ clearInterval(id); el.textContent = final; }
+      step++;
+    }, 26);
+  }
+  if(!("IntersectionObserver" in window)) return;
+  var o = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){ scramble(e.target); o.unobserve(e.target); }
+    });
+  }, { threshold:.9 });
+  Array.prototype.forEach.call(document.querySelectorAll(".kicker"), function(k){ o.observe(k); });
+})();
+
 /* ================================================================
    MOTION — GSAP where it's available, and the page stands on its own
    without it. Every tween animates *from* a state GSAP itself sets,
@@ -1518,6 +1702,67 @@ LB = (function(){
      to GSAP as well meant a fast scroll could leave a dozen of them caught
      mid-fade, and the plain observer never has that problem. */
 
+  /* The chapters travel sideways while the section holds still. Horizontal
+     mode is switched on here, so without GSAP they stay a normal stack and
+     nothing is hidden off screen. */
+  (function(){
+    var pin = document.getElementById("hpin"),
+        track = document.getElementById("chapterList"),
+        rail = document.getElementById("hrail"),
+        cards = gsap.utils.toArray(".chapter");
+    if(!pin || cards.length < 2) return;
+
+    pin.classList.add("h-on");
+    cards.forEach(function(){ rail.appendChild(document.createElement("i")); });
+    var ticks = rail.querySelectorAll("i");
+    ticks[0].classList.add("on");
+
+    function span(){ return Math.max(0, track.scrollWidth - window.innerWidth + 40); }
+
+    var slide = gsap.to(track, {
+      x:function(){ return -span(); },
+      ease:"none",
+      scrollTrigger:{
+        trigger:pin, start:"top top", end:function(){ return "+=" + span(); },
+        pin:true, scrub:1, anticipatePin:1, invalidateOnRefresh:true,
+        onUpdate:function(self){
+          var k = Math.round(self.progress * (cards.length - 1));
+          for(var i = 0; i < ticks.length; i++) ticks[i].classList.toggle("on", i === k);
+        }
+      }
+    });
+
+    /* Each card lifts as it crosses in. fromTo with immediateRender:false is
+       deliberate — a plain .from() hides the card the moment it's created,
+       so if its trigger never fires (and with containerAnimation it may not)
+       the whole section pins as an empty screen. This way the card is
+       visible unless and until the animation actually runs. */
+    cards.forEach(function(card){
+      gsap.fromTo(card,
+        { opacity:0, y:46, scale:.965 },
+        {
+          opacity:1, y:0, scale:1, duration:.6, ease:ease, immediateRender:false,
+          scrollTrigger:{
+            trigger:card, containerAnimation:slide,
+            start:"left 95%", toggleActions:"play none none none"
+          }
+        });
+    });
+  })();
+
+  /* The marquee speeds up with the scroll and settles when she stops. */
+  (function(){
+    var row = document.getElementById("marqueeRow");
+    if(!row) return;
+    ScrollTrigger.create({
+      start:0, end:"max",
+      onUpdate:function(self){
+        var v = Math.min(Math.abs(self.getVelocity()) / 900, 5);
+        row.style.animationDuration = (34 / (1 + v)).toFixed(2) + "s";
+      }
+    });
+  })();
+
   // Reading progress across the whole page.
   gsap.to("#scrollbar i", {
     scaleX:1, ease:"none",
@@ -1529,39 +1774,101 @@ LB = (function(){
 })();
 
 /* ---------------- confetti + candles ---------------- */
-var burst = (function(){
-  var cv = document.getElementById("confetti"), ctx = cv.getContext("2d"), parts = [], raf = null;
-  function size(){ cv.width = innerWidth; cv.height = innerHeight; }
+var burst, firework;
+(function(){
+  var cv = document.getElementById("confetti"), ctx = cv.getContext("2d"),
+      parts = [], raf = null, dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function size(){
+    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+    cv.style.width = innerWidth + "px"; cv.style.height = innerHeight + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
   size(); window.addEventListener("resize", size);
-  var colors = ["#F0B8C4","#E9C983","#C1607A","#F6F1EA","#FFD9A0"];
+
+  var colors = ["#F0B8C4", "#E9C983", "#C1607A", "#F6F1EA", "#FFD9A0", "#FF8FA8"];
+
+  function heart(g, x, y, s, rot){
+    g.save(); g.translate(x, y); g.rotate(rot); g.scale(s, s); g.beginPath();
+    g.moveTo(0, 3);
+    g.bezierCurveTo(0, 1.2, -1.6, 0, -3, 0);
+    g.bezierCurveTo(-5.6, 0, -5.6, 3.4, -5.6, 3.4);
+    g.bezierCurveTo(-5.6, 5.2, -3.6, 7.4, 0, 9.4);
+    g.bezierCurveTo(3.6, 7.4, 5.6, 5.2, 5.6, 3.4);
+    g.bezierCurveTo(5.6, 3.4, 5.6, 0, 3, 0);
+    g.bezierCurveTo(1.6, 0, 0, 1.2, 0, 3);
+    g.closePath(); g.fill(); g.restore();
+  }
+
   function tick(){
-    ctx.clearRect(0, 0, cv.width, cv.height);
+    // Trails rather than a hard clear, so sparks streak.
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = "rgba(0,0,0,.22)";
+    ctx.fillRect(0, 0, innerWidth, innerHeight);
+    ctx.globalCompositeOperation = "source-over";
+
     for(var i = parts.length - 1; i >= 0; i--){
       var p = parts[i];
-      p.vy += 0.14; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life--;
-      if(p.life <= 0 || p.y > cv.height + 40){ parts.splice(i, 1); continue; }
-      ctx.save();
-      ctx.translate(p.x, p.y); ctx.rotate(p.r);
-      ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 46));
+      p.vy += p.g; p.vx *= p.drag; p.vy *= p.drag;
+      p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life--;
+      if(p.life <= 0 || p.y > innerHeight + 60){ parts.splice(i, 1); continue; }
+      var a = Math.max(0, Math.min(1, p.life / p.fade));
+      ctx.globalAlpha = a;
       ctx.fillStyle = p.c;
-      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      ctx.restore();
+      if(p.kind === "heart"){
+        heart(ctx, p.x, p.y, p.s, p.r);
+      } else if(p.kind === "spark"){
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, 6.283); ctx.fill();
+      } else {
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+      }
     }
+    ctx.globalAlpha = 1;
     if(parts.length) raf = requestAnimationFrame(tick);
-    else { raf = null; ctx.clearRect(0, 0, cv.width, cv.height); }
+    else { raf = null; ctx.clearRect(0, 0, innerWidth, innerHeight); }
   }
-  return function(x, y, count){
+  function run(){ if(!raf) raf = requestAnimationFrame(tick); }
+
+  /* Paper confetti, as before. */
+  burst = function(x, y, count){
     if(reduce) return;
     for(var i = 0; i < (count || 130); i++){
-      var a = Math.random() * Math.PI * 2, s = 3 + Math.random() * 11;
+      var a = Math.random() * 6.283, sp = 3 + Math.random() * 11;
       parts.push({
-        x:x, y:y, vx:Math.cos(a) * s, vy:Math.sin(a) * s - 5,
-        w:4 + Math.random() * 7, h:6 + Math.random() * 10,
+        kind: Math.random() < .22 ? "heart" : "flake",
+        x:x, y:y, vx:Math.cos(a) * sp, vy:Math.sin(a) * sp - 5, g:.14, drag:1,
+        w:4 + Math.random() * 7, h:6 + Math.random() * 10, s:.6 + Math.random() * .9,
         r:Math.random() * 6, vr:(Math.random() - .5) * .3,
-        c:colors[(Math.random() * colors.length) | 0], life:70 + Math.random() * 70
+        c:colors[(Math.random() * colors.length) | 0],
+        life:70 + Math.random() * 70, fade:46
       });
     }
-    if(!raf) raf = requestAnimationFrame(tick);
+    run();
+  };
+
+  /* A shell that climbs, then opens into a ring of sparks. */
+  firework = function(x, y, hue){
+    if(reduce) return;
+    var col = hue || colors[(Math.random() * colors.length) | 0], n = 46 + (Math.random() * 26 | 0);
+    for(var i = 0; i < n; i++){
+      var a = (i / n) * 6.283 + Math.random() * .12, sp = 2.6 + Math.random() * 5.2;
+      parts.push({
+        kind:"spark", x:x, y:y,
+        vx:Math.cos(a) * sp, vy:Math.sin(a) * sp,
+        g:.055, drag:.965, s:1 + Math.random() * 2.1, r:0, vr:0,
+        c:col, life:52 + Math.random() * 46, fade:52
+      });
+    }
+    for(var k = 0; k < 12; k++){
+      var a2 = Math.random() * 6.283, sp2 = 1 + Math.random() * 3;
+      parts.push({
+        kind:"heart", x:x, y:y, vx:Math.cos(a2) * sp2, vy:Math.sin(a2) * sp2,
+        g:.07, drag:.98, s:.8 + Math.random() * .8, r:Math.random() * 6, vr:(Math.random() - .5) * .2,
+        c:colors[(Math.random() * colors.length) | 0], life:70 + Math.random() * 50, fade:60
+      });
+    }
+    run();
   };
 })();
 
@@ -1573,9 +1880,15 @@ var burst = (function(){
     if(done) return; done = true;
     cake.classList.add("out");
     var r = cake.getBoundingClientRect();
-    burst(r.left + r.width / 2, r.top + 30, 170);
-    setTimeout(function(){ burst(innerWidth * 0.2, innerHeight * 0.35, 80); }, 260);
-    setTimeout(function(){ burst(innerWidth * 0.8, innerHeight * 0.4, 80); }, 460);
+    burst(r.left + r.width / 2, r.top + 30, 150);
+
+    // then the sky goes off, for a while
+    var shots = [[.22,.30],[.78,.26],[.5,.18],[.34,.42],[.68,.38],[.16,.22],[.86,.44],[.5,.34]];
+    shots.forEach(function(pt, i){
+      setTimeout(function(){ firework(innerWidth * pt[0], innerHeight * pt[1]); }, 320 + i * 420);
+    });
+    setTimeout(function(){ burst(innerWidth * .5, innerHeight * .5, 120); }, 320 + shots.length * 420);
+
     msg.classList.add("in");
     btn.textContent = "Wish granted";
     btn.disabled = true;
@@ -1590,9 +1903,10 @@ var burst = (function(){
 (function(){
   if(!DAY.isToday) return;
   setTimeout(function(){
-    burst(innerWidth * 0.5, innerHeight * 0.32, 150);
-    setTimeout(function(){ burst(innerWidth * 0.16, innerHeight * 0.26, 70); }, 320);
-    setTimeout(function(){ burst(innerWidth * 0.84, innerHeight * 0.3, 70); }, 540);
+    burst(innerWidth * 0.5, innerHeight * 0.34, 130);
+    setTimeout(function(){ firework(innerWidth * 0.22, innerHeight * 0.28); }, 380);
+    setTimeout(function(){ firework(innerWidth * 0.78, innerHeight * 0.24); }, 760);
+    setTimeout(function(){ firework(innerWidth * 0.5, innerHeight * 0.2); }, 1150);
   }, 1700);
 })();
 
