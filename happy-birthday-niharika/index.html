@@ -251,29 +251,6 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 @keyframes blob2{0%,100%{transform:translate(0,0) scale(1.06)}50%{transform:translate(-12vw,14vh) scale(.9)}}
 @keyframes blob3{0%,100%{transform:translate(0,0) scale(.95)}50%{transform:translate(10vw,-12vh) scale(1.2)}}
 
-/* ---------- countdown ---------- */
-.clock{display:flex;flex-wrap:wrap;gap:clamp(10px,2.4vw,26px);margin-top:44px;justify-content:flex-start}
-.unit{
-  flex:1 1 120px;min-width:110px;border:1px solid var(--line);border-radius:6px;
-  padding:clamp(16px,2.6vw,26px) clamp(10px,2vw,18px);text-align:center;
-  background:linear-gradient(160deg,rgba(240,184,196,.07),rgba(233,201,131,.02));
-}
-.unit .digits{
-  display:flex;justify-content:center;gap:2px;color:var(--champagne);
-  font-family:var(--display);font-weight:300;font-size:clamp(38px,7.4vw,76px);line-height:1;
-  text-shadow:0 2px 26px rgba(240,184,196,.28);
-}
-.unit .col{overflow:hidden;height:1em;width:.62em;position:relative}
-.unit .strip{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .62s cubic-bezier(.2,.9,.25,1)}
-.unit .strip span{height:1em;line-height:1;display:block}
-.unit .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--faint);margin-top:14px}
-.clock.today{justify-content:center}
-.clock .today-msg{
-  font-family:var(--display);font-style:italic;font-size:clamp(24px,5vw,54px);text-align:center;
-  padding:clamp(24px,4vw,44px);border:1px solid var(--line);border-radius:6px;width:100%;
-  background:linear-gradient(160deg,rgba(240,184,196,.1),rgba(233,201,131,.03));
-}
-
 /* ---------- generic section ---------- */
 section{position:relative;z-index:1}
 .wrap{max-width:1220px;margin:0 auto;padding:clamp(76px,11vw,150px) var(--pad)}
@@ -708,15 +685,6 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
       Soul, who is convinced she is the main character. Ice cream in winter. Audit season armour.
       Scroll slowly. Every photo has something to say, and I finally wrote it down.
     </p>
-  </div>
-</section>
-
-<!-- ============ COUNTDOWN ============ -->
-<section>
-  <div class="wrap" style="padding-bottom:0">
-    <div class="kicker reveal">The countdown</div>
-    <h2 class="big reveal" id="clockHead">Until the <em>twentieth.</em></h2>
-    <div class="clock reveal" id="clock"></div>
   </div>
 </section>
 
@@ -1297,9 +1265,9 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   if(DAY.born){
     stats.unshift({ n:Math.floor((Date.now() - DAY.born.getTime()) / 86400000), comma:true, l:"Days of Niharika" });
   }
-  stats.unshift(DAY.isToday
-    ? { text:"Today", l:DAY.label + " · her day" }
-    : { n:DAY.daysTo, l:"Days until " + DAY.label });
+  // She only ever sees this on the day, so it states the date rather than
+  // counting toward it.
+  stats.unshift({ text:DAY.label.split(" ")[0], l:DAY.label.split(" ")[1] + " · her day" });
   stats.forEach(function(s){
     var d = document.createElement("div");
     d.className = "stat";
@@ -1363,71 +1331,6 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
     d.innerHTML = '<div class="ref">' + f.ref + '</div><h4>' + f.h + '</h4><p>' + f.p + '</p>';
     box.appendChild(d);
   });
-})();
-
-/* ---------------- the countdown ---------------- */
-(function(){
-  var box = document.getElementById("clock"),
-      head = document.getElementById("clockHead");
-  if(!box) return;
-
-  if(DAY.isToday){
-    box.classList.add("today");
-    box.innerHTML = '<div class="today-msg shine">It\'s today. You were born, and everything since has been better for it.</div>';
-    head.innerHTML = "No more <em>counting.</em>";
-    return;
-  }
-
-  var units = [
-    { k:"d", pad:3, l:"Days" },
-    { k:"h", pad:2, l:"Hours" },
-    { k:"m", pad:2, l:"Minutes" },
-    { k:"s", pad:2, l:"Seconds" }
-  ];
-
-  units.forEach(function(u){
-    var el = document.createElement("div");
-    el.className = "unit";
-    var cols = "";
-    for(var i = 0; i < u.pad; i++){
-      var strip = "";
-      for(var d = 0; d < 10; d++) strip += "<span>" + d + "</span>";
-      cols += '<div class="col"><div class="strip">' + strip + '</div></div>';
-    }
-    el.innerHTML = '<div class="digits" data-k="' + u.k + '">' + cols + '</div>' +
-                   '<div class="lbl">' + u.l + '</div>';
-    box.appendChild(el);
-    u.el = el.querySelectorAll(".strip");
-  });
-
-  /* Each digit is a column of 0-9 that slides — an odometer, not a redraw,
-     so the numbers roll instead of blinking. */
-  function show(u, value){
-    var str = String(value);
-    while(str.length < u.pad) str = "0" + str;
-    for(var i = 0; i < u.pad; i++){
-      u.el[i].style.transform = "translateY(" + (-parseInt(str[i], 10) * 10) + "%)";
-    }
-  }
-
-  var target = new Date(CONFIG.birthday.year || new Date().getFullYear(),
-                        CONFIG.birthday.month - 1, CONFIG.birthday.day, 0, 0, 0);
-
-  function tick(){
-    var now = new Date(),
-        mark = new Date(now.getFullYear(), CONFIG.birthday.month - 1, CONFIG.birthday.day);
-    if(now > mark) mark = new Date(now.getFullYear() + 1, CONFIG.birthday.month - 1, CONFIG.birthday.day);
-    var left = Math.max(0, mark - now),
-        sec = Math.floor(left / 1000);
-    show(units[0], Math.floor(sec / 86400));
-    show(units[1], Math.floor(sec / 3600) % 24);
-    show(units[2], Math.floor(sec / 60) % 60);
-    show(units[3], sec % 60);
-    // Midnight on the day: reload into the celebration state.
-    if(left <= 0) location.reload();
-  }
-  tick();
-  setInterval(tick, 1000);
 })();
 
 /* ---------------- thirty reasons ---------------- */
