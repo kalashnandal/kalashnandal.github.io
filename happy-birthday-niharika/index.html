@@ -199,8 +199,7 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
   border-top:1px solid var(--line);border-bottom:1px solid var(--line);
   background:linear-gradient(90deg,rgba(240,184,196,.06),rgba(233,201,131,.02),rgba(240,184,196,.06));
 }
-.marquee .row{display:flex;gap:44px;width:max-content;animation:slide 34s linear infinite}
-.marquee:hover .row{animation-play-state:paused}
+.marquee .row{display:flex;gap:44px;width:max-content;will-change:transform}
 .marquee b{
   font-family:var(--display);font-style:italic;font-weight:300;white-space:nowrap;
   font-size:clamp(26px,5.4vw,62px);color:transparent;
@@ -208,7 +207,6 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 }
 .marquee b.solid{color:var(--rose);-webkit-text-stroke:0}
 .marquee i{align-self:center;font-style:normal;color:var(--gold);font-size:clamp(13px,2vw,20px)}
-@keyframes slide{to{transform:translateX(-50%)}}
 
 /* ---------- custom cursor (fine pointers only) ---------- */
 #cursor,#cursorDot{position:fixed;top:0;left:0;z-index:140;pointer-events:none;opacity:0;transition:opacity .3s}
@@ -242,6 +240,39 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 /* ---------- tilt ---------- */
 .findings{perspective:1200px}
 .finding{transform-style:preserve-3d;will-change:transform}
+
+/* ---------- aurora field ---------- */
+.aurora{position:fixed;inset:-25%;z-index:0;pointer-events:none;filter:blur(90px);opacity:.55}
+.aurora i{position:absolute;display:block;border-radius:50%;mix-blend-mode:screen;will-change:transform}
+.aurora .a1{width:52vw;height:52vw;left:4%;top:8%;background:radial-gradient(circle,rgba(193,96,122,.55),transparent 68%);animation:blob1 34s ease-in-out infinite}
+.aurora .a2{width:46vw;height:46vw;right:2%;top:26%;background:radial-gradient(circle,rgba(233,201,131,.34),transparent 68%);animation:blob2 44s ease-in-out infinite}
+.aurora .a3{width:58vw;height:58vw;left:26%;bottom:2%;background:radial-gradient(circle,rgba(120,74,168,.42),transparent 70%);animation:blob3 52s ease-in-out infinite}
+@keyframes blob1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(14vw,10vh) scale(1.16)}}
+@keyframes blob2{0%,100%{transform:translate(0,0) scale(1.06)}50%{transform:translate(-12vw,14vh) scale(.9)}}
+@keyframes blob3{0%,100%{transform:translate(0,0) scale(.95)}50%{transform:translate(10vw,-12vh) scale(1.2)}}
+
+/* ---------- countdown ---------- */
+.clock{display:flex;flex-wrap:wrap;gap:clamp(10px,2.4vw,26px);margin-top:44px;justify-content:flex-start}
+.unit{
+  flex:1 1 120px;min-width:110px;border:1px solid var(--line);border-radius:6px;
+  padding:clamp(16px,2.6vw,26px) clamp(10px,2vw,18px);text-align:center;
+  background:linear-gradient(160deg,rgba(240,184,196,.07),rgba(233,201,131,.02));
+}
+.unit .digits{
+  display:flex;justify-content:center;gap:2px;color:var(--champagne);
+  font-family:var(--display);font-weight:300;font-size:clamp(38px,7.4vw,76px);line-height:1;
+  text-shadow:0 2px 26px rgba(240,184,196,.28);
+}
+.unit .col{overflow:hidden;height:1em;width:.62em;position:relative}
+.unit .strip{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .62s cubic-bezier(.2,.9,.25,1)}
+.unit .strip span{height:1em;line-height:1;display:block}
+.unit .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--faint);margin-top:14px}
+.clock.today{justify-content:center}
+.clock .today-msg{
+  font-family:var(--display);font-style:italic;font-size:clamp(24px,5vw,54px);text-align:center;
+  padding:clamp(24px,4vw,44px);border:1px solid var(--line);border-radius:6px;width:100%;
+  background:linear-gradient(160deg,rgba(240,184,196,.1),rgba(233,201,131,.03));
+}
 
 /* ---------- generic section ---------- */
 section{position:relative;z-index:1}
@@ -362,12 +393,17 @@ h2.big em{font-style:italic}
 .tile{
   position:relative;overflow:hidden;border-radius:3px;background:#120D18;
   border:1px solid rgba(246,241,234,.07);cursor:pointer;grid-row-end:span 40;
-  opacity:0;transform:translateY(28px) scale(.98);
-  transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),border-color .4s;
+  opacity:0;transform:translateY(30px);
+  clip-path:inset(12% 0 0 0);
+  transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1.1s cubic-bezier(.2,.7,.2,1),
+             clip-path 1.1s cubic-bezier(.2,.7,.2,1),border-color .4s;
 }
-.tile.in{opacity:1;transform:none}
+.tile.in{opacity:1;transform:none;clip-path:inset(0 0 0 0)}
+/* the photo settles out of a slow push-in as the tile opens */
+.tile img{transform:scale(1.09)}
+.tile.in img{transform:scale(1)}
 .tile:hover{border-color:rgba(240,184,196,.45)}
-.tile img{width:100%;height:auto;display:block;transition:transform 1.1s cubic-bezier(.2,.7,.2,1),filter .6s;filter:saturate(.92)}
+.tile img{width:100%;height:auto;display:block;transition:transform 1.6s cubic-bezier(.2,.7,.2,1),filter .6s;filter:saturate(.92)}
 .tile:hover img{transform:scale(1.04);filter:saturate(1.05)}
 .tile .cap{
   position:absolute;left:0;right:0;bottom:0;padding:34px 14px 13px;
@@ -486,6 +522,81 @@ h2.big em{font-style:italic}
 .wish-msg{margin-top:22px;font-family:var(--display);font-style:italic;font-size:clamp(16px,2.4vw,22px);color:var(--rose);opacity:0;transition:opacity .8s .3s}
 .wish-msg.in{opacity:1}
 
+/* ---------- envelope you tear open ---------- */
+.envstage{margin-top:52px;display:grid;place-items:center}
+.envelope{
+  position:relative;width:min(92vw,560px);aspect-ratio:1.6/1;
+  border-radius:8px;overflow:hidden;user-select:none;
+  background:linear-gradient(155deg,#1B1220 0%,#140D18 46%,#0D0812 100%);
+  border:1px solid var(--line);
+  box-shadow:0 46px 110px rgba(0,0,0,.6), inset 0 1px 0 rgba(246,241,234,.05);
+  transition:opacity .9s ease,transform 1s cubic-bezier(.2,.8,.2,1),filter .9s;
+}
+/* the paper's diagonal folds */
+/* the paper's seams: two side panels and the pocket, like a real envelope */
+.envelope .fold{position:absolute;inset:0;pointer-events:none}
+.envelope .fold i{position:absolute;inset:0;display:block}
+.envelope .fold .l{
+  background:linear-gradient(100deg,rgba(246,241,234,.075),rgba(0,0,0,.2));
+  clip-path:polygon(0 0,52% 52%,0 100%);
+}
+.envelope .fold .r{
+  background:linear-gradient(260deg,rgba(246,241,234,.06),rgba(0,0,0,.22));
+  clip-path:polygon(100% 0,48% 52%,100% 100%);
+}
+.envelope .fold .p{
+  background:linear-gradient(180deg,rgba(246,241,234,.05),rgba(0,0,0,.34));
+  clip-path:polygon(0 100%,50% 46%,100% 100%);
+  box-shadow:inset 0 -1px 0 rgba(240,184,196,.14);
+}
+/* paper grain */
+.envelope:after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/></filter><rect width="120" height="120" filter="url(%23n)"/></svg>');
+}
+.envelope .addr{
+  position:absolute;left:0;right:0;bottom:11%;text-align:center;z-index:2;
+  font-family:var(--mono);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);
+}
+.envelope .addr b{display:block;font-family:var(--display);font-style:italic;text-transform:none;
+  letter-spacing:0;font-size:clamp(19px,3.4vw,28px);color:var(--ivory);margin-bottom:9px}
+.seal{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:clamp(58px,11vw,84px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 34% 30%,#D4738D,#7C1E3C 62%,#4A122B);
+  box-shadow:0 12px 30px rgba(0,0,0,.55),inset 0 2px 6px rgba(255,255,255,.22);
+  font-family:var(--display);font-style:italic;font-size:clamp(24px,4.4vw,34px);color:#FBEFE7;
+  transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s;
+}
+/* the strip that tears away */
+.tear{
+  position:absolute;left:0;right:0;top:0;height:27%;z-index:3;
+  cursor:grab;touch-action:none;transform-origin:0% 100%;
+  background:linear-gradient(170deg,#241730,#170F1E);
+  border-bottom:1px solid rgba(240,184,196,.16);
+  will-change:transform,clip-path;
+}
+.tear:active{cursor:grabbing}
+.tear .grip{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  font-family:var(--mono);font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+}
+.tear .grip em{font-style:normal;animation:nudge 1.9s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(0);opacity:.5}50%{transform:translateX(6px);opacity:1}}
+.tear .perf{
+  position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  background:repeating-linear-gradient(90deg,rgba(240,184,196,.5) 0 5px,transparent 5px 11px);
+}
+/* what shows through once it's torn */
+.envelope .inside{position:absolute;left:0;right:0;top:0;height:27%;z-index:2;background:#07060A;box-shadow:inset 0 -14px 26px rgba(0,0,0,.7)}
+.envstage.open .envelope{opacity:.22;transform:scale(.93) translateY(-8px);filter:saturate(.5)}
+.envstage.open .seal{transform:translate(-50%,-50%) scale(.6);opacity:0}
+
+.letterhold{max-height:0;overflow:hidden;opacity:0;width:100%;
+  transition:max-height 1.25s cubic-bezier(.2,.8,.2,1),opacity .9s ease .25s}
+.envstage.open .letterhold{opacity:1}
+
 /* ---------- letter ---------- */
 .letter-sec{background:linear-gradient(180deg,#07060A,#0E0A14 40%,#07060A)}
 .letter{
@@ -539,6 +650,7 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 </head>
 <body>
 <div class="backdrop"></div>
+<div class="aurora" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
 <div id="scrollbar" aria-hidden="true"><i></i></div>
 <div id="cursor" aria-hidden="true"></div>
 <div id="cursorDot" aria-hidden="true"></div>
@@ -596,6 +708,15 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
       Soul, who is convinced she is the main character. Ice cream in winter. Audit season armour.
       Scroll slowly. Every photo has something to say, and I finally wrote it down.
     </p>
+  </div>
+</section>
+
+<!-- ============ COUNTDOWN ============ -->
+<section>
+  <div class="wrap" style="padding-bottom:0">
+    <div class="kicker reveal">The countdown</div>
+    <h2 class="big reveal" id="clockHead">Until the <em>twentieth.</em></h2>
+    <div class="clock reveal" id="clock"></div>
   </div>
 </section>
 
@@ -727,11 +848,25 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   <div class="wrap">
     <div class="kicker reveal">The note</div>
     <h2 class="big reveal">Everything I don't say out loud <em>often enough.</em></h2>
-    <div class="letter reveal">
-      <div class="sal shine" id="salut"></div>
-      <div id="noteBody"></div>
-      <div class="sign" id="sign"></div>
-      <div class="ps" id="ps"></div>
+    <div class="envstage" id="envstage">
+      <div class="envelope" id="envelope">
+        <div class="inside"></div>
+        <div class="fold"><i class="l"></i><i class="r"></i><i class="p"></i></div>
+        <div class="seal">N</div>
+        <div class="addr"><b>For Niharika</b>Sealed until she opens it</div>
+        <div class="tear" id="tear">
+          <div class="perf"></div>
+          <div class="grip">Drag to tear <em>&#9654;</em></div>
+        </div>
+      </div>
+      <div class="letterhold" id="letterhold">
+        <div class="letter">
+          <div class="sal shine" id="salut"></div>
+          <div id="noteBody"></div>
+          <div class="sign" id="sign"></div>
+          <div class="ps" id="ps"></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1007,16 +1142,42 @@ var DAY = (function(){
      so we try, and if we're blocked we start on her first interaction. */
   var song = document.getElementById("song"),
       TARGET = 0.10,               // 10% — it sits under the page, not on it
-      fadeTimer = null, wanted = true;
+      fadeTimer = null, wanted = true, level = 0;
 
-  song.volume = 0;
+  /* iOS Safari ignores HTMLMediaElement.volume entirely — it's read-only
+     there, so setting .volume = 0.1 played the song at full system volume
+     on every iPhone. Routing through a Web Audio gain node is the only way
+     to actually attenuate it. We fall back to .volume where Web Audio is
+     missing, and keep both in sync either way. */
+  var AC = window.AudioContext || window.webkitAudioContext,
+      ctx = null, gain = null;
+
+  function graph(){
+    if(gain || !AC) return;
+    try{
+      ctx = new AC();
+      var src = ctx.createMediaElementSource(song);
+      gain = ctx.createGain();
+      gain.gain.value = level;
+      src.connect(gain);
+      gain.connect(ctx.destination);
+    }catch(e){ ctx = null; gain = null; }
+  }
+
+  function apply(v){
+    level = Math.max(0, Math.min(1, v));
+    song.volume = level;                                    // non-iOS
+    if(gain && ctx) gain.gain.setTargetAtTime(level, ctx.currentTime, .05);
+  }
+
+  apply(0);
 
   function fade(to, ms){
     clearInterval(fadeTimer);
-    var from = song.volume, t0 = Date.now();
+    var from = level, t0 = Date.now();
     fadeTimer = setInterval(function(){
       var p = Math.min((Date.now() - t0) / ms, 1);
-      song.volume = Math.max(0, Math.min(1, from + (to - from) * p));
+      apply(from + (to - from) * p);
       if(p >= 1){
         clearInterval(fadeTimer);
         if(to === 0) song.pause();
@@ -1032,6 +1193,8 @@ var DAY = (function(){
 
   function start(){
     if(!wanted) return;
+    graph();
+    if(ctx && ctx.state === "suspended") ctx.resume();
     var pr = song.play();
     // One chain — branching .then and .catch off the same promise leaves the
     // blocked-autoplay rejection unhandled, which surfaces as a page error.
@@ -1058,8 +1221,10 @@ var DAY = (function(){
   start();
 
   btn.addEventListener("click", function(){
-    if(song.paused || song.volume === 0){
+    if(song.paused || level === 0){
       wanted = true;
+      graph();
+      if(ctx && ctx.state === "suspended") ctx.resume();
       song.play().catch(function(){});
       fade(TARGET, 900);
       label(true);
@@ -1200,6 +1365,71 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   });
 })();
 
+/* ---------------- the countdown ---------------- */
+(function(){
+  var box = document.getElementById("clock"),
+      head = document.getElementById("clockHead");
+  if(!box) return;
+
+  if(DAY.isToday){
+    box.classList.add("today");
+    box.innerHTML = '<div class="today-msg shine">It\'s today. You were born, and everything since has been better for it.</div>';
+    head.innerHTML = "No more <em>counting.</em>";
+    return;
+  }
+
+  var units = [
+    { k:"d", pad:3, l:"Days" },
+    { k:"h", pad:2, l:"Hours" },
+    { k:"m", pad:2, l:"Minutes" },
+    { k:"s", pad:2, l:"Seconds" }
+  ];
+
+  units.forEach(function(u){
+    var el = document.createElement("div");
+    el.className = "unit";
+    var cols = "";
+    for(var i = 0; i < u.pad; i++){
+      var strip = "";
+      for(var d = 0; d < 10; d++) strip += "<span>" + d + "</span>";
+      cols += '<div class="col"><div class="strip">' + strip + '</div></div>';
+    }
+    el.innerHTML = '<div class="digits" data-k="' + u.k + '">' + cols + '</div>' +
+                   '<div class="lbl">' + u.l + '</div>';
+    box.appendChild(el);
+    u.el = el.querySelectorAll(".strip");
+  });
+
+  /* Each digit is a column of 0-9 that slides — an odometer, not a redraw,
+     so the numbers roll instead of blinking. */
+  function show(u, value){
+    var str = String(value);
+    while(str.length < u.pad) str = "0" + str;
+    for(var i = 0; i < u.pad; i++){
+      u.el[i].style.transform = "translateY(" + (-parseInt(str[i], 10) * 10) + "%)";
+    }
+  }
+
+  var target = new Date(CONFIG.birthday.year || new Date().getFullYear(),
+                        CONFIG.birthday.month - 1, CONFIG.birthday.day, 0, 0, 0);
+
+  function tick(){
+    var now = new Date(),
+        mark = new Date(now.getFullYear(), CONFIG.birthday.month - 1, CONFIG.birthday.day);
+    if(now > mark) mark = new Date(now.getFullYear() + 1, CONFIG.birthday.month - 1, CONFIG.birthday.day);
+    var left = Math.max(0, mark - now),
+        sec = Math.floor(left / 1000);
+    show(units[0], Math.floor(sec / 86400));
+    show(units[1], Math.floor(sec / 3600) % 24);
+    show(units[2], Math.floor(sec / 60) % 60);
+    show(units[3], sec % 60);
+    // Midnight on the day: reload into the celebration state.
+    if(left <= 0) location.reload();
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
 /* ---------------- thirty reasons ---------------- */
 (function(){
   var box = document.getElementById("reasons"),
@@ -1266,6 +1496,99 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
       box.classList.toggle("hush", e[0].isIntersecting);
     }, { threshold:.02 }).observe(document.getElementById("track"));
   }
+})();
+
+/* ---------------- the envelope ----------------
+   Drag the strip across and the paper tears with you: the rip follows your
+   finger, the torn edge is a real jagged path, and past two thirds it lets
+   go and the letter comes out. Let go early and it springs back shut. */
+(function(){
+  var stage = document.getElementById("envstage"),
+      tear = document.getElementById("tear"),
+      hold = document.getElementById("letterhold"),
+      grip = tear ? tear.querySelector(".grip") : null;
+  if(!stage || !tear || !hold) return;
+
+  /* A jagged bottom edge, generated once so it looks torn rather than cut. */
+  var pts = [], STEPS = 46;
+  for(var i = 0; i <= STEPS; i++){
+    var x = (i / STEPS) * 100,
+        y = 88 + Math.sin(i * 1.7) * 3 + Math.random() * 7;
+    pts.push(x.toFixed(2) + "% " + y.toFixed(2) + "%");
+  }
+  var edge = "polygon(0% 0%, 100% 0%, 100% " + pts[pts.length - 1].split(" ")[1] + ", " +
+             pts.slice().reverse().join(", ") + ", 0% 0%)";
+  tear.style.clipPath = edge;
+
+  var dragging = false, startX = 0, progress = 0, opened = false, width = 1;
+
+  function paint(p){
+    // lifts and peels around its left edge as the rip travels right
+    tear.style.transform = "rotate(" + (-p * 16).toFixed(2) + "deg) translateY(" +
+      (-p * 26).toFixed(1) + "px)";
+    tear.style.opacity = (1 - p * 0.25).toFixed(3);
+    if(grip) grip.style.opacity = (1 - p * 1.6).toFixed(2);
+  }
+
+  function open(){
+    if(opened) return;
+    opened = true;
+    tear.style.transition = "transform .85s cubic-bezier(.3,.9,.3,1),opacity .85s ease";
+    tear.style.transform = "rotate(-46deg) translate(24px,-190px)";
+    tear.style.opacity = "0";
+    tear.style.pointerEvents = "none";
+
+    var r = stage.getBoundingClientRect();
+    if(typeof burst === "function") burst(r.left + r.width / 2, r.top + r.height * 0.28, 46);
+
+    stage.classList.add("open");
+    hold.style.maxHeight = (hold.scrollHeight + 60) + "px";
+    // once it's open, let the letter own its height for good
+    setTimeout(function(){ hold.style.maxHeight = "none"; }, 1500);
+    if(window.ScrollTrigger) setTimeout(function(){ ScrollTrigger.refresh(); }, 1600);
+  }
+
+  function reset(){
+    tear.style.transition = "transform .55s cubic-bezier(.2,1.6,.4,1),opacity .4s";
+    progress = 0;
+    paint(0);
+    setTimeout(function(){ tear.style.transition = ""; }, 560);
+  }
+
+  function down(x){
+    if(opened) return;
+    dragging = true;
+    startX = x;
+    width = tear.getBoundingClientRect().width;
+    tear.style.transition = "";
+  }
+  function move(x){
+    if(!dragging || opened) return;
+    progress = Math.max(0, Math.min(1, (x - startX) / (width * 0.72)));
+    paint(progress);
+    if(progress >= 1) { dragging = false; open(); }
+  }
+  function up(){
+    if(!dragging || opened) return;
+    dragging = false;
+    if(progress > 0.62) open(); else reset();
+  }
+
+  tear.addEventListener("pointerdown", function(e){ down(e.clientX); tear.setPointerCapture(e.pointerId); });
+  tear.addEventListener("pointermove", function(e){ if(dragging){ e.preventDefault(); move(e.clientX); } });
+  tear.addEventListener("pointerup", up);
+  tear.addEventListener("pointercancel", up);
+
+  // A tap opens it too — nobody should be stuck behind a gesture.
+  tear.addEventListener("click", function(){
+    if(!opened && progress < .05) open();
+  });
+  tear.addEventListener("keydown", function(e){
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); open(); }
+  });
+  tear.setAttribute("tabindex", "0");
+  tear.setAttribute("role", "button");
+  tear.setAttribute("aria-label", "Tear open the envelope");
 })();
 
 /* ---------------- letter ---------------- */
@@ -1609,6 +1932,41 @@ LB = (function(){
   Array.prototype.forEach.call(document.querySelectorAll(".kicker"), function(k){ o.observe(k); });
 })();
 
+/* ---------------- marquee (driven frame by frame) ----------------
+   It used to be a CSS animation whose duration was rewritten on every
+   scroll event to react to velocity. Changing animation-duration mid-flight
+   restarts the animation, so the band visibly jumped every time she
+   scrolled. Moving it to a transform we own removes the stutter entirely. */
+(function(){
+  var row = document.getElementById("marqueeRow");
+  if(!row || reduce) return;
+
+  var x = 0, half = 0, speed = 46, boost = 0, last = 0, lastY = window.scrollY;
+
+  function measure(){ half = row.scrollWidth / 2; }
+  measure();
+  window.addEventListener("resize", measure);
+  window.addEventListener("load", measure);
+
+  window.addEventListener("scroll", function(){
+    var dy = Math.abs(window.scrollY - lastY);
+    lastY = window.scrollY;
+    boost = Math.min(boost + dy * 2.4, 900);
+  }, { passive:true });
+
+  (function frame(t){
+    var dt = last ? Math.min((t - last) / 1000, .05) : 0;
+    last = t;
+    boost *= 0.94;                                   // settles when she stops
+    if(half){
+      x -= (speed + boost) * dt;
+      if(x <= -half) x += half;                      // seamless: content is doubled
+      row.style.transform = "translate3d(" + x.toFixed(2) + "px,0,0)";
+    }
+    requestAnimationFrame(frame);
+  })(0);
+})();
+
 /* ================================================================
    MOTION — GSAP where it's available, and the page stands on its own
    without it. Every tween animates *from* a state GSAP itself sets,
@@ -1617,6 +1975,12 @@ LB = (function(){
 (function(){
   if(reduce || !window.gsap || !window.ScrollTrigger) return;
   gsap.registerPlugin(ScrollTrigger);
+
+  /* A phone's address bar collapsing changes the viewport height, which
+     makes ScrollTrigger recalculate every pin mid-scroll — that's the jump.
+     Ignoring resizes that are really just the browser chrome moving keeps
+     the pinned sections steady. */
+  ScrollTrigger.config({ ignoreMobileResize: true });
 
   var ease = "power3.out";
 
@@ -1750,27 +2114,17 @@ LB = (function(){
     });
   })();
 
-  /* The marquee speeds up with the scroll and settles when she stops. */
-  (function(){
-    var row = document.getElementById("marqueeRow");
-    if(!row) return;
-    ScrollTrigger.create({
-      start:0, end:"max",
-      onUpdate:function(self){
-        var v = Math.min(Math.abs(self.getVelocity()) / 900, 5);
-        row.style.animationDuration = (34 / (1 + v)).toFixed(2) + "s";
-      }
-    });
-  })();
-
   // Reading progress across the whole page.
   gsap.to("#scrollbar i", {
     scaleX:1, ease:"none",
     scrollTrigger:{ start:0, end:"max", scrub:.3 }
   });
 
-  // The corridor changes the document height as images settle.
+  /* The masonry and the corridor both change the document height as images
+     settle, and a stale pin start is the other source of jumping. */
   window.addEventListener("load", function(){ ScrollTrigger.refresh(); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ ScrollTrigger.refresh(); });
+  setTimeout(function(){ ScrollTrigger.refresh(); }, 2500);
 })();
 
 /* ---------------- confetti + candles ---------------- */
