@@ -84,26 +84,33 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
   100%{transform:translateY(-108svh) translateX(calc(var(--drift) * -.6)) rotate(-10deg) scale(.94);opacity:0}
 }
 
-/* ---------- opener ---------- */
-#loader{
-  position:fixed;inset:0;z-index:200;background:#07060A;display:grid;place-items:center;
-  transition:opacity .8s ease,visibility .8s;
+/* ---------- opener: a cloth drawn aside ---------- */
+#curtain{position:fixed;inset:0;z-index:200;background:#07060A;overflow:hidden}
+#curtain.gone{pointer-events:none}
+#cloth{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* the light waiting behind the fabric */
+#curtain .glow{
+  position:absolute;left:50%;top:50%;width:150vmax;height:150vmax;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(255,235,214,.5),rgba(240,184,196,.16) 34%,transparent 62%);
+  opacity:0;transition:opacity .9s ease;pointer-events:none;
 }
-#loader.gone{opacity:0;visibility:hidden}
-.seal{text-align:center}
-.seal .ring{
+#curtain.opening .glow{opacity:1}
+.intro{position:absolute;inset:0;display:grid;place-items:center;text-align:center;z-index:2;
+  transition:opacity .5s ease,transform .7s cubic-bezier(.4,0,.2,1)}
+#curtain.opening .intro{opacity:0;transform:scale(.92)}
+.intro .ring{
   width:104px;height:104px;margin:0 auto 20px;border-radius:50%;
-  border:1px solid rgba(240,184,196,.3);display:grid;place-items:center;position:relative;
+  border:1px solid rgba(74,38,30,.35);display:grid;place-items:center;position:relative;
 }
-.seal .ring:before{
+.intro .ring:before{
   content:"";position:absolute;inset:-9px;border-radius:50%;
-  border:1px solid rgba(233,201,131,.16);animation:pulse 2.6s ease-in-out infinite;
+  border:1px solid rgba(74,38,30,.16);animation:pulse 2.6s ease-in-out infinite;
 }
 @keyframes pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.06);opacity:1}}
-.seal .num{font-family:var(--display);font-size:34px;letter-spacing:.02em}
-.seal .cap{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
-.bar{width:150px;height:1px;background:rgba(246,241,234,.12);margin:18px auto 0;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--shine);transition:width .3s ease}
+.intro .num{font-family:var(--display);font-size:36px;letter-spacing:.02em;color:#4A261E}
+.intro .cap{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:rgba(74,38,30,.55)}
+.bar{width:150px;height:1px;background:rgba(74,38,30,.18);margin:18px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#4A261E;transition:width .3s ease}
 
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:100svh;display:grid;place-items:center;overflow:hidden;z-index:1}
@@ -674,11 +681,15 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 <canvas id="confetti"></canvas>
 
 <!-- ============ OPENER ============ -->
-<div id="loader">
-  <div class="seal">
-    <div class="ring"><div class="num shine" id="sealNum">00</div></div>
-    <div class="cap">Opening the archive</div>
-    <div class="bar"><i></i></div>
+<div id="curtain">
+  <div class="glow"></div>
+  <canvas id="cloth"></canvas>
+  <div class="intro">
+    <div>
+      <div class="ring"><div class="num" id="sealNum">00</div></div>
+      <div class="cap">Opening the archive</div>
+      <div class="bar"><i></i></div>
+    </div>
   </div>
 </div>
 
@@ -1082,36 +1093,216 @@ var DAY = (function(){
   return { isToday:isToday, daysTo:daysTo, label:label, age:age, born:b.year ? new Date(b.year, b.month - 1, b.day) : null };
 })();
 
-/* Counts to thirty, then hands over to the hero and starts the video. */
+/* ================================================================
+   THE OPENER — a length of cloth hangs over the page, counts to thirty,
+   then is taken by the corner and drawn aside.
+
+   Verlet cloth: a grid of points, each remembering where it was last
+   frame, pulled together by distance constraints. Pinned along the top
+   until the pull, when the pins let go left to right while one corner is
+   dragged off screen — so it gathers and sweeps rather than just falling.
+   ================================================================ */
 (function(){
-  var num = document.getElementById("sealNum"),
+  var stage = document.getElementById("curtain"),
+      cv = document.getElementById("cloth"),
+      num = document.getElementById("sealNum"),
       bar = document.querySelector(".bar i"),
-      loader = document.getElementById("loader"),
       hero = document.querySelector(".hero"),
       vid = document.getElementById("heroVid"),
-      opened = false, t0 = null, DUR = 1100;
+      finished = false;
 
-  function step(t){
-    if(!t0) t0 = t;
-    var p = Math.min((t - t0) / DUR, 1);
-    var eased = 1 - Math.pow(1 - p, 3);
-    num.textContent = pad2(Math.round(30 * eased));
-    bar.style.width = (eased * 100).toFixed(1) + "%";
-    if(p < 1) requestAnimationFrame(step); else ready();
-  }
-  requestAnimationFrame(step);
-
-  function ready(){
-    if(opened) return;
-    opened = true;
-    num.textContent = "30";
-    bar.style.width = "100%";
-    loader.classList.add("gone");
+  function finish(){
+    if(finished) return;
+    finished = true;
+    stage.style.transition = "opacity .5s ease";
+    stage.style.opacity = "0";
+    setTimeout(function(){ stage.style.display = "none"; }, 520);
     hero.classList.add("go");
-    var pr = vid.play();                     // the video starts as it's revealed
+    var pr = vid.play();
     if(pr && pr.catch) pr.catch(function(){});
   }
-  setTimeout(ready, 2600);                   // never hang on a slow frame
+
+  // Reduced motion, or no canvas: straight to the page.
+  if(reduce || !cv.getContext){
+    stage.style.display = "none";
+    hero.classList.add("go");
+    return;
+  }
+
+  var ctx = cv.getContext("2d"),
+      dpr = Math.min(window.devicePixelRatio || 1, 2),
+      W = 0, H = 0, small = window.innerWidth < 700,
+      COLS = small ? 21 : 31, ROWS = small ? 15 : 18,
+      pts = [], links = [], restX = 0, restY = 0;
+
+  function build(){
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Generously oversized, so a swing never exposes an edge.
+    var w = W * 1.62, h = H * 1.5, ox = -(w - W) / 2, oy = -(h - H) * .26;
+    restX = w / (COLS - 1); restY = h / (ROWS - 1);
+
+    /* A curtain is more fabric than the rail it hangs on. Giving the
+       horizontal links a rest length longer than the space available means
+       the sheet has to buckle, so it gathers into real vertical folds
+       instead of hanging like a flat board. */
+    /* Only a little excess fabric. More than this and the sheet folds over
+       itself, which in a flat mesh draws as overlapping slabs. The pleats
+       you see are shaded on, not modelled, so they survive a calm mesh. */
+    var GATHER = 1.045;
+
+    pts = []; links = [];
+    for(var r = 0; r < ROWS; r++){
+      for(var c = 0; c < COLS; c++){
+        // a whisper of waviness to tell the folds which way to buckle
+        var x = ox + c * restX + Math.sin(c * 1.35) * restX * 0.10,
+            y = oy + r * restY;
+        pts.push({ x:x, y:y, px:x, py:y, pin:(r < 2), hx:x, hy:y });   // two rows of rail keeps it from swinging
+      }
+    }
+    function idx(c, r){ return r * COLS + c; }
+    for(var r2 = 0; r2 < ROWS; r2++){
+      for(var c2 = 0; c2 < COLS; c2++){
+        if(c2 < COLS - 1) links.push([idx(c2,r2), idx(c2+1,r2), restX * GATHER]);
+        if(r2 < ROWS - 1) links.push([idx(c2,r2), idx(c2,r2+1), restY]);
+        // a slack diagonal keeps it from shearing into paper
+        if(c2 < COLS-1 && r2 < ROWS-1)
+          links.push([idx(c2,r2), idx(c2+1,r2+1), Math.hypot(restX,restY) * 1.02]);
+      }
+    }
+  }
+  build();
+  window.addEventListener("resize", function(){ if(!started) build(); });
+
+  var GRAV = 1500, DAMP = .988, ITER = 6, t = 0, started = false, pullT = -1;
+
+  function step(dt){
+    t += dt;
+    var wind = started ? 0 : Math.sin(t * 1.15) * 3.5 + Math.sin(t * .5) * 2;
+
+    for(var i = 0; i < pts.length; i++){
+      var p = pts[i];
+      if(p.pin){ p.x = p.hx; p.y = p.hy; p.px = p.x; p.py = p.y; continue; }
+      var vx = (p.x - p.px) * DAMP, vy = (p.y - p.py) * DAMP;
+      p.px = p.x; p.py = p.y;
+      p.x += vx + wind * dt * dt * 60;
+      p.y += vy + GRAV * dt * dt;
+    }
+
+    for(var k = 0; k < ITER; k++){
+      for(var l = 0; l < links.length; l++){
+        var a = pts[links[l][0]], b = pts[links[l][1]], rest = links[l][2];
+        var dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || .0001;
+        var diff = (d - rest) / d * .5;
+        var ox2 = dx * diff, oy2 = dy * diff;
+        if(!a.pin){ a.x += ox2; a.y += oy2; }
+        if(!b.pin){ b.x -= ox2; b.y -= oy2; }
+      }
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+    for(var r = 0; r < ROWS - 1; r++){
+      for(var c = 0; c < COLS - 1; c++){
+        var i = r * COLS + c,
+            a = pts[i], b = pts[i+1], d = pts[i+COLS+1], e = pts[i+COLS];
+        // how much this patch is compressed horizontally = how it catches light
+        /* A 2D sheet has no depth to catch light, so the pleats are drawn
+           rather than simulated: a sine across the columns gives the fold
+           profile, and it deepens wherever the fabric is actually gathered
+           (cells narrower than their rest width). Reads as drapery, costs
+           one sine per cell. */
+        var comp = (b.x - a.x) / (restX * 1.045),
+            fold = Math.sin(c * 1.75 + Math.sin(t * 0.5) * 0.3),
+            amp = Math.max(0, Math.min(1, 1.12 - comp)),
+            k = 0.52 + fold * 0.24 * (0.5 + amp * 0.5) + (comp - 1) * 0.14;
+        k = Math.max(0.16, Math.min(1, k)) * (1 - (r / ROWS) * 0.14);
+        /* Shadow and highlight are both warm. Scaling one colour toward
+           black instead just turned the shadows grey, and it read as bark
+           rather than silk. */
+        var R = Math.round(104 + (250 - 104) * k),
+            G = Math.round(86 + (238 - 86) * k),
+            B = Math.round(76 + (221 - 76) * k);
+        var col = "rgb(" + R + "," + G + "," + B + ")";
+        ctx.fillStyle = col;
+        ctx.strokeStyle = col;                 // covers the hairline seam
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        ctx.lineTo(d.x, d.y); ctx.lineTo(e.x, e.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+  }
+
+  /* Draw it aside.
+
+     Dragging the mesh itself off screen tore it: no number of constraint
+     iterations holds a sheet stretched past its own width, and it came
+     apart into stepped slabs. So the simulation only does what it is good
+     at — the fabric is released at the rail and billows — while the sheet
+     as a whole is swept away by moving the canvas. Nothing is stretched,
+     and it reads as cloth being pulled aside. */
+  function pull(){
+    if(started) return;
+    started = true;
+    pullT = t;
+    stage.classList.add("opening");
+
+    cv.style.transition = "transform 1.25s cubic-bezier(.55,.06,.3,1), opacity .5s ease 0.8s";
+    cv.style.transformOrigin = "100% 30%";
+    // a beat later, so the release reads before the sweep
+    setTimeout(function(){
+      cv.style.transform = "translate3d(112%,6%,0) rotate(7deg) scale(1.04)";
+      cv.style.opacity = "0";
+    }, 90);
+
+    setTimeout(finish, 1450);
+  }
+
+  var last = 0, acc = 0;
+  function frame(now){
+    if(!last) last = now;
+    var dt = Math.min((now - last) / 1000, .05);
+    last = now;
+    acc += dt;
+
+    while(acc >= 1/120){ step(1/120); acc -= 1/120; }
+
+    if(started){
+      // the rail lets go left to right, so it drops as it leaves
+      var release = Math.min((t - pullT) / 0.55, 1);
+      for(var c = 0; c < COLS; c++){
+        if(c / COLS <= release){ pts[c].pin = false; pts[COLS + c].pin = false; }
+      }
+    }
+
+    draw();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* the count, on the cloth */
+  (function(){
+    var t0 = null, DUR = 1200;
+    function tick(now){
+      if(!t0) t0 = now;
+      var p = Math.min((now - t0) / DUR, 1), eased = 1 - Math.pow(1 - p, 3);
+      num.textContent = pad2(Math.round(30 * eased));
+      bar.style.width = (eased * 100).toFixed(1) + "%";
+      if(p < 1) requestAnimationFrame(tick);
+      else setTimeout(pull, 260);
+    }
+    requestAnimationFrame(tick);
+  })();
+
+  setTimeout(function(){ if(!started) pull(); }, 3200);   // never hang
+  setTimeout(finish, 5200);                               // last resort
 })();
 
 /* ---------------- hero ---------------- */
