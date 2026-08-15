@@ -84,12 +84,36 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
   100%{transform:translateY(-108svh) translateX(calc(var(--drift) * -.6)) rotate(-10deg) scale(.94);opacity:0}
 }
 
+/* ---------- opener ---------- */
+#loader{
+  position:fixed;inset:0;z-index:200;background:#07060A;display:grid;place-items:center;
+  transition:opacity .8s ease,visibility .8s;
+}
+#loader.gone{opacity:0;visibility:hidden}
+.seal{text-align:center}
+.seal .ring{
+  width:104px;height:104px;margin:0 auto 20px;border-radius:50%;
+  border:1px solid rgba(240,184,196,.3);display:grid;place-items:center;position:relative;
+}
+.seal .ring:before{
+  content:"";position:absolute;inset:-9px;border-radius:50%;
+  border:1px solid rgba(233,201,131,.16);animation:pulse 2.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.06);opacity:1}}
+.seal .num{font-family:var(--display);font-size:34px;letter-spacing:.02em}
+.seal .cap{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
+.bar{width:150px;height:1px;background:rgba(246,241,234,.12);margin:18px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--shine);transition:width .3s ease}
+
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:100svh;display:grid;place-items:center;overflow:hidden;z-index:1}
 /* The clip is shot vertically. Cropping it to a wide screen cut our heads
    off, so the real video is contained and a blurred copy fills the room
    around it. Nothing is ever cut, at any aspect ratio. */
-.hero video,.hero .fallback{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+/* .vid-bg is an <img> now, so it has to be named here explicitly — left out
+   of this rule it laid out in flow at 693px tall and shoved the entire hero
+   below the fold. */
+.hero video,.hero .fallback,.hero .vid-bg{position:absolute;inset:0;width:100%;height:100%;z-index:0}
 /* The clip is 9:16. On a screen taller than that (every phone) cover only
    trims the sides, so it fills edge to edge with our heads intact. Only on
    screens wider than the clip does cover start eating faces — there we
@@ -101,10 +125,16 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
   .hero .vid-main{object-fit:contain}
 }
 /* The fill behind a contained video is a still, blurred once when it's
-   rasterised, rather than a second video blurred on every frame. */
-.hero .vid-bg{
-  object-fit:cover;transform:scale(1.2);
-  filter:blur(30px) saturate(.7) brightness(.4);
+   rasterised, rather than a second video blurred on every frame. On phones
+   the video covers the screen completely, so this layer is invisible — and
+   a full-screen blurred layer still costs to raster and composite even when
+   nothing shows it. It only exists where it's actually seen. */
+.hero .vid-bg{display:none}
+@media (min-aspect-ratio: 9/16){
+  .hero .vid-bg{
+    display:block;object-fit:cover;transform:scale(1.2);
+    filter:blur(30px) saturate(.7) brightness(.4);
+  }
 }
 .hero .fallback{object-fit:cover;filter:saturate(.9) brightness(.72)}
 @media (min-aspect-ratio: 9/16){ .hero .fallback{object-fit:contain} }
@@ -256,24 +286,46 @@ h2.big em{font-style:italic}
 .reveal{opacity:0;transform:translateY(26px);transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1s cubic-bezier(.2,.7,.2,1)}
 .reveal.in{opacity:1;transform:none}
 
-/* ---------- ledger ---------- */
-.ledger{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:52px}
-.ledger .row{
-  display:grid;grid-template-columns:34px 1fr auto;gap:18px;align-items:baseline;
-  padding:20px 4px;border-bottom:1px solid rgba(246,241,234,.06);
+/* ---------- balance sheet ---------- */
+.bs{margin-top:46px;border:1px solid var(--line);border-radius:4px;overflow:hidden;
+  background:linear-gradient(160deg,rgba(240,184,196,.045),rgba(233,201,131,.015))}
+.bs-head{padding:clamp(20px,3vw,30px) clamp(16px,3vw,32px);border-bottom:1px solid var(--line);text-align:center}
+.bs-head .t{font-family:var(--display);font-size:clamp(17px,2.6vw,25px);letter-spacing:.01em}
+.bs-head .s{font-family:var(--mono);font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint);margin-top:9px}
+.bs table{width:100%;border-collapse:collapse}
+.bs th,.bs td{padding:11px clamp(12px,2.4vw,26px);vertical-align:baseline}
+.bs thead th{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--faint);font-weight:400;border-bottom:1px solid var(--line);text-align:left;
 }
-.ledger .row:last-child{border-bottom:none}
-.ledger .n{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.1em}
-.ledger .t{font-family:var(--display);font-size:clamp(17px,2.3vw,23px);font-weight:300}
-.ledger .t small{display:block;font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:6px;line-height:1.7;max-width:56ch}
-.ledger .v{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);white-space:nowrap}
-.networth{
-  display:flex;flex-wrap:wrap;gap:14px 30px;align-items:baseline;justify-content:space-between;
-  margin-top:26px;padding:26px;border:1px solid var(--line);border-radius:4px;
-  background:linear-gradient(135deg,rgba(240,184,196,.05),rgba(233,201,131,.03));
+.bs th.num,.bs td.num{text-align:center;width:3.4em;font-family:var(--mono);font-size:10px;color:var(--rose-deep)}
+.bs th.amt,.bs td.amt{text-align:right;white-space:nowrap;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--champagne)}
+.bs td.p{font-family:var(--display);font-size:clamp(14px,1.9vw,17px);font-weight:300}
+.bs tr.grp td{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--rose);
+  padding-top:26px;padding-bottom:8px;
 }
-.networth .l{font-family:var(--mono);font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--faint)}
-.networth .r{font-family:var(--display);font-style:italic;font-size:clamp(20px,3.2vw,34px)}
+.bs tr.sub td{font-family:var(--sans);font-size:12px;color:var(--muted);padding-top:14px;padding-bottom:4px;font-style:italic}
+.bs tr.line td{border-top:1px solid rgba(240,184,196,.28)}
+.bs tr.total td{
+  font-family:var(--display);font-size:clamp(14px,2vw,18px);
+  border-top:1px solid rgba(240,184,196,.34);
+  border-bottom:3px double rgba(240,184,196,.34);   /* the accountant's double rule */
+  padding-top:13px;padding-bottom:13px;
+}
+.bs tr.total td.amt{font-size:13px;color:var(--rose)}
+.bs-notes{padding:clamp(18px,3vw,28px) clamp(16px,3vw,32px);border-top:1px solid var(--line)}
+.bs-notes h4{font-family:var(--mono);font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:var(--faint);margin-bottom:16px}
+.bs-notes ol{list-style:none;counter-reset:n;display:grid;gap:11px}
+.bs-notes li{counter-increment:n;display:grid;grid-template-columns:2.2em 1fr;gap:6px;
+  font-size:13.5px;line-height:1.75;color:var(--muted)}
+.bs-notes li:before{content:counter(n) ".";font-family:var(--mono);font-size:10px;color:var(--rose-deep);padding-top:3px}
+@media (max-width:560px){
+  .bs th,.bs td{padding:9px 10px}
+  .bs td.p{font-size:13.5px}
+  .bs td.amt,.bs th.amt{font-size:9.5px}
+  .bs-notes li{font-size:12.5px;grid-template-columns:1.9em 1fr}
+}
 
 /* ---------- stats ---------- */
 .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
@@ -600,8 +652,6 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 
 @media (max-width:640px){
   .chapter{grid-template-columns:1fr;gap:8px}
-  .ledger .row{grid-template-columns:26px 1fr;gap:12px}
-  .ledger .v{grid-column:2;margin-top:6px}
   .eyebrow,.hero .sub{letter-spacing:.22em}
   .hint{display:none}
   .frame.portrait{width:min(72vw,300px)}
@@ -622,6 +672,15 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 <div id="hearts" aria-hidden="true"></div>
 <div class="grain"></div>
 <canvas id="confetti"></canvas>
+
+<!-- ============ OPENER ============ -->
+<div id="loader">
+  <div class="seal">
+    <div class="ring"><div class="num shine" id="sealNum">00</div></div>
+    <div class="cap">Opening the archive</div>
+    <div class="bar"><i></i></div>
+  </div>
+</div>
 
 <!-- ============ HERO ============ -->
 <header class="hero">
@@ -668,7 +727,7 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   <div class="wrap">
     <div class="kicker reveal">Schedule I · Balance sheet of us</div>
     <h2 class="big reveal">Assets, examined <em>and found extraordinary.</em></h2>
-    <div class="ledger reveal" id="ledger"></div>
+    <div class="bs reveal" id="bs"></div>
     <div class="networth reveal">
       <div class="l">Net worth &nbsp;/&nbsp; as certified</div>
       <div class="r shine">Immeasurable. The auditor declined to sign — he's biased.</div>
@@ -855,14 +914,41 @@ var CONFIG = {
 
   base: "https://kalashnandal.co.in/I-love-you/",
 
-  ledger: [
-    { t:"Her laugh",            s:"Appears without warning, appreciates every year, and has never once been correctly valued on any market.", v:"Non-depreciating" },
-    { t:"That discipline",      s:"Articleship, attempts, audits, and evenings at Burn — she has never once needed to be pushed. Only fed.", v:"Fixed asset" },
-    { t:"Patience with me",     s:"Extended generously, drawn down heavily, never once charged interest.", v:"Interest-free" },
-    { t:"The 2AM overthinking", s:"Recognised as a liability by her. Recorded as a footnote by me. Fully provided for either way.", v:"Provisioned" },
-    { t:"Loyalty",              s:"To her people, to Soul, and to her word — in that order, and without exception.", v:"Unimpaired" },
-    { t:"Every ordinary day",   s:"Car rides, chai runs, tired 11pm messages. The cheapest inputs, the highest returns.", v:"Compounding" }
-  ],
+  balanceSheet: {
+    /* Schedule III format, near enough. Particulars, note reference, amount. */
+    rows: [
+      { grp:"I. Assets" },
+      { sub:"(1) Non-current assets" },
+      { t:"Goodwill, self-generated",            n:1, a:"Immeasurable" },
+      { t:"Her laugh",                           n:2, a:"Non-depreciating" },
+      { t:"That discipline",                     n:3, a:"Fixed asset" },
+      { sub:"(2) Current assets" },
+      { t:"Ordinary days, on hand",              n:4, a:"Compounding" },
+      { t:"Patience extended to me",             n:5, a:"Interest-free" },
+      { total:"Total assets",                    a:"\u221E" },
+
+      { grp:"II. Equity and liabilities" },
+      { sub:"(1) Equity" },
+      { t:"Share capital \u2014 one heart, fully paid", n:6, a:"1 (one)" },
+      { t:"Reserves and surplus",                n:7, a:"Every year since" },
+      { sub:"(2) Non-current liabilities" },
+      { t:"Promises outstanding",                n:8, a:"Carried at full value" },
+      { sub:"(3) Current liabilities and provisions" },
+      { t:"Provision for 2AM overthinking",      n:9, a:"Fully provided" },
+      { total:"Total equity and liabilities",    a:"\u221E" }
+    ],
+    notes: [
+      "Not recognised by any accounting standard, obvious to everyone who has met her.",
+      "Appears without warning, appreciates every year, and has never once been correctly valued on any market.",
+      "Articleship, attempts, audits, and evenings at Burn. She has never once needed to be pushed. Only fed.",
+      "Car rides, chai runs, tired 11pm messages. The cheapest inputs, the highest returns.",
+      "Extended generously, drawn down heavily, never once charged interest.",
+      "Issued to her in full, not transferable, no buyback clause.",
+      "Everything she has built since the two-braids photograph.",
+      "Held at full value. No discounting, no expiry.",
+      "Recognised as a liability by her, recorded as a footnote by me. Usually settled by food, or a drive after 10pm."
+    ]
+  },
 
   stats: [
     { n:30,  l:"Frames on display" },
@@ -996,10 +1082,36 @@ var DAY = (function(){
   return { isToday:isToday, daysTo:daysTo, label:label, age:age, born:b.year ? new Date(b.year, b.month - 1, b.day) : null };
 })();
 
-/* The hero animates in immediately — no curtain, no waiting. */
+/* Counts to thirty, then hands over to the hero and starts the video. */
 (function(){
-  var hero = document.querySelector(".hero");
-  requestAnimationFrame(function(){ requestAnimationFrame(function(){ hero.classList.add("go"); }); });
+  var num = document.getElementById("sealNum"),
+      bar = document.querySelector(".bar i"),
+      loader = document.getElementById("loader"),
+      hero = document.querySelector(".hero"),
+      vid = document.getElementById("heroVid"),
+      opened = false, t0 = null, DUR = 1100;
+
+  function step(t){
+    if(!t0) t0 = t;
+    var p = Math.min((t - t0) / DUR, 1);
+    var eased = 1 - Math.pow(1 - p, 3);
+    num.textContent = pad2(Math.round(30 * eased));
+    bar.style.width = (eased * 100).toFixed(1) + "%";
+    if(p < 1) requestAnimationFrame(step); else ready();
+  }
+  requestAnimationFrame(step);
+
+  function ready(){
+    if(opened) return;
+    opened = true;
+    num.textContent = "30";
+    bar.style.width = "100%";
+    loader.classList.add("gone");
+    hero.classList.add("go");
+    var pr = vid.play();                     // the video starts as it's revealed
+    if(pr && pr.catch) pr.catch(function(){});
+  }
+  setTimeout(ready, 2600);                   // never hang on a slow frame
 })();
 
 /* ---------------- hero ---------------- */
@@ -1041,8 +1153,20 @@ var DAY = (function(){
     bg.style.display = "none";
     document.getElementById("heroFallback").style.display = "block";
   });
-  var pr = v.play();
-  if(pr && pr.catch) pr.catch(function(){});
+  function playVideo(){
+    var pr = v.play();
+    if(pr && pr.catch) pr.catch(function(){});
+  }
+  playVideo();
+  v.addEventListener("loadeddata", playVideo);
+  // Low Power Mode and some iOS builds refuse autoplay outright; her first
+  // touch anywhere gets it going.
+  ["pointerdown","touchstart","scroll"].forEach(function(e){
+    window.addEventListener(e, function once(){
+      window.removeEventListener(e, once);
+      if(v.paused) playVideo();
+    }, { once:true, passive:true });
+  });
 
   /* ---- the song ----
      Browsers refuse to start audio before the visitor has touched the page,
@@ -1185,17 +1309,36 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   window.addEventListener("load", ask);
 })();
 
-/* ---------------- ledger ---------------- */
+/* ---------------- balance sheet ---------------- */
 (function(){
-  var box = document.getElementById("ledger");
-  CONFIG.ledger.forEach(function(r, i){
-    var d = document.createElement("div");
-    d.className = "row";
-    d.innerHTML = '<div class="n">' + pad2(i + 1) + '</div>' +
-      '<div class="t">' + r.t + '<small>' + r.s + '</small></div>' +
-      '<div class="v">' + r.v + '</div>';
-    box.appendChild(d);
+  var box = document.getElementById("bs"), BS = CONFIG.balanceSheet;
+  if(!box) return;
+
+  var body = "";
+  BS.rows.forEach(function(r){
+    if(r.grp){ body += '<tr class="grp"><td colspan="3">' + r.grp + '</td></tr>'; return; }
+    if(r.sub){ body += '<tr class="sub"><td colspan="3">' + r.sub + '</td></tr>'; return; }
+    if(r.total){
+      body += '<tr class="total"><td class="p">' + r.total + '</td><td class="num"></td>' +
+              '<td class="amt">' + r.a + '</td></tr>';
+      return;
+    }
+    body += '<tr><td class="p">' + r.t + '</td><td class="num">' + r.n + '</td>' +
+            '<td class="amt">' + r.a + '</td></tr>';
   });
+
+  var notes = "";
+  BS.notes.forEach(function(n){ notes += "<li><span>" + n + "</span></li>"; });
+
+  box.innerHTML =
+    '<div class="bs-head">' +
+      '<div class="t">Balance Sheet as at ' + DAY.label + '</div>' +
+      '<div class="s">All amounts in feelings, unless otherwise stated</div>' +
+    '</div>' +
+    '<table><thead><tr>' +
+      '<th>Particulars</th><th class="num">Note</th><th class="amt">As at ' + DAY.label + '</th>' +
+    '</tr></thead><tbody>' + body + '</tbody></table>' +
+    '<div class="bs-notes"><h4>Notes forming part of the accounts</h4><ol>' + notes + '</ol></div>';
 })();
 
 /* ---------------- stats ---------------- */
@@ -1880,7 +2023,7 @@ LB = (function(){
       scrollTrigger:{ trigger:box, start:"top 82%" }
     }, opts || {}));
   }
-  stagger(".ledger", ".row", { x:-18, y:0, stagger:.06 });
+  stagger("#bs", "tbody tr", { x:-14, y:0, stagger:.035, duration:.55 });
   stagger("#statGrid", ".stat", { y:26, stagger:.06 });
   stagger("#findings", ".finding", { y:40, stagger:.08 });
   stagger("#reasons", ".reason", { y:26, scale:.94, stagger:.02, duration:.6 });
