@@ -62,6 +62,10 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
   0%,100%{transform:translate(0,0)}20%{transform:translate(-2%,2%)}
   40%{transform:translate(2%,-1%)}60%{transform:translate(-1%,-2%)}80%{transform:translate(1%,2%)}
 }
+/* The moving grain repaints the whole screen every step. On a phone that
+   was most of the remaining dropped frames, and the texture reads the same
+   sitting still. */
+@media (max-width:900px),(pointer:coarse){ .grain{animation:none} }
 #confetti{position:fixed;inset:0;z-index:120;pointer-events:none}
 
 /* ---------- floating hearts ---------- */
@@ -80,34 +84,6 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
   100%{transform:translateY(-108svh) translateX(calc(var(--drift) * -.6)) rotate(-10deg) scale(.94);opacity:0}
 }
 
-/* ---------- loader ---------- */
-#loader{position:fixed;inset:0;z-index:200;pointer-events:auto}
-#loader .half{
-  position:absolute;left:0;right:0;height:50.5%;background:#07060A;
-  transition:transform 1.15s cubic-bezier(.76,0,.24,1);
-}
-#loader .half.t{top:0}
-#loader .half.b{bottom:0}
-#loader.gone{pointer-events:none}
-#loader.gone .half.t{transform:translateY(-101%)}
-#loader.gone .half.b{transform:translateY(101%)}
-#loader.done{visibility:hidden}
-.seal{position:absolute;inset:0;display:grid;place-items:center;text-align:center;transition:opacity .45s ease,transform .8s cubic-bezier(.76,0,.24,1)}
-#loader.gone .seal{opacity:0;transform:scale(.94)}
-.seal .ring{
-  width:104px;height:104px;margin:0 auto 20px;border-radius:50%;
-  border:1px solid rgba(240,184,196,.3);display:grid;place-items:center;position:relative;
-}
-.seal .ring:before{
-  content:"";position:absolute;inset:-9px;border-radius:50%;
-  border:1px solid rgba(233,201,131,.16);animation:pulse 2.6s ease-in-out infinite;
-}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.06);opacity:1}}
-.seal .num{font-family:var(--display);font-size:34px;letter-spacing:.02em}
-.seal .cap{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
-.bar{width:150px;height:1px;background:rgba(246,241,234,.12);margin:18px auto 0;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--shine);transition:width .4s ease}
-
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:100svh;display:grid;place-items:center;overflow:hidden;z-index:1}
 /* The clip is shot vertically. Cropping it to a wide screen cut our heads
@@ -118,23 +94,24 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
    trims the sides, so it fills edge to edge with our heads intact. Only on
    screens wider than the clip does cover start eating faces — there we
    contain it and let the blurred copy fill the room. */
-.hero .vid-main{
-  object-fit:cover;
-  filter:saturate(.9) contrast(1.04) brightness(.72);
-}
+/* No filter on the playing video: a CSS filter on video re-runs every
+   frame. The veil overlay does the darkening instead, for free. */
+.hero .vid-main{object-fit:cover}
 @media (min-aspect-ratio: 9/16){
   .hero .vid-main{object-fit:contain}
 }
+/* The fill behind a contained video is a still, blurred once when it's
+   rasterised, rather than a second video blurred on every frame. */
 .hero .vid-bg{
-  object-fit:cover;transform:scale(1.18);
-  filter:blur(34px) saturate(.7) brightness(.42);
+  object-fit:cover;transform:scale(1.2);
+  filter:blur(30px) saturate(.7) brightness(.4);
 }
 .hero .fallback{object-fit:cover;filter:saturate(.9) brightness(.72)}
 @media (min-aspect-ratio: 9/16){ .hero .fallback{object-fit:contain} }
 .hero .veil{
   position:absolute;inset:0;z-index:1;pointer-events:none;
   background:
-    radial-gradient(90% 70% at 50% 40%, rgba(7,6,10,.15) 0%, rgba(7,6,10,.72) 62%, rgba(7,6,10,.96) 100%),
+    radial-gradient(90% 70% at 50% 40%, rgba(7,6,10,.34) 0%, rgba(7,6,10,.78) 62%, rgba(7,6,10,.97) 100%),
     linear-gradient(180deg, rgba(7,6,10,.75) 0%, rgba(7,6,10,0) 26%, rgba(7,6,10,0) 58%, rgba(7,6,10,.98) 100%);
 }
 .hero .inner{position:relative;z-index:2;text-align:center;padding:120px var(--pad) 130px;width:100%}
@@ -241,15 +218,26 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 .findings{perspective:1200px}
 .finding{transform-style:preserve-3d;will-change:transform}
 
-/* ---------- aurora field ---------- */
-.aurora{position:fixed;inset:-25%;z-index:0;pointer-events:none;filter:blur(90px);opacity:.55}
-.aurora i{position:absolute;display:block;border-radius:50%;mix-blend-mode:screen;will-change:transform}
-.aurora .a1{width:52vw;height:52vw;left:4%;top:8%;background:radial-gradient(circle,rgba(193,96,122,.55),transparent 68%);animation:blob1 34s ease-in-out infinite}
-.aurora .a2{width:46vw;height:46vw;right:2%;top:26%;background:radial-gradient(circle,rgba(233,201,131,.34),transparent 68%);animation:blob2 44s ease-in-out infinite}
-.aurora .a3{width:58vw;height:58vw;left:26%;bottom:2%;background:radial-gradient(circle,rgba(120,74,168,.42),transparent 70%);animation:blob3 52s ease-in-out infinite}
-@keyframes blob1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(14vw,10vh) scale(1.16)}}
-@keyframes blob2{0%,100%{transform:translate(0,0) scale(1.06)}50%{transform:translate(-12vw,14vh) scale(.9)}}
-@keyframes blob3{0%,100%{transform:translate(0,0) scale(.95)}50%{transform:translate(10vw,-12vh) scale(1.2)}}
+/* ---------- aurora field ----------
+   A blur() filter this size has to be re-rasterised every frame, and with
+   mix-blend-mode on top it was the single most expensive thing on the page
+   — median frame time doubled with it on. Radial gradients are already
+   soft, so the look survives and the cost goes to nearly nothing. */
+.aurora{position:fixed;inset:-10%;z-index:0;pointer-events:none;opacity:.85;contain:strict}
+.aurora i{position:absolute;display:block;border-radius:50%;will-change:transform}
+.aurora .a1{width:70vw;height:70vw;left:-6%;top:2%;
+  background:radial-gradient(circle closest-side,rgba(193,96,122,.30),rgba(193,96,122,.10) 55%,transparent 78%);
+  animation:blob1 42s ease-in-out infinite}
+.aurora .a2{width:62vw;height:62vw;right:-8%;top:24%;
+  background:radial-gradient(circle closest-side,rgba(233,201,131,.20),rgba(233,201,131,.06) 55%,transparent 78%);
+  animation:blob2 56s ease-in-out infinite}
+.aurora .a3{width:78vw;height:78vw;left:18%;bottom:-8%;
+  background:radial-gradient(circle closest-side,rgba(120,74,168,.26),rgba(120,74,168,.08) 55%,transparent 78%);
+  animation:blob3 64s ease-in-out infinite}
+@keyframes blob1{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(10vw,8vh,0) scale(1.12)}}
+@keyframes blob2{0%,100%{transform:translate3d(0,0,0) scale(1.05)}50%{transform:translate3d(-9vw,11vh,0) scale(.92)}}
+@keyframes blob3{0%,100%{transform:translate3d(0,0,0) scale(.96)}50%{transform:translate3d(8vw,-9vh,0) scale(1.15)}}
+@media (prefers-reduced-motion:reduce){ .aurora i{animation:none} }
 
 /* ---------- generic section ---------- */
 section{position:relative;z-index:1}
@@ -635,22 +623,9 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 <div class="grain"></div>
 <canvas id="confetti"></canvas>
 
-<!-- ============ LOADER ============ -->
-<div id="loader">
-  <div class="half t"></div>
-  <div class="half b"></div>
-  <div class="seal">
-    <div class="ring"><div class="num shine" id="sealNum">00</div></div>
-    <div class="cap">Opening the archive</div>
-    <div class="bar"><i></i></div>
-  </div>
-</div>
-
 <!-- ============ HERO ============ -->
 <header class="hero">
-  <video class="vid-bg" id="heroBg" autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1">
-    <source src="https://kalashnandal.co.in/I-love-you/IMG_1655.webm" type="video/webm">
-  </video>
+  <img class="vid-bg" id="heroBg" src="https://kalashnandal.co.in/I-love-you/22.webp" alt="" aria-hidden="true">
   <video class="vid-main" id="heroVid" autoplay muted loop playsinline preload="auto"
          poster="https://kalashnandal.co.in/I-love-you/22.webp">
     <source src="https://kalashnandal.co.in/I-love-you/IMG_1655.webm" type="video/webm">
@@ -1021,44 +996,10 @@ var DAY = (function(){
   return { isToday:isToday, daysTo:daysTo, label:label, age:age, born:b.year ? new Date(b.year, b.month - 1, b.day) : null };
 })();
 
-/* ---------------- loader ---------------- */
+/* The hero animates in immediately — no curtain, no waiting. */
 (function(){
-  var num = document.getElementById("sealNum"),
-      bar = document.querySelector(".bar i"),
-      loader = document.getElementById("loader"),
-      hero = document.querySelector(".hero"),
-      opened = false;
-
-  /* Real progress: we actually wait on the first frames of the corridor so
-     the curtain doesn't open onto empty boxes. */
-  var queue = frames.slice(0, 10).map(urlOf), loaded = 0, total = queue.length;
-
-  function tick(){
-    loaded++;
-    var pct = Math.min(loaded / total, 1);
-    num.textContent = pad2(Math.round(30 * pct));
-    bar.style.width = (pct * 100) + "%";
-    if(loaded >= total) setTimeout(open, 260);
-  }
-
-  queue.forEach(function(src){
-    var im = new Image();
-    im.onload = im.onerror = tick;
-    im.src = src;
-  });
-
-  function open(){
-    if(opened) return;
-    opened = true;
-    num.textContent = "30";
-    bar.style.width = "100%";
-    loader.classList.add("gone");
-    hero.classList.add("go");
-    setTimeout(function(){ loader.classList.add("done"); }, 1400);
-  }
-
-  // Never let a stalled image keep the curtain shut.
-  setTimeout(open, 4200);
+  var hero = document.querySelector(".hero");
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ hero.classList.add("go"); }); });
 })();
 
 /* ---------------- hero ---------------- */
@@ -1100,10 +1041,8 @@ var DAY = (function(){
     bg.style.display = "none";
     document.getElementById("heroFallback").style.display = "block";
   });
-  [v, bg].forEach(function(el){
-    var pr = el.play();
-    if(pr && pr.catch) pr.catch(function(){});
-  });
+  var pr = v.play();
+  if(pr && pr.catch) pr.catch(function(){});
 
   /* ---- the song ----
      Browsers refuse to start audio before the visitor has touched the page,
