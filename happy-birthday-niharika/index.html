@@ -1125,7 +1125,12 @@ var DAY = (function(){
       bar = document.querySelector(".bar i"),
       hero = document.querySelector(".hero"),
       vid = document.getElementById("heroVid"),
+      poster = document.getElementById("heroBg"),
       finished = false;
+
+  /* It has to be playing while it is still behind the fabric, so that what
+     the curtains open onto is the very frame that was showing through. */
+  (function(){ var pr = vid.play(); if(pr && pr.catch) pr.catch(function(){}); })();
 
   function finish(){
     if(finished) return;
@@ -1174,6 +1179,7 @@ var DAY = (function(){
         ox = -(w - cw) / 2,
         oy = -(h - ch) * .26;
     this.restX = w / (COLS - 1); this.restY = h / (ROWS - 1);
+    this.meshOx = ox; this.meshOy = oy;
 
     /* A curtain is more fabric than the rail it hangs on — a little excess
        makes it buckle and gather. Too much and a flat mesh folds through
@@ -1219,24 +1225,93 @@ var DAY = (function(){
     }
   };
 
-  Curtain.prototype.draw = function(){
-    var ctx = this.ctx, pts = this.pts;
+  /* The cloth is not a colour — it is the hero itself, seen through fabric.
+     Each column is a strip of the playing video, drawn onto the quad that
+     column currently occupies, so the picture bends with the folds. When
+     the curtains part, the same moment is behind them, sharp and moving:
+     one continuous scene rather than a loading screen in front of one. */
+  /* One column's colour: wine in the shadow of a fold, blush on its face. */
+  Curtain.prototype.tone = function(col, wob, comp){
+    var k = 0.5 + Math.sin(col * 1.75 + wob) * 0.28 + (comp - 1) * 0.5;
+    k = Math.max(0, Math.min(1, k));
+    return k < 0.5
+      ? "rgba(74,18,43," + ((0.5 - k) * 0.86).toFixed(3) + ")"
+      : "rgba(255,222,230," + ((k - 0.5) * 0.42).toFixed(3) + ")";
+  };
+
+  Curtain.prototype.draw = function(src, sw0, sh0){
+    var ctx = this.ctx, pts = this.pts, self = this;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, this.w, this.h);
-    for(var r = 0; r < ROWS - 1; r++){
+
+    var usable = src && sw0 > 0 && sh0 > 0;
+    if(usable){
+      // how the video would cover the whole window
+      var scale = Math.max(W / sw0, H / sh0),
+          dw = sw0 * scale, dh = sh0 * scale,
+          offX = (W - dw) / 2, offY = (H - dh) / 2,
+          left = this.side < 0 ? 0 : (W - this.w);
+
       for(var c = 0; c < COLS - 1; c++){
-        var i = r * COLS + c,
+        var tl = pts[c], tr = pts[c + 1], bl = pts[(ROWS - 1) * COLS + c];
+
+        /* Sample the picture at the place this column currently covers,
+           not at the place it started. That keeps the image registered to
+           the window, so the fabric reads as a veil over this exact moment
+           and the curtains open onto it without the picture jumping. */
+        var pxL = left + tl.x, pxR = left + tr.x,
+            sx = (pxL - offX) / scale,
+            sy = (tl.y - offY) / scale,
+            sw = (pxR - pxL) / scale,
+            sh = (bl.y - tl.y) / scale;
+        if(sw <= 0 || sh <= 0) continue;
+
+        /* The basis has to come from the true strip width. Inflating sw
+           before dividing cancelled itself out in the transform, so the
+           strips met exactly edge to edge — and every seam showed as a
+           black hairline. Build the basis first, then draw a little past
+           the edge so neighbours overlap. */
+        var ux = (tr.x - tl.x) / sw, uy = (tr.y - tl.y) / sw,
+            vx = (bl.x - tl.x) / sh, vy = (bl.y - tl.y) / sh,
+            /* Neighbouring strips sample the same pixels of the same
+               frame, so overlapping them is invisible — and it covers the
+               gaps that open lower down where the sheet curves away from a
+               straight-sided strip. */
+            over = 1.16;
+
+        ctx.save();
+        ctx.transform(ux, uy, vx, vy, tl.x, tl.y);
+        try{ ctx.drawImage(src, sx, sy, sw * over, sh * 1.02, 0, 0, sw * over, sh * 1.02); }catch(e){}
+
+        /* The fold. Shading each column with one flat wash banded the veil
+           into hard stripes, so it runs as a gradient whose ends match its
+           neighbours' — wine where the fabric turns away, blush where it
+           catches the light. */
+        var comp = (tr.x - tl.x) / (this.restX * 1.045),
+            wob = Math.sin(t * 0.5) * 0.3,
+            g = ctx.createLinearGradient(0, 0, sw, 0);
+        g.addColorStop(0, self.tone(c, wob, comp));
+        g.addColorStop(1, self.tone(c + 1, wob, comp));
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, sw, sh * 1.02);   // shading tiles exactly, no double-darkening
+        ctx.restore();
+      }
+      return;
+    }
+
+    // Nothing to show through yet: plain rose silk.
+    for(var r2 = 0; r2 < ROWS - 1; r2++){
+      for(var c2 = 0; c2 < COLS - 1; c2++){
+        var i = r2 * COLS + c2,
             a = pts[i], b = pts[i+1], d = pts[i+COLS+1], e = pts[i+COLS];
-        var comp = (b.x - a.x) / (this.restX * 1.045),
-            fold = Math.sin(c * 1.75 + Math.sin(t * 0.5) * 0.3),
-            amp = Math.max(0, Math.min(1, 1.12 - comp)),
-            k = 0.52 + fold * 0.24 * (0.5 + amp * 0.5) + (comp - 1) * 0.14;
-        k = Math.max(0.16, Math.min(1, k)) * (1 - (r / ROWS) * 0.14);
-        /* Rose silk: wine in the folds, blush on the faces. Both warm —
-           scaling a single colour toward black just turns it grey. */
-        var R = Math.round(74 + (243 - 74) * k),
-            G = Math.round(18 + (186 - 18) * k),
-            B = Math.round(43 + (198 - 43) * k);
-        var col = "rgb(" + R + "," + G + "," + B + ")";
+        var comp2 = (b.x - a.x) / (this.restX * 1.045),
+            fold2 = Math.sin(c2 * 1.75 + Math.sin(t * 0.5) * 0.3),
+            amp = Math.max(0, Math.min(1, 1.12 - comp2)),
+            k2 = 0.52 + fold2 * 0.24 * (0.5 + amp * 0.5) + (comp2 - 1) * 0.14;
+        k2 = Math.max(0.16, Math.min(1, k2)) * (1 - (r2 / ROWS) * 0.14);
+        var col = "rgb(" + Math.round(74 + (243 - 74) * k2) + "," +
+                           Math.round(18 + (186 - 18) * k2) + "," +
+                           Math.round(43 + (198 - 43) * k2) + ")";
         ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 1.1;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
@@ -1307,7 +1382,14 @@ var DAY = (function(){
       });
     }
 
-    both.forEach(function(cu){ cu.draw(); });
+    /* Prefer the live video, fall back to its poster until it has frames. */
+    var src = null, sw0 = 0, sh0 = 0;
+    if(vid && vid.readyState >= 2 && vid.videoWidth){
+      src = vid; sw0 = vid.videoWidth; sh0 = vid.videoHeight;
+    } else if(poster && poster.complete && poster.naturalWidth){
+      src = poster; sw0 = poster.naturalWidth; sh0 = poster.naturalHeight;
+    }
+    both.forEach(function(cu){ cu.draw(src, sw0, sh0); });
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
