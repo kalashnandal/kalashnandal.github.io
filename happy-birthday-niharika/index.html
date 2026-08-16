@@ -2230,14 +2230,26 @@ LB = (function(){
   });
 
   // Grids and lists deal themselves in.
+  /* fromTo with immediateRender:false, not from(): a .from() applies its
+     start state the moment it is created, so anything whose trigger never
+     fires is left sitting in it. And GSAP writes the transform inline,
+     which beats any transform the stylesheet wants to apply afterwards —
+     so the inline one is cleared once the entrance has played. */
   function stagger(container, items, opts){
     var box = document.querySelector(container);
     if(!box) return;
     box.classList.remove("reveal"); box.classList.add("in");
-    gsap.from(box.querySelectorAll(items), Object.assign({
-      y:34, opacity:0, duration:.75, ease:ease, stagger:.07,
-      scrollTrigger:{ trigger:box, start:"top 82%" }
-    }, opts || {}));
+    var els = box.querySelectorAll(items);
+    if(!els.length) return;
+    var o = Object.assign({ y:34, scale:1, x:0, duration:.75, stagger:.07 }, opts || {});
+    gsap.fromTo(els,
+      { y:o.y, x:o.x, scale:o.scale, opacity:0 },
+      {
+        y:0, x:0, scale:1, opacity:1,
+        duration:o.duration, ease:ease, stagger:o.stagger, immediateRender:false,
+        scrollTrigger:{ trigger:box, start:"top 82%", toggleActions:"play none none none" },
+        onComplete:function(){ gsap.set(els, { clearProps:"transform" }); }
+      });
   }
   stagger("#bs", "tbody tr", { x:-14, y:0, stagger:.035, duration:.55 });
   stagger("#statGrid", ".stat", { y:26, stagger:.06 });
