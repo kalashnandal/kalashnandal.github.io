@@ -87,8 +87,9 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 /* ---------- opener: a cloth drawn aside ---------- */
 #curtain{position:fixed;inset:0;z-index:200;background:#07060A;overflow:hidden;
   transition:background-color .6s ease}
-/* once they start to part, what is behind them is the page, not more black */
-#curtain.opening{background-color:transparent}
+/* The moment she starts pulling, what appears above the cloth has to be
+   the page — otherwise she drags the curtain down to reveal black. */
+#curtain.pulling,#curtain.opening{background-color:transparent}
 #curtain.gone{pointer-events:none}
 #clothL,#clothR{position:absolute;top:0;bottom:0;width:52%;height:100%;display:block}
 #clothL{left:0}
@@ -100,21 +101,47 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
   opacity:0;transition:opacity .9s ease;pointer-events:none;
 }
 #curtain.opening .glow{opacity:1}
-.intro{position:absolute;inset:0;display:grid;place-items:center;text-align:center;z-index:2;
-  transition:opacity .5s ease,transform .7s cubic-bezier(.4,0,.2,1)}
-#curtain.opening .intro{opacity:0;transform:scale(.92)}
-.intro .heart{position:relative;width:clamp(104px,22vw,132px);margin:0 auto 22px;
-  transition:transform .55s cubic-bezier(.34,1.56,.64,1),opacity .5s ease}
-.intro .heart svg{width:100%;height:auto;display:block;filter:drop-shadow(0 12px 26px rgba(74,18,43,.5))}
-.intro .heart .num{
-  position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
-  font-family:var(--display);font-size:clamp(26px,5.4vw,34px);color:#FBEFE7;
-  text-shadow:0 2px 8px rgba(74,18,43,.6);
+.intro{position:absolute;left:0;right:0;top:0;height:100%;display:grid;place-items:center;
+  text-align:center;z-index:3;will-change:transform}
+#curtain.opening .intro{opacity:0;transition:opacity .45s ease}
+.intro .guy{position:relative;width:clamp(150px,36vw,210px);margin:0 auto 18px;
+  animation:bob 2.6s ease-in-out infinite;transform-origin:50% 100%}
+.intro .guy svg{width:100%;height:auto;display:block;
+  filter:drop-shadow(0 14px 26px rgba(74,18,43,.55))}
+.intro .guy .num{
+  position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);
+  font-family:var(--display);font-size:clamp(20px,4.2vw,26px);color:#FFF1F4;
+  text-shadow:0 2px 8px rgba(74,18,43,.7);pointer-events:none;
 }
-#curtain.opening .intro .heart{transform:scale(1.5) rotate(-6deg);opacity:0}
-.intro .cap{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:rgba(74,18,43,.62)}
-.bar{width:150px;height:1px;background:rgba(74,18,43,.22);margin:18px auto 0;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:#9E2447;transition:width .3s ease}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-9px) rotate(1.5deg)}}
+/* she blinks */
+.intro .eyes{animation:blink 4.4s infinite;transform-origin:50% 62px}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+/* and kicks her legs while she waits */
+.intro .legL{animation:kickL 1.5s ease-in-out infinite;transform-origin:56px 112px}
+.intro .legR{animation:kickR 1.5s ease-in-out infinite;transform-origin:84px 112px}
+@keyframes kickL{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(9deg)}}
+@keyframes kickR{0%,100%{transform:rotate(8deg)}50%{transform:rotate(-8deg)}}
+.intro .footL{animation:kickL 1.5s ease-in-out infinite;transform-origin:56px 112px}
+.intro .footR{animation:kickR 1.5s ease-in-out infinite;transform-origin:84px 112px}
+/* a tug on the cloth, to show what she wants */
+.intro .arms{animation:tug 2.2s ease-in-out infinite}
+@keyframes tug{0%,72%,100%{transform:translateY(0)}82%{transform:translateY(7px)}}
+.intro.pulling .guy{animation:none}
+.intro.pulling .arms,.intro.pulling .legL,.intro.pulling .legR,
+.intro.pulling .footL,.intro.pulling .footR{animation:none}
+.intro .hint{
+  margin-top:20px;font-family:var(--mono);font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;
+  color:rgba(255,226,233,.85);text-shadow:0 2px 14px rgba(30,4,14,.9);transition:opacity .4s ease;
+}
+.intro .hint:after{content:" \2193";}
+.intro.pulling .hint{opacity:0}
+/* The cloth carries the video now, which is dark — wine-on-dark was
+   invisible. */
+.intro .cap{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;
+  color:rgba(255,238,242,.9);text-shadow:0 2px 14px rgba(30,4,14,.9)}
+.bar{width:150px;height:1px;background:rgba(255,226,233,.3);margin:16px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#FFDCE4;transition:width .3s ease}
 
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:100svh;display:grid;place-items:center;overflow:hidden;z-index:1}
@@ -690,23 +717,47 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   <canvas id="clothL"></canvas>
   <canvas id="clothR"></canvas>
   <div class="intro">
-    <div>
-      <div class="heart" id="heartSeal">
-        <svg viewBox="0 0 120 108" aria-hidden="true">
-          <defs>
-            <radialGradient id="wax" cx="36%" cy="28%">
-              <stop offset="0" stop-color="#E4899F"/>
-              <stop offset="55%" stop-color="#9E2447"/>
-              <stop offset="100%" stop-color="#4A122B"/>
-            </radialGradient>
-          </defs>
-          <path d="M60 104C24 80 4 60 4 37 4 18 18 5 35 5c10 0 19 5 25 13C66 10 75 5 85 5c17 0 31 13 31 32 0 23-20 43-56 67z" fill="url(#wax)"/>
-        </svg>
-        <span class="num" id="sealNum">00</span>
-      </div>
-      <div class="cap">Sealed with love</div>
-      <div class="bar"><i></i></div>
+    <div class="guy" id="guy" aria-hidden="true">
+      <svg viewBox="0 0 140 170">
+        <defs>
+          <radialGradient id="wax" cx="36%" cy="26%">
+            <stop offset="0" stop-color="#F3A8B9"/>
+            <stop offset="55%" stop-color="#D4436A"/>
+            <stop offset="100%" stop-color="#8E1E3F"/>
+          </radialGradient>
+        </defs>
+        <!-- arms, reaching up to hold the cloth -->
+        <g class="arms" stroke="#C33459" stroke-width="7" stroke-linecap="round" fill="none">
+          <path class="armL" d="M28 66 L10 34"/>
+          <path class="armR" d="M112 66 L130 34"/>
+        </g>
+        <!-- legs -->
+        <g class="legs" stroke="#C33459" stroke-width="7" stroke-linecap="round" fill="none">
+          <path class="legL" d="M56 112 L50 148"/>
+          <path class="legR" d="M84 112 L90 148"/>
+        </g>
+        <ellipse class="footL" cx="46" cy="152" rx="10" ry="6" fill="#8E1E3F"/>
+        <ellipse class="footR" cx="94" cy="152" rx="10" ry="6" fill="#8E1E3F"/>
+        <!-- body -->
+        <path class="body" d="M70 118C34 94 14 74 14 51 14 32 28 19 45 19c10 0 19 5 25 13C76 24 85 19 95 19c17 0 31 13 31 32 0 23-20 43-56 67z" fill="url(#wax)"/>
+        <!-- face -->
+        <g class="face">
+          <circle class="blushL" cx="46" cy="74" r="7" fill="#F58AA5" opacity=".65"/>
+          <circle class="blushR" cx="94" cy="74" r="7" fill="#F58AA5" opacity=".65"/>
+          <g class="eyes">
+            <ellipse cx="55" cy="60" rx="7.5" ry="9" fill="#FFF6F2"/>
+            <ellipse cx="85" cy="60" rx="7.5" ry="9" fill="#FFF6F2"/>
+            <circle cx="56" cy="62" r="4" fill="#3A0D1E"/>
+            <circle cx="86" cy="62" r="4" fill="#3A0D1E"/>
+          </g>
+          <path d="M62 78q8 8 16 0" stroke="#3A0D1E" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <span class="num" id="sealNum">00</span>
     </div>
+    <div class="cap" id="introCap">Sealed with love</div>
+    <div class="bar"><i></i></div>
+    <div class="hint" id="introHint">Scroll — she'll pull it down</div>
   </div>
 </div>
 
@@ -1135,6 +1186,7 @@ var DAY = (function(){
   function finish(){
     if(finished) return;
     finished = true;
+    if(window.ScrollTrigger) ScrollTrigger.refresh();   // it measured behind a curtain
     stage.style.transition = "opacity .5s ease";
     stage.style.opacity = "0";
     setTimeout(function(){ stage.style.display = "none"; }, 520);
@@ -1332,28 +1384,77 @@ var DAY = (function(){
   build();
   window.addEventListener("resize", function(){ if(!started) build(); });
 
-  /* Part them. The meshes billow where the rail lets go; the sheets
-     themselves are moved as whole canvases, because a mesh stretched past
-     its own width comes apart no matter how many solver passes it gets. */
-  function pull(){
-    if(started) return;
-    started = true;
-    pullT = t;
-    stage.classList.add("opening");
+  /* She pulls it down, and the scroll is the rope.
 
-    setTimeout(function(){
-      L.cv.style.transition = "transform 1.3s cubic-bezier(.5,.05,.25,1), opacity .5s ease .85s";
-      Rt.cv.style.transition = L.cv.style.transition;
-      L.cv.style.transform = "translate3d(-104%,3%,0) rotate(-5deg)";
-      Rt.cv.style.transform = "translate3d(104%,3%,0) rotate(5deg)";
-      L.cv.style.opacity = "0"; Rt.cv.style.opacity = "0";
-      // petals, as they open
-      // a scatter of petals where the seal was, not a firework
-      if(typeof burst === "function") burst(W * 0.5, H * 0.44, 34);
-    }, 120);
+     Nothing opens on a timer: the curtain comes down exactly as far as she
+     scrolls, and the little heart rides the hem down holding on. The page
+     itself is held still while it happens, so the scroll has somewhere to
+     go — and it is released the moment the cloth is off. */
+  var progress = 0, opened = false, intro = document.querySelector(".intro"),
+      hint = document.getElementById("introHint");
 
-    setTimeout(finish, 1500);
+  function apply(){
+    var y = progress * 118;
+    L.cv.style.transform = "translate3d(0," + y.toFixed(2) + "%,0)";
+    Rt.cv.style.transform = L.cv.style.transform;
+    // she comes down with the cloth, hanging off the hem
+    intro.style.transform = "translate3d(0," + (progress * H * 1.02).toFixed(1) + "px,0)";
+    if(progress > 0.004){
+      stage.classList.add("pulling");
+      if(!started){ started = true; pullT = t; intro.classList.add("pulling"); }
+    }
+    if(progress >= 1) release();
   }
+
+  function push(d){
+    if(opened) return;
+    progress = Math.max(0, Math.min(1, progress + d));
+    apply();
+  }
+
+  function release(){
+    if(opened) return;
+    opened = true;
+    stage.classList.add("opening");
+    window.scrollTo(0, 0);          // whatever leaked through, start her at the top
+    if(typeof burst === "function") burst(W * 0.5, H * 0.55, 30);
+    setTimeout(finish, 520);
+  }
+
+  /* Hold the page still by refusing the scroll events, not by setting
+     overflow:hidden on the body. ScrollTrigger sets its pins up during
+     these first seconds, and measuring a document that cannot scroll left
+     it with a body of zero height — after the curtain lifted, the page
+     would not scroll at all. */
+  window.addEventListener("scroll", function(){
+    if(!opened && window.scrollY !== 0) window.scrollTo(0, 0);
+  }, { passive:true });
+
+  window.addEventListener("wheel", function(e){
+    if(opened) return;
+    e.preventDefault();
+    push(e.deltaY * 0.00072);
+  }, { passive:false });
+
+  var ty = null;
+  window.addEventListener("touchstart", function(e){ ty = e.touches[0].clientY; }, { passive:true });
+  window.addEventListener("touchmove", function(e){
+    if(opened) return;
+    e.preventDefault();
+    var y = e.touches[0].clientY;
+    if(ty !== null) push((ty - y) * 0.0013);
+    ty = y;
+  }, { passive:false });
+
+  window.addEventListener("keydown", function(e){
+    if(opened) return;
+    if(e.key === "ArrowDown" || e.key === " " || e.key === "PageDown"){ e.preventDefault(); push(0.16); }
+  });
+  // tapping helps her along too, so nobody can be stuck behind a gesture
+  stage.addEventListener("click", function(){ if(!opened) push(0.3); });
+
+  // and if she never scrolls at all, it opens on its own
+  setTimeout(function(){ if(!opened && progress < 0.02) { progress = 1; apply(); } }, 16000);
 
   var last = 0, acc = 0;
   function frame(now){
@@ -1370,8 +1471,8 @@ var DAY = (function(){
     }
 
     if(started){
-      // the rail lets go from the middle outward, so they fall as they part
-      var release = Math.min((t - pullT) / 0.5, 1);
+      // the rail lets go from the middle outward, so it sags as it comes down
+      var release = Math.min((t - pullT) / 0.7, 1);
       both.forEach(function(cu){
         for(var c = 0; c < COLS; c++){
           var fromCentre = cu.side < 0 ? (COLS - 1 - c) : c;
@@ -1394,7 +1495,8 @@ var DAY = (function(){
   }
   requestAnimationFrame(frame);
 
-  /* the count, on the cloth */
+  /* The count runs first; only then does she ask to be pulled. */
+  var counting = true;
   (function(){
     var t0 = null, DUR = 1200;
     function tick(now){
@@ -1403,13 +1505,11 @@ var DAY = (function(){
       num.textContent = pad2(Math.round(30 * eased));
       bar.style.width = (eased * 100).toFixed(1) + "%";
       if(p < 1) requestAnimationFrame(tick);
-      else setTimeout(pull, 260);
+      else { counting = false; hint.style.opacity = "1"; }
     }
+    hint.style.opacity = "0";
     requestAnimationFrame(tick);
   })();
-
-  setTimeout(function(){ if(!started) pull(); }, 3200);   // never hang
-  setTimeout(finish, 5200);                               // last resort
 })();
 
 /* ---------------- hero ---------------- */
