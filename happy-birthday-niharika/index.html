@@ -124,6 +124,7 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 @keyframes kickR{0%,100%{transform:rotate(8deg)}50%{transform:rotate(-8deg)}}
 .intro .footL{animation:kickL 1.5s ease-in-out infinite;transform-origin:56px 112px}
 .intro .footR{animation:kickR 1.5s ease-in-out infinite;transform-origin:84px 112px}
+.intro .handL,.intro .handR{transition:none}
 /* a tug on the cloth, to show what she wants */
 .intro .arms{animation:tug 2.2s ease-in-out infinite}
 @keyframes tug{0%,72%,100%{transform:translateY(0)}82%{transform:translateY(7px)}}
@@ -726,22 +727,29 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
             <stop offset="100%" stop-color="#8E1E3F"/>
           </radialGradient>
         </defs>
-        <!-- arms, reaching up to hold the cloth -->
-        <g class="arms" stroke="#C33459" stroke-width="7" stroke-linecap="round" fill="none">
-          <path class="armL" d="M28 66 L10 34"/>
-          <path class="armR" d="M112 66 L130 34"/>
+        <!-- arms, reaching up to take hold of the cloth -->
+        <g class="arms" id="guyArms">
+          <g stroke="#C33459" stroke-width="7" stroke-linecap="round" fill="none">
+            <path class="armL" d="M28 66 L8 26"/>
+            <path class="armR" d="M112 66 L132 26"/>
+          </g>
+          <!-- her fists, closed around the fabric -->
+          <circle class="handL" cx="8" cy="24" r="9" fill="#E0577C" stroke="#8E1E3F" stroke-width="2.5"/>
+          <circle class="handR" cx="132" cy="24" r="9" fill="#E0577C" stroke="#8E1E3F" stroke-width="2.5"/>
         </g>
         <!-- legs -->
-        <g class="legs" stroke="#C33459" stroke-width="7" stroke-linecap="round" fill="none">
-          <path class="legL" d="M56 112 L50 148"/>
-          <path class="legR" d="M84 112 L90 148"/>
+        <g class="legs" id="guyLegs">
+          <g stroke="#C33459" stroke-width="7" stroke-linecap="round" fill="none">
+            <path class="legL" d="M56 112 L50 148"/>
+            <path class="legR" d="M84 112 L90 148"/>
+          </g>
+          <ellipse class="footL" cx="46" cy="152" rx="10" ry="6" fill="#8E1E3F"/>
+          <ellipse class="footR" cx="94" cy="152" rx="10" ry="6" fill="#8E1E3F"/>
         </g>
-        <ellipse class="footL" cx="46" cy="152" rx="10" ry="6" fill="#8E1E3F"/>
-        <ellipse class="footR" cx="94" cy="152" rx="10" ry="6" fill="#8E1E3F"/>
         <!-- body -->
-        <path class="body" d="M70 118C34 94 14 74 14 51 14 32 28 19 45 19c10 0 19 5 25 13C76 24 85 19 95 19c17 0 31 13 31 32 0 23-20 43-56 67z" fill="url(#wax)"/>
+        <path class="body" id="guyBody" d="M70 118C34 94 14 74 14 51 14 32 28 19 45 19c10 0 19 5 25 13C76 24 85 19 95 19c17 0 31 13 31 32 0 23-20 43-56 67z" fill="url(#wax)"/>
         <!-- face -->
-        <g class="face">
+        <g class="face" id="guyFace">
           <circle class="blushL" cx="46" cy="74" r="7" fill="#F58AA5" opacity=".65"/>
           <circle class="blushR" cx="94" cy="74" r="7" fill="#F58AA5" opacity=".65"/>
           <g class="eyes">
@@ -1202,10 +1210,12 @@ var DAY = (function(){
     return;
   }
 
-  var dpr = Math.min(window.devicePixelRatio || 1, 2),
+  /* The veil is soft and dark; it does not need retina pixels, and at 2x
+     it was drawing four times the fill for no visible gain. */
+  var dpr = window.innerWidth < 700 ? 1 : Math.min(window.devicePixelRatio || 1, 1.5),
       W = 0, H = 0, small = window.innerWidth < 700,
-      COLS = small ? 13 : 18, ROWS = small ? 15 : 18,
-      GRAV = 1500, DAMP = .988, ITER = 6,
+      COLS = small ? 11 : 16, ROWS = small ? 11 : 14,
+      GRAV = 1500, DAMP = .988, ITER = 4,
       t = 0, started = false, pullT = -1;
 
   /* Two curtains, each its own cloth, meeting at the middle — they part
@@ -1296,8 +1306,14 @@ var DAY = (function(){
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, this.w, this.h);
 
-    var usable = src && sw0 > 0 && sh0 > 0;
+    var usable = src && sw0 > 0 && sh0 > 0 && offReady;
+    if(usable){ src = off; }   // cut the strips from the small copy
     if(usable){
+      /* Source coordinates are worked out in the video's own pixels, but
+         the strips are cut from a small copy of it — so every read has to
+         be scaled into that copy's space. Without this they ran far
+         outside the little canvas. */
+      var shrink = off.width / sw0;
       // how the video would cover the whole window
       var scale = Math.max(W / sw0, H / sh0),
           dw = sw0 * scale, dh = sh0 * scale,
@@ -1323,8 +1339,10 @@ var DAY = (function(){
            strips met exactly edge to edge — and every seam showed as a
            black hairline. Build the basis first, then draw a little past
            the edge so neighbours overlap. */
-        var ux = (tr.x - tl.x) / sw, uy = (tr.y - tl.y) / sw,
-            vx = (bl.x - tl.x) / sh, vy = (bl.y - tl.y) / sh,
+        var ssx = sx * shrink, ssy = sy * shrink,
+            ssw = sw * shrink, ssh = sh * shrink;
+        var ux = (tr.x - tl.x) / ssw, uy = (tr.y - tl.y) / ssw,
+            vx = (bl.x - tl.x) / ssh, vy = (bl.y - tl.y) / ssh,
             /* Neighbouring strips sample the same pixels of the same
                frame, so overlapping them is invisible — and it covers the
                gaps that open lower down where the sheet curves away from a
@@ -1333,21 +1351,26 @@ var DAY = (function(){
 
         ctx.save();
         ctx.transform(ux, uy, vx, vy, tl.x, tl.y);
-        try{ ctx.drawImage(src, sx, sy, sw * over, sh * 1.02, 0, 0, sw * over, sh * 1.02); }catch(e){}
+        try{ ctx.drawImage(src, ssx, ssy, ssw * over, ssh * 1.02, 0, 0, ssw * over, ssh * 1.02); }catch(e){}
 
-        /* The fold. Shading each column with one flat wash banded the veil
-           into hard stripes, so it runs as a gradient whose ends match its
-           neighbours' — wine where the fabric turns away, blush where it
-           catches the light. */
-        var comp = (tr.x - tl.x) / (this.restX * 1.045),
-            wob = Math.sin(t * 0.5) * 0.3,
-            g = ctx.createLinearGradient(0, 0, sw, 0);
-        g.addColorStop(0, self.tone(c, wob, comp));
-        g.addColorStop(1, self.tone(c + 1, wob, comp));
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, sw, sh * 1.02);   // shading tiles exactly, no double-darkening
         ctx.restore();
       }
+
+      /* The folds, in one pass. A gradient per strip meant a couple of dozen
+         createLinearGradient calls a frame; one gradient across the whole
+         sheet, with a stop at each column, draws the same thing. */
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var wob = Math.sin(t * 0.5) * 0.3,
+          gg = ctx.createLinearGradient(0, 0, this.w, 0), last = -1;
+      for(var q = 0; q < COLS; q++){
+        var stop = Math.max(0, Math.min(1, pts[q].x / this.w));
+        if(stop <= last) stop = Math.min(1, last + 0.0005);
+        last = stop;
+        var cmp = q < COLS - 1 ? (pts[q+1].x - pts[q].x) / this.restX : 1;
+        gg.addColorStop(stop, this.tone(q, wob, cmp));
+      }
+      ctx.fillStyle = gg;
+      ctx.fillRect(0, 0, this.w, this.h);
       return;
     }
 
@@ -1372,6 +1395,19 @@ var DAY = (function(){
       }
     }
   };
+
+  /* Every strip used to sample the <video> directly — two dozen transformed
+     drawImage calls from a moving 1080x1920 texture every frame, which
+     stalled the main thread so badly that rAF fired fewer than twice a
+     second. The frame is now copied once into a small offscreen canvas and
+     the strips are cut from that instead. */
+  var off = document.createElement("canvas"), offCtx = off.getContext("2d"), offReady = false;
+  function grabFrame(src, sw0, sh0){
+    var tw = small ? 240 : 420, th = Math.round(tw * (sh0 / sw0));
+    if(off.width !== tw || off.height !== th){ off.width = tw; off.height = th; }
+    try{ offCtx.drawImage(src, 0, 0, tw, th); offReady = true; }catch(e){ offReady = false; }
+    return offReady;
+  }
 
   var L = new Curtain(document.getElementById("clothL"), -1),
       Rt = new Curtain(document.getElementById("clothR"), 1),
@@ -1399,6 +1435,19 @@ var DAY = (function(){
     Rt.cv.style.transform = L.cv.style.transform;
     // she comes down with the cloth, hanging off the hem
     intro.style.transform = "translate3d(0," + (progress * H * 1.02).toFixed(1) + "px,0)";
+
+    /* And she visibly hauls: arms stretch up to the hem, body leans back
+       against the weight, legs brace forward. Without this her hands just
+       sat there and nothing looked like it was doing the pulling. */
+    var arms = document.getElementById("guyArms"),
+        legs = document.getElementById("guyLegs"),
+        body = document.getElementById("guyBody"),
+        face = document.getElementById("guyFace"),
+        heave = Math.sin(progress * 22) * 1.6;          // a little effort in it
+    if(arms) arms.setAttribute("transform", "translate(0," + (-6 - progress * 20 + heave).toFixed(1) + ")");
+    if(legs) legs.setAttribute("transform", "rotate(" + (progress * 15).toFixed(1) + " 70 112)");
+    if(body) body.setAttribute("transform", "rotate(" + (-progress * 11).toFixed(1) + " 70 70)");
+    if(face) face.setAttribute("transform", "rotate(" + (-progress * 11).toFixed(1) + " 70 70)");
     if(progress > 0.004){
       stage.classList.add("pulling");
       if(!started){ started = true; pullT = t; intro.classList.add("pulling"); }
@@ -1456,7 +1505,7 @@ var DAY = (function(){
   // and if she never scrolls at all, it opens on its own
   setTimeout(function(){ if(!opened && progress < 0.02) { progress = 1; apply(); } }, 16000);
 
-  var last = 0, acc = 0;
+  var last = 0, acc = 0, grabTick = 0, lastDraw = 0;
   function frame(now){
     if(!last) last = now;
     var dt = Math.min((now - last) / 1000, .05);
@@ -1464,24 +1513,29 @@ var DAY = (function(){
     acc += dt;
     var wind = started ? 0 : Math.sin(t * 1.15) * 3.5 + Math.sin(t * .5) * 2;
 
-    while(acc >= 1/120){
-      t += 1/120;
-      both.forEach(function(cu){ cu.step(1/120, wind); });
-      acc -= 1/120;
-    }
+    /* Simulating and repainting a video-textured cloth on every frame cost
+       around 100ms a frame on a throttled phone — the whole opening
+       crawled. It does not need to: while it hangs, redrawing eight times
+       a second is plenty for a slow sway, and while she is pulling it down
+       the sheet moves as one piece under a CSS transform, so it needs no
+       repaint at all. The heart keeps animating either way. */
+    var pulling = progress > 0.004,
+        due = !pulling && (now - lastDraw > 120);
 
-    if(started){
-      // the rail lets go from the middle outward, so it sags as it comes down
-      var release = Math.min((t - pullT) / 0.7, 1);
-      both.forEach(function(cu){
-        for(var c = 0; c < COLS; c++){
-          var fromCentre = cu.side < 0 ? (COLS - 1 - c) : c;
-          if(fromCentre / COLS <= release){
-            cu.pts[c].pin = false; cu.pts[COLS + c].pin = false;
-          }
-        }
-      });
+    if(!due){
+      requestAnimationFrame(frame);
+      return;
     }
+    lastDraw = now;
+
+    // at most two physics steps a frame, so a slow frame cannot snowball
+    var steps = 0;
+    while(acc >= 1/60 && steps < 2){
+      t += 1/60;
+      both.forEach(function(cu){ cu.step(1/60, wind); });
+      acc -= 1/60; steps++;
+    }
+    if(acc > 0.25) acc = 0;
 
     /* Prefer the live video, fall back to its poster until it has frames. */
     var src = null, sw0 = 0, sh0 = 0;
@@ -1490,6 +1544,7 @@ var DAY = (function(){
     } else if(poster && poster.complete && poster.naturalWidth){
       src = poster; sw0 = poster.naturalWidth; sh0 = poster.naturalHeight;
     }
+    if(src && (grabTick++ % 2 === 0)) grabFrame(src, sw0, sh0);
     both.forEach(function(cu){ cu.draw(src, sw0, sh0); });
     requestAnimationFrame(frame);
   }
