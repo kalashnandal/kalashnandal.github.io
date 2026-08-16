@@ -87,9 +87,8 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 /* ---------- opener: a cloth drawn aside ---------- */
 #curtain{position:fixed;inset:0;z-index:200;background:#07060A;overflow:hidden;
   transition:background-color .6s ease}
-/* The moment she starts pulling, what appears above the cloth has to be
-   the page — otherwise she drags the curtain down to reveal black. */
-#curtain.pulling,#curtain.opening{background-color:transparent}
+/* once they start to part, what is behind them is the page, not more black */
+#curtain.opening{background-color:transparent}
 #curtain.gone{pointer-events:none}
 #clothL,#clothR{position:absolute;top:0;bottom:0;width:52%;height:100%;display:block}
 #clothL{left:0}
@@ -101,48 +100,21 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
   opacity:0;transition:opacity .9s ease;pointer-events:none;
 }
 #curtain.opening .glow{opacity:1}
-.intro{position:absolute;left:0;right:0;top:0;height:100%;display:grid;place-items:center;
-  text-align:center;z-index:3;will-change:transform}
-#curtain.opening .intro{opacity:0;transition:opacity .45s ease}
-.intro .guy{position:relative;width:clamp(150px,36vw,210px);margin:0 auto 18px;
-  animation:bob 2.6s ease-in-out infinite;transform-origin:50% 100%}
-.intro .guy svg{width:100%;height:auto;display:block;
-  filter:drop-shadow(0 14px 26px rgba(74,18,43,.55))}
-.intro .guy .num{
-  position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);
-  font-family:var(--display);font-size:clamp(20px,4.2vw,26px);color:#FFF1F4;
-  text-shadow:0 2px 8px rgba(74,18,43,.7);pointer-events:none;
+.intro{position:absolute;inset:0;display:grid;place-items:center;text-align:center;z-index:2;
+  transition:opacity .5s ease,transform .7s cubic-bezier(.4,0,.2,1)}
+#curtain.opening .intro{opacity:0;transform:scale(.92)}
+.intro .heart{position:relative;width:clamp(104px,22vw,132px);margin:0 auto 22px;
+  transition:transform .55s cubic-bezier(.34,1.56,.64,1),opacity .5s ease}
+.intro .heart svg{width:100%;height:auto;display:block;filter:drop-shadow(0 12px 26px rgba(74,18,43,.5))}
+.intro .heart .num{
+  position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+  font-family:var(--display);font-size:clamp(26px,5.4vw,34px);color:#FBEFE7;
+  text-shadow:0 2px 8px rgba(74,18,43,.6);
 }
-@keyframes bob{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-9px) rotate(1.5deg)}}
-/* she blinks */
-.intro .eyes{animation:blink 4.4s infinite;transform-origin:50% 62px}
-@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
-/* and kicks her legs while she waits */
-.intro .legL{animation:kickL 1.5s ease-in-out infinite;transform-origin:56px 112px}
-.intro .legR{animation:kickR 1.5s ease-in-out infinite;transform-origin:84px 112px}
-@keyframes kickL{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(9deg)}}
-@keyframes kickR{0%,100%{transform:rotate(8deg)}50%{transform:rotate(-8deg)}}
-.intro .footL{animation:kickL 1.5s ease-in-out infinite;transform-origin:56px 112px}
-.intro .footR{animation:kickR 1.5s ease-in-out infinite;transform-origin:84px 112px}
-.intro .handL,.intro .handR{transition:none}
-/* a tug on the cloth, to show what she wants */
-.intro .arms{animation:tug 2.2s ease-in-out infinite}
-@keyframes tug{0%,72%,100%{transform:translateY(0)}82%{transform:translateY(7px)}}
-.intro.pulling .guy{animation:none}
-.intro.pulling .arms,.intro.pulling .legL,.intro.pulling .legR,
-.intro.pulling .footL,.intro.pulling .footR{animation:none}
-.intro .hint{
-  margin-top:20px;font-family:var(--mono);font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;
-  color:rgba(255,226,233,.85);text-shadow:0 2px 14px rgba(30,4,14,.9);transition:opacity .4s ease;
-}
-.intro .hint:after{content:" \2193";}
-.intro.pulling .hint{opacity:0}
-/* The cloth carries the video now, which is dark — wine-on-dark was
-   invisible. */
-.intro .cap{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;
-  color:rgba(255,238,242,.9);text-shadow:0 2px 14px rgba(30,4,14,.9)}
-.bar{width:150px;height:1px;background:rgba(255,226,233,.3);margin:16px auto 0;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:#FFDCE4;transition:width .3s ease}
+#curtain.opening .intro .heart{transform:scale(1.5) rotate(-6deg);opacity:0}
+.intro .cap{font-family:var(--mono);font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:rgba(74,18,43,.62)}
+.bar{width:150px;height:1px;background:rgba(74,18,43,.22);margin:18px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#9E2447;transition:width .3s ease}
 
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:100svh;display:grid;place-items:center;overflow:hidden;z-index:1}
@@ -718,54 +690,23 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   <canvas id="clothL"></canvas>
   <canvas id="clothR"></canvas>
   <div class="intro">
-    <div class="guy" id="guy" aria-hidden="true">
-      <svg viewBox="0 0 140 170">
-        <defs>
-          <radialGradient id="wax" cx="36%" cy="26%">
-            <stop offset="0" stop-color="#F3A8B9"/>
-            <stop offset="55%" stop-color="#D4436A"/>
-            <stop offset="100%" stop-color="#8E1E3F"/>
-          </radialGradient>
-        </defs>
-        <!-- arms, reaching up to take hold of the cloth -->
-        <g class="arms" id="guyArms">
-          <g stroke="#C33459" stroke-width="7" stroke-linecap="round" fill="none">
-            <path class="armL" d="M28 66 L8 26"/>
-            <path class="armR" d="M112 66 L132 26"/>
-          </g>
-          <!-- her fists, closed around the fabric -->
-          <circle class="handL" cx="8" cy="24" r="9" fill="#E0577C" stroke="#8E1E3F" stroke-width="2.5"/>
-          <circle class="handR" cx="132" cy="24" r="9" fill="#E0577C" stroke="#8E1E3F" stroke-width="2.5"/>
-        </g>
-        <!-- legs -->
-        <g class="legs" id="guyLegs">
-          <g stroke="#C33459" stroke-width="7" stroke-linecap="round" fill="none">
-            <path class="legL" d="M56 112 L50 148"/>
-            <path class="legR" d="M84 112 L90 148"/>
-          </g>
-          <ellipse class="footL" cx="46" cy="152" rx="10" ry="6" fill="#8E1E3F"/>
-          <ellipse class="footR" cx="94" cy="152" rx="10" ry="6" fill="#8E1E3F"/>
-        </g>
-        <!-- body -->
-        <path class="body" id="guyBody" d="M70 118C34 94 14 74 14 51 14 32 28 19 45 19c10 0 19 5 25 13C76 24 85 19 95 19c17 0 31 13 31 32 0 23-20 43-56 67z" fill="url(#wax)"/>
-        <!-- face -->
-        <g class="face" id="guyFace">
-          <circle class="blushL" cx="46" cy="74" r="7" fill="#F58AA5" opacity=".65"/>
-          <circle class="blushR" cx="94" cy="74" r="7" fill="#F58AA5" opacity=".65"/>
-          <g class="eyes">
-            <ellipse cx="55" cy="60" rx="7.5" ry="9" fill="#FFF6F2"/>
-            <ellipse cx="85" cy="60" rx="7.5" ry="9" fill="#FFF6F2"/>
-            <circle cx="56" cy="62" r="4" fill="#3A0D1E"/>
-            <circle cx="86" cy="62" r="4" fill="#3A0D1E"/>
-          </g>
-          <path d="M62 78q8 8 16 0" stroke="#3A0D1E" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-        </g>
-      </svg>
-      <span class="num" id="sealNum">00</span>
+    <div>
+      <div class="heart" id="heartSeal">
+        <svg viewBox="0 0 120 108" aria-hidden="true">
+          <defs>
+            <radialGradient id="wax" cx="36%" cy="28%">
+              <stop offset="0" stop-color="#E4899F"/>
+              <stop offset="55%" stop-color="#9E2447"/>
+              <stop offset="100%" stop-color="#4A122B"/>
+            </radialGradient>
+          </defs>
+          <path d="M60 104C24 80 4 60 4 37 4 18 18 5 35 5c10 0 19 5 25 13C66 10 75 5 85 5c17 0 31 13 31 32 0 23-20 43-56 67z" fill="url(#wax)"/>
+        </svg>
+        <span class="num" id="sealNum">00</span>
+      </div>
+      <div class="cap">Sealed with love</div>
+      <div class="bar"><i></i></div>
     </div>
-    <div class="cap" id="introCap">Sealed with love</div>
-    <div class="bar"><i></i></div>
-    <div class="hint" id="introHint">Scroll — she'll pull it down</div>
   </div>
 </div>
 
@@ -1184,17 +1125,11 @@ var DAY = (function(){
       bar = document.querySelector(".bar i"),
       hero = document.querySelector(".hero"),
       vid = document.getElementById("heroVid"),
-      poster = document.getElementById("heroBg"),
       finished = false;
-
-  /* It has to be playing while it is still behind the fabric, so that what
-     the curtains open onto is the very frame that was showing through. */
-  (function(){ var pr = vid.play(); if(pr && pr.catch) pr.catch(function(){}); })();
 
   function finish(){
     if(finished) return;
     finished = true;
-    if(window.ScrollTrigger) ScrollTrigger.refresh();   // it measured behind a curtain
     stage.style.transition = "opacity .5s ease";
     stage.style.opacity = "0";
     setTimeout(function(){ stage.style.display = "none"; }, 520);
@@ -1210,12 +1145,10 @@ var DAY = (function(){
     return;
   }
 
-  /* The veil is soft and dark; it does not need retina pixels, and at 2x
-     it was drawing four times the fill for no visible gain. */
-  var dpr = window.innerWidth < 700 ? 1 : Math.min(window.devicePixelRatio || 1, 1.5),
+  var dpr = Math.min(window.devicePixelRatio || 1, 2),
       W = 0, H = 0, small = window.innerWidth < 700,
-      COLS = small ? 11 : 16, ROWS = small ? 11 : 14,
-      GRAV = 1500, DAMP = .988, ITER = 4,
+      COLS = small ? 13 : 18, ROWS = small ? 15 : 18,
+      GRAV = 1500, DAMP = .988, ITER = 6,
       t = 0, started = false, pullT = -1;
 
   /* Two curtains, each its own cloth, meeting at the middle — they part
@@ -1241,7 +1174,6 @@ var DAY = (function(){
         ox = -(w - cw) / 2,
         oy = -(h - ch) * .26;
     this.restX = w / (COLS - 1); this.restY = h / (ROWS - 1);
-    this.meshOx = ox; this.meshOy = oy;
 
     /* A curtain is more fabric than the rail it hangs on — a little excess
        makes it buckle and gather. Too much and a flat mesh folds through
@@ -1287,106 +1219,24 @@ var DAY = (function(){
     }
   };
 
-  /* The cloth is not a colour — it is the hero itself, seen through fabric.
-     Each column is a strip of the playing video, drawn onto the quad that
-     column currently occupies, so the picture bends with the folds. When
-     the curtains part, the same moment is behind them, sharp and moving:
-     one continuous scene rather than a loading screen in front of one. */
-  /* One column's colour: wine in the shadow of a fold, blush on its face. */
-  Curtain.prototype.tone = function(col, wob, comp){
-    var k = 0.5 + Math.sin(col * 1.75 + wob) * 0.28 + (comp - 1) * 0.5;
-    k = Math.max(0, Math.min(1, k));
-    return k < 0.5
-      ? "rgba(74,18,43," + ((0.5 - k) * 0.86).toFixed(3) + ")"
-      : "rgba(255,222,230," + ((k - 0.5) * 0.42).toFixed(3) + ")";
-  };
-
-  Curtain.prototype.draw = function(src, sw0, sh0){
-    var ctx = this.ctx, pts = this.pts, self = this;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  Curtain.prototype.draw = function(){
+    var ctx = this.ctx, pts = this.pts;
     ctx.clearRect(0, 0, this.w, this.h);
-
-    var usable = src && sw0 > 0 && sh0 > 0 && offReady;
-    if(usable){ src = off; }   // cut the strips from the small copy
-    if(usable){
-      /* Source coordinates are worked out in the video's own pixels, but
-         the strips are cut from a small copy of it — so every read has to
-         be scaled into that copy's space. Without this they ran far
-         outside the little canvas. */
-      var shrink = off.width / sw0;
-      // how the video would cover the whole window
-      var scale = Math.max(W / sw0, H / sh0),
-          dw = sw0 * scale, dh = sh0 * scale,
-          offX = (W - dw) / 2, offY = (H - dh) / 2,
-          left = this.side < 0 ? 0 : (W - this.w);
-
+    for(var r = 0; r < ROWS - 1; r++){
       for(var c = 0; c < COLS - 1; c++){
-        var tl = pts[c], tr = pts[c + 1], bl = pts[(ROWS - 1) * COLS + c];
-
-        /* Sample the picture at the place this column currently covers,
-           not at the place it started. That keeps the image registered to
-           the window, so the fabric reads as a veil over this exact moment
-           and the curtains open onto it without the picture jumping. */
-        var pxL = left + tl.x, pxR = left + tr.x,
-            sx = (pxL - offX) / scale,
-            sy = (tl.y - offY) / scale,
-            sw = (pxR - pxL) / scale,
-            sh = (bl.y - tl.y) / scale;
-        if(sw <= 0 || sh <= 0) continue;
-
-        /* The basis has to come from the true strip width. Inflating sw
-           before dividing cancelled itself out in the transform, so the
-           strips met exactly edge to edge — and every seam showed as a
-           black hairline. Build the basis first, then draw a little past
-           the edge so neighbours overlap. */
-        var ssx = sx * shrink, ssy = sy * shrink,
-            ssw = sw * shrink, ssh = sh * shrink;
-        var ux = (tr.x - tl.x) / ssw, uy = (tr.y - tl.y) / ssw,
-            vx = (bl.x - tl.x) / ssh, vy = (bl.y - tl.y) / ssh,
-            /* Neighbouring strips sample the same pixels of the same
-               frame, so overlapping them is invisible — and it covers the
-               gaps that open lower down where the sheet curves away from a
-               straight-sided strip. */
-            over = 1.16;
-
-        ctx.save();
-        ctx.transform(ux, uy, vx, vy, tl.x, tl.y);
-        try{ ctx.drawImage(src, ssx, ssy, ssw * over, ssh * 1.02, 0, 0, ssw * over, ssh * 1.02); }catch(e){}
-
-        ctx.restore();
-      }
-
-      /* The folds, in one pass. A gradient per strip meant a couple of dozen
-         createLinearGradient calls a frame; one gradient across the whole
-         sheet, with a stop at each column, draws the same thing. */
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      var wob = Math.sin(t * 0.5) * 0.3,
-          gg = ctx.createLinearGradient(0, 0, this.w, 0), last = -1;
-      for(var q = 0; q < COLS; q++){
-        var stop = Math.max(0, Math.min(1, pts[q].x / this.w));
-        if(stop <= last) stop = Math.min(1, last + 0.0005);
-        last = stop;
-        var cmp = q < COLS - 1 ? (pts[q+1].x - pts[q].x) / this.restX : 1;
-        gg.addColorStop(stop, this.tone(q, wob, cmp));
-      }
-      ctx.fillStyle = gg;
-      ctx.fillRect(0, 0, this.w, this.h);
-      return;
-    }
-
-    // Nothing to show through yet: plain rose silk.
-    for(var r2 = 0; r2 < ROWS - 1; r2++){
-      for(var c2 = 0; c2 < COLS - 1; c2++){
-        var i = r2 * COLS + c2,
+        var i = r * COLS + c,
             a = pts[i], b = pts[i+1], d = pts[i+COLS+1], e = pts[i+COLS];
-        var comp2 = (b.x - a.x) / (this.restX * 1.045),
-            fold2 = Math.sin(c2 * 1.75 + Math.sin(t * 0.5) * 0.3),
-            amp = Math.max(0, Math.min(1, 1.12 - comp2)),
-            k2 = 0.52 + fold2 * 0.24 * (0.5 + amp * 0.5) + (comp2 - 1) * 0.14;
-        k2 = Math.max(0.16, Math.min(1, k2)) * (1 - (r2 / ROWS) * 0.14);
-        var col = "rgb(" + Math.round(74 + (243 - 74) * k2) + "," +
-                           Math.round(18 + (186 - 18) * k2) + "," +
-                           Math.round(43 + (198 - 43) * k2) + ")";
+        var comp = (b.x - a.x) / (this.restX * 1.045),
+            fold = Math.sin(c * 1.75 + Math.sin(t * 0.5) * 0.3),
+            amp = Math.max(0, Math.min(1, 1.12 - comp)),
+            k = 0.52 + fold * 0.24 * (0.5 + amp * 0.5) + (comp - 1) * 0.14;
+        k = Math.max(0.16, Math.min(1, k)) * (1 - (r / ROWS) * 0.14);
+        /* Rose silk: wine in the folds, blush on the faces. Both warm —
+           scaling a single colour toward black just turns it grey. */
+        var R = Math.round(74 + (243 - 74) * k),
+            G = Math.round(18 + (186 - 18) * k),
+            B = Math.round(43 + (198 - 43) * k);
+        var col = "rgb(" + R + "," + G + "," + B + ")";
         ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 1.1;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
@@ -1395,19 +1245,6 @@ var DAY = (function(){
       }
     }
   };
-
-  /* Every strip used to sample the <video> directly — two dozen transformed
-     drawImage calls from a moving 1080x1920 texture every frame, which
-     stalled the main thread so badly that rAF fired fewer than twice a
-     second. The frame is now copied once into a small offscreen canvas and
-     the strips are cut from that instead. */
-  var off = document.createElement("canvas"), offCtx = off.getContext("2d"), offReady = false;
-  function grabFrame(src, sw0, sh0){
-    var tw = small ? 240 : 420, th = Math.round(tw * (sh0 / sw0));
-    if(off.width !== tw || off.height !== th){ off.width = tw; off.height = th; }
-    try{ offCtx.drawImage(src, 0, 0, tw, th); offReady = true; }catch(e){ offReady = false; }
-    return offReady;
-  }
 
   var L = new Curtain(document.getElementById("clothL"), -1),
       Rt = new Curtain(document.getElementById("clothR"), 1),
@@ -1420,92 +1257,30 @@ var DAY = (function(){
   build();
   window.addEventListener("resize", function(){ if(!started) build(); });
 
-  /* She pulls it down, and the scroll is the rope.
-
-     Nothing opens on a timer: the curtain comes down exactly as far as she
-     scrolls, and the little heart rides the hem down holding on. The page
-     itself is held still while it happens, so the scroll has somewhere to
-     go — and it is released the moment the cloth is off. */
-  var progress = 0, opened = false, intro = document.querySelector(".intro"),
-      hint = document.getElementById("introHint");
-
-  function apply(){
-    var y = progress * 118;
-    L.cv.style.transform = "translate3d(0," + y.toFixed(2) + "%,0)";
-    Rt.cv.style.transform = L.cv.style.transform;
-    // she comes down with the cloth, hanging off the hem
-    intro.style.transform = "translate3d(0," + (progress * H * 1.02).toFixed(1) + "px,0)";
-
-    /* And she visibly hauls: arms stretch up to the hem, body leans back
-       against the weight, legs brace forward. Without this her hands just
-       sat there and nothing looked like it was doing the pulling. */
-    var arms = document.getElementById("guyArms"),
-        legs = document.getElementById("guyLegs"),
-        body = document.getElementById("guyBody"),
-        face = document.getElementById("guyFace"),
-        heave = Math.sin(progress * 22) * 1.6;          // a little effort in it
-    if(arms) arms.setAttribute("transform", "translate(0," + (-6 - progress * 20 + heave).toFixed(1) + ")");
-    if(legs) legs.setAttribute("transform", "rotate(" + (progress * 15).toFixed(1) + " 70 112)");
-    if(body) body.setAttribute("transform", "rotate(" + (-progress * 11).toFixed(1) + " 70 70)");
-    if(face) face.setAttribute("transform", "rotate(" + (-progress * 11).toFixed(1) + " 70 70)");
-    if(progress > 0.004){
-      stage.classList.add("pulling");
-      if(!started){ started = true; pullT = t; intro.classList.add("pulling"); }
-    }
-    if(progress >= 1) release();
-  }
-
-  function push(d){
-    if(opened) return;
-    progress = Math.max(0, Math.min(1, progress + d));
-    apply();
-  }
-
-  function release(){
-    if(opened) return;
-    opened = true;
+  /* Part them. The meshes billow where the rail lets go; the sheets
+     themselves are moved as whole canvases, because a mesh stretched past
+     its own width comes apart no matter how many solver passes it gets. */
+  function pull(){
+    if(started) return;
+    started = true;
+    pullT = t;
     stage.classList.add("opening");
-    window.scrollTo(0, 0);          // whatever leaked through, start her at the top
-    if(typeof burst === "function") burst(W * 0.5, H * 0.55, 30);
-    setTimeout(finish, 520);
+
+    setTimeout(function(){
+      L.cv.style.transition = "transform 1.3s cubic-bezier(.5,.05,.25,1), opacity .5s ease .85s";
+      Rt.cv.style.transition = L.cv.style.transition;
+      L.cv.style.transform = "translate3d(-104%,3%,0) rotate(-5deg)";
+      Rt.cv.style.transform = "translate3d(104%,3%,0) rotate(5deg)";
+      L.cv.style.opacity = "0"; Rt.cv.style.opacity = "0";
+      // petals, as they open
+      // a scatter of petals where the seal was, not a firework
+      if(typeof burst === "function") burst(W * 0.5, H * 0.44, 34);
+    }, 120);
+
+    setTimeout(finish, 1500);
   }
 
-  /* Hold the page still by refusing the scroll events, not by setting
-     overflow:hidden on the body. ScrollTrigger sets its pins up during
-     these first seconds, and measuring a document that cannot scroll left
-     it with a body of zero height — after the curtain lifted, the page
-     would not scroll at all. */
-  window.addEventListener("scroll", function(){
-    if(!opened && window.scrollY !== 0) window.scrollTo(0, 0);
-  }, { passive:true });
-
-  window.addEventListener("wheel", function(e){
-    if(opened) return;
-    e.preventDefault();
-    push(e.deltaY * 0.00072);
-  }, { passive:false });
-
-  var ty = null;
-  window.addEventListener("touchstart", function(e){ ty = e.touches[0].clientY; }, { passive:true });
-  window.addEventListener("touchmove", function(e){
-    if(opened) return;
-    e.preventDefault();
-    var y = e.touches[0].clientY;
-    if(ty !== null) push((ty - y) * 0.0013);
-    ty = y;
-  }, { passive:false });
-
-  window.addEventListener("keydown", function(e){
-    if(opened) return;
-    if(e.key === "ArrowDown" || e.key === " " || e.key === "PageDown"){ e.preventDefault(); push(0.16); }
-  });
-  // tapping helps her along too, so nobody can be stuck behind a gesture
-  stage.addEventListener("click", function(){ if(!opened) push(0.3); });
-
-  // and if she never scrolls at all, it opens on its own
-  setTimeout(function(){ if(!opened && progress < 0.02) { progress = 1; apply(); } }, 16000);
-
-  var last = 0, acc = 0, grabTick = 0, lastDraw = 0;
+  var last = 0, acc = 0;
   function frame(now){
     if(!last) last = now;
     var dt = Math.min((now - last) / 1000, .05);
@@ -1513,45 +1288,31 @@ var DAY = (function(){
     acc += dt;
     var wind = started ? 0 : Math.sin(t * 1.15) * 3.5 + Math.sin(t * .5) * 2;
 
-    /* Simulating and repainting a video-textured cloth on every frame cost
-       around 100ms a frame on a throttled phone — the whole opening
-       crawled. It does not need to: while it hangs, redrawing eight times
-       a second is plenty for a slow sway, and while she is pulling it down
-       the sheet moves as one piece under a CSS transform, so it needs no
-       repaint at all. The heart keeps animating either way. */
-    var pulling = progress > 0.004,
-        due = !pulling && (now - lastDraw > 120);
-
-    if(!due){
-      requestAnimationFrame(frame);
-      return;
+    while(acc >= 1/120){
+      t += 1/120;
+      both.forEach(function(cu){ cu.step(1/120, wind); });
+      acc -= 1/120;
     }
-    lastDraw = now;
 
-    // at most two physics steps a frame, so a slow frame cannot snowball
-    var steps = 0;
-    while(acc >= 1/60 && steps < 2){
-      t += 1/60;
-      both.forEach(function(cu){ cu.step(1/60, wind); });
-      acc -= 1/60; steps++;
+    if(started){
+      // the rail lets go from the middle outward, so they fall as they part
+      var release = Math.min((t - pullT) / 0.5, 1);
+      both.forEach(function(cu){
+        for(var c = 0; c < COLS; c++){
+          var fromCentre = cu.side < 0 ? (COLS - 1 - c) : c;
+          if(fromCentre / COLS <= release){
+            cu.pts[c].pin = false; cu.pts[COLS + c].pin = false;
+          }
+        }
+      });
     }
-    if(acc > 0.25) acc = 0;
 
-    /* Prefer the live video, fall back to its poster until it has frames. */
-    var src = null, sw0 = 0, sh0 = 0;
-    if(vid && vid.readyState >= 2 && vid.videoWidth){
-      src = vid; sw0 = vid.videoWidth; sh0 = vid.videoHeight;
-    } else if(poster && poster.complete && poster.naturalWidth){
-      src = poster; sw0 = poster.naturalWidth; sh0 = poster.naturalHeight;
-    }
-    if(src && (grabTick++ % 2 === 0)) grabFrame(src, sw0, sh0);
-    both.forEach(function(cu){ cu.draw(src, sw0, sh0); });
+    both.forEach(function(cu){ cu.draw(); });
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 
-  /* The count runs first; only then does she ask to be pulled. */
-  var counting = true;
+  /* the count, on the cloth */
   (function(){
     var t0 = null, DUR = 1200;
     function tick(now){
@@ -1560,11 +1321,13 @@ var DAY = (function(){
       num.textContent = pad2(Math.round(30 * eased));
       bar.style.width = (eased * 100).toFixed(1) + "%";
       if(p < 1) requestAnimationFrame(tick);
-      else { counting = false; hint.style.opacity = "1"; }
+      else setTimeout(pull, 260);
     }
-    hint.style.opacity = "0";
     requestAnimationFrame(tick);
   })();
+
+  setTimeout(function(){ if(!started) pull(); }, 3200);   // never hang
+  setTimeout(finish, 5200);                               // last resort
 })();
 
 /* ---------------- hero ---------------- */
