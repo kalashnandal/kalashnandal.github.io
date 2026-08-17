@@ -257,7 +257,12 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 
 /* ---------- tilt ---------- */
 .findings{perspective:1200px}
-.finding{transform-style:preserve-3d;will-change:transform}
+.finding{
+  transform-style:preserve-3d;will-change:transform;
+  transform:rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg)) translateY(var(--lift,0px));
+  transition:transform .5s cubic-bezier(.2,.8,.2,1),border-color .5s,background .5s;
+}
+.finding.tilting{transition:transform .16s ease-out}
 
 /* ---------- aurora field ----------
    A blur() filter this size has to be re-rasterised every frame, and with
@@ -416,7 +421,7 @@ h2.big em{font-style:italic}
    Row spans are computed from each file's real dimensions. */
 .sheet{
   display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:48px;
-  grid-auto-rows:6px;align-items:start;
+  grid-auto-rows:6px;align-items:start;perspective:1400px;
 }
 .tile{
   position:relative;overflow:hidden;border-radius:3px;background:#120D18;
@@ -426,7 +431,9 @@ h2.big em{font-style:italic}
   transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1.1s cubic-bezier(.2,.7,.2,1),
              clip-path 1.1s cubic-bezier(.2,.7,.2,1),border-color .4s;
 }
-.tile.in{opacity:1;transform:none;clip-path:inset(0 0 0 0)}
+.tile.in{opacity:1;clip-path:inset(0 0 0 0);
+  transform:rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg)) translateZ(var(--tz,0px))}
+.tile.tilting{transition:transform .16s ease-out,border-color .4s}
 /* the photo settles out of a slow push-in as the tile opens */
 .tile img{transform:scale(1.09)}
 .tile.in img{transform:scale(1)}
@@ -475,16 +482,35 @@ h2.big em{font-style:italic}
 .finding h4{font-family:var(--display);font-weight:400;font-size:19px;margin:12px 0 9px}
 .finding p{font-size:14px;line-height:1.8;color:var(--muted)}
 
+/* ---------- particle portrait ---------- */
+.dust-sec{position:relative}
+.dust-stage{
+  position:relative;margin:46px auto 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;
+  background:radial-gradient(70% 70% at 50% 45%,#150F1D,#07060A 78%);
+  aspect-ratio:3/4;max-height:76svh;width:min(100%,520px);
+}
+#dustCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+.dust-hint{
+  position:absolute;left:0;right:0;bottom:14px;text-align:center;pointer-events:none;
+  font-family:var(--mono);font-size:9px;letter-spacing:.26em;text-transform:uppercase;
+  color:rgba(246,241,234,.45);
+}
+
 /* ---------- thirty reasons ---------- */
 .reasons{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-top:44px;
   perspective:1000px;
 }
+/* Flip and tilt are composed from custom properties rather than each
+   writing `transform` — two rules fighting over one property is what left
+   these cards unable to turn over. */
 .reason{
-  position:relative;aspect-ratio:1/1;transform-style:preserve-3d;
-  transition:transform .7s cubic-bezier(.3,.8,.3,1);cursor:pointer;
+  position:relative;aspect-ratio:1/1;transform-style:preserve-3d;cursor:pointer;
+  transform:rotateX(var(--tx,0deg)) rotateY(calc(var(--ty,0deg) + var(--flip,0deg))) translateZ(var(--tz,0px));
+  transition:transform .7s cubic-bezier(.3,.8,.3,1);
 }
-.reason.open{transform:rotateY(180deg)}
+.reason.open{--flip:180deg}
+.reason.tilting{transition:transform .18s ease-out}
 .reason .side{
   position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
   border:1px solid var(--line);border-radius:4px;display:grid;place-items:center;
@@ -836,6 +862,19 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
     <div class="kicker reveal">Audit findings · No qualifications</div>
     <h2 class="big reveal">Material observations, <em>reported honestly.</em></h2>
     <div class="findings reveal" id="findings"></div>
+  </div>
+</section>
+
+<!-- ============ PARTICLE PORTRAIT ============ -->
+<section class="dust-sec">
+  <div class="wrap">
+    <div class="kicker reveal">Held together</div>
+    <h2 class="big reveal">Thirty thousand small pieces, <em>and all of them her.</em></h2>
+    <p class="lede reveal">Scroll and she gathers. Move across her and she scatters, then finds her way back.</p>
+    <div class="dust-stage reveal">
+      <canvas id="dustCanvas"></canvas>
+      <div class="dust-hint">Move across her</div>
+    </div>
   </div>
 </section>
 
@@ -1631,6 +1670,138 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   });
 })();
 
+/* ---------------- particle portrait ----------------
+   A photograph read pixel by pixel, each one becoming a particle that
+   drifts and returns. Drawn by writing straight into an ImageData buffer
+   and blitting it once a frame — thirty thousand fillRect calls would not
+   survive a phone, one putImageData will. */
+(function(){
+  var cv = document.getElementById("dustCanvas");
+  if(!cv || !cv.getContext) return;
+  var ctx = cv.getContext("2d", { alpha:false });
+
+  var stage = cv.parentNode;
+  var img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = urlOf(frames[29]);        // big glasses, softest smile
+
+  var W = 0, H = 0, N = 0, running = false, ready = false,
+      px, py, vx, vy, tx, ty, col, buf, id32, imgData,
+      mx = -9999, my = -9999, grav = 0, gather = 0;
+
+  function build(){
+    var r = cv.getBoundingClientRect();
+    W = Math.max(1, Math.round(r.width));
+    H = Math.max(1, Math.round(r.height));
+    cv.width = W; cv.height = H;
+    imgData = ctx.createImageData(W, H);
+    buf = imgData.data;
+    id32 = new Uint32Array(buf.buffer);
+
+    // fill the stage rather than sitting inside it — anything that falls
+    // outside simply is not turned into a particle
+    var scale = Math.max(W / img.naturalWidth, H / img.naturalHeight),
+        dw = Math.round(img.naturalWidth * scale),
+        dh = Math.round(img.naturalHeight * scale),
+        ox = ((W - dw) / 2) | 0, oy = ((H - dh) / 2) | 0;
+
+    var tmp = document.createElement("canvas");
+    tmp.width = dw; tmp.height = dh;
+    var tctx = tmp.getContext("2d");
+    tctx.drawImage(img, 0, 0, dw, dh);
+    var src = tctx.getImageData(0, 0, dw, dh).data;
+
+    // one particle every few pixels — denser on a big screen
+    var step = W < 700 ? 3 : 2, pts = [];   // one particle per 2-3px of photograph
+    for(var y = 0; y < dh; y += step){
+      for(var x = 0; x < dw; x += step){
+        var i = (y * dw + x) * 4, a = src[i + 3];
+        if(a < 24) continue;
+        var r8 = src[i], g8 = src[i+1], b8 = src[i+2];
+        if(r8 + g8 + b8 < 26) continue;                 // skip the near-black
+        // the photograph is dim; particles of it are dimmer still
+        r8 = r8 < 205 ? (r8 * 1.24) | 0 : 255;
+        g8 = g8 < 205 ? (g8 * 1.22) | 0 : 255;
+        b8 = b8 < 205 ? (b8 * 1.20) | 0 : 255;
+        var gx = x + ox, gy = y + oy;
+        if(gx < -40 || gy < -40 || gx > W + 40 || gy > H + 40) continue;
+        pts.push(gx, gy, (255 << 24) | (b8 << 16) | (g8 << 8) | r8);
+      }
+    }
+
+    N = pts.length / 3;
+    px = new Float32Array(N); py = new Float32Array(N);
+    vx = new Float32Array(N); vy = new Float32Array(N);
+    tx = new Float32Array(N); ty = new Float32Array(N);
+    col = new Uint32Array(N);
+    for(var k = 0; k < N; k++){
+      tx[k] = pts[k*3]; ty[k] = pts[k*3+1]; col[k] = pts[k*3+2];
+      var a2 = Math.random() * 6.283, d = 240 + Math.random() * 620;
+      px[k] = W/2 + Math.cos(a2) * d;
+      py[k] = H/2 + Math.sin(a2) * d * 0.7;
+      vx[k] = vy[k] = 0;
+    }
+    ready = true;
+  }
+
+  img.onload = function(){
+    // the stage takes the photograph's own shape, so nothing is cropped
+    // and nothing is letterboxed
+    stage.style.aspectRatio = img.naturalWidth + " / " + img.naturalHeight;
+    build();
+  };
+  window.addEventListener("resize", function(){ if(ready) build(); });
+
+  cv.addEventListener("pointermove", function(e){
+    var r = cv.getBoundingClientRect();
+    mx = e.clientX - r.left; my = e.clientY - r.top;
+  });
+  cv.addEventListener("pointerleave", function(){ mx = my = -9999; });
+
+  if("IntersectionObserver" in window){
+    new IntersectionObserver(function(en){ running = en[0].isIntersecting; },
+      { threshold:.08 }).observe(cv);
+  } else running = true;
+
+  function frame(){
+    requestAnimationFrame(frame);
+    if(!ready || !running) return;
+
+    // she gathers as she comes into view
+    gather += (1 - gather) * 0.02;
+
+    id32.fill(0xff07060a);                                // the stage colour
+
+    var pull = 0.055 * gather, damp = 0.86, R = 105, R2 = R * R;
+    for(var k = 0; k < N; k++){
+      var dx = tx[k] - px[k], dy = ty[k] - py[k];
+      var ax = dx * pull, ay = dy * pull;
+
+      // and scatters where the pointer crosses her
+      var ox2 = px[k] - mx, oy2 = py[k] - my, d2 = ox2*ox2 + oy2*oy2;
+      if(d2 < R2 && d2 > 0.01){
+        var f = (1 - d2 / R2) * 26 / Math.sqrt(d2);
+        ax += ox2 * f; ay += oy2 * f;
+      }
+
+      vx[k] = (vx[k] + ax) * damp;
+      vy[k] = (vy[k] + ay) * damp;
+      px[k] += vx[k]; py[k] += vy[k];
+
+      /* Two by two, not one pixel: at one particle per pixel the portrait
+         needed four times as many to look solid, and this costs three more
+         array writes instead. */
+      var xi = px[k] | 0, yi = py[k] | 0;
+      if(xi >= 0 && xi < W - 1 && yi >= 0 && yi < H - 1){
+        var o = yi * W + xi, c = col[k];
+        id32[o] = c; id32[o+1] = c; id32[o+W] = c; id32[o+W+1] = c;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+  requestAnimationFrame(frame);
+})();
+
 /* ---------------- thirty reasons ---------------- */
 (function(){
   var box = document.getElementById("reasons"),
@@ -2093,17 +2264,30 @@ LB = (function(){
     btn.addEventListener("mouseleave", function(){ btn.style.transform = ""; });
   });
 
-  /* Finding cards tip in 3D under the pointer. */
-  Array.prototype.forEach.call(document.querySelectorAll(".finding"), function(card){
-    card.addEventListener("mousemove", function(e){
-      var r = card.getBoundingClientRect(),
-          px = (e.clientX - r.left) / r.width - .5,
-          py = (e.clientY - r.top) / r.height - .5;
-      card.style.transform = "perspective(1000px) rotateY(" + (px * 9).toFixed(2) +
-        "deg) rotateX(" + (-py * 9).toFixed(2) + "deg) translateY(-5px)";
+  /* Every card tips in 3D under the pointer. The tilt is written as custom
+     properties, so it composes with the flip instead of overwriting it. */
+  function tiltable(sel, deg, extra){
+    Array.prototype.forEach.call(document.querySelectorAll(sel), function(card){
+      card.addEventListener("mousemove", function(e){
+        var r = card.getBoundingClientRect(),
+            px = (e.clientX - r.left) / r.width - .5,
+            py = (e.clientY - r.top) / r.height - .5;
+        card.classList.add("tilting");
+        card.style.setProperty("--ty", (px * deg).toFixed(2) + "deg");
+        card.style.setProperty("--tx", (-py * deg).toFixed(2) + "deg");
+        if(extra) card.style.setProperty(extra.k, extra.v);
+      });
+      card.addEventListener("mouseleave", function(){
+        card.classList.remove("tilting");
+        card.style.setProperty("--ty", "0deg");
+        card.style.setProperty("--tx", "0deg");
+        if(extra) card.style.setProperty(extra.k, extra.z);
+      });
     });
-    card.addEventListener("mouseleave", function(){ card.style.transform = ""; });
-  });
+  }
+  tiltable(".finding", 9, { k:"--lift", v:"-5px", z:"0px" });
+  tiltable(".reason", 11, { k:"--tz", v:"14px", z:"0px" });
+  tiltable(".tile", 6, { k:"--tz", v:"18px", z:"0px" });
 })();
 
 /* ---------------- scramble the section labels on arrival ---------------- */
