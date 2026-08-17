@@ -470,7 +470,7 @@ h2.big em{font-style:italic}
 /* ---------- findings ---------- */
 /* Fixed three across so the six findings fill two complete rows — an
    auto-fit track went to four columns on wide screens and left two holes. */
-.findings{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:46px}
+.findings{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:46px;perspective:1200px}
 @media (max-width:1000px){ .findings{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:620px){ .findings{grid-template-columns:1fr} }
 .finding{
@@ -481,6 +481,54 @@ h2.big em{font-style:italic}
 .finding .ref{font-family:var(--mono);font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--rose-deep)}
 .finding h4{font-family:var(--display);font-weight:400;font-size:19px;margin:12px 0 9px}
 .finding p{font-size:14px;line-height:1.8;color:var(--muted)}
+
+/* ---------- the laptop it was built on ---------- */
+.mac-sec{position:relative}
+.mac-track{position:relative;height:calc(100svh + 120svh)}
+.mac-pin{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden}
+.mac-title{
+  position:absolute;top:clamp(40px,9svh,110px);left:0;right:0;text-align:center;padding:0 var(--pad);
+  font-family:var(--display);font-weight:300;font-size:clamp(20px,3.4vw,36px);line-height:1.25;
+}
+.mac-title em{font-style:italic;color:var(--rose)}
+.mac{width:min(88vw,780px);perspective:1400px;transform:translateY(6svh)}
+.mac .lid{
+  position:relative;transform-origin:50% 100%;transform:rotateX(var(--open,-88deg));
+  will-change:transform;
+}
+.mac .screen{
+  position:relative;border-radius:12px 12px 3px 3px;overflow:hidden;
+  background:#0A080D;border:2px solid #2A2530;border-bottom:none;
+  aspect-ratio:16/10;box-shadow:0 -10px 40px rgba(0,0,0,.55);
+}
+.mac .screen img{width:100%;height:100%;object-fit:cover;display:block;opacity:.94}
+.mac .screen .bezeltext{
+  position:absolute;left:0;right:0;bottom:8px;text-align:center;
+  font-family:var(--mono);font-size:8px;letter-spacing:.3em;color:rgba(246,241,234,.5);
+}
+.mac .glare{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(112deg,rgba(255,255,255,.16),transparent 42%);
+  opacity:var(--glare,.9);
+}
+.mac .base{
+  height:clamp(14px,2.4vw,22px);border-radius:0 0 12px 12px;
+  background:linear-gradient(180deg,#3A3542,#211D28 60%,#15121B);
+  box-shadow:0 22px 50px rgba(0,0,0,.6);position:relative;
+}
+.mac .base:before{
+  content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);
+  width:16%;height:4px;border-radius:0 0 6px 6px;background:#15121B;
+}
+.mac .keys{
+  position:absolute;left:6%;right:6%;top:-1px;height:0;overflow:hidden;
+}
+
+/* ---------- clouds ---------- */
+.cloudwrap{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:.85}
+#cloudCanvas{width:100%;height:100%;display:block}
+.letter-sec{position:relative;isolation:isolate}
+.letter-sec .wrap{position:relative;z-index:1}
 
 /* ---------- particle portrait ---------- */
 .dust-sec{position:relative}
@@ -865,6 +913,25 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
   </div>
 </section>
 
+<!-- ============ THE LAPTOP ============ -->
+<section class="mac-sec">
+  <div class="mac-track" id="macTrack">
+    <div class="mac-pin">
+      <div class="mac-title reveal">Built for you on this, <em>at two in the morning.</em></div>
+      <div class="mac" id="mac">
+        <div class="lid" id="macLid">
+          <div class="screen">
+            <img src="https://kalashnandal.co.in/I-love-you/12.webp" alt="Niharika" width="720" height="1280">
+            <div class="glare" id="macGlare"></div>
+            <div class="bezeltext">for niharika · 20 august</div>
+          </div>
+        </div>
+        <div class="base"><div class="keys"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ PARTICLE PORTRAIT ============ -->
 <section class="dust-sec">
   <div class="wrap">
@@ -914,6 +981,7 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
 
 <!-- ============ LETTER ============ -->
 <section class="letter-sec">
+  <div class="cloudwrap" aria-hidden="true"><canvas id="cloudCanvas"></canvas></div>
   <div class="wrap">
     <div class="kicker reveal">The note</div>
     <h2 class="big reveal">Everything I don't say out loud <em>often enough.</em></h2>
@@ -1667,6 +1735,188 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
     d.className = "finding";
     d.innerHTML = '<div class="ref">' + f.ref + '</div><h4>' + f.h + '</h4><p>' + f.p + '</p>';
     box.appendChild(d);
+  });
+})();
+
+/* ---------------- the laptop ----------------
+   The lid opens as she scrolls through the pinned section. It is one CSS
+   rotation driven by scroll position — no per-frame work beyond writing a
+   single custom property, so it costs essentially nothing. */
+(function(){
+  var track = document.getElementById("macTrack"),
+      lid = document.getElementById("macLid"),
+      glare = document.getElementById("macGlare");
+  if(!track || !lid) return;
+
+  var queued = false;
+  function apply(){
+    queued = false;
+    var r = track.getBoundingClientRect(),
+        span = track.offsetHeight - window.innerHeight;
+    if(span <= 0) return;
+    var p = Math.max(0, Math.min(1, -r.top / span));
+    // most of the opening happens in the first two thirds, then it rests
+    var k = Math.min(1, p / 0.66), ease = k * k * (3 - 2 * k);
+    lid.style.setProperty("--open", (-88 + ease * 88).toFixed(2) + "deg");
+    if(glare) glare.style.setProperty("--glare", (0.9 - ease * 0.72).toFixed(3));
+  }
+  function ask(){ if(!queued){ queued = true; requestAnimationFrame(apply); } }
+  window.addEventListener("scroll", ask, { passive:true });
+  window.addEventListener("resize", ask);
+  ask();
+})();
+
+/* ---------------- clouds ----------------
+   A small WebGL shader behind the letter: layered value noise drifting.
+   Rendered at half resolution into a canvas that is stretched back up —
+   the fill rate is what costs on a phone, and nobody can tell at this
+   softness. Paused whenever the section is off screen. */
+(function(){
+  var cv = document.getElementById("cloudCanvas");
+  if(!cv || reduce) return;
+  var gl = cv.getContext("webgl", { alpha:true, antialias:false, depth:false, premultipliedAlpha:true });
+  if(!gl){ cv.style.display = "none"; return; }
+
+  var vsSrc = "attribute vec2 p;varying vec2 uv;void main(){uv=p*0.5+0.5;gl_Position=vec4(p,0.0,1.0);}";
+  var fsSrc = [
+    "precision mediump float;varying vec2 uv;uniform float t;uniform vec2 res;",
+    "float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}",
+    "float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);",
+    "return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}",
+    // three octaves, evaluated once — two four-octave fbms per pixel cost
+    // 17ms a frame, which is most of a frame budget for a background
+    "float fbm(vec2 p){float v=0.0,a=0.55;for(int i=0;i<2;i++){v+=a*n(p);p*=2.1;a*=0.5;}return v;}",
+    "void main(){",
+    "  vec2 q=uv*vec2(res.x/res.y,1.0);",
+    "  float d=fbm(q*2.4+vec2(t*0.032,t*0.017));",
+    "  float m=smoothstep(0.30,0.86,d);",
+    "  vec3 wine=vec3(0.29,0.07,0.17), rose=vec3(0.94,0.72,0.77), gold=vec3(0.91,0.79,0.51);",
+    "  vec3 c=mix(wine,rose,m);",
+    "  c=mix(c,gold,smoothstep(0.66,1.0,d)*0.4);",
+    "  float edge=smoothstep(1.0,0.35,length(uv-0.5)*1.6);",
+    "  gl_FragColor=vec4(c,m*0.55*edge);",
+    "}"
+  ].join("\n");
+
+  function sh(type, src){
+    var o = gl.createShader(type);
+    gl.shaderSource(o, src); gl.compileShader(o);
+    return gl.getShaderParameter(o, gl.COMPILE_STATUS) ? o : null;
+  }
+  var vs = sh(gl.VERTEX_SHADER, vsSrc), fs = sh(gl.FRAGMENT_SHADER, fsSrc);
+  if(!vs || !fs){ cv.style.display = "none"; return; }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ cv.style.display = "none"; return; }
+  gl.useProgram(prog);
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  var loc = gl.getAttribLocation(prog, "p");
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+  var uT = gl.getUniformLocation(prog, "t"), uR = gl.getUniformLocation(prog, "res"),
+      running = false, t0 = performance.now();
+
+  function size(){
+    var r = cv.getBoundingClientRect(), q = 0.28;     // a fraction of the pixels
+    var w = Math.max(2, (r.width * q) | 0), h = Math.max(2, (r.height * q) | 0);
+    if(cv.width !== w || cv.height !== h){ cv.width = w; cv.height = h; }
+    gl.viewport(0, 0, cv.width, cv.height);
+    gl.uniform2f(uR, cv.width, cv.height);
+  }
+  window.addEventListener("resize", size);
+  size();
+
+  if("IntersectionObserver" in window){
+    new IntersectionObserver(function(e){ running = e[0].isIntersecting; },
+      { threshold:.02 }).observe(cv);
+  } else running = true;
+
+  /* And a guarantee rather than a hope: the first couple of seconds of
+     drawing are timed, and if this device cannot keep up while the clouds
+     are on screen they are switched off for good. A background is never
+     worth a dropped frame. */
+  var lastDraw = 0, samples = [], judged = false, watchFrom = 0;
+
+  function judge(now){
+    if(judged) return;
+    if(!watchFrom){ watchFrom = now; return; }
+    if(now - watchFrom < 2000) return;
+    judged = true;
+    samples.sort(function(a, b){ return a - b; });
+    var med = samples[samples.length >> 1] || 0;
+    if(med > 24){                                   // slower than ~40fps
+      running = false;
+      cv.parentNode && cv.parentNode.removeChild(cv);
+    }
+  }
+
+  var prev = 0;
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(!running) return;
+    if(prev && samples.length < 240) samples.push(now - prev);
+    prev = now;
+    judge(now);
+    if(now - lastDraw < 66) return;                  // 15fps is plenty for drifting cloud
+    lastDraw = now;
+    gl.uniform1f(uT, (now - t0) / 1000);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ---------------- cards in depth ----------------
+   The pointer tilt only exists on a mouse, so on a phone the cards were
+   flat. Their angle now also comes from where they sit on the screen —
+   the ones above centre lean back, the ones below lean forward — which
+   reads as depth while she scrolls, with no pointer involved. */
+(function(){
+  if(reduce) return;
+  var groups = [
+    { sel:".reason", deg:9 },
+    { sel:".finding", deg:6 },
+    { sel:".tile", deg:4 }
+  ], items = [], queued = false;
+
+  /* Positions are measured once and cached. Reading getBoundingClientRect
+     for sixty-odd cards on every scroll frame forces a layout each time,
+     and that alone took the page from 17ms a frame to 50. */
+  function collect(){
+    items = [];
+    var sy = window.scrollY;
+    groups.forEach(function(g){
+      Array.prototype.forEach.call(document.querySelectorAll(g.sel), function(el){
+        var r = el.getBoundingClientRect();
+        items.push({ el:el, deg:g.deg, mid:r.top + sy + r.height / 2 });
+      });
+    });
+  }
+
+  function apply(){
+    queued = false;
+    var h = window.innerHeight, mid = h / 2, sy = window.scrollY;
+    for(var i = 0; i < items.length; i++){
+      var it = items[i], centre = it.mid - sy;
+      if(centre < -160 || centre > h + 160) continue;     // off screen, skip
+      if(it.el.classList.contains("tilting")) continue;   // a pointer owns it
+      var k = Math.max(-1, Math.min(1, (centre - mid) / mid));
+      it.el.style.setProperty("--tx", (-k * it.deg).toFixed(2) + "deg");
+    }
+  }
+  function ask(){ if(!queued){ queued = true; requestAnimationFrame(apply); } }
+
+  window.addEventListener("scroll", ask, { passive:true });
+  window.addEventListener("resize", function(){ collect(); ask(); });
+  window.addEventListener("load", function(){ collect(); ask(); });
+  collect(); ask();
+  [600, 1600, 3000].forEach(function(ms){          // as the grids and images settle
+    setTimeout(function(){ collect(); ask(); }, ms);
   });
 })();
 
