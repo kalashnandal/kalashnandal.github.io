@@ -286,7 +286,10 @@ button:focus-visible,a:focus-visible{outline:1px solid var(--rose);outline-offse
 @media (prefers-reduced-motion:reduce){ .aurora i{animation:none} }
 
 /* ---------- generic section ---------- */
-section{position:relative;z-index:1}
+/* Anything laid out in normal flow paints *below* .backdrop (fixed, z-index:0),
+   so every band of the page has to be lifted out of the flow layer — the footer
+   was not, and read as 250px of dead space at the end. */
+section,.marquee,footer{position:relative;z-index:1}
 .wrap{max-width:1220px;margin:0 auto;padding:clamp(76px,11vw,150px) var(--pad)}
 .kicker{
   font-family:var(--mono);font-size:10px;letter-spacing:.36em;text-transform:uppercase;color:var(--rose-deep);
@@ -896,7 +899,7 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
     <p class="lede reveal">Scroll and she gathers. Move across her and she scatters, then finds her way back.</p>
     <div class="dust-stage reveal">
       <canvas id="dustCanvas"></canvas>
-      <div class="dust-hint">Move across her</div>
+      <div class="dust-hint" id="dustHint">Move across her</div>
     </div>
   </div>
 </section>
@@ -1937,11 +1940,41 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   };
   window.addEventListener("resize", function(){ if(ready) build(); });
 
-  cv.addEventListener("pointermove", function(e){
+  /* A finger is not a mouse. Once a touch turns into a page scroll the
+     browser stops sending pointermove, so on a phone she never scattered.
+     touchmove keeps firing right through the scroll, so read that instead —
+     passively, so scrolling is never held up. */
+  var touched = false;
+  function at(x, y){
     var r = cv.getBoundingClientRect();
-    mx = e.clientX - r.left; my = e.clientY - r.top;
+    mx = x - r.left; my = y - r.top;
+  }
+  cv.addEventListener("pointermove", function(e){
+    if(e.pointerType === "touch") return;             // touch is handled below
+    at(e.clientX, e.clientY);
   });
   cv.addEventListener("pointerleave", function(){ mx = my = -9999; });
+
+  function fromTouch(e){
+    var t = e.touches[0];
+    if(!t) return;
+    touched = true;
+    at(t.clientX, t.clientY);
+  }
+  cv.addEventListener("touchstart", fromTouch, { passive:true });
+  cv.addEventListener("touchmove", fromTouch, { passive:true });
+  function letGo(){ mx = my = -9999; }
+  cv.addEventListener("touchend", letGo, { passive:true });
+  cv.addEventListener("touchcancel", letGo, { passive:true });
+
+  /* And on a phone nobody hovers, so she has to show what she does first:
+     one slow sweep across her while she is on screen, which stops for good
+     the moment a real finger arrives. */
+  var demo = matchMedia("(hover:none)").matches, demoT = 0;
+  if(demo){
+    var hint = document.getElementById("dustHint");
+    if(hint) hint.textContent = "Drag a finger across her";
+  }
 
   if("IntersectionObserver" in window){
     new IntersectionObserver(function(en){ running = en[0].isIntersecting; },
@@ -1954,6 +1987,15 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
 
     // she gathers as she comes into view
     gather += (1 - gather) * 0.02;
+
+    if(demo){
+      if(touched) demo = false;
+      else if(gather > .55){
+        demoT += 0.011;
+        if(demoT > 1.15){ demo = false; mx = my = -9999; }
+        else { mx = W * (0.12 + demoT * 0.78); my = H * (0.42 + Math.sin(demoT * 3.1) * 0.13); }
+      }
+    }
 
     id32.fill(0xff07060a);                                // the stage colour
 
