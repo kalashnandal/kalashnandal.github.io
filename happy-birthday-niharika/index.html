@@ -482,50 +482,25 @@ h2.big em{font-style:italic}
 .finding h4{font-family:var(--display);font-weight:400;font-size:19px;margin:12px 0 9px}
 .finding p{font-size:14px;line-height:1.8;color:var(--muted)}
 
-/* ---------- the laptop it was built on ---------- */
-.mac-sec{position:relative}
-.mac-track{position:relative;height:calc(100svh + 120svh)}
-.mac-pin{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden}
-.mac-title{
-  position:absolute;top:clamp(40px,9svh,110px);left:0;right:0;text-align:center;padding:0 var(--pad);
-  font-family:var(--display);font-weight:300;font-size:clamp(20px,3.4vw,36px);line-height:1.25;
-}
-.mac-title em{font-style:italic;color:var(--rose)}
-.mac{width:min(88vw,780px);perspective:1400px;transform:translateY(6svh)}
-.mac .lid{
-  position:relative;transform-origin:50% 100%;transform:rotateX(var(--open,-88deg));
-  will-change:transform;
-}
-.mac .screen{
-  position:relative;border-radius:12px 12px 3px 3px;overflow:hidden;
-  background:#0A080D;border:2px solid #2A2530;border-bottom:none;
-  aspect-ratio:16/10;box-shadow:0 -10px 40px rgba(0,0,0,.55);
-}
-.mac .screen img{width:100%;height:100%;object-fit:cover;display:block;opacity:.94}
-.mac .screen .bezeltext{
-  position:absolute;left:0;right:0;bottom:8px;text-align:center;
-  font-family:var(--mono);font-size:8px;letter-spacing:.3em;color:rgba(246,241,234,.5);
-}
-.mac .glare{
-  position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(112deg,rgba(255,255,255,.16),transparent 42%);
-  opacity:var(--glare,.9);
-}
-.mac .base{
-  height:clamp(14px,2.4vw,22px);border-radius:0 0 12px 12px;
-  background:linear-gradient(180deg,#3A3542,#211D28 60%,#15121B);
-  box-shadow:0 22px 50px rgba(0,0,0,.6);position:relative;
-}
-.mac .base:before{
-  content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);
-  width:16%;height:4px;border-radius:0 0 6px 6px;background:#15121B;
-}
-.mac .keys{
-  position:absolute;left:6%;right:6%;top:-1px;height:0;overflow:hidden;
-}
-
 /* ---------- clouds ---------- */
-.cloudwrap{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:.85}
+.cloudwrap{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+/* If WebGL is missing or the shader switches itself off, something still
+   drifts there rather than nothing at all — but only then, or the two
+   layers stack and the section turns to soup. */
+.cloudwrap.shader:before{display:none}
+.cloudwrap:before{
+  content:"";position:absolute;inset:-15%;
+  background:
+    radial-gradient(38% 30% at 28% 30%,rgba(193,96,122,.30),transparent 70%),
+    radial-gradient(34% 28% at 74% 58%,rgba(233,201,131,.20),transparent 72%),
+    radial-gradient(44% 34% at 50% 88%,rgba(120,74,168,.26),transparent 74%);
+  animation:cloudDrift 44s ease-in-out infinite;
+}
+@keyframes cloudDrift{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  50%{transform:translate3d(4%,-3%,0) scale(1.08)}
+}
+@media (prefers-reduced-motion:reduce){ .cloudwrap:before{animation:none} }
 #cloudCanvas{width:100%;height:100%;display:block}
 .letter-sec{position:relative;isolation:isolate}
 .letter-sec .wrap{position:relative;z-index:1}
@@ -700,7 +675,7 @@ h2.big em{font-style:italic}
 .envstage.open .letterhold{opacity:1}
 
 /* ---------- letter ---------- */
-.letter-sec{background:linear-gradient(180deg,#07060A,#0E0A14 40%,#07060A)}
+.letter-sec{background:linear-gradient(180deg,#07060A,#0B0812 40%,#07060A)}
 .letter{
   max-width:760px;margin:52px auto 0;padding:clamp(30px,6vw,64px);
   border:1px solid var(--line);border-radius:4px;
@@ -910,25 +885,6 @@ footer .fine{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacin
     <div class="kicker reveal">Audit findings · No qualifications</div>
     <h2 class="big reveal">Material observations, <em>reported honestly.</em></h2>
     <div class="findings reveal" id="findings"></div>
-  </div>
-</section>
-
-<!-- ============ THE LAPTOP ============ -->
-<section class="mac-sec">
-  <div class="mac-track" id="macTrack">
-    <div class="mac-pin">
-      <div class="mac-title reveal">Built for you on this, <em>at two in the morning.</em></div>
-      <div class="mac" id="mac">
-        <div class="lid" id="macLid">
-          <div class="screen">
-            <img src="https://kalashnandal.co.in/I-love-you/12.webp" alt="Niharika" width="720" height="1280">
-            <div class="glare" id="macGlare"></div>
-            <div class="bezeltext">for niharika · 20 august</div>
-          </div>
-        </div>
-        <div class="base"><div class="keys"></div></div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -1738,34 +1694,6 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   });
 })();
 
-/* ---------------- the laptop ----------------
-   The lid opens as she scrolls through the pinned section. It is one CSS
-   rotation driven by scroll position — no per-frame work beyond writing a
-   single custom property, so it costs essentially nothing. */
-(function(){
-  var track = document.getElementById("macTrack"),
-      lid = document.getElementById("macLid"),
-      glare = document.getElementById("macGlare");
-  if(!track || !lid) return;
-
-  var queued = false;
-  function apply(){
-    queued = false;
-    var r = track.getBoundingClientRect(),
-        span = track.offsetHeight - window.innerHeight;
-    if(span <= 0) return;
-    var p = Math.max(0, Math.min(1, -r.top / span));
-    // most of the opening happens in the first two thirds, then it rests
-    var k = Math.min(1, p / 0.66), ease = k * k * (3 - 2 * k);
-    lid.style.setProperty("--open", (-88 + ease * 88).toFixed(2) + "deg");
-    if(glare) glare.style.setProperty("--glare", (0.9 - ease * 0.72).toFixed(3));
-  }
-  function ask(){ if(!queued){ queued = true; requestAnimationFrame(apply); } }
-  window.addEventListener("scroll", ask, { passive:true });
-  window.addEventListener("resize", ask);
-  ask();
-})();
-
 /* ---------------- clouds ----------------
    A small WebGL shader behind the letter: layered value noise drifting.
    Rendered at half resolution into a canvas that is stretched back up —
@@ -1775,7 +1703,7 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   var cv = document.getElementById("cloudCanvas");
   if(!cv || reduce) return;
   var gl = cv.getContext("webgl", { alpha:true, antialias:false, depth:false, premultipliedAlpha:true });
-  if(!gl){ cv.style.display = "none"; return; }
+  if(!gl){ cv.parentNode.removeChild(cv); return; }   // the gradient behind it stands in
 
   var vsSrc = "attribute vec2 p;varying vec2 uv;void main(){uv=p*0.5+0.5;gl_Position=vec4(p,0.0,1.0);}";
   var fsSrc = [
@@ -1789,12 +1717,12 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
     "void main(){",
     "  vec2 q=uv*vec2(res.x/res.y,1.0);",
     "  float d=fbm(q*2.4+vec2(t*0.032,t*0.017));",
-    "  float m=smoothstep(0.30,0.86,d);",
+    "  float m=smoothstep(0.24,0.80,d);",
     "  vec3 wine=vec3(0.29,0.07,0.17), rose=vec3(0.94,0.72,0.77), gold=vec3(0.91,0.79,0.51);",
     "  vec3 c=mix(wine,rose,m);",
     "  c=mix(c,gold,smoothstep(0.66,1.0,d)*0.4);",
-    "  float edge=smoothstep(1.0,0.35,length(uv-0.5)*1.6);",
-    "  gl_FragColor=vec4(c,m*0.55*edge);",
+    "  float edge=smoothstep(1.15,0.25,length(uv-0.5)*1.35);",
+    "  gl_FragColor=vec4(c,m*0.42*edge);",
     "}"
   ].join("\n");
 
@@ -1804,10 +1732,10 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
     return gl.getShaderParameter(o, gl.COMPILE_STATUS) ? o : null;
   }
   var vs = sh(gl.VERTEX_SHADER, vsSrc), fs = sh(gl.FRAGMENT_SHADER, fsSrc);
-  if(!vs || !fs){ cv.style.display = "none"; return; }
+  if(!vs || !fs){ cv.parentNode.removeChild(cv); return; }
   var prog = gl.createProgram();
   gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ cv.style.display = "none"; return; }
+  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ cv.parentNode.removeChild(cv); return; }
   gl.useProgram(prog);
 
   var buf = gl.createBuffer();
@@ -1818,6 +1746,7 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  cv.parentNode.classList.add("shader");         // stand down, fallback
 
   var uT = gl.getUniformLocation(prog, "t"), uR = gl.getUniformLocation(prog, "res"),
       running = false, t0 = performance.now();
@@ -1843,16 +1772,22 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
      worth a dropped frame. */
   var lastDraw = 0, samples = [], judged = false, watchFrom = 0;
 
+  /* The guard exists to catch a device that genuinely cannot afford this,
+     not to punish a page that is still loading. It waits until the clouds
+     have actually been on screen a while, ignores the first second, and
+     only gives up on sustained slowness. */
   function judge(now){
     if(judged) return;
     if(!watchFrom){ watchFrom = now; return; }
-    if(now - watchFrom < 2000) return;
+    if(now - watchFrom < 1000){ samples.length = 0; return; }   // settle first
+    if(now - watchFrom < 4000) return;
     judged = true;
     samples.sort(function(a, b){ return a - b; });
     var med = samples[samples.length >> 1] || 0;
-    if(med > 24){                                   // slower than ~40fps
+    if(med > 42){                                   // worse than ~24fps, sustained
       running = false;
-      cv.parentNode && cv.parentNode.removeChild(cv);
+      var wrap = cv.parentNode;
+      if(wrap){ wrap.classList.remove("shader"); wrap.removeChild(cv); }  // fallback takes over
     }
   }
 
