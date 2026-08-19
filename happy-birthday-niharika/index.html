@@ -2200,8 +2200,12 @@ Array.prototype.forEach.call(document.querySelectorAll(".reveal"), watch);
   });
   document.getElementById("sign").textContent = "— " + CONFIG.signOff;
   document.getElementById("ps").textContent = "P.S. Soul still comes second. You're first.";
+  /* Her birthday, not today's date — the note is dated the day it is for,
+     whatever day she happens to open it on. */
+  var B = CONFIG.birthday;
   document.getElementById("stamp").textContent =
-    new Date().toLocaleDateString("en-IN", { day:"2-digit", month:"long", year:"numeric" });
+    new Date(B.year || new Date().getFullYear(), B.month - 1, B.day)
+      .toLocaleDateString("en-IN", { day:"2-digit", month:"long", year:"numeric" });
 })();
 
 /* ================================================================
