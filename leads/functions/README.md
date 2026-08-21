@@ -32,6 +32,26 @@ The token goes in by typing it into the prompt below. It should not be pasted
 into a file, a repo, an email, or a chat — if it ever lands in one of those,
 revoke it in GHL and issue a new one.
 
+## Check it before you deploy anything
+
+`check-ghl.mjs` does the tedious part for you. It proves the token works,
+**lists your calendars and your team with their ids** so you never have to dig
+them out of GHL's URLs, and then makes the one call nobody has been able to
+verify — real free slots on a real calendar.
+
+```bash
+cd leads/functions
+GHL_TOKEN='pit-...' GHL_LOCATION_ID='...' node check-ghl.mjs
+```
+
+Every request it makes is a read: nothing is created, changed or booked. The
+token is taken from the environment, never written to a file, and never echoed
+— not even partially, and not even if GHL quotes it back in an error. So the
+whole output is safe to paste into a chat if something looks wrong.
+
+It tries each known API version in turn, so a stale version header shows up as
+a diagnosis rather than a mystery.
+
 ## Deploying
 
 Cloud Functions needs the **Blaze** plan — a card on file. At four calendars
@@ -132,6 +152,8 @@ were written from documentation, not run against a live token — GHL's hosts
 were unreachable from the machine this was built on. The first real call will
 confirm them. If GHL has moved something the fix is in that one file, and the
 dashboard needs no change at all.
+
+`check-ghl.mjs` is how you find out, in one command, without deploying first.
 
 Everything either side of those calls **is** tested: run `test-proxy.mjs`,
 which drives the handler with GHL and Google stubbed and checks the auth gate,
