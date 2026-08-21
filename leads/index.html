@@ -106,6 +106,7 @@
 
       <nav class="nav" id="tabs">
         <button class="tab on" data-tab="review">Review</button>
+        <button class="tab hide" data-tab="booking" id="tabBooking">Find a time</button>
         <div class="nav-label">Leads</div>
         <button class="tab" data-tab="sales_partner">Summit Sales <span class="cnt" id="cntSales">0</span></button>
         <button class="tab" data-tab="client">Clients <span class="cnt" id="cntClient">0</span></button>
@@ -152,8 +153,8 @@
 
           <section class="card">
             <div class="card-head">
-              <h2>Pipeline</h2>
-              <span class="hint">Open leads by stage. The figure between two stages is how many got past the first.</span>
+              <h2>Summit Sales pipeline</h2>
+              <span class="hint">Summit leads only — client delivery has no sales pipeline. The figure between two stages is how many got past the first.</span>
             </div>
             <div class="card-body">
               <div class="pipe" id="pipeChart"></div>
@@ -209,6 +210,41 @@
           </header>
           <div id="toolbar_client"></div>
           <div id="table_client"></div>
+        </section>
+
+        <!-- ---------- FIND A TIME ---------- -->
+        <section class="panel" data-panel="booking" id="bookPanel">
+          <header class="page-head">
+            <div>
+              <h1>Find a time</h1>
+              <p class="page-sub">All four sales calendars at once, in the prospect's own time. Click a name to book — GHL sends the invite.</p>
+            </div>
+          </header>
+
+          <div id="bkWho"></div>
+
+          <section class="card">
+            <div class="card-head">
+              <div class="bk-controls">
+                <button class="btn btn-sm btn-ghost" id="bkPrev" aria-label="Previous day">&#8592;</button>
+                <input class="inp inp-sm" type="date" id="bkDate">
+                <button class="btn btn-sm btn-ghost" id="bkNext" aria-label="Next day">&#8594;</button>
+                <span class="bk-tzlab">Prospect&#39;s time</span>
+                <select class="inp inp-sm" id="bkTz" aria-label="Prospect's timezone"></select>
+                <button class="btn btn-sm btn-ghost" id="bkReload">Refresh</button>
+              </div>
+              <span class="hint" id="bkDay"></span>
+            </div>
+            <div class="card-body">
+              <div class="bk-legend" id="bkReps"></div>
+              <div class="bk-grid" id="bkGrid"></div>
+            </div>
+          </section>
+
+          <section class="card hide" id="bkConfirm">
+            <div class="card-head"><h2>Confirm the booking</h2></div>
+            <div class="card-body" id="bkConfirmBody"></div>
+          </section>
         </section>
 
         <!-- ---------- ACTIVITY ---------- -->
@@ -291,10 +327,6 @@
                 <div class="fld">
                   <label for="invRole">Role</label>
                   <select class="inp" id="invRole"></select>
-                </div>
-                <div class="fld hide" id="invClientWrap">
-                  <label for="invClients">Which clients</label>
-                  <select class="inp" id="invClients" multiple size="3"></select>
                 </div>
               </div>
               <p class="muted mt-8" id="invRoleBlurb"></p>

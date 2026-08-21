@@ -1,12 +1,17 @@
 {
   "//": [
-    "Deploys the leads dashboard, the Firestore rules and the indexes together.",
+    "Deploys the leads dashboard, the Firestore rules, the indexes and the",
+    "calendar service together.",
     "",
     "  firebase deploy",
     "",
     "Hosting serves the contents of leads/ at the root of your Firebase domain,",
     "so the dashboard lands on https://<project>.web.app/ rather than a /leads/",
     "subpath. Source files that are not part of the running app are excluded.",
+    "",
+    "The functions block is the calendar service behind the dashboard's",
+    "'Find a time' tab. It is the only place the GoHighLevel token exists \u2014 see",
+    "leads/functions/README.md. Cloud Functions needs the Blaze plan.",
     "",
     "This exists because GitHub Pages stopped assigning runners to this repo's",
     "build. Firebase Hosting is independent of that, and you are already in this",
@@ -21,18 +26,39 @@
       "firestore.rules",
       "firestore.indexes.json",
       "README.md",
-      "build-standalone.mjs"
+      "build-standalone.mjs",
+      "build-ghl.mjs",
+      "functions/**"
     ],
     "cleanUrls": true,
     "headers": [
       {
         "source": "**/*.@(js|css|html)",
-        "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }]
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, must-revalidate"
+          }
+        ]
       }
     ]
   },
   "firestore": {
     "rules": "leads/firestore.rules",
     "indexes": "leads/firestore.indexes.json"
-  }
+  },
+  "functions": [
+    {
+      "source": "leads/functions",
+      "codebase": "cal",
+      "runtime": "nodejs20",
+      "ignore": [
+        "node_modules",
+        ".git",
+        ".env",
+        "cloudflare",
+        "README.md"
+      ]
+    }
+  ]
 }

@@ -16,6 +16,9 @@ leads/
 ├── config.js               ← the file you edit: Firebase keys, fields, stages
 ├── store.js                all database access (Firebase + demo fallback)
 ├── app.js                  UI and behaviour
+├── booking.js              "Find a time" — the multi-calendar slot picker
+├── dom.js                  $, $$ and esc, shared by app.js and booking.js
+├── functions/              Cloud Function holding the GHL token — deploy separately
 ├── xlsx.js                 dependency-free Excel writer
 ├── firestore.rules         access control — deploy this, it is the real boundary
 └── firestore.indexes.json  composite indexes the queries need
@@ -67,9 +70,10 @@ project and hammer it with sign-in attempts.
 
 ### 4. Deploy the rules and indexes
 
-The rules are what actually stop a sales user reading client leads. Until they
-are deployed, the default production rules block everything and the dashboard
-will show empty tables.
+The rules are what actually stop someone without an invite reading your leads,
+and what stops a member promoting themselves to admin. Until they are deployed,
+the default production rules block everything and the dashboard will show empty
+tables.
 
 ```bash
 npm install -g firebase-tools
@@ -111,14 +115,14 @@ Authorised domains**, or the link will refuse to send.
 
 Roles:
 
-| Role     | Sees                          | Can do                                                        |
-| -------- | ----------------------------- | ------------------------------------------------------------- |
-| `admin`  | everything                    | everything, plus manage clients, invite people, see all exports |
-| `ops`    | everything                    | add and edit leads, comment, export — the LinkedIn team        |
-| `sales`  | Summit Sales leads only       | move stages, set sales owner / GHL link / deal value, comment  |
-| `client` | only their own client's leads | read and comment only                                          |
+| Role     | Sees       | Can do                                                                 |
+| -------- | ---------- | ---------------------------------------------------------------------- |
+| `admin`  | everything | everything, plus manage clients, invite people, see everyone's exports  |
+| `member` | everything | add, edit, comment, move stages, export — cannot delete or open Admin   |
 
-Pick `client` and the form asks which client accounts they may see.
+Access is deliberately flat: anyone you let in sees every lead, for Summit
+Sales and for clients alike. The only thing `admin` adds is the Admin tab —
+people, clients, and the full export history.
 
 Pending invites are listed under the form, where you can resend or revoke them.
 A revoked invite's link stops working immediately.
@@ -152,6 +156,58 @@ is the internal record, not a second CRM.
 
 Change the 7-day threshold with `STALE_DAYS` in `config.js`, and the call days
 with `REVIEW_DAYS` (`0` = Sunday, so `[2,4]` is Tuesday and Thursday).
+
+---
+
+## Find a time — booking across the four sales calendars
+
+The cold-call problem this solves: a caller in India has a prospect on the
+phone who says *"I'm free at twelve"*. Four reps, four separate GHL calendars,
+and no way to see who is actually open at that moment — so the invite goes out
+hours later, or never.
+
+**Find a time** puts all four calendars in one list. Pick the day, set the
+prospect's timezone, and every slot shows the reps who are free at it. Click a
+name, confirm, and GHL sends the prospect the invite while they are still on
+the call. Opening it from a lead's **Find a time** button carries that lead
+across, guesses their timezone from their country, and prefills the contact
+details.
+
+The booking then lands back on the lead: stage moves to **Meeting Booked**
+(only ever forward), the date is recorded, and the activity trail says who it
+was booked with. Same reason as ever — a call that is only in GHL is invisible
+on the Tuesday review.
+
+### It needs the calendar service deployed first
+
+The tab stays hidden until it has something behind it. GHL's API needs a
+Private Integration Token, and a token in this page would be readable by
+anyone who views source on the GHL site — so the token lives in a ~200-line
+Cloud Function you deploy once, into the same Firebase project. See
+**[`functions/README.md`](functions/README.md)**. It needs the Blaze plan — at
+this volume the bill rounds to nothing, but a card has to be on file. If that
+is a blocker, `functions/cloudflare/` runs the identical handler on
+Cloudflare's free tier instead.
+
+Once it is deployed, fill in `BOOKING` in `config.js`:
+
+```js
+export const BOOKING = {
+  proxy: "https://leads-cal.<you>.workers.dev",
+  slotMinutes: 30,
+  reps: [
+    { id: "melton", name: "Melton Weaver", calendarId: "…", userId: "…", timezone: "America/New_York" },
+    …
+  ],
+};
+```
+
+Then rebuild the block with `node build-ghl.mjs`.
+
+> The GHL endpoints in the service were written from documentation and have
+> not been run against a live token — GHL was unreachable from the machine
+> this was built on. If something has moved, the fix is in that one file and
+> the dashboard needs no change.
 
 ---
 
@@ -235,15 +291,14 @@ who may set it — otherwise nothing else needs touching.
 - **Deleting a lead** is admin-only and removes the lead row, but its activity
   entries stay in the audit trail by design. Prefer marking a lead **Lost**
   with a reason.
-- **`clientAccess` is capped at 30 clients per user** — Firestore's `in` query
-  takes at most 30 values. Well beyond the current n, but it is a real ceiling.
 - **The activity feed loads the 120 most recent entries.** Per-lead history is
   complete; only the global *Activity* tab is capped.
-- **Queries are scoped by role in `store.js` to mirror `firestore.rules`.**
+- **Queries in `store.js` must stay in step with `firestore.rules`.**
   Firestore validates a query against its *potential* result set, so a rule
-  like `stream == 'sales_partner'` needs a matching `where` clause or the whole
-  query is rejected. If you change one, change the other — and add the matching
-  composite index.
+  like `stream == 'sales_partner'` would need a matching `where` clause or the
+  whole query is rejected. Flat access is what lets the lead and activity feeds
+  be plain `orderBy()` queries today; if you ever narrow a rule, add the
+  matching `where` clause and composite index at the same time.
 - **Excel export is written by `xlsx.js`, not a library.** No CDN at click
   time, so it keeps working on restricted office networks and offline.
 - **Free Spark plan is fine** at this volume; Firestore's free tier covers

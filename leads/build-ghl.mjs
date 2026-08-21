@@ -31,7 +31,7 @@ const stripExports = (s) => s.replace(/^export\s+(?=(const|let|var|function|asyn
 const mod = (f) => `\n/* ===== ${f} ${"=".repeat(Math.max(0, 60 - f.length))} */\n` +
   stripExports(stripImports(read(f))).trim() + "\n";
 
-const js = [mod("config.js"), mod("xlsx.js"), mod("store.js"), mod("app.js")].join("\n");
+const js = [mod("config.js"), mod("dom.js"), mod("xlsx.js"), mod("store.js"), mod("booking.js"), mod("app.js")].join("\n");
 for (const [label, re] of [["static import", /^import\s*[{\w*]/m], ["export", /^export\s/m]]) {
   const m = js.match(re);
   if (m) throw new Error(`${label} survived stripping: ${JSON.stringify(m[0])}`);

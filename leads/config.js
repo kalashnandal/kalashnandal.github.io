@@ -97,11 +97,16 @@ export const NOINDEX = true;
    2. ROLES
    Set on each user's document in the `users` collection (see README).
 --------------------------------------------------------------------------- */
+/* Two roles only. Everyone who can sign in sees and edits every lead — the
+   team is internal and splitting visibility just got in the way. Admin adds
+   the Admin panel: people, clients, and everyone's export history.
+
+   NOTE: this means anyone invited can read every lead in both streams. That
+   is right for the team; if an outside client ever needs a login, visibility
+   scoping has to come back before inviting them. */
 export const ROLES = {
-  admin:  { label: "Admin",         blurb: "Full access. Manages people, clients and sees every export." },
-  ops:    { label: "LinkedIn Team", blurb: "Creates and edits leads, comments, exports." },
-  sales:  { label: "Summit Sales",  blurb: "Sees leads shared with Summit. Updates stage, comments, exports." },
-  client: { label: "Client",        blurb: "Read-only, and only the leads for their own client account." },
+  admin:  { label: "Admin",  blurb: "Everything, plus managing people, clients and all export history." },
+  member: { label: "Member", blurb: "Full access to every lead — add, edit, comment, export." },
 };
 
 /* ---------------------------------------------------------------------------
@@ -195,6 +200,69 @@ export const calUrl = (lead) => {
 };
 
 /* ---------------------------------------------------------------------------
+   4c. FIND A TIME — booking across the US sales team's GHL calendars
+
+   The problem this solves: a caller in India has a prospect on the phone who
+   says "I'm free at 12". Four reps, four separate GHL calendars, and no way to
+   see who is actually open at that moment — so the invite goes out hours later,
+   or not at all.
+
+   `proxy` is the URL of the small server that holds the GHL token. It CANNOT
+   be called from here without one: the API needs a Private Integration Token,
+   and anything in this file is readable by anyone who views source on the GHL
+   page. See functions/README.md — deploy it, paste the URL here, done.
+
+   Leave `proxy` blank and the tab hides itself, so the rest of the dashboard
+   works untouched until you are ready.
+
+   Each rep needs their GHL calendar id (Calendars → the calendar → the id in
+   the URL) and their GHL user id (Settings → Team → the user → the id in the
+   URL). The calendar id decides which calendar is read and written; the user
+   id is who the appointment gets assigned to.
+--------------------------------------------------------------------------- */
+export const BOOKING = {
+  proxy: "",
+
+  slotMinutes: 30,        // length of the call being booked
+  dayStartHour: 8,        // earliest slot shown, in the PROSPECT's timezone
+  dayEndHour: 19,         // latest slot shown
+  daysAhead: 21,          // how far out the date picker allows
+
+  title: "Discovery call",
+
+  reps: [
+    { id: "melton", name: "Melton Weaver", calendarId: "", userId: "", timezone: "America/New_York" },
+    { id: "rep2",   name: "Rep two",       calendarId: "", userId: "", timezone: "America/New_York" },
+    { id: "rep3",   name: "Rep three",     calendarId: "", userId: "", timezone: "America/Chicago"  },
+    { id: "rep4",   name: "Rep four",      calendarId: "", userId: "", timezone: "America/Los_Angeles" },
+  ],
+};
+
+/* Timezones offered in the picker, and the guess made from a lead's country.
+   The caller can always override — the guess is only there to save a click on
+   the overwhelmingly common case. */
+export const TIMEZONES = [
+  { id: "America/New_York",    label: "US Eastern"  },
+  { id: "America/Chicago",     label: "US Central"  },
+  { id: "America/Denver",      label: "US Mountain" },
+  { id: "America/Los_Angeles", label: "US Pacific"  },
+  { id: "Europe/London",       label: "UK"          },
+  { id: "Australia/Sydney",    label: "Australia (Sydney)" },
+  { id: "Asia/Kolkata",        label: "India (IST)" },
+];
+
+export const TZ_BY_COUNTRY = {
+  "United States": "America/New_York",
+  "Canada": "America/New_York",
+  "United Kingdom": "Europe/London",
+  "Ireland": "Europe/London",
+  "Australia": "Australia/Sydney",
+  "India": "Asia/Kolkata",
+  "Singapore": "Asia/Kolkata",
+  "United Arab Emirates": "Asia/Kolkata",
+};
+
+/* ---------------------------------------------------------------------------
    5. LEAD FIELDS
    type:     text | email | tel | url | date | number | textarea | select
    group:    which fieldset it sits in on the form
@@ -207,7 +275,7 @@ export const LEAD_FIELDS = [
   { key: "firstName",     label: "First Name",        type: "text",     group: "Person",  required: true, table: true, width: 16 },
   { key: "lastName",      label: "Last Name",         type: "text",     group: "Person",  table: true, width: 16 },
   { key: "jobTitle",      label: "Job Title",         type: "text",     group: "Person",  table: true, width: 26 },
-  { key: "linkedinUrl",   label: "LinkedIn Profile",  type: "url",      group: "Person",  required: true, width: 40, placeholder: "https://linkedin.com/in/..." },
+  { key: "linkedinUrl",   label: "LinkedIn Profile",  type: "url",      group: "Person",  width: 40, placeholder: "https://linkedin.com/in/..." },
   { key: "email",         label: "Email",             type: "email",    group: "Person",  table: true, width: 30 },
   { key: "phone",         label: "Phone",             type: "tel",      group: "Person",  width: 18 },
   { key: "whatsapp",      label: "WhatsApp",          type: "tel",      group: "Person",  width: 18 },
@@ -225,7 +293,8 @@ export const LEAD_FIELDS = [
 
   /* --- Where it came from ----------------------------------------------- */
   { key: "source",        label: "Source",            type: "select",   group: "Source",  table: true, width: 20,
-    options: ["LinkedIn Outreach", "LinkedIn Inbound", "Content / Post", "Referral", "Event", "Other"] },
+    options: ["LinkedIn Outreach", "LinkedIn Inbound", "Cold Calling", "Upwork",
+              "Content / Post", "Referral", "Event", "Other"] },
   { key: "campaign",      label: "Campaign",          type: "text",     group: "Source",  width: 22 },
   { key: "connectedOn",   label: "Connected On",      type: "date",     group: "Source",  width: 14 },
   { key: "repliedOn",     label: "Replied On",        type: "date",     group: "Source",  width: 14 },

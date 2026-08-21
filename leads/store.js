@@ -24,7 +24,7 @@
    document read per entry).
    ========================================================================== */
 
-import { firebaseConfig, isConfigured, BOOTSTRAP_ADMIN, MS_TENANT } from "./config.js";
+import { firebaseConfig, isConfigured, BOOTSTRAP_ADMIN, MS_TENANT, BOOKING } from "./config.js";
 
 const SDK = "https://www.gstatic.com/firebasejs/10.14.1";
 
@@ -65,27 +65,15 @@ async function firebaseStore() {
   let profile = null;
   let phoneVerifier = null, phoneConfirmation = null;
 
-  /* The where() clause that makes a query provably safe for this user's role.
-     null means "no clause needed" (staff see everything);
-     false means "this user can see nothing". */
-  const scopeClause = () => {
-    const r = profile?.role;
-    if (r === "admin" || r === "ops") return null;
-    if (r === "sales") return where("stream", "==", "sales_partner");
-    if (r === "client") {
-      const ids = (profile.clientAccess || []).slice(0, 30);
-      return ids.length ? where("clientId", "in", ids) : false;
-    }
-    return false;
-  };
+  /* Everyone with a role sees everything, so no query needs narrowing any
+     more. This used to add a where() per role to satisfy the rules, which is
+     why activity documents still carry stream/clientId — harmless now, and
+     still useful for filtering.
 
-  const scoped = (col, ...tail) => {
-    const clause = scopeClause();
-    if (clause === false) return false;
-    return clause
-      ? query(collection(D, col), clause, ...tail)
-      : query(collection(D, col), ...tail);
-  };
+     A user with no role gets nothing; the rules refuse them anyway, and
+     returning false here avoids firing a query that would only be denied. */
+  const scoped = (col, ...tail) =>
+    profile?.role ? query(collection(D, col), ...tail) : false;
 
   const store = {
     mode: "firebase",
@@ -353,7 +341,6 @@ async function firebaseStore() {
         ...(user.phoneNumber ? { phone: user.phoneNumber } : {}),
         role: inv.role,
         active: true,
-        ...(inv.role === "client" ? { clientAccess: inv.clientAccess || [] } : {}),
       };
       await setDoc(doc(D, "users", user.uid), profileDoc);
       await updateDoc(doc(D, "invites", key), { status: "accepted", acceptedAt: serverTimestamp(), uid: user.uid });
@@ -378,6 +365,36 @@ async function firebaseStore() {
         ? query(base, orderBy("at", "desc"), limit(300))
         : query(base, where("by", "==", profile.uid), orderBy("at", "desc"), limit(300));
       return live(q, cb);
+    },
+
+    /* ---- GHL calendars -------------------------------------------------
+       Neither of these talks to GHL directly. They talk to the proxy, which
+       holds the Private Integration Token — a token in this file would be
+       readable by anyone who views source on the GHL page, and GHL's API
+       sends no CORS headers to a browser anyway.
+
+       The proxy is told who is calling by the Firebase ID token, which it
+       verifies against Google's public keys. An expired login therefore
+       cannot book, which is the point.  ---------------------------------- */
+    async callProxy(path, body) {
+      if (!BOOKING.proxy) throw new Error("no-proxy");
+      const token = await A.currentUser.getIdToken();
+      const res = await fetch(`${BOOKING.proxy.replace(/\/$/, "")}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Calendar service returned ${res.status}`);
+      return data;
+    },
+
+    freeSlots({ date, timezone, calendarIds }) {
+      return this.callProxy("/slots", { date, timezone, calendarIds });
+    },
+
+    book(payload) {
+      return this.callProxy("/book", payload);
     },
   };
 
@@ -447,7 +464,7 @@ function demoStore() {
         email: `${f.toLowerCase()}@${co.toLowerCase().replace(/\W/g, "")}.com`,
         country: ["United States", "United Kingdom", "Canada"][i % 3],
         industry: ["Logistics", "Software", "Manufacturing", "Retail", "Healthcare"][i % 5],
-        source: "LinkedIn Outreach",
+        source: ["LinkedIn Outreach", "Cold Calling", "Upwork", "LinkedIn Inbound"][i % 4],
         status: st,
         stream,
         clientId,
@@ -463,6 +480,11 @@ function demoStore() {
         createdByName: team[i % team.length],
       };
     });
+    db.users = [
+      { id: "demo-user", name: "Demo User", email: "demo@local", role: "admin", active: true },
+      { id: uid(), name: "Aisha Verma", email: "aisha@imarkinfotech.com", role: "member", active: true },
+      { id: uid(), name: "Mark Ellison", email: "mark@salesbysummit.com", role: "member", active: true },
+    ];
     db.activity = db.leads.map((ld) => ({
       id: uid(), leadId: ld.id, stream: ld.stream, clientId: ld.clientId,
       type: "created", text: `Lead created — ${ld.firstName} ${ld.lastName}`,
@@ -614,6 +636,63 @@ function demoStore() {
 
     watchExports: (cb) =>
       watch((db) => [...db.exports].sort((a, b) => (b.at || "").localeCompare(a.at || "")), cb),
+
+    /* Stand-in availability so the slot grid can be worked on, demoed and
+       tested without a GHL token. Deterministic per rep and per slot, so the
+       same date always looks the same — a grid that reshuffles on every
+       refresh is impossible to check anything against.
+
+       Availability is seeded in the reps' own zone and then re-expressed in
+       whichever zone was asked for, exactly as GHL does it. Without that the
+       timezone control would look broken in a demo: the same free hour has to
+       read 12:00 Eastern and 09:00 Pacific, because it is the same hour.
+
+       Shape matches the proxy exactly: `t` is the wall-clock time in the
+       prospect's timezone (what the caller reads out loud) and `iso` is the
+       same moment with its offset attached (what gets booked). Keeping both
+       on the wire means the browser never does timezone arithmetic. */
+    async freeSlots({ date, timezone, calendarIds }) {
+      const REP_ZONE = "America/New_York";
+
+      const offsetText = (tz) => {
+        try {
+          const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longOffset" })
+            .formatToParts(new Date(`${date}T12:00:00Z`));
+          return (parts.find((p) => p.type === "timeZoneName")?.value || "GMT+00:00").replace("GMT", "") || "+00:00";
+        } catch { return "+00:00"; }
+      };
+      const offsetMinutes = (text) =>
+        (text[0] === "-" ? -1 : 1) * (Number(text.slice(1, 3)) * 60 + Number(text.slice(4, 6)));
+
+      const askedOffset = offsetText(timezone);
+      const shift = offsetMinutes(askedOffset) - offsetMinutes(offsetText(REP_ZONE));
+
+      const out = {};
+      for (const id of calendarIds) {
+        out[id] = [];
+        for (let h = BOOKING.dayStartHour; h < BOOKING.dayEndHour; h++) {
+          for (let m = 0; m < 60; m += BOOKING.slotMinutes) {
+            let seed = 0;
+            const key = `${id}|${date}|${h}:${m}`;
+            for (let i = 0; i < key.length; i++) seed = (seed * 31 + key.charCodeAt(i)) >>> 0;
+            if (seed % 5 < 2) continue;                       // ~40% of slots busy
+
+            const mins = h * 60 + m + shift;
+            if (mins < 0 || mins >= 1440) continue;           // rolled off this day
+            const t = `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+            out[id].push({ t, iso: `${date}T${t}:00${askedOffset}` });
+          }
+        }
+        out[id].sort((a, b) => a.t.localeCompare(b.t));
+      }
+      await new Promise((r) => setTimeout(r, 120));
+      return { slots: out, demo: true };
+    },
+
+    async book(payload) {
+      await new Promise((r) => setTimeout(r, 200));
+      return { ok: true, demo: true, appointmentId: uid(), contactId: uid(), ...payload };
+    },
   };
 
   return store;

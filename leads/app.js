@@ -5,20 +5,16 @@
 import {
   LEAD_FIELDS, FIELD_GROUPS, STAGES, stage, OPEN_STAGES, STALE_DAYS,
   STREAMS, ROLES, REVIEW_DAYS, field, CAL, calUrl, AUTH, NOINDEX, FULL_BLEED,
+  BOOKING,
 } from "./config.js";
 import { openStore } from "./store.js";
+import { initBooking, bookingForLead, bookingEnabled } from "./booking.js";
 import { downloadXlsx } from "./xlsx.js";
+import { $, $$, esc } from "./dom.js";
 
 /* ==========================================================================
    TINY HELPERS
    ========================================================================== */
-const $  = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-
-const esc = (v) =>
-  String(v ?? "").replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-
 const DAY = 864e5;
 const asDate = (v) => (v ? new Date(v) : null);
 const daysSince = (v) => (v ? Math.floor((Date.now() - new Date(v)) / DAY) : Infinity);
@@ -72,20 +68,19 @@ function lastReviewStart() {
    Mirrors firestore.rules. The rules are what actually enforce this — these
    checks only keep the UI honest.
    ========================================================================== */
-const SALES_EDITABLE = ["status", "salesOwner", "ghlUrl", "dealValue", "nextFollowUp", "lostReason", "notes", "sharedOn"];
+/* Anyone who can sign in has full access to every lead. The only thing a
+   role decides is whether the Admin panel appears. Deleting stays admin-only,
+   since it is the one irreversible action. */
+const signedIn = (r) => r !== null && r !== undefined;
 
 const can = {
-  create:  (r) => ["admin", "ops"].includes(r),
-  editAll: (r) => ["admin", "ops"].includes(r),
-  edit:    (r) => ["admin", "ops", "sales"].includes(r),
+  create:  signedIn,
+  editAll: signedIn,
+  edit:    signedIn,
+  comment: signedIn,
   remove:  (r) => r === "admin",
   admin:   (r) => r === "admin",
-  comment: (r) => r !== null,
-  editable(r, key) {
-    if (this.editAll(r)) return true;
-    if (r === "sales") return SALES_EDITABLE.includes(key);
-    return false;
-  },
+  editable: () => true,
 };
 
 /* ==========================================================================
@@ -458,6 +453,19 @@ function showApp() {
   $("#meAvatar").textContent = initials(name);
   $("#tabAdmin").classList.toggle("hide", !can.admin(S.me.role));
 
+  /* "Find a time" only appears once there is something behind it. With no
+     proxy deployed the tab stays hidden rather than offering a button that
+     cannot work. */
+  if (bookingEnabled(S.store)) {
+    $("#tabBooking").classList.remove("hide");
+    initBooking({
+      store: S.store,
+      toast,
+      leads: () => S.leads,
+      onBooked: onGhlBooked,
+    });
+  }
+
   // Live subscriptions. Each fires immediately with current data.
   S.store.watchLeads((rows) => { S.leads = rows; renderAll(); });
   S.store.watchClients((rows) => { S.clients = rows; renderAll(); });
@@ -475,10 +483,7 @@ function wireChrome() {
 
   $("#tabs").addEventListener("click", (e) => {
     const t = e.target.closest(".tab");
-    if (!t) return;
-    S.tab = t.dataset.tab;
-    $$(".tab").forEach((x) => x.classList.toggle("on", x === t));
-    $$(".panel").forEach((p) => p.classList.toggle("on", p.dataset.panel === S.tab));
+    if (t) goTab(t.dataset.tab);
   });
 
   $("#drClose").addEventListener("click", closeDrawer);
@@ -492,6 +497,14 @@ function wireChrome() {
     $("#newClient").value = "";
     toast("Client added.", "good");
   });
+}
+
+/* Single way in and out of a tab, so the drawer can send someone straight to
+   "Find a time" with a lead in hand. */
+function goTab(name) {
+  S.tab = name;
+  $$(".tab").forEach((x) => x.classList.toggle("on", x.dataset.tab === name));
+  $$(".panel").forEach((p) => p.classList.toggle("on", p.dataset.panel === name));
 }
 
 function renderAll() {
@@ -516,26 +529,36 @@ function isStale(l) {
 function renderReview() {
   const since = lastReviewStart();
   const L = S.leads;
+
+  /* Pipeline figures are Summit-only. Client delivery has no sales pipeline,
+     so counting those leads in "open", "meetings" or "won" overstated every
+     one of them. Only the new-lead counts and "needs attention" span both —
+     a client lead can go cold just as easily. */
+  const P = L.filter((l) => l.stream === "sales_partner");
+
   const newSince = L.filter((l) => asDate(l.createdAt) >= since);
   const stale = L.filter(isStale);
-  const open = L.filter((l) => OPEN_STAGES.includes(l.status));
+  const open = P.filter((l) => OPEN_STAGES.includes(l.status));
 
   $("#reviewHint").textContent =
     `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
 
-  const meetings = L.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
-  const won = L.filter((l) => l.status === "won").length;
+  const newSummit = newSince.filter((l) => l.stream === "sales_partner").length;
+  const newClient = newSince.filter((l) => l.stream === "client").length;
+  const meetings = P.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
+  const won = P.filter((l) => l.status === "won").length;
 
-  $("#reviewLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
+  $("#reviewLine").innerHTML = heroSentence(L, newSummit, newClient, stale.length, meetings);
 
   /* Plain counts. Every one of these is just "how many leads are in this
      state" — nothing averaged, nothing derived. The label carries its own
      timeframe, since "new" alone reads as all-time at a glance. */
   $("#statTiles").innerHTML = [
-    { k: "New since last call", v: newSince.length, d: `${L.length} leads all time` },
-    { k: "Open pipeline", v: open.length, d: "not won or lost" },
-    { k: "Meetings booked", v: meetings, d: "meeting or proposal", cls: meetings ? "good" : "" },
-    { k: "Won", v: won, d: "closed and won", cls: won ? "good" : "" },
+    { k: "New for Summit", v: newSummit, d: "since the last call" },
+    { k: "New for clients", v: newClient, d: "since the last call" },
+    { k: "Open pipeline", v: open.length, d: "Summit, not won or lost" },
+    { k: "Meetings booked", v: meetings, d: "Summit, meeting or proposal", cls: meetings ? "good" : "" },
+    { k: "Won", v: won, d: "Summit, closed and won", cls: won ? "good" : "" },
     { k: "Needs attention", v: stale.length, d: `no activity in ${STALE_DAYS}+ days`, cls: stale.length ? "alert" : "" },
   ].map((t) => `
     <div class="stat ${t.cls || ""}">
@@ -547,7 +570,7 @@ function renderReview() {
   /* ---- pipeline strip: stages left to right, with the conversion between
          each pair in the gap ---- */
   const fs = STAGES.filter((s) => s.funnel);
-  const counts = fs.map((s) => L.filter((l) => l.status === s.key).length);
+  const counts = fs.map((s) => P.filter((l) => l.status === s.key).length);
   const openTotal = counts.reduce((a, b) => a + b, 0);
 
   const blocks = fs.map((s, i) => {
@@ -577,13 +600,13 @@ function renderReview() {
     : emptyChart("No leads yet.");
 
   $("#outcomeChart").innerHTML = STAGES.filter((s) => !s.funnel).map((s) => {
-    const n = L.filter((l) => l.status === s.key).length;
+    const n = P.filter((l) => l.status === s.key).length;
     return `<span class="outcome" style="border-color:${s.line};background:${s.outline ? "transparent" : s.tint}">
       <span class="n" style="color:${s.ink}">${n}</span>
       <span class="k">${esc(s.label)}</span>
     </span>`;
   }).join("") + `<span class="outcome" style="border-style:dashed">
-      <span class="k">${esc(winRateLabel(L))}</span></span>`;
+      <span class="k">${esc(winRateLabel(P))}</span></span>`;
 
   /* ---- needs attention ---- */
   const attn = [...stale].sort(
@@ -634,17 +657,29 @@ function renderReview() {
 
 /* One plain sentence naming the thing that most deserves attention right now.
    Ordered by what would actually change the conversation on the call. */
-function heroSentence(L, created, stale, meetings) {
+/* The one line everyone reads before the call starts. The brief is explicit:
+   it must say, out loud, how many leads came in for Summit Sales and how many
+   for clients since the last review — then flag anything going stale. */
+function heroSentence(L, newSummit, newClient, stale, meetings) {
   if (!L.length) return "No leads yet — add the first one from the Summit Sales tab.";
+
+  const n = (v, one, many) => `<b>${v}</b> ${v === 1 ? one : many}`;
+  const total = newSummit + newClient;
+
+  let lead;
+  if (!total) {
+    lead = meetings
+      ? `Nothing new since the last call, but ${n(meetings, "lead is", "leads are")} still in play.`
+      : "Nothing new since the last call.";
+  } else {
+    lead = `Since the last call: ${n(newSummit, "new lead", "new leads")} for Summit Sales `
+         + `and ${n(newClient, "for a client", "for clients")}.`;
+  }
+
   if (stale) {
-    return `<b>${stale}</b> open lead${stale > 1 ? "s have" : " has"} gone quiet for ${STALE_DAYS}+ days.`;
+    lead += ` ${n(stale, "open lead has", "open leads have")} gone quiet for ${STALE_DAYS}+ days.`;
   }
-  if (created && meetings) {
-    return `<b>${created}</b> new lead${created > 1 ? "s" : ""} since the last call, and <b>${meetings}</b> in play.`;
-  }
-  if (created) return `<b>${created}</b> new lead${created > 1 ? "s" : ""} logged since the last call.`;
-  if (meetings) return `Nothing new since the last call, but <b>${meetings}</b> still in play.`;
-  return "Nothing new since the last call.";
+  return lead;
 }
 
 function winRateLabel(L) {
@@ -962,7 +997,8 @@ function renderDrawer() {
   /* ---- footer ---- */
   const canEdit = can.edit(S.me.role);
   $("#drFoot").innerHTML = `
-    ${canEdit ? bookButton(lead) : ""}
+    ${canEdit && bookingEnabled(S.store) ? `<button class="btn btn-sm btn-primary" id="drFind">Find a time</button>` : ""}
+    ${canEdit ? bookButton(lead, bookingEnabled(S.store)) : ""}
     ${canEdit ? `<button class="btn btn-sm btn-ghost" id="drEdit">Edit lead</button>` : ""}
     ${canEdit ? `<select class="inp" id="drStage" style="max-width:190px">
         ${STAGES.map((s) => `<option value="${s.key}"${lead.status === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
@@ -976,6 +1012,14 @@ function renderDrawer() {
     // Remember which lead the booking modal was opened for, so the completed
     // booking can be attached to the right record.
     $("#drBook")?.addEventListener("click", () => { S.bookingFor = lead.id; });
+
+    /* Straight to the slot grid with this lead attached and their timezone
+       already guessed — the caller is on the phone, every click counts. */
+    $("#drFind")?.addEventListener("click", () => {
+      closeDrawer();
+      goTab("booking");
+      bookingForLead(lead);
+    });
   }
   if (can.remove(S.me.role)) {
     $("#drDel").addEventListener("click", async () => {
@@ -1086,7 +1130,7 @@ function wireCommentBox(lead) {
    script is blocked or slow, the link simply opens the page in a new tab. The
    feature degrades instead of breaking.
 --------------------------------------------------------------------------- */
-function bookButton(lead) {
+function bookButton(lead, secondary = false) {
   if (!CAL.enabled) return "";
   const name = `${lead.firstName || ""} ${lead.lastName || ""}`.trim();
   const cfg = JSON.stringify({
@@ -1096,7 +1140,7 @@ function bookButton(lead) {
     ...(lead.company ? { notes: `${name || "Lead"} — ${lead.company}` } : {}),
   });
   const booked = lead.callBookedFor;
-  return `<a class="btn btn-sm ${booked ? "btn-ghost" : "btn-primary"}" id="drBook"
+  return `<a class="btn btn-sm ${booked || secondary ? "btn-ghost" : "btn-primary"}" id="drBook"
       href="${esc(calUrl(lead))}" target="_blank" rel="noopener noreferrer"
       data-cal-link="${esc(CAL.link)}"
       data-cal-namespace="${esc(CAL.namespace)}"
@@ -1157,6 +1201,42 @@ async function onBookingSuccess(data) {
   } catch (ex) {
     console.error(ex);
     toast("Call was booked, but the lead couldn't be updated. Set the stage by hand.", "bad");
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   A booking made from "Find a time" has to land back on the lead, or the whole
+   point is lost — the Tuesday call asks "did anyone actually get on a call
+   with this one", and the answer has to be in the record, not in GHL.
+--------------------------------------------------------------------------- */
+async function onGhlBooked({ lead, rep, slot, date, timezone }) {
+  if (!lead) return;   // booked for a fresh contact, nothing here to attach to
+
+  const when = `${fmtDate(date)} at ${slot.t} (${timezone})`;
+  const patch = { callBookedFor: date, salesOwner: lead.salesOwner || rep.name };
+  const notes = [{
+    type: "comment",
+    text: `Call booked with ${rep.name} for ${when}. Invite sent from GHL.`,
+  }];
+
+  /* Only ever forward. A booking should not drag a lead that already reached
+     proposal back to meeting. */
+  const order = STAGES.findIndex((s) => s.key === lead.status);
+  const meetingIdx = STAGES.findIndex((s) => s.key === "meeting");
+  if (order >= 0 && order < meetingIdx) {
+    patch.status = "meeting";
+    notes.push({
+      type: "stage",
+      text: `Stage moved: ${stage(lead.status).label} → Meeting Booked`,
+      from: lead.status, to: "meeting",
+    });
+  }
+
+  try {
+    await S.store.updateLead(lead, patch, notes);
+  } catch (ex) {
+    console.error(ex);
+    toast("The call is booked, but the lead didn't update. Set the stage by hand.", "warn");
   }
 }
 
@@ -1493,13 +1573,12 @@ function wireInvites() {
   roleSel.dataset.wired = "1";
 
   roleSel.innerHTML = Object.entries(ROLES)
-    .map(([k, r]) => `<option value="${k}"${k === "ops" ? " selected" : ""}>${esc(r.label)}</option>`)
+    .map(([k, r]) => `<option value="${k}"${k === "member" ? " selected" : ""}>${esc(r.label)}</option>`)
     .join("");
 
   const sync = () => {
     const r = roleSel.value;
     $("#invRoleBlurb").textContent = ROLES[r]?.blurb || "";
-    $("#invClientWrap").classList.toggle("hide", r !== "client");
   };
   roleSel.addEventListener("change", sync);
   sync();
@@ -1511,12 +1590,10 @@ async function sendInvite() {
   const name = $("#invName").value.trim();
   const email = $("#invEmail").value.trim().toLowerCase();
   const role = $("#invRole").value;
-  const clientAccess = [...$("#invClients").selectedOptions].map((o) => o.value);
   const phone = $("#invPhone").value.trim().replace(/[\s()-]/g, "");
 
   if (!name) return toast("Add their name so people know who this is.", "warn");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast("That email doesn't look right.", "warn");
-  if (role === "client" && !clientAccess.length) return toast("Pick which clients they can see.", "warn");
   if (phone && !/^\+[1-9]\d{7,14}$/.test(phone))
     return toast("Include the country code on the mobile, like +91 98765 43210.", "warn");
   if (S.users.some((u) => (u.email || "").toLowerCase() === email)) {
@@ -1527,7 +1604,7 @@ async function sendInvite() {
   btn.disabled = true;
   btn.textContent = "Sending…";
   try {
-    await S.store.createInvite(email, { name, role, clientAccess, phone });
+    await S.store.createInvite(email, { name, role, phone });
     await S.store.sendInviteLink(email);
     $("#invName").value = "";
     $("#invEmail").value = "";
@@ -1560,10 +1637,6 @@ function inviteError(ex) {
 function renderInvites() {
   const host = $("#invList");
   if (!host) return;
-
-  const opts = S.clients.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
-  const sel = $("#invClients");
-  if (sel && sel.innerHTML !== opts) sel.innerHTML = opts;
 
   const open = S.invites.filter((i) => i.status !== "accepted");
   host.innerHTML = open.length
