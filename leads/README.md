@@ -18,7 +18,7 @@ leads/
 ├── app.js                  UI and behaviour
 ├── booking.js              "Find a time" — the multi-calendar slot picker
 ├── dom.js                  $, $$ and esc, shared by app.js and booking.js
-├── cal-proxy/              the service holding the GHL token (deploy separately)
+├── functions/              Cloud Function holding the GHL token — deploy separately
 ├── xlsx.js                 dependency-free Excel writer
 ├── firestore.rules         access control — deploy this, it is the real boundary
 └── firestore.indexes.json  composite indexes the queries need
@@ -183,9 +183,11 @@ on the Tuesday review.
 The tab stays hidden until it has something behind it. GHL's API needs a
 Private Integration Token, and a token in this page would be readable by
 anyone who views source on the GHL site — so the token lives in a ~200-line
-service you deploy once. See **[`cal-proxy/README.md`](cal-proxy/README.md)**;
-Cloudflare Workers is free and needs no change to the Firebase plan, and
-Firebase Functions works too if you would rather stay in one project.
+Cloud Function you deploy once, into the same Firebase project. See
+**[`functions/README.md`](functions/README.md)**. It needs the Blaze plan — at
+this volume the bill rounds to nothing, but a card has to be on file. If that
+is a blocker, `functions/cloudflare/` runs the identical handler on
+Cloudflare's free tier instead.
 
 Once it is deployed, fill in `BOOKING` in `config.js`:
 

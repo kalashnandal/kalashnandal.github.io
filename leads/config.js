@@ -210,7 +210,7 @@ export const calUrl = (lead) => {
    `proxy` is the URL of the small server that holds the GHL token. It CANNOT
    be called from here without one: the API needs a Private Integration Token,
    and anything in this file is readable by anyone who views source on the GHL
-   page. See cal-proxy/README.md — deploy it, paste the URL here, done.
+   page. See functions/README.md — deploy it, paste the URL here, done.
 
    Leave `proxy` blank and the tab hides itself, so the rest of the dashboard
    works untouched until you are ready.

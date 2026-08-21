@@ -1,5 +1,6 @@
 name = "leads-cal"
 main = "worker.js"
+# handler.js is one level up; wrangler bundles imported modules automatically.
 compatibility_date = "2024-11-01"
 
 # Everything here is public — it ends up readable by anyone who can see the

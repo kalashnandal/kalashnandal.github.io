@@ -1,0 +1,11 @@
+{
+  "name": "leads-cal",
+  "description": "Calendar service for the LinkedIn Leads dashboard — the only place the GHL token lives.",
+  "type": "module",
+  "main": "index.js",
+  "private": true,
+  "engines": { "node": "20" },
+  "dependencies": {
+    "firebase-functions": "^5.0.0"
+  }
+}
