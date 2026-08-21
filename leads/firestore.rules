@@ -25,38 +25,14 @@ service cloud.firestore {
     function role()        { return me().get('role', ''); }
 
     function isAdmin()  { return active() && role() == 'admin'; }
-    function isOps()    { return active() && role() == 'ops'; }
-    function isSales()  { return active() && role() == 'sales'; }
-    function isClient() { return active() && role() == 'client'; }
-    function isStaff()  { return isAdmin() || isOps(); }
 
-    function myClients() { return me().get('clientAccess', []); }
+    /* Any active user with a role. Everyone on the team sees and edits every
+       lead — the only thing admin adds is managing people and clients. */
+    function isMember() { return active() && role() != ''; }
 
-    /* Fields a sales-partner user is allowed to touch. They work the deal, so
-       they own the stage and the commercial fields — but they can't rewrite
-       who the lead is or which team member sourced it. */
-    function salesEditable() {
-      return ['status', 'salesOwner', 'ghlUrl', 'dealValue', 'nextFollowUp',
-              'lostReason', 'notes', 'sharedOn', 'updatedAt', 'lastActivityAt',
-              'commentCount'];
-    }
-
-    function changedKeys() {
-      return request.resource.data.diff(resource.data).affectedKeys();
-    }
-
-    /* Scope check. `d` is any document carrying `stream` and `clientId` —
-       a lead, or an activity entry with those fields denormalised onto it.
-
-       Denormalising means an activity read costs no extra document read, and
-       it keeps every clause expressible as a `where` filter, which is what
-       lets the client's queries pass rule evaluation at all (Firestore checks
-       a query's potential result set, not the rows it returns). */
-    function inScope(d) {
-      return isStaff()
-          || (isSales()  && d.stream == 'sales_partner')
-          || (isClient() && d.get('clientId', '') in myClients());
-    }
+    /* Kept as a named check so the intent stays obvious at each call site,
+       even though it is now simply "are you on the team". */
+    function inScope(d) { return isMember(); }
 
     /* Does this activity entry's denormalised scope actually match its lead?
        Checked on write only, so the cost is one read per comment, not per
@@ -66,7 +42,7 @@ service cloud.firestore {
       return exists(path)
           && get(path).data.stream == d.stream
           && get(path).data.get('clientId', '') == d.get('clientId', '')
-          && inScope(get(path).data);
+          && isMember();
     }
 
     /* =====================================================================
@@ -75,17 +51,14 @@ service cloud.firestore {
     match /leads/{leadId} {
       allow read: if inScope(resource.data);
 
-      allow create: if isStaff()
+      allow create: if isMember()
                     && request.resource.data.createdBy == request.auth.uid
                     && request.resource.data.stream in ['sales_partner', 'client']
                     // a client-stream lead must name its client
                     && (request.resource.data.stream != 'client'
                         || request.resource.data.get('clientId', '') != '');
 
-      allow update: if isStaff()
-                    || (isSales()
-                        && resource.data.stream == 'sales_partner'
-                        && changedKeys().hasOnly(salesEditable()));
+      allow update: if isMember();
 
       allow delete: if isAdmin();
     }
@@ -126,7 +99,7 @@ service cloud.firestore {
        CLIENTS
     ===================================================================== */
     match /clients/{clientId} {
-      allow read:  if active();
+      allow read:  if isMember();
       allow write: if isAdmin();
     }
 

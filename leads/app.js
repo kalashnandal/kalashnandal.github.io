@@ -72,20 +72,19 @@ function lastReviewStart() {
    Mirrors firestore.rules. The rules are what actually enforce this — these
    checks only keep the UI honest.
    ========================================================================== */
-const SALES_EDITABLE = ["status", "salesOwner", "ghlUrl", "dealValue", "nextFollowUp", "lostReason", "notes", "sharedOn"];
+/* Anyone who can sign in has full access to every lead. The only thing a
+   role decides is whether the Admin panel appears. Deleting stays admin-only,
+   since it is the one irreversible action. */
+const signedIn = (r) => r !== null && r !== undefined;
 
 const can = {
-  create:  (r) => ["admin", "ops"].includes(r),
-  editAll: (r) => ["admin", "ops"].includes(r),
-  edit:    (r) => ["admin", "ops", "sales"].includes(r),
+  create:  signedIn,
+  editAll: signedIn,
+  edit:    signedIn,
+  comment: signedIn,
   remove:  (r) => r === "admin",
   admin:   (r) => r === "admin",
-  comment: (r) => r !== null,
-  editable(r, key) {
-    if (this.editAll(r)) return true;
-    if (r === "sales") return SALES_EDITABLE.includes(key);
-    return false;
-  },
+  editable: () => true,
 };
 
 /* ==========================================================================
@@ -516,26 +515,36 @@ function isStale(l) {
 function renderReview() {
   const since = lastReviewStart();
   const L = S.leads;
+
+  /* Pipeline figures are Summit-only. Client delivery has no sales pipeline,
+     so counting those leads in "open", "meetings" or "won" overstated every
+     one of them. Only the new-lead counts and "needs attention" span both —
+     a client lead can go cold just as easily. */
+  const P = L.filter((l) => l.stream === "sales_partner");
+
   const newSince = L.filter((l) => asDate(l.createdAt) >= since);
   const stale = L.filter(isStale);
-  const open = L.filter((l) => OPEN_STAGES.includes(l.status));
+  const open = P.filter((l) => OPEN_STAGES.includes(l.status));
 
   $("#reviewHint").textContent =
     `Since the last review call — ${since.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}`;
 
-  const meetings = L.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
-  const won = L.filter((l) => l.status === "won").length;
+  const newSummit = newSince.filter((l) => l.stream === "sales_partner").length;
+  const newClient = newSince.filter((l) => l.stream === "client").length;
+  const meetings = P.filter((l) => ["meeting", "proposal"].includes(l.status)).length;
+  const won = P.filter((l) => l.status === "won").length;
 
-  $("#reviewLine").innerHTML = heroSentence(L, newSince.length, stale.length, meetings);
+  $("#reviewLine").innerHTML = heroSentence(L, newSummit, newClient, stale.length, meetings);
 
   /* Plain counts. Every one of these is just "how many leads are in this
      state" — nothing averaged, nothing derived. The label carries its own
      timeframe, since "new" alone reads as all-time at a glance. */
   $("#statTiles").innerHTML = [
-    { k: "New since last call", v: newSince.length, d: `${L.length} leads all time` },
-    { k: "Open pipeline", v: open.length, d: "not won or lost" },
-    { k: "Meetings booked", v: meetings, d: "meeting or proposal", cls: meetings ? "good" : "" },
-    { k: "Won", v: won, d: "closed and won", cls: won ? "good" : "" },
+    { k: "New for Summit", v: newSummit, d: "since the last call" },
+    { k: "New for clients", v: newClient, d: "since the last call" },
+    { k: "Open pipeline", v: open.length, d: "Summit, not won or lost" },
+    { k: "Meetings booked", v: meetings, d: "Summit, meeting or proposal", cls: meetings ? "good" : "" },
+    { k: "Won", v: won, d: "Summit, closed and won", cls: won ? "good" : "" },
     { k: "Needs attention", v: stale.length, d: `no activity in ${STALE_DAYS}+ days`, cls: stale.length ? "alert" : "" },
   ].map((t) => `
     <div class="stat ${t.cls || ""}">
@@ -547,7 +556,7 @@ function renderReview() {
   /* ---- pipeline strip: stages left to right, with the conversion between
          each pair in the gap ---- */
   const fs = STAGES.filter((s) => s.funnel);
-  const counts = fs.map((s) => L.filter((l) => l.status === s.key).length);
+  const counts = fs.map((s) => P.filter((l) => l.status === s.key).length);
   const openTotal = counts.reduce((a, b) => a + b, 0);
 
   const blocks = fs.map((s, i) => {
@@ -577,13 +586,13 @@ function renderReview() {
     : emptyChart("No leads yet.");
 
   $("#outcomeChart").innerHTML = STAGES.filter((s) => !s.funnel).map((s) => {
-    const n = L.filter((l) => l.status === s.key).length;
+    const n = P.filter((l) => l.status === s.key).length;
     return `<span class="outcome" style="border-color:${s.line};background:${s.outline ? "transparent" : s.tint}">
       <span class="n" style="color:${s.ink}">${n}</span>
       <span class="k">${esc(s.label)}</span>
     </span>`;
   }).join("") + `<span class="outcome" style="border-style:dashed">
-      <span class="k">${esc(winRateLabel(L))}</span></span>`;
+      <span class="k">${esc(winRateLabel(P))}</span></span>`;
 
   /* ---- needs attention ---- */
   const attn = [...stale].sort(
@@ -634,17 +643,29 @@ function renderReview() {
 
 /* One plain sentence naming the thing that most deserves attention right now.
    Ordered by what would actually change the conversation on the call. */
-function heroSentence(L, created, stale, meetings) {
+/* The one line everyone reads before the call starts. The brief is explicit:
+   it must say, out loud, how many leads came in for Summit Sales and how many
+   for clients since the last review — then flag anything going stale. */
+function heroSentence(L, newSummit, newClient, stale, meetings) {
   if (!L.length) return "No leads yet — add the first one from the Summit Sales tab.";
+
+  const n = (v, one, many) => `<b>${v}</b> ${v === 1 ? one : many}`;
+  const total = newSummit + newClient;
+
+  let lead;
+  if (!total) {
+    lead = meetings
+      ? `Nothing new since the last call, but ${n(meetings, "lead is", "leads are")} still in play.`
+      : "Nothing new since the last call.";
+  } else {
+    lead = `Since the last call: ${n(newSummit, "new lead", "new leads")} for Summit Sales `
+         + `and ${n(newClient, "for a client", "for clients")}.`;
+  }
+
   if (stale) {
-    return `<b>${stale}</b> open lead${stale > 1 ? "s have" : " has"} gone quiet for ${STALE_DAYS}+ days.`;
+    lead += ` ${n(stale, "open lead has", "open leads have")} gone quiet for ${STALE_DAYS}+ days.`;
   }
-  if (created && meetings) {
-    return `<b>${created}</b> new lead${created > 1 ? "s" : ""} since the last call, and <b>${meetings}</b> in play.`;
-  }
-  if (created) return `<b>${created}</b> new lead${created > 1 ? "s" : ""} logged since the last call.`;
-  if (meetings) return `Nothing new since the last call, but <b>${meetings}</b> still in play.`;
-  return "Nothing new since the last call.";
+  return lead;
 }
 
 function winRateLabel(L) {
@@ -1493,13 +1514,12 @@ function wireInvites() {
   roleSel.dataset.wired = "1";
 
   roleSel.innerHTML = Object.entries(ROLES)
-    .map(([k, r]) => `<option value="${k}"${k === "ops" ? " selected" : ""}>${esc(r.label)}</option>`)
+    .map(([k, r]) => `<option value="${k}"${k === "member" ? " selected" : ""}>${esc(r.label)}</option>`)
     .join("");
 
   const sync = () => {
     const r = roleSel.value;
     $("#invRoleBlurb").textContent = ROLES[r]?.blurb || "";
-    $("#invClientWrap").classList.toggle("hide", r !== "client");
   };
   roleSel.addEventListener("change", sync);
   sync();
@@ -1511,12 +1531,10 @@ async function sendInvite() {
   const name = $("#invName").value.trim();
   const email = $("#invEmail").value.trim().toLowerCase();
   const role = $("#invRole").value;
-  const clientAccess = [...$("#invClients").selectedOptions].map((o) => o.value);
   const phone = $("#invPhone").value.trim().replace(/[\s()-]/g, "");
 
   if (!name) return toast("Add their name so people know who this is.", "warn");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast("That email doesn't look right.", "warn");
-  if (role === "client" && !clientAccess.length) return toast("Pick which clients they can see.", "warn");
   if (phone && !/^\+[1-9]\d{7,14}$/.test(phone))
     return toast("Include the country code on the mobile, like +91 98765 43210.", "warn");
   if (S.users.some((u) => (u.email || "").toLowerCase() === email)) {
@@ -1527,7 +1545,7 @@ async function sendInvite() {
   btn.disabled = true;
   btn.textContent = "Sending…";
   try {
-    await S.store.createInvite(email, { name, role, clientAccess, phone });
+    await S.store.createInvite(email, { name, role, phone });
     await S.store.sendInviteLink(email);
     $("#invName").value = "";
     $("#invEmail").value = "";
@@ -1560,10 +1578,6 @@ function inviteError(ex) {
 function renderInvites() {
   const host = $("#invList");
   if (!host) return;
-
-  const opts = S.clients.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
-  const sel = $("#invClients");
-  if (sel && sel.innerHTML !== opts) sel.innerHTML = opts;
 
   const open = S.invites.filter((i) => i.status !== "accepted");
   host.innerHTML = open.length

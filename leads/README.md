@@ -67,9 +67,10 @@ project and hammer it with sign-in attempts.
 
 ### 4. Deploy the rules and indexes
 
-The rules are what actually stop a sales user reading client leads. Until they
-are deployed, the default production rules block everything and the dashboard
-will show empty tables.
+The rules are what actually stop someone without an invite reading your leads,
+and what stops a member promoting themselves to admin. Until they are deployed,
+the default production rules block everything and the dashboard will show empty
+tables.
 
 ```bash
 npm install -g firebase-tools
@@ -111,14 +112,14 @@ Authorised domains**, or the link will refuse to send.
 
 Roles:
 
-| Role     | Sees                          | Can do                                                        |
-| -------- | ----------------------------- | ------------------------------------------------------------- |
-| `admin`  | everything                    | everything, plus manage clients, invite people, see all exports |
-| `ops`    | everything                    | add and edit leads, comment, export — the LinkedIn team        |
-| `sales`  | Summit Sales leads only       | move stages, set sales owner / GHL link / deal value, comment  |
-| `client` | only their own client's leads | read and comment only                                          |
+| Role     | Sees       | Can do                                                                 |
+| -------- | ---------- | ---------------------------------------------------------------------- |
+| `admin`  | everything | everything, plus manage clients, invite people, see everyone's exports  |
+| `member` | everything | add, edit, comment, move stages, export — cannot delete or open Admin   |
 
-Pick `client` and the form asks which client accounts they may see.
+Access is deliberately flat: anyone you let in sees every lead, for Summit
+Sales and for clients alike. The only thing `admin` adds is the Admin tab —
+people, clients, and the full export history.
 
 Pending invites are listed under the form, where you can resend or revoke them.
 A revoked invite's link stops working immediately.
@@ -235,15 +236,14 @@ who may set it — otherwise nothing else needs touching.
 - **Deleting a lead** is admin-only and removes the lead row, but its activity
   entries stay in the audit trail by design. Prefer marking a lead **Lost**
   with a reason.
-- **`clientAccess` is capped at 30 clients per user** — Firestore's `in` query
-  takes at most 30 values. Well beyond the current n, but it is a real ceiling.
 - **The activity feed loads the 120 most recent entries.** Per-lead history is
   complete; only the global *Activity* tab is capped.
-- **Queries are scoped by role in `store.js` to mirror `firestore.rules`.**
+- **Queries in `store.js` must stay in step with `firestore.rules`.**
   Firestore validates a query against its *potential* result set, so a rule
-  like `stream == 'sales_partner'` needs a matching `where` clause or the whole
-  query is rejected. If you change one, change the other — and add the matching
-  composite index.
+  like `stream == 'sales_partner'` would need a matching `where` clause or the
+  whole query is rejected. Flat access is what lets the lead and activity feeds
+  be plain `orderBy()` queries today; if you ever narrow a rule, add the
+  matching `where` clause and composite index at the same time.
 - **Excel export is written by `xlsx.js`, not a library.** No CDN at click
   time, so it keeps working on restricted office networks and offline.
 - **Free Spark plan is fine** at this volume; Firestore's free tier covers

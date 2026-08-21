@@ -65,27 +65,15 @@ async function firebaseStore() {
   let profile = null;
   let phoneVerifier = null, phoneConfirmation = null;
 
-  /* The where() clause that makes a query provably safe for this user's role.
-     null means "no clause needed" (staff see everything);
-     false means "this user can see nothing". */
-  const scopeClause = () => {
-    const r = profile?.role;
-    if (r === "admin" || r === "ops") return null;
-    if (r === "sales") return where("stream", "==", "sales_partner");
-    if (r === "client") {
-      const ids = (profile.clientAccess || []).slice(0, 30);
-      return ids.length ? where("clientId", "in", ids) : false;
-    }
-    return false;
-  };
+  /* Everyone with a role sees everything, so no query needs narrowing any
+     more. This used to add a where() per role to satisfy the rules, which is
+     why activity documents still carry stream/clientId — harmless now, and
+     still useful for filtering.
 
-  const scoped = (col, ...tail) => {
-    const clause = scopeClause();
-    if (clause === false) return false;
-    return clause
-      ? query(collection(D, col), clause, ...tail)
-      : query(collection(D, col), ...tail);
-  };
+     A user with no role gets nothing; the rules refuse them anyway, and
+     returning false here avoids firing a query that would only be denied. */
+  const scoped = (col, ...tail) =>
+    profile?.role ? query(collection(D, col), ...tail) : false;
 
   const store = {
     mode: "firebase",
@@ -353,7 +341,6 @@ async function firebaseStore() {
         ...(user.phoneNumber ? { phone: user.phoneNumber } : {}),
         role: inv.role,
         active: true,
-        ...(inv.role === "client" ? { clientAccess: inv.clientAccess || [] } : {}),
       };
       await setDoc(doc(D, "users", user.uid), profileDoc);
       await updateDoc(doc(D, "invites", key), { status: "accepted", acceptedAt: serverTimestamp(), uid: user.uid });
@@ -447,7 +434,7 @@ function demoStore() {
         email: `${f.toLowerCase()}@${co.toLowerCase().replace(/\W/g, "")}.com`,
         country: ["United States", "United Kingdom", "Canada"][i % 3],
         industry: ["Logistics", "Software", "Manufacturing", "Retail", "Healthcare"][i % 5],
-        source: "LinkedIn Outreach",
+        source: ["LinkedIn Outreach", "Cold Calling", "Upwork", "LinkedIn Inbound"][i % 4],
         status: st,
         stream,
         clientId,
@@ -463,6 +450,11 @@ function demoStore() {
         createdByName: team[i % team.length],
       };
     });
+    db.users = [
+      { id: "demo-user", name: "Demo User", email: "demo@local", role: "admin", active: true },
+      { id: uid(), name: "Aisha Verma", email: "aisha@imarkinfotech.com", role: "member", active: true },
+      { id: uid(), name: "Mark Ellison", email: "mark@salesbysummit.com", role: "member", active: true },
+    ];
     db.activity = db.leads.map((ld) => ({
       id: uid(), leadId: ld.id, stream: ld.stream, clientId: ld.clientId,
       type: "created", text: `Lead created — ${ld.firstName} ${ld.lastName}`,
