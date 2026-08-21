@@ -508,6 +508,65 @@ position:relative; isolation:isolate;}
 }
 #llb-root #demobar code{font-size:11.5px; background:rgba(61,82,213,.1); padding:1px 4px; border-radius:3px}
 
+/* ==========================================================================
+   FIND A TIME — the multi-calendar slot picker
+
+   Read on a phone call, so the time is the loudest thing in each row and the
+   available reps sit right next to it. Nothing here depends on colour alone:
+   a rep who is free is a chip with their name in it, a rep who is busy simply
+   is not in the row.
+   ========================================================================== */
+#llb-root .bk-controls{display:flex !important; align-items:center !important; gap:8px !important; flex-wrap:wrap !important}
+#llb-root .inp-sm{padding:5px 8px !important; font-size:12.5px !important; width:auto !important; min-width:0 !important}
+
+#llb-root .bk-who{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  background:var(--card); border:1px solid var(--line); border-left:3px solid var(--accent);
+  border-radius:var(--r-l); padding:11px 14px; margin-bottom:14px;
+}
+#llb-root .bk-who .grow, #llb-root .bk-who > div:first-child{flex:1 1 auto; min-width:0}
+#llb-root .bk-who b{font-size:14px}
+#llb-root .bk-who .muted{display:block}
+
+#llb-root .bk-legend{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:12px;
+  padding-bottom:12px; border-bottom:1px solid var(--line-2)}
+#llb-root .bk-rep{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-2)}
+#llb-root .bk-rep.unset{color:var(--ink-4); text-decoration:line-through}
+#llb-root .bk-dot{width:9px; height:9px; border-radius:50%; flex:none}
+
+#llb-root .bk-grid{display:flex; flex-direction:column}
+#llb-root .bk-row{
+  display:grid; grid-template-columns:104px minmax(0,1fr) auto;
+  align-items:center; gap:14px;
+  padding:9px 4px; border-bottom:1px solid var(--line-2);
+}
+#llb-root .bk-row:last-child{border-bottom:0}
+#llb-root .bk-row:hover{background:var(--line-3)}
+#llb-root .bk-time{font-family:var(--disp); font-size:16px; font-weight:600; letter-spacing:-.01em}
+#llb-root .bk-free{display:flex; gap:7px; flex-wrap:wrap}
+#llb-root .bk-count{font-size:11.5px; color:var(--ink-4); white-space:nowrap}
+
+#llb-root .bk-chip{
+  font:inherit; font-size:12.5px; font-weight:550; cursor:pointer;
+  padding:5px 11px; border-radius:999px;
+  color:var(--rep); background:var(--card);
+  border:1px solid currentColor; opacity:.92;
+  transition:background .12s, color .12s;
+}
+#llb-root .bk-chip:hover{background:var(--rep); color:#fff; opacity:1}
+
+#llb-root .bk-empty{padding:26px 4px; text-align:center; color:var(--ink-3); font-size:13px}
+#llb-root .bk-empty.bad{color:var(--bad)}
+
+#llb-root .bk-confirm-line{font-size:14.5px; color:var(--ink-2)}
+#llb-root .row-8{display:flex; gap:8px; flex-wrap:wrap}
+
+@media (max-width:640px){
+  #llb-root .bk-row{grid-template-columns:84px minmax(0,1fr); row-gap:6px}
+  #llb-root .bk-count{grid-column:1 / -1; text-align:left}
+}
+#llb-root .bk-tzlab{font-size:11.5px; color:var(--ink-3); margin-left:4px}
+
 
 /* .hide must outrank the ID rules armoured above. */
 #llb-root #login.hide,
@@ -610,6 +669,7 @@ position:relative; isolation:isolate;}
 
       <nav class="nav" id="tabs">
         <button class="tab on" data-tab="review">Review</button>
+        <button class="tab hide" data-tab="booking" id="tabBooking">Find a time</button>
         <div class="nav-label">Leads</div>
         <button class="tab" data-tab="sales_partner">Summit Sales <span class="cnt" id="cntSales">0</span></button>
         <button class="tab" data-tab="client">Clients <span class="cnt" id="cntClient">0</span></button>
@@ -713,6 +773,41 @@ position:relative; isolation:isolate;}
           </header>
           <div id="toolbar_client"></div>
           <div id="table_client"></div>
+        </section>
+
+        <!-- ---------- FIND A TIME ---------- -->
+        <section class="panel" data-panel="booking" id="bookPanel">
+          <header class="page-head">
+            <div>
+              <h1>Find a time</h1>
+              <p class="page-sub">All four sales calendars at once, in the prospect's own time. Click a name to book — GHL sends the invite.</p>
+            </div>
+          </header>
+
+          <div id="bkWho"></div>
+
+          <section class="card">
+            <div class="card-head">
+              <div class="bk-controls">
+                <button class="btn btn-sm btn-ghost" id="bkPrev" aria-label="Previous day">&#8592;</button>
+                <input class="inp inp-sm" type="date" id="bkDate">
+                <button class="btn btn-sm btn-ghost" id="bkNext" aria-label="Next day">&#8594;</button>
+                <span class="bk-tzlab">Prospect&#39;s time</span>
+                <select class="inp inp-sm" id="bkTz" aria-label="Prospect's timezone"></select>
+                <button class="btn btn-sm btn-ghost" id="bkReload">Refresh</button>
+              </div>
+              <span class="hint" id="bkDay"></span>
+            </div>
+            <div class="card-body">
+              <div class="bk-legend" id="bkReps"></div>
+              <div class="bk-grid" id="bkGrid"></div>
+            </div>
+          </section>
+
+          <section class="card hide" id="bkConfirm">
+            <div class="card-head"><h2>Confirm the booking</h2></div>
+            <div class="card-body" id="bkConfirmBody"></div>
+          </section>
         </section>
 
         <!-- ---------- ACTIVITY ---------- -->
@@ -1041,6 +1136,69 @@ const calUrl = (lead) => {
 };
 
 /* ---------------------------------------------------------------------------
+   4c. FIND A TIME — booking across the US sales team's GHL calendars
+
+   The problem this solves: a caller in India has a prospect on the phone who
+   says "I'm free at 12". Four reps, four separate GHL calendars, and no way to
+   see who is actually open at that moment — so the invite goes out hours later,
+   or not at all.
+
+   `proxy` is the URL of the small server that holds the GHL token. It CANNOT
+   be called from here without one: the API needs a Private Integration Token,
+   and anything in this file is readable by anyone who views source on the GHL
+   page. See cal-proxy/README.md — deploy it, paste the URL here, done.
+
+   Leave `proxy` blank and the tab hides itself, so the rest of the dashboard
+   works untouched until you are ready.
+
+   Each rep needs their GHL calendar id (Calendars → the calendar → the id in
+   the URL) and their GHL user id (Settings → Team → the user → the id in the
+   URL). The calendar id decides which calendar is read and written; the user
+   id is who the appointment gets assigned to.
+--------------------------------------------------------------------------- */
+const BOOKING = {
+  proxy: "",
+
+  slotMinutes: 30,        // length of the call being booked
+  dayStartHour: 8,        // earliest slot shown, in the PROSPECT's timezone
+  dayEndHour: 19,         // latest slot shown
+  daysAhead: 21,          // how far out the date picker allows
+
+  title: "Discovery call",
+
+  reps: [
+    { id: "melton", name: "Melton Weaver", calendarId: "", userId: "", timezone: "America/New_York" },
+    { id: "rep2",   name: "Rep two",       calendarId: "", userId: "", timezone: "America/New_York" },
+    { id: "rep3",   name: "Rep three",     calendarId: "", userId: "", timezone: "America/Chicago"  },
+    { id: "rep4",   name: "Rep four",      calendarId: "", userId: "", timezone: "America/Los_Angeles" },
+  ],
+};
+
+/* Timezones offered in the picker, and the guess made from a lead's country.
+   The caller can always override — the guess is only there to save a click on
+   the overwhelmingly common case. */
+const TIMEZONES = [
+  { id: "America/New_York",    label: "US Eastern"  },
+  { id: "America/Chicago",     label: "US Central"  },
+  { id: "America/Denver",      label: "US Mountain" },
+  { id: "America/Los_Angeles", label: "US Pacific"  },
+  { id: "Europe/London",       label: "UK"          },
+  { id: "Australia/Sydney",    label: "Australia (Sydney)" },
+  { id: "Asia/Kolkata",        label: "India (IST)" },
+];
+
+const TZ_BY_COUNTRY = {
+  "United States": "America/New_York",
+  "Canada": "America/New_York",
+  "United Kingdom": "Europe/London",
+  "Ireland": "Europe/London",
+  "Australia": "Australia/Sydney",
+  "India": "Asia/Kolkata",
+  "Singapore": "Asia/Kolkata",
+  "United Arab Emirates": "Asia/Kolkata",
+};
+
+/* ---------------------------------------------------------------------------
    5. LEAD FIELDS
    type:     text | email | tel | url | date | number | textarea | select
    group:    which fieldset it sits in on the form
@@ -1110,6 +1268,28 @@ const VIZ = { mark: "#a8801a" };
 /* Where the weekly review starts. The team reviews on Tuesday and Thursday, so
    "since the last review" means since the most recent Tue or Thu that passed. */
 const REVIEW_DAYS = [2, 4]; // 0 = Sunday
+
+
+/* ===== dom.js ====================================================== */
+/* ============================================================================
+   dom.js — the three helpers every view needs.
+
+   Their own file because app.js and booking.js both need them, and the GHL
+   build concatenates every module into one scope: two files each declaring
+   `const $` would be a syntax error the moment they were joined.
+   ========================================================================== */
+
+const $  = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+/* Escape before interpolating into HTML. Everything in this app that reaches
+   innerHTML goes through here — lead names and comments are user input, and a
+   company whose name contains angle brackets should render, not run. Note the
+   GHL build inlines all of this into one script tag, so a literal closing tag
+   anywhere in this file — even inside a comment — would end it early. */
+const esc = (v) =>
+  String(v ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 
 /* ===== xlsx.js ===================================================== */
@@ -1716,6 +1896,36 @@ async function firebaseStore() {
         : query(base, where("by", "==", profile.uid), orderBy("at", "desc"), limit(300));
       return live(q, cb);
     },
+
+    /* ---- GHL calendars -------------------------------------------------
+       Neither of these talks to GHL directly. They talk to the proxy, which
+       holds the Private Integration Token — a token in this file would be
+       readable by anyone who views source on the GHL page, and GHL's API
+       sends no CORS headers to a browser anyway.
+
+       The proxy is told who is calling by the Firebase ID token, which it
+       verifies against Google's public keys. An expired login therefore
+       cannot book, which is the point.  ---------------------------------- */
+    async callProxy(path, body) {
+      if (!BOOKING.proxy) throw new Error("no-proxy");
+      const token = await A.currentUser.getIdToken();
+      const res = await fetch(`${BOOKING.proxy.replace(/\/$/, "")}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Calendar service returned ${res.status}`);
+      return data;
+    },
+
+    freeSlots({ date, timezone, calendarIds }) {
+      return this.callProxy("/slots", { date, timezone, calendarIds });
+    },
+
+    book(payload) {
+      return this.callProxy("/book", payload);
+    },
   };
 
   return store;
@@ -1956,6 +2166,63 @@ function demoStore() {
 
     watchExports: (cb) =>
       watch((db) => [...db.exports].sort((a, b) => (b.at || "").localeCompare(a.at || "")), cb),
+
+    /* Stand-in availability so the slot grid can be worked on, demoed and
+       tested without a GHL token. Deterministic per rep and per slot, so the
+       same date always looks the same — a grid that reshuffles on every
+       refresh is impossible to check anything against.
+
+       Availability is seeded in the reps' own zone and then re-expressed in
+       whichever zone was asked for, exactly as GHL does it. Without that the
+       timezone control would look broken in a demo: the same free hour has to
+       read 12:00 Eastern and 09:00 Pacific, because it is the same hour.
+
+       Shape matches the proxy exactly: `t` is the wall-clock time in the
+       prospect's timezone (what the caller reads out loud) and `iso` is the
+       same moment with its offset attached (what gets booked). Keeping both
+       on the wire means the browser never does timezone arithmetic. */
+    async freeSlots({ date, timezone, calendarIds }) {
+      const REP_ZONE = "America/New_York";
+
+      const offsetText = (tz) => {
+        try {
+          const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longOffset" })
+            .formatToParts(new Date(`${date}T12:00:00Z`));
+          return (parts.find((p) => p.type === "timeZoneName")?.value || "GMT+00:00").replace("GMT", "") || "+00:00";
+        } catch { return "+00:00"; }
+      };
+      const offsetMinutes = (text) =>
+        (text[0] === "-" ? -1 : 1) * (Number(text.slice(1, 3)) * 60 + Number(text.slice(4, 6)));
+
+      const askedOffset = offsetText(timezone);
+      const shift = offsetMinutes(askedOffset) - offsetMinutes(offsetText(REP_ZONE));
+
+      const out = {};
+      for (const id of calendarIds) {
+        out[id] = [];
+        for (let h = BOOKING.dayStartHour; h < BOOKING.dayEndHour; h++) {
+          for (let m = 0; m < 60; m += BOOKING.slotMinutes) {
+            let seed = 0;
+            const key = `${id}|${date}|${h}:${m}`;
+            for (let i = 0; i < key.length; i++) seed = (seed * 31 + key.charCodeAt(i)) >>> 0;
+            if (seed % 5 < 2) continue;                       // ~40% of slots busy
+
+            const mins = h * 60 + m + shift;
+            if (mins < 0 || mins >= 1440) continue;           // rolled off this day
+            const t = `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+            out[id].push({ t, iso: `${date}T${t}:00${askedOffset}` });
+          }
+        }
+        out[id].sort((a, b) => a.t.localeCompare(b.t));
+      }
+      await new Promise((r) => setTimeout(r, 120));
+      return { slots: out, demo: true };
+    },
+
+    async book(payload) {
+      await new Promise((r) => setTimeout(r, 200));
+      return { ok: true, demo: true, appointmentId: uid(), contactId: uid(), ...payload };
+    },
   };
 
   return store;
@@ -1987,6 +2254,385 @@ async function openStore() {
 }
 
 
+/* ===== booking.js ================================================== */
+/* ============================================================================
+   booking.js — "Find a time" across the US sales team's GHL calendars.
+
+   Written for one moment: a caller in India has a prospect on the phone, the
+   prospect says "I'm free at twelve", and the caller has seconds to answer.
+   So the screen is a list of times, biggest thing on the page, each with the
+   reps who are actually free next to it. One click books, and GHL sends the
+   invite while the prospect is still on the line.
+
+   Everything here is deliberately timezone-dumb. The proxy returns each slot
+   as a wall-clock time in the prospect's zone plus the exact instant to book;
+   this file renders the first and posts back the second. No date arithmetic,
+   which is where this kind of feature normally goes wrong.
+   ========================================================================== */
+
+
+
+
+/* Module state. `slots` is keyed by calendar id, exactly as it comes back. */
+const B = {
+  store: null,
+  toast: () => {},
+  onBooked: () => {},
+  leads: () => [],
+  date: "",
+  timezone: TIMEZONES[0].id,
+  slots: null,
+  loading: false,
+  error: "",
+  lead: null,          // the lead being booked for, if any
+  picked: null,        // { rep, slot } awaiting confirmation
+};
+
+/* The tab hides itself until there is something behind it — a deployed proxy,
+   or the demo, which stands in with fake availability. */
+const bookingEnabled = (store) => Boolean(BOOKING.proxy) || store?.mode === "demo";
+
+/* ---------------------------------------------------------------------------
+   Dates. Kept as plain YYYY-MM-DD strings — a Date object here would only
+   invite a timezone bug.
+--------------------------------------------------------------------------- */
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+const addDays = (iso, n) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + n));
+  return dt.toISOString().slice(0, 10);
+};
+
+const prettyDate = (iso) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(undefined, {
+    weekday: "long", day: "numeric", month: "long", timeZone: "UTC",
+  });
+};
+
+/* 24h "14:30" → "2:30 PM". US prospects hear it this way, so the caller should
+   read it this way. */
+const pretty = (t) => {
+  const [h, m] = t.split(":").map(Number);
+  const ap = h < 12 ? "AM" : "PM";
+  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, "0")} ${ap}`;
+};
+
+const guessTimezone = (lead) =>
+  TZ_BY_COUNTRY[lead?.country] || TIMEZONES[0].id;
+
+/* ---------------------------------------------------------------------------
+   Wiring. Called once, from app.js, after the shell exists.
+--------------------------------------------------------------------------- */
+function initBooking({ store, toast, onBooked, leads }) {
+  B.store = store;
+  B.toast = toast || B.toast;
+  B.onBooked = onBooked || B.onBooked;
+  B.leads = leads || B.leads;
+  B.date = todayISO();
+
+  const host = $("#bookPanel");
+  if (!host) return;
+
+  $("#bkTz").innerHTML = TIMEZONES
+    .map((t) => `<option value="${esc(t.id)}">${esc(t.label)}</option>`).join("");
+  $("#bkTz").value = B.timezone;
+  $("#bkDate").value = B.date;
+  $("#bkDate").min = todayISO();
+  $("#bkDate").max = addDays(todayISO(), BOOKING.daysAhead);
+
+  $("#bkDate").addEventListener("change", (e) => { B.date = e.target.value; load(); });
+  $("#bkTz").addEventListener("change", (e) => { B.timezone = e.target.value; load(); });
+  $("#bkPrev").addEventListener("click", () => shiftDay(-1));
+  $("#bkNext").addEventListener("click", () => shiftDay(1));
+  $("#bkReload").addEventListener("click", () => load());
+
+  /* Click anywhere in the grid: a free rep chip picks that rep and slot. */
+  $("#bkGrid").addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-rep][data-slot]");
+    if (!chip || chip.disabled) return;
+    const rep = BOOKING.reps.find((r) => r.id === chip.dataset.rep);
+    const slot = JSON.parse(chip.dataset.slot);
+    B.picked = { rep, slot };
+    renderConfirm();
+  });
+
+  $("#bkConfirmBody").addEventListener("click", (e) => {
+    if (e.target.id === "bkCancel") { B.picked = null; renderConfirm(); }
+    if (e.target.id === "bkBook") confirmBooking();
+  });
+
+  renderRepLegend();
+  load();
+}
+
+function shiftDay(n) {
+  const next = addDays(B.date, n);
+  if (next < todayISO()) return;
+  B.date = next;
+  $("#bkDate").value = next;
+  load();
+}
+
+/* Open the tab with a lead already attached — used by the drawer's
+   "Find a time" button, which is how most bookings will actually start. */
+function bookingForLead(lead) {
+  B.lead = lead || null;
+  if (lead) {
+    B.timezone = guessTimezone(lead);
+    const sel = $("#bkTz");
+    if (sel) sel.value = B.timezone;
+  }
+  B.picked = null;
+  renderWho();
+  load();
+}
+
+/* ---------------------------------------------------------------------------
+   Loading availability
+--------------------------------------------------------------------------- */
+async function load() {
+  const configured = BOOKING.reps.filter((r) => r.calendarId);
+  const reps = configured.length ? configured : BOOKING.reps;
+
+  B.loading = true;
+  B.error = "";
+  B.picked = null;
+  render();
+
+  try {
+    const res = await B.store.freeSlots({
+      date: B.date,
+      timezone: B.timezone,
+      calendarIds: reps.map((r) => r.calendarId || r.id),
+    });
+    B.slots = res.slots || {};
+  } catch (ex) {
+    B.slots = null;
+    B.error = ex?.message === "no-proxy"
+      ? "No calendar service configured yet — set BOOKING.proxy in config.js."
+      : (ex?.message || "Could not reach the calendar service.");
+  } finally {
+    B.loading = false;
+    render();
+  }
+}
+
+/* Every distinct start time across all four calendars, in order. Reps rarely
+   share slot boundaries exactly, so the rows come from the union, not from
+   any one rep's calendar. */
+function slotRows() {
+  const seen = new Map();
+  for (const rep of BOOKING.reps) {
+    for (const s of B.slots?.[rep.calendarId || rep.id] || []) {
+      if (!seen.has(s.t)) seen.set(s.t, { t: s.t, free: [] });
+      seen.get(s.t).free.push({ rep, slot: s });
+    }
+  }
+  return [...seen.values()].sort((a, b) => a.t.localeCompare(b.t));
+}
+
+/* ---------------------------------------------------------------------------
+   Rendering
+--------------------------------------------------------------------------- */
+function renderRepLegend() {
+  const host = $("#bkReps");
+  if (!host) return;
+
+  /* Only worth flagging once there is a real service behind the tab. In the
+     demo every calendar is unlinked by definition, and striking all four
+     through while they are plainly bookable just reads as broken. */
+  const live = Boolean(BOOKING.proxy);
+  const unset = live ? BOOKING.reps.filter((r) => !r.calendarId).length : 0;
+
+  host.innerHTML = BOOKING.reps.map((r) => `
+    <span class="bk-rep${live && !r.calendarId ? " unset" : ""}">
+      <span class="bk-dot" style="background:${esc(repInk(r))}"></span>${esc(r.name)}
+    </span>`).join("")
+    + (unset
+        ? `<span class="muted">${unset} calendar${unset > 1 ? "s" : ""} not linked yet — set calendarId in config.js</span>`
+        : "");
+}
+
+/* Reps get their own hues so the same person is the same colour on every row.
+   Availability itself is never carried by colour alone — a free rep is a
+   filled chip with their name in it, a busy one simply is not there. */
+const REP_INK = ["#3d52d5", "#136c3e", "#8f5108", "#6d3bb5", "#0f6f77", "#a3241b"];
+const repInk = (rep) => REP_INK[Math.max(0, BOOKING.reps.findIndex((r) => r.id === rep.id)) % REP_INK.length];
+
+function renderWho() {
+  const host = $("#bkWho");
+  if (!host) return;
+  const l = B.lead;
+  host.innerHTML = l
+    ? `<div class="bk-who">
+         <div>
+           <div class="eyebrow">Booking for</div>
+           <b>${esc(`${l.firstName || ""} ${l.lastName || ""}`.trim() || l.company || "this lead")}</b>
+           <span class="muted">${esc([l.company, l.email].filter(Boolean).join(" · "))}</span>
+         </div>
+         <button class="btn btn-xs btn-ghost" id="bkClearLead">Clear</button>
+       </div>`
+    : `<div class="bk-who">
+         <div>
+           <div class="eyebrow">Booking for</div>
+           <span class="muted">No lead attached — open a lead and press <b>Find a time</b>, or fill in the details when you book.</span>
+         </div>
+       </div>`;
+  const clear = $("#bkClearLead");
+  if (clear) clear.addEventListener("click", () => { B.lead = null; B.picked = null; renderWho(); renderConfirm(); });
+}
+
+function render() {
+  const grid = $("#bkGrid");
+  if (!grid) return;
+
+  $("#bkDay").textContent = prettyDate(B.date);
+  renderWho();
+
+  if (B.loading) {
+    grid.innerHTML = `<div class="bk-empty">Checking all ${BOOKING.reps.length} calendars…</div>`;
+    return renderConfirm();
+  }
+  if (B.error) {
+    grid.innerHTML = `<div class="bk-empty bad">${esc(B.error)}</div>`;
+    return renderConfirm();
+  }
+
+  const rows = slotRows();
+  if (!rows.length) {
+    grid.innerHTML = `<div class="bk-empty">Nobody is free on ${esc(prettyDate(B.date))}. Try the next day.</div>`;
+    return renderConfirm();
+  }
+
+  grid.innerHTML = rows.map((row) => `
+    <div class="bk-row${row.free.length ? "" : " none"}">
+      <div class="bk-time">${esc(pretty(row.t))}</div>
+      <div class="bk-free">
+        ${row.free.map(({ rep, slot }) => `
+          <button class="bk-chip" data-rep="${esc(rep.id)}"
+                  data-slot="${esc(JSON.stringify(slot))}"
+                  style="--rep:${esc(repInk(rep))}">
+            ${esc(rep.name)}
+          </button>`).join("")}
+      </div>
+      <div class="bk-count">${row.free.length} free</div>
+    </div>`).join("");
+
+  renderConfirm();
+}
+
+/* The confirm step exists because booking is irreversible from the prospect's
+   point of view — they get an email the moment it lands. One glance at who,
+   when, and with whom before that happens. */
+function renderConfirm() {
+  const host = $("#bkConfirmBody");
+  const card = $("#bkConfirm");
+  if (!host || !card) return;
+
+  if (!B.picked) {
+    card.classList.add("hide");
+    host.innerHTML = "";
+    return;
+  }
+  card.classList.remove("hide");
+
+  const { rep, slot } = B.picked;
+  const l = B.lead || {};
+  const tzLabel = TIMEZONES.find((t) => t.id === B.timezone)?.label || B.timezone;
+
+  host.innerHTML = `
+    <div class="bk-confirm-line">
+      <b>${esc(pretty(slot.t))}</b> ${esc(tzLabel)} · ${esc(prettyDate(B.date))}
+      with <b style="color:${esc(repInk(rep))}">${esc(rep.name)}</b>
+    </div>
+    <div class="grid-2 mt-12">
+      <div class="fld">
+        <label for="bkFirst">First name <span class="req">*</span></label>
+        <input class="inp" id="bkFirst" value="${esc(l.firstName || "")}">
+      </div>
+      <div class="fld">
+        <label for="bkLast">Last name</label>
+        <input class="inp" id="bkLast" value="${esc(l.lastName || "")}">
+      </div>
+      <div class="fld">
+        <label for="bkEmail">Email <span class="req">*</span></label>
+        <input class="inp" id="bkEmail" type="email" value="${esc(l.email || "")}">
+      </div>
+      <div class="fld">
+        <label for="bkPhone">Phone</label>
+        <input class="inp" id="bkPhone" type="tel" value="${esc(l.phone || "")}">
+      </div>
+    </div>
+    <div class="fld mt-12">
+      <label for="bkNotes">Note for the rep <span class="muted">(optional)</span></label>
+      <textarea class="inp" id="bkNotes" rows="2" placeholder="What the prospect asked about"></textarea>
+    </div>
+    <p class="muted mt-8">The invite goes to this email from GHL as soon as you book.</p>
+    <div class="mt-12 row-8">
+      <button class="btn btn-primary" id="bkBook">Book with ${esc(rep.name.split(" ")[0])}</button>
+      <button class="btn btn-ghost" id="bkCancel">Cancel</button>
+    </div>`;
+}
+
+/* ---------------------------------------------------------------------------
+   Booking
+--------------------------------------------------------------------------- */
+async function confirmBooking() {
+  const { rep, slot } = B.picked || {};
+  if (!rep) return;
+
+  const first = $("#bkFirst").value.trim();
+  const email = $("#bkEmail").value.trim();
+  if (!first) return B.toast("Add the prospect's first name.", "warn");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return B.toast("A real email address is needed for the invite.", "warn");
+
+  const btn = $("#bkBook");
+  btn.disabled = true;
+  btn.textContent = "Booking…";
+
+  try {
+    const res = await B.store.book({
+      calendarId: rep.calendarId || rep.id,
+      userId: rep.userId || "",
+      startTime: slot.iso,
+      timezone: B.timezone,
+      minutes: BOOKING.slotMinutes,
+      title: BOOKING.title,
+      notes: $("#bkNotes").value.trim(),
+      contact: {
+        firstName: first,
+        lastName: $("#bkLast").value.trim(),
+        email,
+        phone: $("#bkPhone").value.trim(),
+      },
+      leadId: B.lead?.id || "",
+    });
+
+    B.toast(`Booked with ${rep.name} — the invite is on its way.`, "good");
+    await B.onBooked({
+      lead: B.lead,
+      rep,
+      slot,
+      date: B.date,
+      timezone: B.timezone,
+      result: res,
+    });
+
+    B.picked = null;
+    load();
+  } catch (ex) {
+    B.toast(ex?.message || "The booking did not go through. Nothing was sent.", "bad");
+    btn.disabled = false;
+    btn.textContent = `Book with ${rep.name.split(" ")[0]}`;
+  }
+}
+
+
 /* ===== app.js ====================================================== */
 /* ============================================================================
    app.js — UI and behaviour for the LinkedIn Leads dashboard.
@@ -1996,16 +2642,11 @@ async function openStore() {
 
 
 
+
+
 /* ==========================================================================
    TINY HELPERS
    ========================================================================== */
-const $  = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-
-const esc = (v) =>
-  String(v ?? "").replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-
 const DAY = 864e5;
 const asDate = (v) => (v ? new Date(v) : null);
 const daysSince = (v) => (v ? Math.floor((Date.now() - new Date(v)) / DAY) : Infinity);
@@ -2444,6 +3085,19 @@ function showApp() {
   $("#meAvatar").textContent = initials(name);
   $("#tabAdmin").classList.toggle("hide", !can.admin(S.me.role));
 
+  /* "Find a time" only appears once there is something behind it. With no
+     proxy deployed the tab stays hidden rather than offering a button that
+     cannot work. */
+  if (bookingEnabled(S.store)) {
+    $("#tabBooking").classList.remove("hide");
+    initBooking({
+      store: S.store,
+      toast,
+      leads: () => S.leads,
+      onBooked: onGhlBooked,
+    });
+  }
+
   // Live subscriptions. Each fires immediately with current data.
   S.store.watchLeads((rows) => { S.leads = rows; renderAll(); });
   S.store.watchClients((rows) => { S.clients = rows; renderAll(); });
@@ -2461,10 +3115,7 @@ function wireChrome() {
 
   $("#tabs").addEventListener("click", (e) => {
     const t = e.target.closest(".tab");
-    if (!t) return;
-    S.tab = t.dataset.tab;
-    $$(".tab").forEach((x) => x.classList.toggle("on", x === t));
-    $$(".panel").forEach((p) => p.classList.toggle("on", p.dataset.panel === S.tab));
+    if (t) goTab(t.dataset.tab);
   });
 
   $("#drClose").addEventListener("click", closeDrawer);
@@ -2478,6 +3129,14 @@ function wireChrome() {
     $("#newClient").value = "";
     toast("Client added.", "good");
   });
+}
+
+/* Single way in and out of a tab, so the drawer can send someone straight to
+   "Find a time" with a lead in hand. */
+function goTab(name) {
+  S.tab = name;
+  $$(".tab").forEach((x) => x.classList.toggle("on", x.dataset.tab === name));
+  $$(".panel").forEach((p) => p.classList.toggle("on", p.dataset.panel === name));
 }
 
 function renderAll() {
@@ -2970,7 +3629,8 @@ function renderDrawer() {
   /* ---- footer ---- */
   const canEdit = can.edit(S.me.role);
   $("#drFoot").innerHTML = `
-    ${canEdit ? bookButton(lead) : ""}
+    ${canEdit && bookingEnabled(S.store) ? `<button class="btn btn-sm btn-primary" id="drFind">Find a time</button>` : ""}
+    ${canEdit ? bookButton(lead, bookingEnabled(S.store)) : ""}
     ${canEdit ? `<button class="btn btn-sm btn-ghost" id="drEdit">Edit lead</button>` : ""}
     ${canEdit ? `<select class="inp" id="drStage" style="max-width:190px">
         ${STAGES.map((s) => `<option value="${s.key}"${lead.status === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
@@ -2984,6 +3644,14 @@ function renderDrawer() {
     // Remember which lead the booking modal was opened for, so the completed
     // booking can be attached to the right record.
     $("#drBook")?.addEventListener("click", () => { S.bookingFor = lead.id; });
+
+    /* Straight to the slot grid with this lead attached and their timezone
+       already guessed — the caller is on the phone, every click counts. */
+    $("#drFind")?.addEventListener("click", () => {
+      closeDrawer();
+      goTab("booking");
+      bookingForLead(lead);
+    });
   }
   if (can.remove(S.me.role)) {
     $("#drDel").addEventListener("click", async () => {
@@ -3094,7 +3762,7 @@ function wireCommentBox(lead) {
    script is blocked or slow, the link simply opens the page in a new tab. The
    feature degrades instead of breaking.
 --------------------------------------------------------------------------- */
-function bookButton(lead) {
+function bookButton(lead, secondary = false) {
   if (!CAL.enabled) return "";
   const name = `${lead.firstName || ""} ${lead.lastName || ""}`.trim();
   const cfg = JSON.stringify({
@@ -3104,7 +3772,7 @@ function bookButton(lead) {
     ...(lead.company ? { notes: `${name || "Lead"} — ${lead.company}` } : {}),
   });
   const booked = lead.callBookedFor;
-  return `<a class="btn btn-sm ${booked ? "btn-ghost" : "btn-primary"}" id="drBook"
+  return `<a class="btn btn-sm ${booked || secondary ? "btn-ghost" : "btn-primary"}" id="drBook"
       href="${esc(calUrl(lead))}" target="_blank" rel="noopener noreferrer"
       data-cal-link="${esc(CAL.link)}"
       data-cal-namespace="${esc(CAL.namespace)}"
@@ -3165,6 +3833,42 @@ async function onBookingSuccess(data) {
   } catch (ex) {
     console.error(ex);
     toast("Call was booked, but the lead couldn't be updated. Set the stage by hand.", "bad");
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   A booking made from "Find a time" has to land back on the lead, or the whole
+   point is lost — the Tuesday call asks "did anyone actually get on a call
+   with this one", and the answer has to be in the record, not in GHL.
+--------------------------------------------------------------------------- */
+async function onGhlBooked({ lead, rep, slot, date, timezone }) {
+  if (!lead) return;   // booked for a fresh contact, nothing here to attach to
+
+  const when = `${fmtDate(date)} at ${slot.t} (${timezone})`;
+  const patch = { callBookedFor: date, salesOwner: lead.salesOwner || rep.name };
+  const notes = [{
+    type: "comment",
+    text: `Call booked with ${rep.name} for ${when}. Invite sent from GHL.`,
+  }];
+
+  /* Only ever forward. A booking should not drag a lead that already reached
+     proposal back to meeting. */
+  const order = STAGES.findIndex((s) => s.key === lead.status);
+  const meetingIdx = STAGES.findIndex((s) => s.key === "meeting");
+  if (order >= 0 && order < meetingIdx) {
+    patch.status = "meeting";
+    notes.push({
+      type: "stage",
+      text: `Stage moved: ${stage(lead.status).label} → Meeting Booked`,
+      from: lead.status, to: "meeting",
+    });
+  }
+
+  try {
+    await S.store.updateLead(lead, patch, notes);
+  } catch (ex) {
+    console.error(ex);
+    toast("The call is booked, but the lead didn't update. Set the stage by hand.", "warn");
   }
 }
 

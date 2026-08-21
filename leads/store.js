@@ -24,7 +24,7 @@
    document read per entry).
    ========================================================================== */
 
-import { firebaseConfig, isConfigured, BOOTSTRAP_ADMIN, MS_TENANT } from "./config.js";
+import { firebaseConfig, isConfigured, BOOTSTRAP_ADMIN, MS_TENANT, BOOKING } from "./config.js";
 
 const SDK = "https://www.gstatic.com/firebasejs/10.14.1";
 
@@ -366,6 +366,36 @@ async function firebaseStore() {
         : query(base, where("by", "==", profile.uid), orderBy("at", "desc"), limit(300));
       return live(q, cb);
     },
+
+    /* ---- GHL calendars -------------------------------------------------
+       Neither of these talks to GHL directly. They talk to the proxy, which
+       holds the Private Integration Token — a token in this file would be
+       readable by anyone who views source on the GHL page, and GHL's API
+       sends no CORS headers to a browser anyway.
+
+       The proxy is told who is calling by the Firebase ID token, which it
+       verifies against Google's public keys. An expired login therefore
+       cannot book, which is the point.  ---------------------------------- */
+    async callProxy(path, body) {
+      if (!BOOKING.proxy) throw new Error("no-proxy");
+      const token = await A.currentUser.getIdToken();
+      const res = await fetch(`${BOOKING.proxy.replace(/\/$/, "")}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Calendar service returned ${res.status}`);
+      return data;
+    },
+
+    freeSlots({ date, timezone, calendarIds }) {
+      return this.callProxy("/slots", { date, timezone, calendarIds });
+    },
+
+    book(payload) {
+      return this.callProxy("/book", payload);
+    },
   };
 
   return store;
@@ -606,6 +636,63 @@ function demoStore() {
 
     watchExports: (cb) =>
       watch((db) => [...db.exports].sort((a, b) => (b.at || "").localeCompare(a.at || "")), cb),
+
+    /* Stand-in availability so the slot grid can be worked on, demoed and
+       tested without a GHL token. Deterministic per rep and per slot, so the
+       same date always looks the same — a grid that reshuffles on every
+       refresh is impossible to check anything against.
+
+       Availability is seeded in the reps' own zone and then re-expressed in
+       whichever zone was asked for, exactly as GHL does it. Without that the
+       timezone control would look broken in a demo: the same free hour has to
+       read 12:00 Eastern and 09:00 Pacific, because it is the same hour.
+
+       Shape matches the proxy exactly: `t` is the wall-clock time in the
+       prospect's timezone (what the caller reads out loud) and `iso` is the
+       same moment with its offset attached (what gets booked). Keeping both
+       on the wire means the browser never does timezone arithmetic. */
+    async freeSlots({ date, timezone, calendarIds }) {
+      const REP_ZONE = "America/New_York";
+
+      const offsetText = (tz) => {
+        try {
+          const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longOffset" })
+            .formatToParts(new Date(`${date}T12:00:00Z`));
+          return (parts.find((p) => p.type === "timeZoneName")?.value || "GMT+00:00").replace("GMT", "") || "+00:00";
+        } catch { return "+00:00"; }
+      };
+      const offsetMinutes = (text) =>
+        (text[0] === "-" ? -1 : 1) * (Number(text.slice(1, 3)) * 60 + Number(text.slice(4, 6)));
+
+      const askedOffset = offsetText(timezone);
+      const shift = offsetMinutes(askedOffset) - offsetMinutes(offsetText(REP_ZONE));
+
+      const out = {};
+      for (const id of calendarIds) {
+        out[id] = [];
+        for (let h = BOOKING.dayStartHour; h < BOOKING.dayEndHour; h++) {
+          for (let m = 0; m < 60; m += BOOKING.slotMinutes) {
+            let seed = 0;
+            const key = `${id}|${date}|${h}:${m}`;
+            for (let i = 0; i < key.length; i++) seed = (seed * 31 + key.charCodeAt(i)) >>> 0;
+            if (seed % 5 < 2) continue;                       // ~40% of slots busy
+
+            const mins = h * 60 + m + shift;
+            if (mins < 0 || mins >= 1440) continue;           // rolled off this day
+            const t = `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+            out[id].push({ t, iso: `${date}T${t}:00${askedOffset}` });
+          }
+        }
+        out[id].sort((a, b) => a.t.localeCompare(b.t));
+      }
+      await new Promise((r) => setTimeout(r, 120));
+      return { slots: out, demo: true };
+    },
+
+    async book(payload) {
+      await new Promise((r) => setTimeout(r, 200));
+      return { ok: true, demo: true, appointmentId: uid(), contactId: uid(), ...payload };
+    },
   };
 
   return store;

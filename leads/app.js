@@ -5,20 +5,16 @@
 import {
   LEAD_FIELDS, FIELD_GROUPS, STAGES, stage, OPEN_STAGES, STALE_DAYS,
   STREAMS, ROLES, REVIEW_DAYS, field, CAL, calUrl, AUTH, NOINDEX, FULL_BLEED,
+  BOOKING,
 } from "./config.js";
 import { openStore } from "./store.js";
+import { initBooking, bookingForLead, bookingEnabled } from "./booking.js";
 import { downloadXlsx } from "./xlsx.js";
+import { $, $$, esc } from "./dom.js";
 
 /* ==========================================================================
    TINY HELPERS
    ========================================================================== */
-const $  = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-
-const esc = (v) =>
-  String(v ?? "").replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-
 const DAY = 864e5;
 const asDate = (v) => (v ? new Date(v) : null);
 const daysSince = (v) => (v ? Math.floor((Date.now() - new Date(v)) / DAY) : Infinity);
@@ -457,6 +453,19 @@ function showApp() {
   $("#meAvatar").textContent = initials(name);
   $("#tabAdmin").classList.toggle("hide", !can.admin(S.me.role));
 
+  /* "Find a time" only appears once there is something behind it. With no
+     proxy deployed the tab stays hidden rather than offering a button that
+     cannot work. */
+  if (bookingEnabled(S.store)) {
+    $("#tabBooking").classList.remove("hide");
+    initBooking({
+      store: S.store,
+      toast,
+      leads: () => S.leads,
+      onBooked: onGhlBooked,
+    });
+  }
+
   // Live subscriptions. Each fires immediately with current data.
   S.store.watchLeads((rows) => { S.leads = rows; renderAll(); });
   S.store.watchClients((rows) => { S.clients = rows; renderAll(); });
@@ -474,10 +483,7 @@ function wireChrome() {
 
   $("#tabs").addEventListener("click", (e) => {
     const t = e.target.closest(".tab");
-    if (!t) return;
-    S.tab = t.dataset.tab;
-    $$(".tab").forEach((x) => x.classList.toggle("on", x === t));
-    $$(".panel").forEach((p) => p.classList.toggle("on", p.dataset.panel === S.tab));
+    if (t) goTab(t.dataset.tab);
   });
 
   $("#drClose").addEventListener("click", closeDrawer);
@@ -491,6 +497,14 @@ function wireChrome() {
     $("#newClient").value = "";
     toast("Client added.", "good");
   });
+}
+
+/* Single way in and out of a tab, so the drawer can send someone straight to
+   "Find a time" with a lead in hand. */
+function goTab(name) {
+  S.tab = name;
+  $$(".tab").forEach((x) => x.classList.toggle("on", x.dataset.tab === name));
+  $$(".panel").forEach((p) => p.classList.toggle("on", p.dataset.panel === name));
 }
 
 function renderAll() {
@@ -983,7 +997,8 @@ function renderDrawer() {
   /* ---- footer ---- */
   const canEdit = can.edit(S.me.role);
   $("#drFoot").innerHTML = `
-    ${canEdit ? bookButton(lead) : ""}
+    ${canEdit && bookingEnabled(S.store) ? `<button class="btn btn-sm btn-primary" id="drFind">Find a time</button>` : ""}
+    ${canEdit ? bookButton(lead, bookingEnabled(S.store)) : ""}
     ${canEdit ? `<button class="btn btn-sm btn-ghost" id="drEdit">Edit lead</button>` : ""}
     ${canEdit ? `<select class="inp" id="drStage" style="max-width:190px">
         ${STAGES.map((s) => `<option value="${s.key}"${lead.status === s.key ? " selected" : ""}>${esc(s.label)}</option>`).join("")}
@@ -997,6 +1012,14 @@ function renderDrawer() {
     // Remember which lead the booking modal was opened for, so the completed
     // booking can be attached to the right record.
     $("#drBook")?.addEventListener("click", () => { S.bookingFor = lead.id; });
+
+    /* Straight to the slot grid with this lead attached and their timezone
+       already guessed — the caller is on the phone, every click counts. */
+    $("#drFind")?.addEventListener("click", () => {
+      closeDrawer();
+      goTab("booking");
+      bookingForLead(lead);
+    });
   }
   if (can.remove(S.me.role)) {
     $("#drDel").addEventListener("click", async () => {
@@ -1107,7 +1130,7 @@ function wireCommentBox(lead) {
    script is blocked or slow, the link simply opens the page in a new tab. The
    feature degrades instead of breaking.
 --------------------------------------------------------------------------- */
-function bookButton(lead) {
+function bookButton(lead, secondary = false) {
   if (!CAL.enabled) return "";
   const name = `${lead.firstName || ""} ${lead.lastName || ""}`.trim();
   const cfg = JSON.stringify({
@@ -1117,7 +1140,7 @@ function bookButton(lead) {
     ...(lead.company ? { notes: `${name || "Lead"} — ${lead.company}` } : {}),
   });
   const booked = lead.callBookedFor;
-  return `<a class="btn btn-sm ${booked ? "btn-ghost" : "btn-primary"}" id="drBook"
+  return `<a class="btn btn-sm ${booked || secondary ? "btn-ghost" : "btn-primary"}" id="drBook"
       href="${esc(calUrl(lead))}" target="_blank" rel="noopener noreferrer"
       data-cal-link="${esc(CAL.link)}"
       data-cal-namespace="${esc(CAL.namespace)}"
@@ -1178,6 +1201,42 @@ async function onBookingSuccess(data) {
   } catch (ex) {
     console.error(ex);
     toast("Call was booked, but the lead couldn't be updated. Set the stage by hand.", "bad");
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   A booking made from "Find a time" has to land back on the lead, or the whole
+   point is lost — the Tuesday call asks "did anyone actually get on a call
+   with this one", and the answer has to be in the record, not in GHL.
+--------------------------------------------------------------------------- */
+async function onGhlBooked({ lead, rep, slot, date, timezone }) {
+  if (!lead) return;   // booked for a fresh contact, nothing here to attach to
+
+  const when = `${fmtDate(date)} at ${slot.t} (${timezone})`;
+  const patch = { callBookedFor: date, salesOwner: lead.salesOwner || rep.name };
+  const notes = [{
+    type: "comment",
+    text: `Call booked with ${rep.name} for ${when}. Invite sent from GHL.`,
+  }];
+
+  /* Only ever forward. A booking should not drag a lead that already reached
+     proposal back to meeting. */
+  const order = STAGES.findIndex((s) => s.key === lead.status);
+  const meetingIdx = STAGES.findIndex((s) => s.key === "meeting");
+  if (order >= 0 && order < meetingIdx) {
+    patch.status = "meeting";
+    notes.push({
+      type: "stage",
+      text: `Stage moved: ${stage(lead.status).label} → Meeting Booked`,
+      from: lead.status, to: "meeting",
+    });
+  }
+
+  try {
+    await S.store.updateLead(lead, patch, notes);
+  } catch (ex) {
+    console.error(ex);
+    toast("The call is booked, but the lead didn't update. Set the stage by hand.", "warn");
   }
 }
 

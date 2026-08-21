@@ -1,0 +1,21 @@
+name = "leads-cal"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Everything here is public — it ends up readable by anyone who can see the
+# Worker's config. The GHL token is NOT here; set it with
+#   npx wrangler secret put GHL_TOKEN
+[vars]
+# Firebase web API key. Public by design, same value as in config.js.
+FIREBASE_API_KEY = ""
+
+# The GHL sub-account these calendars live in.
+GHL_LOCATION_ID = ""
+
+# Comma-separated allowlist. A calendar not named here cannot be read or
+# booked through this Worker, no matter who is signed in.
+CALENDAR_IDS = ""
+
+# Lock the browser side down to the page the dashboard is embedded on.
+# "*" works but means any site can call this with a valid dashboard login.
+ALLOWED_ORIGIN = "https://salesbysummit.com"

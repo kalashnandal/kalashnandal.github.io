@@ -470,3 +470,62 @@ fieldset.grp legend{
   font-size:12px; font-weight:500; text-align:center; padding:6px 16px;
 }
 #demobar code{font-size:11.5px; background:rgba(61,82,213,.1); padding:1px 4px; border-radius:3px}
+
+/* ==========================================================================
+   FIND A TIME — the multi-calendar slot picker
+
+   Read on a phone call, so the time is the loudest thing in each row and the
+   available reps sit right next to it. Nothing here depends on colour alone:
+   a rep who is free is a chip with their name in it, a rep who is busy simply
+   is not in the row.
+   ========================================================================== */
+.bk-controls{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.inp-sm{padding:5px 8px; font-size:12.5px; width:auto; min-width:0}
+
+.bk-who{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  background:var(--card); border:1px solid var(--line); border-left:3px solid var(--accent);
+  border-radius:var(--r-l); padding:11px 14px; margin-bottom:14px;
+}
+.bk-who .grow, .bk-who > div:first-child{flex:1 1 auto; min-width:0}
+.bk-who b{font-size:14px}
+.bk-who .muted{display:block}
+
+.bk-legend{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:12px;
+  padding-bottom:12px; border-bottom:1px solid var(--line-2)}
+.bk-rep{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-2)}
+.bk-rep.unset{color:var(--ink-4); text-decoration:line-through}
+.bk-dot{width:9px; height:9px; border-radius:50%; flex:none}
+
+.bk-grid{display:flex; flex-direction:column}
+.bk-row{
+  display:grid; grid-template-columns:104px minmax(0,1fr) auto;
+  align-items:center; gap:14px;
+  padding:9px 4px; border-bottom:1px solid var(--line-2);
+}
+.bk-row:last-child{border-bottom:0}
+.bk-row:hover{background:var(--line-3)}
+.bk-time{font-family:var(--disp); font-size:16px; font-weight:600; letter-spacing:-.01em}
+.bk-free{display:flex; gap:7px; flex-wrap:wrap}
+.bk-count{font-size:11.5px; color:var(--ink-4); white-space:nowrap}
+
+.bk-chip{
+  font:inherit; font-size:12.5px; font-weight:550; cursor:pointer;
+  padding:5px 11px; border-radius:999px;
+  color:var(--rep); background:var(--card);
+  border:1px solid currentColor; opacity:.92;
+  transition:background .12s, color .12s;
+}
+.bk-chip:hover{background:var(--rep); color:#fff; opacity:1}
+
+.bk-empty{padding:26px 4px; text-align:center; color:var(--ink-3); font-size:13px}
+.bk-empty.bad{color:var(--bad)}
+
+.bk-confirm-line{font-size:14.5px; color:var(--ink-2)}
+.row-8{display:flex; gap:8px; flex-wrap:wrap}
+
+@media (max-width:640px){
+  .bk-row{grid-template-columns:84px minmax(0,1fr); row-gap:6px}
+  .bk-count{grid-column:1 / -1; text-align:left}
+}
+.bk-tzlab{font-size:11.5px; color:var(--ink-3); margin-left:4px}

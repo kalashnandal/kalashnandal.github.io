@@ -200,6 +200,69 @@ export const calUrl = (lead) => {
 };
 
 /* ---------------------------------------------------------------------------
+   4c. FIND A TIME — booking across the US sales team's GHL calendars
+
+   The problem this solves: a caller in India has a prospect on the phone who
+   says "I'm free at 12". Four reps, four separate GHL calendars, and no way to
+   see who is actually open at that moment — so the invite goes out hours later,
+   or not at all.
+
+   `proxy` is the URL of the small server that holds the GHL token. It CANNOT
+   be called from here without one: the API needs a Private Integration Token,
+   and anything in this file is readable by anyone who views source on the GHL
+   page. See cal-proxy/README.md — deploy it, paste the URL here, done.
+
+   Leave `proxy` blank and the tab hides itself, so the rest of the dashboard
+   works untouched until you are ready.
+
+   Each rep needs their GHL calendar id (Calendars → the calendar → the id in
+   the URL) and their GHL user id (Settings → Team → the user → the id in the
+   URL). The calendar id decides which calendar is read and written; the user
+   id is who the appointment gets assigned to.
+--------------------------------------------------------------------------- */
+export const BOOKING = {
+  proxy: "",
+
+  slotMinutes: 30,        // length of the call being booked
+  dayStartHour: 8,        // earliest slot shown, in the PROSPECT's timezone
+  dayEndHour: 19,         // latest slot shown
+  daysAhead: 21,          // how far out the date picker allows
+
+  title: "Discovery call",
+
+  reps: [
+    { id: "melton", name: "Melton Weaver", calendarId: "", userId: "", timezone: "America/New_York" },
+    { id: "rep2",   name: "Rep two",       calendarId: "", userId: "", timezone: "America/New_York" },
+    { id: "rep3",   name: "Rep three",     calendarId: "", userId: "", timezone: "America/Chicago"  },
+    { id: "rep4",   name: "Rep four",      calendarId: "", userId: "", timezone: "America/Los_Angeles" },
+  ],
+};
+
+/* Timezones offered in the picker, and the guess made from a lead's country.
+   The caller can always override — the guess is only there to save a click on
+   the overwhelmingly common case. */
+export const TIMEZONES = [
+  { id: "America/New_York",    label: "US Eastern"  },
+  { id: "America/Chicago",     label: "US Central"  },
+  { id: "America/Denver",      label: "US Mountain" },
+  { id: "America/Los_Angeles", label: "US Pacific"  },
+  { id: "Europe/London",       label: "UK"          },
+  { id: "Australia/Sydney",    label: "Australia (Sydney)" },
+  { id: "Asia/Kolkata",        label: "India (IST)" },
+];
+
+export const TZ_BY_COUNTRY = {
+  "United States": "America/New_York",
+  "Canada": "America/New_York",
+  "United Kingdom": "Europe/London",
+  "Ireland": "Europe/London",
+  "Australia": "Australia/Sydney",
+  "India": "Asia/Kolkata",
+  "Singapore": "Asia/Kolkata",
+  "United Arab Emirates": "Asia/Kolkata",
+};
+
+/* ---------------------------------------------------------------------------
    5. LEAD FIELDS
    type:     text | email | tel | url | date | number | textarea | select
    group:    which fieldset it sits in on the form

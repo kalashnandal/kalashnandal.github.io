@@ -16,6 +16,9 @@ leads/
 ├── config.js               ← the file you edit: Firebase keys, fields, stages
 ├── store.js                all database access (Firebase + demo fallback)
 ├── app.js                  UI and behaviour
+├── booking.js              "Find a time" — the multi-calendar slot picker
+├── dom.js                  $, $$ and esc, shared by app.js and booking.js
+├── cal-proxy/              the service holding the GHL token (deploy separately)
 ├── xlsx.js                 dependency-free Excel writer
 ├── firestore.rules         access control — deploy this, it is the real boundary
 └── firestore.indexes.json  composite indexes the queries need
@@ -153,6 +156,56 @@ is the internal record, not a second CRM.
 
 Change the 7-day threshold with `STALE_DAYS` in `config.js`, and the call days
 with `REVIEW_DAYS` (`0` = Sunday, so `[2,4]` is Tuesday and Thursday).
+
+---
+
+## Find a time — booking across the four sales calendars
+
+The cold-call problem this solves: a caller in India has a prospect on the
+phone who says *"I'm free at twelve"*. Four reps, four separate GHL calendars,
+and no way to see who is actually open at that moment — so the invite goes out
+hours later, or never.
+
+**Find a time** puts all four calendars in one list. Pick the day, set the
+prospect's timezone, and every slot shows the reps who are free at it. Click a
+name, confirm, and GHL sends the prospect the invite while they are still on
+the call. Opening it from a lead's **Find a time** button carries that lead
+across, guesses their timezone from their country, and prefills the contact
+details.
+
+The booking then lands back on the lead: stage moves to **Meeting Booked**
+(only ever forward), the date is recorded, and the activity trail says who it
+was booked with. Same reason as ever — a call that is only in GHL is invisible
+on the Tuesday review.
+
+### It needs the calendar service deployed first
+
+The tab stays hidden until it has something behind it. GHL's API needs a
+Private Integration Token, and a token in this page would be readable by
+anyone who views source on the GHL site — so the token lives in a ~200-line
+service you deploy once. See **[`cal-proxy/README.md`](cal-proxy/README.md)**;
+Cloudflare Workers is free and needs no change to the Firebase plan, and
+Firebase Functions works too if you would rather stay in one project.
+
+Once it is deployed, fill in `BOOKING` in `config.js`:
+
+```js
+export const BOOKING = {
+  proxy: "https://leads-cal.<you>.workers.dev",
+  slotMinutes: 30,
+  reps: [
+    { id: "melton", name: "Melton Weaver", calendarId: "…", userId: "…", timezone: "America/New_York" },
+    …
+  ],
+};
+```
+
+Then rebuild the block with `node build-ghl.mjs`.
+
+> The GHL endpoints in the service were written from documentation and have
+> not been run against a live token — GHL was unreachable from the machine
+> this was built on. If something has moved, the fix is in that one file and
+> the dashboard needs no change.
 
 ---
 
