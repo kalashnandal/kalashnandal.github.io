@@ -8,7 +8,7 @@ import {
   BOOKING,
 } from "./config.js";
 import { openStore } from "./store.js";
-import { initBooking, bookingForLead, bookingEnabled } from "./booking.js";
+import { initBooking, bookingForLead, bookingEnabled, bookingVisible } from "./booking.js";
 import { downloadXlsx } from "./xlsx.js";
 import { $, $$, esc } from "./dom.js";
 
@@ -453,10 +453,10 @@ function showApp() {
   $("#meAvatar").textContent = initials(name);
   $("#tabAdmin").classList.toggle("hide", !can.admin(S.me.role));
 
-  /* "Find a time" only appears once there is something behind it. With no
-     proxy deployed the tab stays hidden rather than offering a button that
-     cannot work. */
-  if (bookingEnabled(S.store)) {
+  /* Admins always see "Find a time" — unconfigured, it explains what is left
+     to do, which a hidden tab cannot. Everyone else sees it only once it can
+     actually book something. */
+  if (bookingVisible(S.store, S.me.role)) {
     $("#tabBooking").classList.remove("hide");
     initBooking({
       store: S.store,

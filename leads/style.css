@@ -529,3 +529,15 @@ fieldset.grp legend{
   .bk-count{grid-column:1 / -1; text-align:left}
 }
 .bk-tzlab{font-size:11.5px; color:var(--ink-3); margin-left:4px}
+
+/* The pre-deployment state of Find a time. A setup screen, not an error —
+   nothing is broken, a step is outstanding. */
+.bk-setup{padding:22px 4px; max-width:620px}
+.bk-setup b{font-size:14.5px}
+.bk-setup .muted{font-size:13px; line-height:1.55; margin-top:8px}
+.bk-steps{margin:14px 0 0 18px; padding:0; font-size:13px; color:var(--ink-2); line-height:1.7}
+.bk-steps li{margin-bottom:2px}
+.bk-setup code{
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px;
+  background:var(--line-3); border:1px solid var(--line); border-radius:var(--r-s); padding:1px 5px;
+}

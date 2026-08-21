@@ -31,9 +31,18 @@ const B = {
   picked: null,        // { rep, slot } awaiting confirmation
 };
 
-/* The tab hides itself until there is something behind it — a deployed proxy,
-   or the demo, which stands in with fake availability. */
+/* Two different questions, deliberately kept apart.
+
+   `bookingEnabled` — can this actually load availability? Needs a deployed
+   calendar service, or the demo standing in for one.
+
+   `bookingVisible` — should the tab appear at all? An admin sees it either
+   way, because a tab that hides itself when unconfigured is indistinguishable
+   from a feature nobody built; they get a panel telling them what is missing.
+   Everyone else only sees it once it works, so callers are never handed a
+   dead tab. */
 export const bookingEnabled = (store) => Boolean(BOOKING.proxy) || store?.mode === "demo";
+export const bookingVisible = (store, role) => bookingEnabled(store) || role === "admin";
 
 /* ---------------------------------------------------------------------------
    Dates. Kept as plain YYYY-MM-DD strings — a Date object here would only
@@ -139,6 +148,15 @@ export function bookingForLead(lead) {
    Loading availability
 --------------------------------------------------------------------------- */
 async function load() {
+  /* Nothing deployed yet: say so properly instead of firing a request that
+     can only fail and reporting the failure as an error. */
+  if (!bookingEnabled(B.store)) {
+    B.loading = false;
+    B.slots = null;
+    B.error = "";
+    return renderSetup();
+  }
+
   const configured = BOOKING.reps.filter((r) => r.calendarId);
   const reps = configured.length ? configured : BOOKING.reps;
 
@@ -228,6 +246,44 @@ function renderWho() {
        </div>`;
   const clear = $("#bkClearLead");
   if (clear) clear.addEventListener("click", () => { B.lead = null; B.picked = null; renderWho(); renderConfirm(); });
+}
+
+/* What an admin sees before the calendar service exists. It is a setup screen,
+   not an error — nothing has gone wrong, a step is simply outstanding, and the
+   screen should say which one. */
+function renderSetup() {
+  const grid = $("#bkGrid");
+  if (!grid) return;
+
+  $("#bkDay").textContent = "";
+  renderWho();
+  ["#bkPrev", "#bkNext", "#bkDate", "#bkTz", "#bkReload"].forEach((sel) => {
+    const el = $(sel);
+    if (el) el.disabled = true;
+  });
+
+  grid.innerHTML = `
+    <div class="bk-setup">
+      <b>Not connected to the sales calendars yet.</b>
+      <p class="muted">
+        This screen shows every free slot across all ${BOOKING.reps.length} calendars at once,
+        so a caller can book while the prospect is still on the phone. It needs one
+        thing first: GoHighLevel's API requires a token, and a token in this page
+        would be readable by anyone who views source on the site — so it lives in a
+        small service instead.
+      </p>
+      <ol class="bk-steps">
+        <li>Deploy the calendar service — <code>leads/functions/README.md</code> has the steps.</li>
+        <li>Put its URL in <code>BOOKING.proxy</code> in <code>config.js</code>, along with each rep's calendar and user id.</li>
+        <li>Run <code>node build-ghl.mjs</code> and paste the rebuilt file into the GHL block.</li>
+      </ol>
+      <p class="muted">
+        Want to see it working first? Add <code>?demo=1</code> to this page's address —
+        same screen, invented availability, nothing written anywhere.
+      </p>
+    </div>`;
+
+  renderConfirm();
 }
 
 function render() {
