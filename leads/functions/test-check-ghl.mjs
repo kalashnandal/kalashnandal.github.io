@@ -72,8 +72,11 @@ t("an unexpected response shape is diagnosed, not crashed on", /shape is not wha
 const noUsers = run("no-users");
 t("a users failure is non-fatal", /Could not list users/.test(noUsers) && /free slots on/.test(noUsers));
 
+/* With no token AND no terminal to prompt on — a pipe, a CI job — it must
+   fail clearly rather than hang waiting for input nobody can give. */
 const noToken = run("happy", { GHL_TOKEN: "" });
-t("refuses to run with no token", /No GHL_TOKEN/.test(noToken));
+t("fails clearly when there is no token and no terminal", /nothing to prompt on/.test(noToken), noToken.slice(0, 200));
+t("and says how to pass one anyway", /GHL_TOKEN=/.test(noToken));
 
 const noLoc = run("happy", { GHL_LOCATION_ID: "" });
 t("survives a missing location id", /skipping the location check/.test(noLoc));

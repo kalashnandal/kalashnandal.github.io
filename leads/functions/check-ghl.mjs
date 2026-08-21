@@ -12,13 +12,14 @@
         nobody has been able to verify: the endpoint paths and API version in
         handler.js were written from documentation, never run.
 
-   Everything it prints is safe to paste back into a chat. The token is read
-   from the environment, never written to a file, and never echoed — not even
-   partially.
+   Everything it prints is safe to paste back into a chat. The token is typed
+   at a prompt with the echo off — never written to a file, never put on the
+   command line where your shell would record it, and never echoed back, not
+   even partially and not even when GHL quotes it inside an error.
 
    Usage, from leads/functions/:
 
-     GHL_TOKEN='pit-...' GHL_LOCATION_ID='...' node check-ghl.mjs
+     GHL_LOCATION_ID='...' node check-ghl.mjs
 
    Nothing is created, changed or booked. Every request here is a read.
    ========================================================================== */
@@ -26,7 +27,6 @@
 const GHL = "https://services.leadconnectorhq.com";
 const VERSIONS = ["2021-04-15", "2021-07-28"];
 
-const TOKEN = process.env.GHL_TOKEN || "";
 const LOCATION = process.env.GHL_LOCATION_ID || "";
 
 const c = {
@@ -37,11 +37,44 @@ const c = {
   b:    (s) => `\x1b[1m${s}\x1b[0m`,
 };
 
+/* Ask for the token rather than taking it from the command line.
+
+   `GHL_TOKEN=pit-... node check-ghl.mjs` writes the credential into your shell
+   history, where it sits in plain text long after you have forgotten it. Typed
+   at a prompt with the echo off, it exists only in this process's memory and
+   is gone when the script exits. The environment variable still works, for CI
+   or for anyone who prefers it — but it is not what the instructions tell you
+   to do. */
+async function promptForToken() {
+  if (!process.stdin.isTTY) {
+    console.error(c.bad("No token, and nothing to prompt on."));
+    console.error("\nEither run it interactively, or pass the token in the environment:\n");
+    console.error("  GHL_TOKEN='pit-...' node check-ghl.mjs\n");
+    process.exit(1);
+  }
+
+  process.stdout.write("Paste your GHL Private Integration Token (it will not be shown): ");
+
+  const { createInterface } = await import("node:readline");
+  const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+
+  /* readline echoes as you type; muting the output stream hides the paste. */
+  const realWrite = rl.output.write.bind(rl.output);
+  rl.output.write = () => {};
+
+  const answer = await new Promise((resolve) => rl.question("", resolve));
+
+  rl.output.write = realWrite;
+  rl.close();
+  process.stdout.write("\n\n");
+
+  return answer.trim();
+}
+
+const TOKEN = process.env.GHL_TOKEN || await promptForToken();
+
 if (!TOKEN) {
-  console.error(c.bad("No GHL_TOKEN in the environment."));
-  console.error("\nRun it like this, with your Private Integration Token:\n");
-  console.error("  GHL_TOKEN='pit-...' GHL_LOCATION_ID='...' node check-ghl.mjs\n");
-  console.error(c.dim("Use single quotes so the shell doesn't eat anything in the token."));
+  console.error(c.bad("No token given — nothing to check."));
   process.exit(1);
 }
 

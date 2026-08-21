@@ -28,9 +28,24 @@ Four things. Only the first is a secret.
 | Calendar ID, per rep | Calendars → open the calendar → the id in the URL |
 | User ID, per rep | Settings → Team → open the person → the id in the URL. This is who the appointment gets assigned to |
 
-The token goes in by typing it into the prompt below. It should not be pasted
-into a file, a repo, an email, or a chat — if it ever lands in one of those,
-revoke it in GHL and issue a new one.
+### Where the token goes
+
+Exactly two places, and neither is a file you edit.
+
+| When | Where it goes | Command |
+| ---- | ------------- | ------- |
+| Checking your setup | Nowhere. Typed at a prompt, held in memory, gone when the script exits | `node check-ghl.mjs` |
+| Running the function | Google Secret Manager, encrypted, readable only by this function | `firebase functions:secrets:set GHL_TOKEN` |
+
+Both prompt for it, so it never reaches your shell history.
+
+It should **not** go in `config.js`, `.env`, the pasted HTML block, the repo, an
+email, or a chat. If it ever lands in one of those, revoke it in GHL and issue a
+new one — that takes a minute and costs nothing.
+
+The distinction that matters: `.env` holds ids, and ids are not credentials.
+Someone who learns your calendar id can do nothing with it. Someone who learns
+the token can create contacts and appointments across your whole sub-account.
 
 ## Check it before you deploy anything
 
@@ -41,13 +56,17 @@ verify — real free slots on a real calendar.
 
 ```bash
 cd leads/functions
-GHL_TOKEN='pit-...' GHL_LOCATION_ID='...' node check-ghl.mjs
+GHL_LOCATION_ID='...' node check-ghl.mjs
 ```
 
+It prompts for the token and hides what you paste. Putting it on the command
+line instead would write it into your shell history, where it would sit in
+plain text long after you had forgotten about it.
+
 Every request it makes is a read: nothing is created, changed or booked. The
-token is taken from the environment, never written to a file, and never echoed
-— not even partially, and not even if GHL quotes it back in an error. So the
-whole output is safe to paste into a chat if something looks wrong.
+token is never written to a file and never echoed back — not partially, and not
+even if GHL quotes it inside an error. So the whole output is safe to paste into
+a chat if something looks wrong.
 
 It tries each known API version in turn, so a stale version header shows up as
 a diagnosis rather than a mystery.
