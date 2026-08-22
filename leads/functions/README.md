@@ -15,10 +15,11 @@ can create contacts and appointments across the whole sub-account, so putting
 it there would hand that to any visitor. GHL also sends no CORS headers, so a
 browser could not call its API directly even if the token were harmless.
 
-So the browser calls this, and this calls GHL. The token stays in Google's
-Secret Manager. Every request has to carry a Firebase ID token from someone
-signed into the dashboard, and that gets checked *with Google* rather than
-merely decoded — a forged or expired one is refused before GHL is touched.
+So the browser calls this, and this calls GHL. The token stays server-side, as
+a secret the service can read and nobody else can. Every request has to carry a
+Firebase ID token from someone signed into the dashboard, and that gets checked
+*with Google* rather than merely decoded — a forged or expired one is refused
+before GHL is touched.
 
 ## What you need from GHL
 
@@ -27,7 +28,7 @@ Four things. Only the first is a secret.
 | What | Where to find it |
 | ---- | ---------------- |
 | **Private Integration Token** | Settings → Private Integrations → create one with scopes `calendars.readonly`, `calendars/events.write`, `contacts.readonly`, `contacts.write` |
-| Location ID | The sub-account id, in the URL of any settings page |
+| Location ID | Usually found for you by the setup page; otherwise the id in any settings-page URL |
 | Calendar ID, per rep | The setup page lists these — no need to go looking |
 | User ID, per rep | Also listed by the setup page. Decides who an appointment is assigned to |
 
@@ -111,24 +112,24 @@ neither, which matters more than keeping everything in one console.
 
 ## Configuration
 
-`.env` (gitignored, not secret):
+The same five names wherever it runs — Cloudflare variables, a Firebase `.env`,
+or anything else.
 
-| Name | What it is |
-| ---- | ---------- |
-| `FIREBASE_API_KEY` | Same public web key as in `config.js`. Identifies the project when checking a caller's sign-in |
-| `GHL_LOCATION_ID` | The GHL sub-account the calendars belong to |
-| `CALENDAR_IDS` | Comma-separated allowlist of calendar ids |
-| `ALLOWED_ORIGIN` | The page the dashboard is embedded on |
-
-Secret Manager:
-
-| Name | What it is |
-| ---- | ---------- |
-| `GHL_TOKEN` | The Private Integration Token. Never in a file |
+| Name | Secret? | What it is |
+| ---- | ------- | ---------- |
+| `GHL_TOKEN` | **yes** | The Private Integration Token |
+| `FIREBASE_API_KEY` | no | The public web key from `config.js`. Identifies the project when checking a caller's sign-in |
+| `GHL_LOCATION_ID` | no | The GHL sub-account the calendars belong to |
+| `CALENDAR_IDS` | no | Comma-separated allowlist of calendar ids |
+| `ALLOWED_ORIGIN` | no | The page the dashboard is embedded on |
+| `SETUP_KEY` | no | Switches the setup page on. Clear it when you are done |
 
 `CALENDAR_IDS` is what stops this being a general-purpose way into the GHL
 account for anyone holding a dashboard login. A calendar not on that list
 cannot be read or booked through here. Keep it to the four.
+
+`GHL_LOCATION_ID` is only needed to create a contact, so `/slots` runs without
+it — the grid should not go blank over a variable it never touches.
 
 ## The two endpoints
 
@@ -164,9 +165,14 @@ were unreachable from the machine this was built on. The first real call will
 confirm them. If GHL has moved something the fix is in that one file, and the
 dashboard needs no change at all.
 
-`check-ghl.mjs` is how you find out, in one command, without deploying first.
+The setup page is how you find out, in a browser, before wiring the dashboard
+to it. (`check-ghl.mjs` does the same from a terminal, if you have one.)
 
-Everything either side of those calls **is** tested: run `test-proxy.mjs`,
-which drives the handler with GHL and Google stubbed and checks the auth gate,
-the calendar allowlist, that the token never reaches the browser, the end-time
-arithmetic, and that one broken calendar doesn't blank the grid.
+Everything either side of those calls **is** tested, with GHL and Google
+stubbed:
+
+| Suite | Covers |
+| ----- | ------ |
+| `test-setup-page.mjs` | the built paste-file, driven as Cloudflare drives it: the key gate, the rendered ids, a rejected token reported once, and that the token never reaches the page |
+| `test-proxy.mjs` | the auth gate, the calendar allowlist, end-time arithmetic, and one broken calendar not blanking the grid |
+| `test-check-ghl.mjs` | the terminal script, across six GHL response shapes |
