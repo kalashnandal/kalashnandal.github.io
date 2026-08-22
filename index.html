@@ -894,6 +894,83 @@
 
         /* ---- Prologue: opt-outs. Reduced motion and the JS kill switch both
                remove the prologue entirely rather than degrading it. ---- */
+        /* =====================================================================
+           WELCOME FILM  —  the 10-second cinematic, on demand
+           The clip is the prologue's own world in motion: the traveller, the
+           monolith, the tree. So it is framed as the monolith rather than as a
+           generic video box, and it opens with the prologue's own grammar —
+           letterbox bars, expo easing, the same gold.
+
+           It costs NOTHING until it is asked for. preload="none" means not one
+           byte of the 730KB is fetched on page load, and the player only exists
+           in the compositor while it is open. Given how much of this build has
+           been spent clawing back frames, an autoplaying hero video would have
+           been the wrong instinct twice over — and a scored 10s film with a
+           fade-in wants to be chosen, not inflicted.
+           ===================================================================== */
+        .reel-open{position:absolute;right:12px;bottom:12px;z-index:3;
+            display:inline-flex;align-items:center;gap:.55rem;
+            padding:.4rem .72rem .4rem .4rem;border:1px solid rgba(212,175,55,.4);
+            border-radius:999px;background:rgba(0,0,0,.62);color:var(--txt);
+            font-size:.5rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;
+            cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+            transition:border-color .4s,background .4s,transform .4s var(--pro-ease)}
+        .reel-open:hover{border-color:var(--gold);background:rgba(0,0,0,.8);transform:translateY(-2px)}
+        .reel-open:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+        .reel-play{width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;
+            background:linear-gradient(140deg,var(--gold),var(--gold2));position:relative}
+        .reel-play::before{content:"";width:0;height:0;margin-left:2px;
+            border-left:6px solid #0a0a0a;border-top:4px solid transparent;border-bottom:4px solid transparent}
+        /* One-time attention pulse: this is a welcome, so it should ask once and
+           then sit still rather than blink forever. */
+        .reel-play::after{content:"";position:absolute;inset:-4px;border-radius:50%;
+            border:1px solid var(--gold);opacity:0;animation:reelPulse 2.6s ease-out 3;pointer-events:none}
+        @keyframes reelPulse{0%{transform:scale(.85);opacity:.75}70%{transform:scale(1.7);opacity:0}100%{opacity:0}}
+        .reel-dur{font-family:var(--mono);font-size:.5rem;letter-spacing:.06em;color:rgba(245,245,245,.45)}
+        /* The card is only 440px wide; below that the label is the first thing
+           to go, and the control stays a play button with a duration. */
+        @media(max-width:520px){.reel-lbl{display:none}}
+
+        .reel{position:fixed;inset:0;z-index:300;display:grid;place-items:center}
+        .reel[hidden]{display:none}
+        .reel-scrim{position:absolute;inset:0;background:rgba(3,3,4,.9);
+            backdrop-filter:blur(14px) saturate(.6);-webkit-backdrop-filter:blur(14px) saturate(.6)}
+        .reel-bars{position:absolute;left:0;right:0;height:9vh;background:#000;z-index:3;
+            transform:scaleY(0);will-change:transform}
+        .reel-bars.t{top:0;transform-origin:top}
+        .reel-bars.b{bottom:0;transform-origin:bottom}
+        .reel-stage{position:relative;z-index:4;display:grid;justify-items:center;gap:1.1rem;
+            padding:2vh 1rem;will-change:transform,opacity}
+        /* The monolith frame: a hard gold edge and a long warm bloom behind it,
+           so the film reads as light coming out of the object from scene II. */
+        .reel-frame{position:relative;border-radius:6px;overflow:hidden;
+            box-shadow:0 0 0 1px rgba(212,175,55,.55),0 0 90px -10px rgba(212,175,55,.5),
+                       0 40px 120px -30px rgba(0,0,0,.95)}
+        .reel-video{display:block;height:min(74vh,760px);width:auto;max-width:92vw;background:#000}
+        .reel-edge{position:absolute;inset:0;pointer-events:none;
+            background:radial-gradient(120% 80% at 50% 50%,transparent 55%,rgba(0,0,0,.55) 100%)}
+        .reel-close{position:absolute;top:calc(9vh + 1.1rem);right:clamp(1rem,3vw,2.4rem);z-index:6;width:38px;height:38px;
+            display:grid;place-items:center;border:1px solid rgba(245,245,245,.2);border-radius:50%;
+            color:rgba(245,245,245,.7);transition:border-color .3s,color .3s}
+        .reel-close:hover{border-color:var(--gold);color:var(--gold)}
+        .reel-close:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+        /* Pinned to the bottom edge of the frame rather than sized by a copy of
+           the video's aspect ratio — the two drifted apart the moment the
+           mobile breakpoint changed the player's height. */
+        .reel-bar{position:absolute;left:0;right:0;bottom:0;z-index:2;height:2px;
+            background:rgba(245,245,245,.16);overflow:hidden}
+        .reel-bar i{display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left;
+            background:linear-gradient(90deg,var(--gold),var(--gold2))}
+        .reel-cap{font-size:.5rem;font-weight:800;letter-spacing:.4em;text-transform:uppercase;
+            color:rgba(245,245,245,.3);text-indent:.4em}
+        @media(max-width:768px){
+            .reel-video{height:min(68vh,640px)}
+            .reel-bars{height:5vh}
+            .reel-close{top:calc(5vh + .8rem);right:1rem}
+        }
+        @media(prefers-reduced-motion:reduce){
+            .reel-play::after{animation:none}
+        }
         html.no-pro #prologue,html.no-pro #pro-load{display:none!important}
         @media(prefers-reduced-motion:reduce){
             #prologue,#pro-load{display:none!important}
@@ -1158,6 +1235,15 @@
                          onerror="this.src='https://ui-avatars.com/api/?name=Kalash+Nandal&background=D4AF37&color=fff&size=512'">
                     <div class="scan" aria-hidden="true"></div>
                     <span class="tag">KN&#8211;01 // MOHALI, IN</span>
+                    <!-- On the portrait rather than in the CTA column: a welcome
+                         film belongs on the face that is welcoming you, it is
+                         found without being read, and it adds no height to a
+                         column that already sits tight against the fixed HUD. -->
+                    <button class="reel-open" type="button" id="reel-open" aria-haspopup="dialog">
+                        <span class="reel-play" aria-hidden="true"></span>
+                        <span class="reel-lbl">Welcome film</span>
+                        <span class="reel-dur" aria-hidden="true">0:10</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1608,6 +1694,35 @@
             </div>
         </footer>
     </div>
+    <!-- ============ WELCOME FILM ============
+         Vertical 404x720, so it is framed as a portrait monolith rather than
+         letterboxed into a widescreen box it was never shot for. WebM is
+         offered first (smaller, and Chrome/Firefox prefer it); MP4/H.264 is the
+         universal fallback that also covers Safari and iOS.
+         preload="none" — nothing downloads until the visitor asks. -->
+    <div id="reel" class="reel" role="dialog" aria-modal="true" aria-label="Welcome film" hidden>
+        <div class="reel-scrim" data-reel-close></div>
+        <button class="reel-close" id="reel-close" type="button" aria-label="Close film">
+            <svg class="ic s18"><use href="#i-x"/></svg>
+        </button>
+        <div class="reel-bars t" aria-hidden="true"></div>
+        <div class="reel-bars b" aria-hidden="true"></div>
+        <div class="reel-stage">
+            <div class="reel-frame">
+                <video id="reel-video" class="reel-video" playsinline preload="none"
+                       poster="https://kalashnandal.co.in/welcome-poster.webp"
+                       width="404" height="720">
+                    <source src="https://kalashnandal.co.in/welcome.webm" type="video/webm">
+                    <source src="https://kalashnandal.co.in/welcome.mp4" type="video/mp4">
+                </video>
+                <div class="reel-edge" aria-hidden="true"></div>
+                <span class="reel-bar" aria-hidden="true"><i></i></span>
+            </div>
+            <span class="reel-cap">Kalash Nandal &mdash; Welcome</span>
+        </div>
+    </div>
+    <!-- ============ /WELCOME FILM ============ -->
+
     <!-- ============ V4: CINEMATIC OUTRO (after the footer, last section) ============
          The footer above is byte-for-byte unchanged. This is purely a closing
          frame: no links, no buttons, no CTA, no icons, no form. -->
@@ -2890,6 +3005,102 @@
                 onRefresh: function(self){ idle(self.isActive); }
             });
         }
+    })();
+    </script>
+    <script>
+    /* =====================================================================
+       WELCOME FILM ENGINE
+       Opens the 10-second cinematic in the prologue's own language: letterbox
+       bars sweep in, the frame rises out of the button it was launched from,
+       the page behind dims and defocuses.
+
+       Independent of GSAP. If the CDN is unreachable the film still opens and
+       plays — it just cuts instead of animating. A decorative dependency must
+       never be able to break a control the visitor clicked.
+       ===================================================================== */
+    (function(){
+        'use strict';
+        var box   = document.getElementById('reel');
+        var vid   = document.getElementById('reel-video');
+        var open  = document.getElementById('reel-open');
+        var close = document.getElementById('reel-close');
+        if(!box || !vid || !open) return;
+
+        var RM      = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var stage   = box.querySelector('.reel-stage');
+        var scrim   = box.querySelector('.reel-scrim');
+        var barT    = box.querySelector('.reel-bars.t');
+        var barB    = box.querySelector('.reel-bars.b');
+        var fill    = box.querySelector('.reel-bar i');
+        var isOpen  = false, lastFocus = null, raf = 0;
+
+        function G(){ return window.gsap; }
+
+        /* The progress hairline under the frame. rAF rather than timeupdate,
+           which only fires ~4x a second and visibly steps. */
+        function tick(){
+            if(!isOpen) return;
+            if(fill && vid.duration) fill.style.transform = 'scaleX(' + (vid.currentTime / vid.duration) + ')';
+            raf = requestAnimationFrame(tick);
+        }
+
+        function show(){
+            if(isOpen) return;
+            isOpen = true;
+            lastFocus = document.activeElement;
+            box.hidden = false;
+            /* Same convention the menu and the testimonial modal use, which is
+               also what the soft-snap checks — so opening the film suspends
+               scroll snapping for free instead of fighting it. */
+            document.body.style.overflow = 'hidden';
+
+            vid.currentTime = 0;
+            var p = vid.play();
+            if(p && p.catch) p.catch(function(){ /* a blocked play just leaves the poster up */ });
+            tick();
+            close.focus({preventScroll:true});
+
+            var g = G();
+            if(!g || RM){ box.style.opacity = 1; return; }
+            /* Rise out of the button that launched it. */
+            var r = open.getBoundingClientRect();
+            var dx = (r.left + r.width/2)  - window.innerWidth/2;
+            var dy = (r.top  + r.height/2) - window.innerHeight/2;
+            g.timeline()
+              .fromTo(scrim, {autoAlpha:0}, {autoAlpha:1, duration:.5, ease:'power2.out'}, 0)
+              .fromTo([barT,barB], {scaleY:0}, {scaleY:1, duration:.7, ease:'expo.out'}, 0)
+              .fromTo(stage, {autoAlpha:0, scale:.34, x:dx, y:dy},
+                             {autoAlpha:1, scale:1, x:0, y:0, duration:1.05, ease:'expo.out'}, .06);
+        }
+
+        function hide(){
+            if(!isOpen) return;
+            isOpen = false;
+            cancelAnimationFrame(raf);
+            vid.pause();
+            document.body.style.overflow = '';
+            if(lastFocus && lastFocus.focus) lastFocus.focus({preventScroll:true});
+
+            function done(){
+                box.hidden = true;
+                vid.currentTime = 0;
+                if(fill) fill.style.transform = 'scaleX(0)';
+            }
+            var g = G();
+            if(!g || RM) return done();
+            g.timeline({onComplete:done})
+              .to(stage,        {autoAlpha:0, scale:.9, duration:.34, ease:'power2.in'}, 0)
+              .to([barT,barB],  {scaleY:0,    duration:.4,  ease:'power2.inOut'}, .05)
+              .to(scrim,        {autoAlpha:0, duration:.42, ease:'power2.in'}, .1);
+        }
+
+        open.addEventListener('click', show);
+        close.addEventListener('click', hide);
+        box.addEventListener('click', function(e){ if(e.target.hasAttribute('data-reel-close')) hide(); });
+        vid.addEventListener('ended', hide);
+        document.addEventListener('keydown', function(e){ if(isOpen && e.key === 'Escape') hide(); });
+        /* Never leave a scored film playing to an empty tab. */
+        document.addEventListener('visibilitychange', function(){ if(document.hidden && isOpen) vid.pause(); });
     })();
     </script>
     <script>
