@@ -19,7 +19,10 @@
 
    Usage, from leads/functions/:
 
-     GHL_LOCATION_ID='...' node check-ghl.mjs
+     node check-ghl.mjs
+
+   It asks for the token, and finds your location id for itself. Pass
+   GHL_LOCATION_ID only if the token can see more than one sub-account.
 
    Nothing is created, changed or booked. Every request here is a read.
    ========================================================================== */
@@ -132,12 +135,44 @@ line();
    1. Does the token work, and can we see the location?
 --------------------------------------------------------------------------- */
 let locationOk = false;
+let location = LOCATION;
 
-if (!LOCATION) {
-  console.log(c.warn("• No GHL_LOCATION_ID given — skipping the location check."));
-  console.log(c.dim("  It is the sub-account id, visible in the URL of any GHL settings page."));
+/* No location id? Go and find it rather than making somebody dig through GHL's
+   URLs. A Private Integration Token is usually issued for one sub-account, so
+   there is normally exactly one right answer and we can just use it. */
+if (!location) {
+  console.log(c.dim("No location id given — asking GHL which sub-accounts this token can see…"));
+
+  for (const path of ["/locations/search", "/locations/"]) {
+    const r = await callAnyVersion(path, { limit: 20 });
+    const found = r.ok ? (r.body?.locations || r.body?.data || []) : [];
+    if (!found.length) continue;
+
+    if (found.length === 1) {
+      location = found[0].id || found[0]._id || "";
+      console.log(`${c.ok("✓")} Found it: ${c.b(found[0].name || location)}`);
+      console.log(c.dim(`  GHL_LOCATION_ID=${location}`));
+    } else {
+      console.log(c.warn(`• This token can see ${found.length} sub-accounts. Pick the one the sales calendars live in:\n`));
+      for (const l of found) console.log(`  ${c.b((l.name || "(unnamed)").padEnd(34))} ${l.id || l._id || ""}`);
+      console.log(c.dim("\n  Then run again with:  GHL_LOCATION_ID='the-id' node check-ghl.mjs"));
+      process.exit(0);
+    }
+    break;
+  }
+
+  if (!location) {
+    console.log(c.warn("• Could not discover it automatically."));
+    console.log(c.dim("  Open any GHL settings page — the id is in the address bar, after /location/."));
+    console.log(c.dim("  Then:  GHL_LOCATION_ID='the-id' node check-ghl.mjs"));
+  }
+  console.log();
+}
+
+if (!location) {
+  console.log(c.warn("• Carrying on without a location id — some checks below will be thin."));
 } else {
-  const r = await callAnyVersion(`/locations/${encodeURIComponent(LOCATION)}`);
+  const r = await callAnyVersion(`/locations/${encodeURIComponent(location)}`);
   if (r.ok) {
     locationOk = true;
     const name = r.body?.location?.name || r.body?.name || "(unnamed)";
@@ -159,7 +194,7 @@ if (!LOCATION) {
 line();
 console.log(c.b("Calendars"));
 
-const cals = await callAnyVersion("/calendars/", { locationId: LOCATION });
+const cals = await callAnyVersion("/calendars/", { locationId: location });
 const calList = cals.ok ? (cals.body?.calendars || cals.body?.data || []) : [];
 
 if (!cals.ok) {
@@ -182,7 +217,7 @@ if (!cals.ok) {
 line();
 console.log(c.b("Team"));
 
-const users = await callAnyVersion("/users/", { locationId: LOCATION });
+const users = await callAnyVersion("/users/", { locationId: location });
 const userList = users.ok ? (users.body?.users || users.body?.data || []) : [];
 
 if (!users.ok) {

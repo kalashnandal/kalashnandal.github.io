@@ -23,6 +23,11 @@ globalThis.fetch = async (url) => {
   const J = (o, s = 200) => new Response(JSON.stringify(o), { status: s });
   const mode = ${JSON.stringify(mode)};
   if (mode === "unauthorized") return J({ message: "Invalid token ${TOKEN}" }, 401);
+  if (u.includes("/locations/search")) {
+    if (mode === "two-locations") return J({ locations: [{ id: "loc_1", name: "Summit Sales" }, { id: "loc_2", name: "Other Co" }] });
+    if (mode === "no-discovery") return J({ message: "forbidden" }, 403);
+    return J({ locations: [{ id: "loc_1", name: "Summit Sales" }] });
+  }
   if (u.includes("/locations/")) return J({ location: { name: "Summit Sales" } });
   if (u.includes("/calendars/") && u.includes("free-slots")) {
     if (mode === "slots-fail") return J({ message: "calendar not found" }, 404);
@@ -78,8 +83,19 @@ const noToken = run("happy", { GHL_TOKEN: "" });
 t("fails clearly when there is no token and no terminal", /nothing to prompt on/.test(noToken), noToken.slice(0, 200));
 t("and says how to pass one anyway", /GHL_TOKEN=/.test(noToken));
 
+/* Nobody should have to dig a location id out of a GHL URL — the script goes
+   and finds it. */
 const noLoc = run("happy", { GHL_LOCATION_ID: "" });
-t("survives a missing location id", /skipping the location check/.test(noLoc));
+t("discovers the location id when none is given", /Found it/.test(noLoc) && /loc_1/.test(noLoc), noLoc.slice(0, 300));
+t("and still completes every later check", /free slots on/.test(noLoc) && /cal_melton/.test(noLoc));
+
+const twoLoc = run("two-locations", { GHL_LOCATION_ID: "" });
+t("lists them and stops when the token sees several sub-accounts",
+  /2 sub-accounts/.test(twoLoc) && /loc_2/.test(twoLoc), twoLoc.slice(0, 300));
+
+const noDisc = run("no-discovery", { GHL_LOCATION_ID: "" });
+t("explains where to find it by hand if discovery fails",
+  /Could not discover it automatically/.test(noDisc) && /address bar/.test(noDisc));
 
 console.log(failures ? `\n${failures} FAILED` : "\nall check-ghl checks passed");
 process.exit(failures ? 1 : 0);

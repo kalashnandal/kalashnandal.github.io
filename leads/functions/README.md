@@ -54,12 +54,23 @@ the token can create contacts and appointments across your whole sub-account.
 them out of GHL's URLs, and then makes the one call nobody has been able to
 verify — real free slots on a real calendar.
 
+### Where to run it
+
+**In your browser, no install:** open the repo on GitHub → green **Code**
+button → **Codespaces** → **Create codespace on main**. That gives you a
+terminal with Node and the repo already there. Then:
+
 ```bash
 cd leads/functions
-GHL_LOCATION_ID='...' node check-ghl.mjs
+node check-ghl.mjs
 ```
 
-It prompts for the token and hides what you paste. Putting it on the command
+**On your own machine instead:** you need [Node](https://nodejs.org) and a
+clone of the repo, then the same two lines.
+
+It asks for the token and hides what you paste, and works out your location id
+for itself — pass `GHL_LOCATION_ID='...'` only if the token can see more than
+one sub-account, which it will tell you. Putting it on the command
 line instead would write it into your shell history, where it would sit in
 plain text long after you had forgotten about it.
 
