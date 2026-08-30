@@ -64,6 +64,19 @@ service cloud.firestore {
     }
 
     /* =====================================================================
+       CLIENTSREPORTING.COM CALL RECORDINGS
+
+       Dashboard users may read the normalised call records but can never
+       alter them. The future server-side sync uses the Firebase Admin SDK,
+       which bypasses these client rules; API credentials never reach a
+       browser and the source record stays authoritative.
+    ===================================================================== */
+    match /callRecordings/{recordingId} {
+      allow read: if isMember();
+      allow create, update, delete: if false;
+    }
+
+    /* =====================================================================
        ACTIVITY — comments and stage changes.
        Append-only: once written, nobody edits or deletes an entry. That is
        what makes it usable as a record on the Tuesday/Thursday call.
