@@ -472,6 +472,108 @@ fieldset.grp legend{
 #demobar code{font-size:11.5px; background:rgba(61,82,213,.1); padding:1px 4px; border-radius:3px}
 
 /* ==========================================================================
+   CALL RECORDINGS — read-only ClientsReporting.com mirror
+   ========================================================================== */
+.rec-head-status{font-size:12px}
+.rec-connection{
+  display:flex; align-items:center; gap:12px; padding:13px 15px; margin-bottom:14px;
+  background:var(--card); border:1px solid var(--line); border-left:3px solid var(--warn);
+  border-radius:var(--r-l);
+}
+.rec-connection[data-state="live"]{border-left-color:var(--good)}
+.rec-connection[data-state="error"]{border-left-color:var(--bad)}
+.rec-connection h2{font-size:13.5px; font-weight:600}
+.rec-connection p{font-size:12.5px; color:var(--ink-3); margin-top:2px}
+.rec-connection-icon{width:28px;height:28px;border-radius:var(--r-m);background:var(--warn-l);display:grid;place-items:center;flex:none}
+.rec-connection-dot{width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 4px rgba(143,81,8,.1)}
+.rec-connection[data-state="live"] .rec-connection-icon{background:var(--good-l)}
+.rec-connection[data-state="live"] .rec-connection-dot{background:var(--good);box-shadow:0 0 0 4px rgba(19,108,62,.1)}
+.rec-connection[data-state="error"] .rec-connection-icon{background:var(--bad-l)}
+.rec-connection[data-state="error"] .rec-connection-dot{background:var(--bad);box-shadow:0 0 0 4px rgba(163,36,27,.1)}
+.rec-connection .pill{margin-left:auto}
+
+.rec-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-bottom:14px}
+.rec-metric{background:var(--card);border:1px solid var(--line);border-radius:var(--r-l);padding:11px 12px;min-width:0}
+.rec-metric span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;color:var(--ink-4)}
+.rec-metric b{display:block;font-family:var(--disp);font-size:20px;line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums}
+.rec-metric small{display:block;font-size:10.5px;color:var(--ink-4);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-toolbar .btn{align-self:flex-end}
+
+.rec-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,370px);gap:14px;align-items:start}
+.rec-list-card{min-width:0;margin-bottom:0;overflow:hidden}
+.rec-table-head,.rec-row{
+  display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(150px,1.25fr) 78px 112px minmax(150px,1.2fr) 72px;
+  gap:10px;align-items:center;
+}
+.rec-table-head{padding:7px 12px;background:var(--line-3);border-bottom:1px solid var(--line);font-size:10.5px;font-weight:600;color:var(--ink-3)}
+.rec-row{padding:10px 12px;border-bottom:1px solid var(--line-2);cursor:pointer;transition:background .12s,box-shadow .12s}
+.rec-row:last-child{border-bottom:0}
+.rec-row:hover{background:var(--line-3)}
+.rec-row.on{background:var(--accent-l);box-shadow:inset 2px 0 0 var(--accent)}
+.rec-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:0}
+.rec-cell{min-width:0}
+.rec-cell b{display:block;font-size:12.5px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-cell small{display:block;font-size:10.5px;color:var(--ink-4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;text-transform:none}
+.rec-cell small.match-high{color:var(--good)}
+.rec-cell .pill{margin:0}
+.rec-duration b{font-variant-numeric:tabular-nums}
+.rec-duration small{text-transform:capitalize}
+.rec-action{text-align:right}
+
+.rec-preview{margin:0;position:sticky;top:22px;overflow:hidden}
+.rec-preview-empty{padding:52px 24px;text-align:center;color:var(--ink-3)}
+.rec-preview-empty h2{font-size:14px;color:var(--ink-2);margin-top:10px}
+.rec-preview-empty p{font-size:12.5px;line-height:1.55;margin:5px auto 0;max-width:32ch}
+.rec-preview-glyph{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;margin:auto;background:var(--line-2);color:var(--ink-4);font-size:11px;padding-left:2px}
+.rec-preview-head{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line-2)}
+.rec-preview-head h2{font-size:15px;margin-top:2px}
+.rec-preview-head .dr-close{margin-left:auto}
+.eyebrow{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-4)}
+.rec-preview-body{padding:14px}
+.rec-audio{margin-bottom:14px}
+.rec-audio audio{width:100%;height:36px;display:block}
+.rec-audio-pending{display:flex;align-items:center;gap:11px;padding:12px;background:var(--line-3);border:1px dashed var(--line);border-radius:var(--r-m);color:var(--ink-4)}
+.rec-audio-pending>span{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);font-size:9px;padding-left:2px}
+.rec-audio-pending b{display:block;font-size:12px;color:var(--ink-2)}
+.rec-audio-pending small{display:block;font-size:10.5px;margin-top:1px}
+.rec-preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;padding-bottom:13px;border-bottom:1px solid var(--line-2)}
+.rec-preview-grid>div>span,.rec-match-card>span,.rec-transcript>span{display:block;font-size:10.5px;color:var(--ink-4)}
+.rec-preview-grid>div>b{display:block;font-size:12.5px;font-weight:550;margin-top:2px;text-transform:none}
+.rec-preview-grid .pill{margin:0}
+.rec-match-card{padding:12px 0;border-bottom:1px solid var(--line-2)}
+.rec-match-card>div{display:flex;gap:8px;align-items:baseline;margin-top:2px}
+.rec-match-card b{font-size:13px}
+.rec-match-card em{font-size:10.5px;font-style:normal;color:var(--good);margin-left:auto}
+.rec-match-card small{display:block;font-size:10.5px;color:var(--ink-4);margin-top:2px}
+.rec-transcript{padding-top:12px}
+.rec-transcript p{font-size:12.5px;color:var(--ink-2);line-height:1.55;margin-top:4px}
+.rec-readonly{font-size:10.5px;color:var(--ink-4);margin-top:14px;padding-top:10px;border-top:1px solid var(--line-2)}
+
+@media(max-width:1180px){
+  .rec-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rec-layout{grid-template-columns:minmax(0,1fr)}
+  .rec-preview{position:static}
+}
+@media(max-width:720px){
+  .rec-connection{align-items:flex-start;flex-wrap:wrap}
+  .rec-connection .pill{margin-left:40px}
+  .rec-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rec-table-head{display:none}
+  .rec-row{grid-template-columns:1fr 1fr;gap:10px 16px;padding:13px 14px}
+  .rec-cell::before{content:attr(data-label);display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:var(--ink-4);margin-bottom:2px}
+  .rec-action{grid-column:1/-1;text-align:left}
+  .rec-action::before{display:none}
+  .rec-action .btn{width:100%}
+}
+@media(max-width:430px){
+  .rec-metrics{grid-template-columns:1fr 1fr}
+  .rec-metric{padding:9px 10px}
+  .rec-row{grid-template-columns:1fr}
+  .rec-action{grid-column:auto}
+  .rec-preview-grid{grid-template-columns:1fr}
+}
+
+/* ==========================================================================
    FIND A TIME — the multi-calendar slot picker
 
    Read on a phone call, so the time is the loudest thing in each row and the
