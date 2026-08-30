@@ -24,7 +24,10 @@
    document read per entry).
    ========================================================================== */
 
-import { firebaseConfig, isConfigured, BOOTSTRAP_ADMIN, MS_TENANT, BOOKING } from "./config.js";
+import {
+  firebaseConfig, isConfigured, BOOTSTRAP_ADMIN, MS_TENANT, BOOKING,
+  CLIENTS_REPORTING,
+} from "./config.js";
 
 const SDK = "https://www.gstatic.com/firebasejs/10.14.1";
 
@@ -164,6 +167,15 @@ async function firebaseStore() {
     /* ---- leads --------------------------------------------------------- */
     watchLeads(cb) {
       const q = scoped("leads", orderBy("createdAt", "desc"));
+      if (!q) { cb([]); return () => {}; }
+      return live(q, cb);
+    },
+
+    /* ---- ClientsReporting.com recordings -----------------------------
+       Read-only in both this interface and firestore.rules. A server-side
+       integration will populate the collection once the CRM API is issued. */
+    watchRecordings(cb) {
+      const q = scoped(CLIENTS_REPORTING.collection, orderBy("startedAt", "desc"));
       if (!q) { cb([]); return () => {}; }
       return live(q, cb);
     },
@@ -408,7 +420,7 @@ function demoStore() {
   const KEY = "linkedin-leads-demo-v1";
   const listeners = new Set();
 
-  const blank = () => ({ leads: [], activity: [], clients: [], users: [], exports: [] });
+  const blank = () => ({ leads: [], recordings: [], activity: [], clients: [], users: [], exports: [] });
   const read = () => {
     try { return { ...blank(), ...JSON.parse(localStorage.getItem(KEY) || "{}") }; }
     catch { return blank(); }
@@ -431,6 +443,7 @@ function demoStore() {
   const profile = { uid: "demo-user", email: "demo@local", name: "Demo User", role: "admin", demo: true };
 
   seed();
+  seedRecordings();
   function seed() {
     if (localStorage.getItem(KEY + ":seeded")) return;
     localStorage.setItem(KEY + ":seeded", "1");
@@ -493,6 +506,54 @@ function demoStore() {
     write(db);
   }
 
+  /* A separate seed lets existing demo browsers receive the new screen too;
+     the original database seed may already have run months ago. */
+  function seedRecordings() {
+    const db = read();
+    if (db.recordings.length) return;
+    const ago = (minutes) => new Date(Date.now() - minutes * 6e4).toISOString();
+    const leadId = (company) => db.leads.find((l) => l.company === company)?.id || "";
+
+    db.recordings = [
+      {
+        id: uid(), crmCallId: "CR-84291", startedAt: ago(38), durationSeconds: 524,
+        callerName: "Priya Menon", callerNumber: "+1 305 555 0147", direction: "outbound",
+        outcome: "qualified", businessName: "Aurora Logistics", matchedBusinessName: "Aurora Logistics",
+        matchConfidence: 0.98, leadId: leadId("Aurora Logistics"), recordingUrl: "",
+        transcriptPreview: "Interested in a discovery call next week. Asked for the service overview and pricing range.",
+      },
+      {
+        id: uid(), crmCallId: "CR-84277", startedAt: ago(164), durationSeconds: 196,
+        callerName: "Daniel Reyes", callerNumber: "+1 415 555 0182", direction: "outbound",
+        outcome: "follow_up", businessName: "Vertex Software Inc.", matchedBusinessName: "Vertex Software",
+        matchConfidence: 0.91, leadId: leadId("Vertex Software"), recordingUrl: "",
+        transcriptPreview: "Requested a follow-up on Thursday after the operations review.",
+      },
+      {
+        id: uid(), crmCallId: "CR-84243", startedAt: ago(405), durationSeconds: 48,
+        callerName: "Sarah Whitfield", callerNumber: "+1 720 555 0109", direction: "outbound",
+        outcome: "voicemail", businessName: "Lakeside Mfg", matchedBusinessName: "Lakeside Manufacturing",
+        matchConfidence: 0.84, leadId: leadId("Lakeside Manufacturing"), recordingUrl: "",
+        transcriptPreview: "Voicemail left with callback details.",
+      },
+      {
+        id: uid(), crmCallId: "CR-84198", startedAt: ago(1510), durationSeconds: 13,
+        callerName: "Tom Okafor", callerNumber: "+44 20 7946 0188", direction: "outbound",
+        outcome: "no_answer", businessName: "Bright Yard", matchedBusinessName: "Bright Yard",
+        matchConfidence: 0.99, leadId: leadId("Bright Yard"), recordingUrl: "",
+        transcriptPreview: "No answer.",
+      },
+      {
+        id: uid(), crmCallId: "CR-84166", startedAt: ago(1880), durationSeconds: 372,
+        callerName: "Amara Singh", callerNumber: "+1 212 555 0164", direction: "inbound",
+        outcome: "interested", businessName: "Helio Venture Partners", matchedBusinessName: "Helio Ventures",
+        matchConfidence: 0.78, leadId: leadId("Helio Ventures"), recordingUrl: "",
+        transcriptPreview: "Asked how the sales and SEO teams coordinate reporting. Open to a second conversation.",
+      },
+    ];
+    write(db);
+  }
+
   const store = {
     mode: "demo",
 
@@ -504,6 +565,9 @@ function demoStore() {
 
     watchLeads: (cb) =>
       watch((db) => [...db.leads].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")), cb),
+
+    watchRecordings: (cb) =>
+      watch((db) => [...db.recordings].sort((a, b) => (b.startedAt || "").localeCompare(a.startedAt || "")), cb),
 
     async createLead(data) {
       const db = read();
