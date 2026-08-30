@@ -5,7 +5,7 @@
 import {
   LEAD_FIELDS, FIELD_GROUPS, STAGES, stage, OPEN_STAGES, STALE_DAYS,
   STREAMS, ROLES, REVIEW_DAYS, field, CAL, calUrl, AUTH, NOINDEX, FULL_BLEED,
-  BOOKING,
+  BOOKING, CLIENTS_REPORTING,
 } from "./config.js";
 import { openStore } from "./store.js";
 import { initBooking, bookingForLead, bookingEnabled, bookingVisible } from "./booking.js";
@@ -34,6 +34,19 @@ const fmtWhen = (v) => {
   const days = Math.round(mins / 1440);
   if (days < 7) return `${days}d ago`;
   return fmtDate(v);
+};
+const fmtDateTime = (v) => {
+  const d = asDate(v);
+  if (!d || isNaN(d)) return "Unknown time";
+  return d.toLocaleString(undefined, {
+    day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit",
+  });
+};
+const fmtDuration = (seconds) => {
+  const total = Math.max(0, Number(seconds) || 0);
+  const mins = Math.floor(total / 60);
+  const secs = Math.round(total % 60);
+  return mins ? `${mins}m ${String(secs).padStart(2, "0")}s` : `${secs}s`;
 };
 const fullName = (l) => `${l.firstName || ""} ${l.lastName || ""}`.trim() || "(no name)";
 const initials = (s) =>
@@ -95,6 +108,11 @@ const S = {
   invites: [],
   exports: [],
   feed: [],
+  recordings: [],
+  recordingError: null,
+  recordingSelected: null,
+  recordingSearch: "",
+  recordingOutcome: "",
   tab: "review",
   /* per-stream filter + sort state */
   view: {
@@ -468,6 +486,13 @@ function showApp() {
 
   // Live subscriptions. Each fires immediately with current data.
   S.store.watchLeads((rows) => { S.leads = rows; renderAll(); });
+  S.store.watchRecordings((rows, err) => {
+    S.recordings = rows;
+    S.recordingError = err || null;
+    if (S.recordingSelected && !rows.some((r) => r.id === S.recordingSelected)) S.recordingSelected = null;
+    if (!S.recordingSelected && rows.length) S.recordingSelected = rows[0].id;
+    renderRecordings();
+  });
   S.store.watchClients((rows) => { S.clients = rows; renderAll(); });
   S.store.watchExports((rows) => { S.exports = rows; renderExports(); });
   S.store.watchRecentActivity((rows) => { S.feed = rows; renderFeed(); });
@@ -497,6 +522,41 @@ function wireChrome() {
     $("#newClient").value = "";
     toast("Client added.", "good");
   });
+
+  $("#recordingSearch").addEventListener("input", (e) => {
+    S.recordingSearch = e.target.value;
+    renderRecordings();
+  });
+  $("#recordingOutcome").addEventListener("change", (e) => {
+    S.recordingOutcome = e.target.value;
+    renderRecordings();
+  });
+  $("#recordingClear").addEventListener("click", () => {
+    S.recordingSearch = "";
+    S.recordingOutcome = "";
+    $("#recordingSearch").value = "";
+    $("#recordingOutcome").value = "";
+    renderRecordings();
+  });
+  $("#recordingList").addEventListener("click", (e) => {
+    const row = e.target.closest("[data-recording-id]");
+    if (!row) return;
+    S.recordingSelected = row.dataset.recordingId;
+    renderRecordings();
+  });
+  $("#recordingList").addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const row = e.target.closest("[data-recording-id]");
+    if (!row) return;
+    e.preventDefault();
+    S.recordingSelected = row.dataset.recordingId;
+    renderRecordings();
+  });
+  $("#recordingPreview").addEventListener("click", (e) => {
+    if (!e.target.closest("[data-close-recording]")) return;
+    S.recordingSelected = null;
+    renderRecordings();
+  });
 }
 
 /* Single way in and out of a tab, so the drawer can send someone straight to
@@ -505,18 +565,206 @@ function goTab(name) {
   S.tab = name;
   $$(".tab").forEach((x) => x.classList.toggle("on", x.dataset.tab === name));
   $$(".panel").forEach((p) => p.classList.toggle("on", p.dataset.panel === name));
+  if (name === "recordings") renderRecordings();
 }
 
 function renderAll() {
   renderReview();
   renderClients();
   renderFeed();
+  renderRecordings();
   if (can.admin(S.me?.role)) renderInvites();
   renderStream("sales_partner");
   renderStream("client");
   $("#cntSales").textContent = S.leads.filter((l) => l.stream === "sales_partner").length;
   $("#cntClient").textContent = S.leads.filter((l) => l.stream === "client").length;
+  $("#cntRecordings").textContent = S.recordings.length;
   if (S.drawer.leadId) renderDrawer();
+}
+
+/* ==========================================================================
+   CLIENTSREPORTING.COM CALL RECORDINGS
+
+   This surface is deliberately read-only. The CRM remains the source of
+   truth; a later server-side sync only needs to write the documented fields
+   into Firestore for the whole interface to become live.
+   ========================================================================== */
+const RECORDING_OUTCOMES = {
+  qualified:      { label: "Qualified", tone: "good" },
+  interested:     { label: "Interested", tone: "good" },
+  follow_up:      { label: "Follow-up", tone: "accent" },
+  no_answer:      { label: "No answer", tone: "neutral" },
+  voicemail:      { label: "Voicemail", tone: "neutral" },
+  not_interested: { label: "Not interested", tone: "bad" },
+};
+
+const recordingOutcome = (value) =>
+  RECORDING_OUTCOMES[value] || { label: (value || "Unclassified").replaceAll("_", " "), tone: "neutral" };
+
+const normaliseBusiness = (value) => (value || "")
+  .toLowerCase()
+  .replace(/\b(incorporated|corporation|company|limited|partners|inc|corp|llc|ltd|co)\b/g, "")
+  .replace(/[^a-z0-9]+/g, " ")
+  .trim();
+
+function recordingBusinessMatch(rec) {
+  const provided = rec.matchedBusinessName || "";
+  const suppliedScore = Number(rec.matchConfidence);
+  if (provided) {
+    return {
+      name: provided,
+      confidence: Number.isFinite(suppliedScore) ? Math.max(0, Math.min(1, suppliedScore)) : null,
+    };
+  }
+
+  const needle = normaliseBusiness(rec.businessName);
+  if (!needle) return { name: "No business supplied", confidence: null };
+  const companies = [...new Set(S.leads.map((l) => l.company).filter(Boolean))];
+  const exact = companies.find((name) => normaliseBusiness(name) === needle);
+  if (exact) return { name: exact, confidence: 0.98 };
+  const close = companies.find((name) => {
+    const candidate = normaliseBusiness(name);
+    return candidate.includes(needle) || needle.includes(candidate);
+  });
+  return close ? { name: close, confidence: 0.84 } : { name: rec.businessName || "Unmatched", confidence: null };
+}
+
+function safeRecordingUrl(value) {
+  if (!value) return "";
+  try {
+    const url = new URL(value, location.href);
+    return url.protocol === "https:" ? url.href : "";
+  } catch { return ""; }
+}
+
+function recordingConnectionState() {
+  if (S.store?.mode === "demo") return {
+    header: "Preview data",
+    title: `${CLIENTS_REPORTING.name} frontend preview`,
+    copy: "This is the finished interface using sample calls. The CRM API can be connected later without redesigning the screen.",
+    pill: "API pending", tone: "warn", state: "preview",
+  };
+  if (S.recordingError) return {
+    header: "Storage unavailable",
+    title: "Recording storage is not connected yet",
+    copy: "The screen is live, but the Firestore read rule or collection still needs to be deployed before calls can appear.",
+    pill: "Needs setup", tone: "bad", state: "error",
+  };
+  if (S.recordings.length) return {
+    header: "Connected",
+    title: `${CLIENTS_REPORTING.name} calls are syncing`,
+    copy: "New calls appear here from the read-only Firestore mirror. The CRM remains the source of truth.",
+    pill: "Live", tone: "good", state: "live",
+  };
+  return {
+    header: "Awaiting first sync",
+    title: `${CLIENTS_REPORTING.name} API pending`,
+    copy: "The interface and read-only storage contract are ready. Calls will populate automatically after the API sync is connected.",
+    pill: "Awaiting API", tone: "warn", state: "pending",
+  };
+}
+
+function renderRecordings() {
+  const list = $("#recordingList");
+  if (!list) return;
+
+  const connection = recordingConnectionState();
+  $("#recordingHeaderStatus").textContent = connection.header;
+  $("#recordingConnectionTitle").textContent = connection.title;
+  $("#recordingConnectionCopy").textContent = connection.copy;
+  $("#recordingConnection").dataset.state = connection.state;
+  $("#recordingConnectionPill").className = `pill pill-${connection.tone}`;
+  $("#recordingConnectionPill").innerHTML = `<span class="dot"></span>${esc(connection.pill)}`;
+  $("#cntRecordings").textContent = S.recordings.length;
+
+  const totalSeconds = S.recordings.reduce((sum, rec) => sum + (Number(rec.durationSeconds) || 0), 0);
+  const matched = S.recordings.filter((rec) => recordingBusinessMatch(rec).confidence !== null).length;
+  const positive = S.recordings.filter((rec) => ["qualified", "interested", "follow_up"].includes(rec.outcome)).length;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const todayCount = S.recordings.filter((rec) => asDate(rec.startedAt) >= today).length;
+  $("#recordingMetrics").innerHTML = [
+    ["Calls today", todayCount, "since midnight"],
+    ["Total calls", S.recordings.length, "in this view"],
+    ["Average duration", S.recordings.length ? fmtDuration(totalSeconds / S.recordings.length) : "—", "connected calls"],
+    ["Business matches", matched, S.recordings.length ? `${Math.round(matched / S.recordings.length * 100)}% matched` : "waiting for data"],
+    ["Positive outcomes", positive, "qualified, interested or follow-up"],
+  ].map(([label, value, note]) => `
+    <div class="rec-metric"><span>${esc(label)}</span><b>${esc(value)}</b><small>${esc(note)}</small></div>`).join("");
+
+  const q = normaliseBusiness(S.recordingSearch);
+  const rows = S.recordings.filter((rec) => {
+    if (S.recordingOutcome && rec.outcome !== S.recordingOutcome) return false;
+    if (!q) return true;
+    const match = recordingBusinessMatch(rec);
+    return [rec.callerName, rec.callerNumber, rec.businessName, rec.crmCallId, match.name]
+      .some((value) => normaliseBusiness(value).includes(q));
+  });
+  $("#recordingListHint").textContent = `${rows.length} of ${S.recordings.length} call${S.recordings.length === 1 ? "" : "s"} · newest first`;
+
+  list.innerHTML = rows.length ? rows.map((rec) => {
+    const outcome = recordingOutcome(rec.outcome);
+    const match = recordingBusinessMatch(rec);
+    const confidence = match.confidence === null ? "Needs review" : `${Math.round(match.confidence * 100)}% match`;
+    return `<div class="rec-row${S.recordingSelected === rec.id ? " on" : ""}" role="row" tabindex="0" data-recording-id="${esc(rec.id)}">
+      <div class="rec-cell" data-label="Date & time"><b>${esc(fmtDateTime(rec.startedAt))}</b><small>${esc(rec.crmCallId || "No CRM ID")}</small></div>
+      <div class="rec-cell" data-label="Caller / business"><b>${esc(rec.callerName || rec.callerNumber || "Unknown caller")}</b><small>${esc(rec.businessName || rec.callerNumber || "Business not supplied")}</small></div>
+      <div class="rec-cell rec-duration" data-label="Duration"><b>${esc(fmtDuration(rec.durationSeconds))}</b><small>${esc(rec.direction || "call")}</small></div>
+      <div class="rec-cell" data-label="Outcome"><span class="pill pill-${outcome.tone}"><span class="dot"></span>${esc(outcome.label)}</span></div>
+      <div class="rec-cell rec-match" data-label="Business match"><b>${esc(match.name)}</b><small class="${match.confidence !== null && match.confidence >= .9 ? "match-high" : ""}">${esc(confidence)}</small></div>
+      <div class="rec-cell rec-action"><button class="btn btn-xs btn-ghost" type="button">Preview</button></div>
+    </div>`;
+  }).join("") : `<div class="tbl-empty"><div class="big">${S.recordings.length ? "No calls match those filters" : "No recordings yet"}</div><p>${S.recordings.length ? "Clear the filters to see every call." : "The first synced CRM call will appear here automatically."}</p></div>`;
+
+  $("#recordingClear").disabled = !S.recordingSearch && !S.recordingOutcome;
+  renderRecordingPreview();
+}
+
+function renderRecordingPreview() {
+  const host = $("#recordingPreview");
+  const rec = S.recordings.find((item) => item.id === S.recordingSelected);
+  if (!rec) {
+    host.innerHTML = `<div class="rec-preview-empty">
+      <span class="rec-preview-glyph" aria-hidden="true">▶</span>
+      <h2>Preview a recording</h2>
+      <p>Select a call to inspect its CRM ID, matching confidence and future playback area.</p>
+    </div>`;
+    return;
+  }
+
+  const match = recordingBusinessMatch(rec);
+  const outcome = recordingOutcome(rec.outcome);
+  const url = safeRecordingUrl(rec.recordingUrl);
+  const confidence = match.confidence === null ? "Needs manual review" : `${Math.round(match.confidence * 100)}% confidence`;
+  host.innerHTML = `
+    <div class="rec-preview-head">
+      <div><span class="eyebrow">Recording preview</span><h2>${esc(rec.callerName || "Unknown caller")}</h2></div>
+      <button class="dr-close" type="button" data-close-recording aria-label="Close recording preview">&times;</button>
+    </div>
+    <div class="rec-preview-body">
+      <div class="rec-audio">
+        ${url
+          ? `<audio class="selectable" controls preload="none" src="${esc(url)}">Your browser cannot play this recording.</audio>`
+          : `<div class="rec-audio-pending"><span aria-hidden="true">▶</span><div><b>Playback will appear here</b><small>The recording URL arrives with the future CRM API sync.</small></div></div>`}
+      </div>
+      <div class="rec-preview-grid">
+        <div><span>CRM call ID</span><b class="selectable">${esc(rec.crmCallId || "—")}</b></div>
+        <div><span>Date &amp; time</span><b>${esc(fmtDateTime(rec.startedAt))}</b></div>
+        <div><span>Duration</span><b>${esc(fmtDuration(rec.durationSeconds))}</b></div>
+        <div><span>Direction</span><b>${esc(rec.direction || "—")}</b></div>
+        <div><span>Outcome</span><b><span class="pill pill-${outcome.tone}"><span class="dot"></span>${esc(outcome.label)}</span></b></div>
+        <div><span>Caller number</span><b class="selectable">${esc(rec.callerNumber || "—")}</b></div>
+      </div>
+      <div class="rec-match-card">
+        <span>Matched business</span>
+        <div><b>${esc(match.name)}</b><em>${esc(confidence)}</em></div>
+        <small>CRM business: ${esc(rec.businessName || "not supplied")}</small>
+      </div>
+      <div class="rec-transcript">
+        <span>Call note / transcript preview</span>
+        <p>${esc(rec.transcriptPreview || "A transcript preview will appear after the API supplies it.")}</p>
+      </div>
+      <p class="rec-readonly">Read-only record · source: ${esc(CLIENTS_REPORTING.name)}</p>
+    </div>`;
 }
 
 /* ==========================================================================
