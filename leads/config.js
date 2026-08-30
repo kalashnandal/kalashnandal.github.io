@@ -94,6 +94,20 @@ export const BOOTSTRAP_ADMIN = "kalash.nandal@imarkinfotech.com";
 export const NOINDEX = true;
 
 /* ---------------------------------------------------------------------------
+   1d. CLIENTSREPORTING.COM CALL RECORDINGS
+
+   The browser never receives a CRM API token. The future server-side sync
+   writes normalised, read-only documents into this Firestore collection and
+   the dashboard only listens to them. Keeping the collection name here means
+   the UI and store have one shared contract while credentials remain on the
+   server where they belong.
+--------------------------------------------------------------------------- */
+export const CLIENTS_REPORTING = Object.freeze({
+  name: "ClientsReporting.com",
+  collection: "callRecordings",
+});
+
+/* ---------------------------------------------------------------------------
    2. ROLES
    Set on each user's document in the `users` collection (see README).
 --------------------------------------------------------------------------- */

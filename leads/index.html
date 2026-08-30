@@ -111,6 +111,7 @@
         <button class="tab" data-tab="sales_partner">Summit Sales <span class="cnt" id="cntSales">0</span></button>
         <button class="tab" data-tab="client">Clients <span class="cnt" id="cntClient">0</span></button>
         <div class="nav-label">Record</div>
+        <button class="tab" data-tab="recordings">Call recordings <span class="cnt" id="cntRecordings">0</span></button>
         <button class="tab" data-tab="activity">Activity</button>
         <button class="tab" data-tab="exports">Exports</button>
         <button class="tab" data-tab="admin" id="tabAdmin">Admin</button>
@@ -245,6 +246,70 @@
             <div class="card-head"><h2>Confirm the booking</h2></div>
             <div class="card-body" id="bkConfirmBody"></div>
           </section>
+        </section>
+
+        <!-- ---------- CALL RECORDINGS ---------- -->
+        <section class="panel" data-panel="recordings">
+          <header class="page-head">
+            <div>
+              <h1>Call recordings</h1>
+              <p class="page-sub">Calls synced from ClientsReporting.com, matched back to the right business.</p>
+            </div>
+            <div class="page-note rec-head-status" id="recordingHeaderStatus">Checking connection…</div>
+          </header>
+
+          <section class="rec-connection" id="recordingConnection" aria-live="polite">
+            <span class="rec-connection-icon" aria-hidden="true"><span class="rec-connection-dot"></span></span>
+            <div class="grow">
+              <h2 id="recordingConnectionTitle">ClientsReporting.com API pending</h2>
+              <p id="recordingConnectionCopy">The interface is ready. The API can be connected later without changing this screen.</p>
+            </div>
+            <span class="pill pill-warn" id="recordingConnectionPill"><span class="dot"></span>Awaiting API</span>
+          </section>
+
+          <div class="rec-metrics" id="recordingMetrics"></div>
+
+          <div class="toolbar rec-toolbar">
+            <div class="fld search">
+              <label for="recordingSearch">Search calls</label>
+              <input class="inp" id="recordingSearch" type="search" placeholder="Caller, business or CRM call ID">
+            </div>
+            <div class="fld">
+              <label for="recordingOutcome">Outcome</label>
+              <select class="inp" id="recordingOutcome">
+                <option value="">All outcomes</option>
+                <option value="qualified">Qualified</option>
+                <option value="interested">Interested</option>
+                <option value="follow_up">Follow-up</option>
+                <option value="no_answer">No answer</option>
+                <option value="voicemail">Voicemail</option>
+                <option value="not_interested">Not interested</option>
+              </select>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="recordingClear" type="button">Clear filters</button>
+          </div>
+
+          <div class="rec-layout">
+            <section class="card rec-list-card">
+              <div class="card-head">
+                <h2>Recent calls</h2>
+                <span class="hint" id="recordingListHint">Newest first</span>
+              </div>
+              <div class="rec-table-head" aria-hidden="true">
+                <span>Date &amp; time</span><span>Caller / business</span><span>Duration</span>
+                <span>Outcome</span><span>Business match</span><span></span>
+              </div>
+              <div class="rec-list" id="recordingList" role="table" aria-label="Call recordings"></div>
+            </section>
+
+            <aside class="card rec-preview" id="recordingPreview" aria-live="polite">
+              <div class="rec-preview-empty">
+                <span class="rec-preview-glyph" aria-hidden="true">▶</span>
+                <h2>Preview a recording</h2>
+                <p>Select a call to inspect its CRM ID, matching confidence and future playback area.</p>
+              </div>
+            </aside>
+          </div>
         </section>
 
         <!-- ---------- ACTIVITY ---------- -->
