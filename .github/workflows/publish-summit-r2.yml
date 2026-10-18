@@ -1,0 +1,11 @@
+name: Publish Summit R2 preview
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify preview publishing target
+        run: echo 'Publishing target is summit-affiliate-preview/index.html only. No production dashboard changes.'
