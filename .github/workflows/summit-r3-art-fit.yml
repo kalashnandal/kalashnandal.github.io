@@ -1,0 +1,40 @@
+name: Final Summit R3 mobile artwork fit
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/summit-r3-art-fit.yml']
+permissions:
+  contents: write
+jobs:
+  finish-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply tested mobile artwork containment
+        shell: python
+        run: |
+          from pathlib import Path
+          import hashlib
+          target=Path('summit-affiliate-preview/index.html')
+          s=target.read_text(encoding='utf-8')
+          assert hashlib.sha256(s.encode()).hexdigest()=='22c62319022566878874a059dc6e618dd26ad9d646c2db272979b04875ff67c9'
+          css='''/* R3 final visual check: contain the whole mountain image inside the mobile footer. */
+          @media(max-width:900px){
+           #llb-root.source-matched #portalSidebar .sidebar-art{flex:0 0 160px!important;max-height:20dvh!important}
+           #llb-root.source-matched #portalSidebar .sidebar-art img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center bottom!important}
+          }
+          '''
+          s=s.replace('</head>','<style id="summit-r3-art-fit">'+css+'</style></head>',1)
+          output=s.encode('utf-8')
+          assert hashlib.sha256(output).hexdigest()=='7854a0e9063454cc9f275c30a2f4338cdda7bec48191bdd9fd24bad3a47a1057'
+          assert len(output)==3155364
+          target.write_bytes(output)
+      - name: Update preview only and remove this temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add summit-affiliate-preview/index.html
+          git rm .github/workflows/summit-r3-art-fit.yml
+          git commit -m 'Keep complete source mountain artwork visible in the R3 mobile drawer'
+          git push origin HEAD:main
