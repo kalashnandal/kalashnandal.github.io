@@ -7101,14 +7101,14 @@ function jfjAuditCanOpen(message){
  return !!(a&&jfjAuditReady(a)&&a.businessName===message.businessName&&Number(a.reportVersion||a.version)===Number(message.version));
 }
 function jfjAuditWire(host){
- const panel=host.querySelector('.r5-filter-panel');if(panel)panel.ontoggle=()=>{if(innerWidth<=760)jfjAuditFiltersOpen=panel.open;};
+ const panel=host.querySelector('.r5-filter-panel');const keepFilterPanel=()=>{if(panel?.isConnected&&innerWidth<=760)jfjAuditFiltersOpen=panel.open;};if(panel){panel.ontoggle=keepFilterPanel;panel.querySelector('summary')?.addEventListener('click',event=>{if(innerWidth>760)return;event.preventDefault();panel.open=!panel.open;keepFilterPanel();});}
  host.querySelectorAll('[data-r5-open]').forEach(b=>b.onclick=()=>jfjAuditCommand('open',b.dataset.r5Open));
  host.querySelectorAll('[data-r5-download]').forEach(b=>b.onclick=()=>jfjAuditCommand('download',b.dataset.r5Download));
  host.querySelectorAll('[data-r5-request]').forEach(b=>b.onclick=()=>jfjAuditRequestDetail(b.dataset.r5Request));
  host.querySelectorAll('[data-r5-affiliate]').forEach(b=>b.onclick=()=>{jfjAuditFilters.partner=b.dataset.r5Affiliate;jfjNavigate('audit-requests');$('#r5RequestList')?.scrollIntoView({block:'start',behavior:'smooth'});});
- host.querySelectorAll('[data-r5-filter]').forEach(el=>el.onchange=()=>{jfjAuditFilters[el.dataset.r5Filter]=el.value;jfjRender();});
- host.querySelector('[data-r5-clear]')?.addEventListener('click',()=>{Object.assign(jfjAuditFilters,{partner:'',from:'',to:'',status:'all',tier:'all',query:''});jfjRender();});
- const search=host.querySelector('[data-r5-search]');if(search)search.oninput=()=>{jfjAuditFilters.query=search.value;const pos=search.selectionStart;jfjRender();const n=$('[data-r5-search]');n?.focus({preventScroll:true});if(pos!=null)try{n.setSelectionRange(pos,pos);}catch{}};
+ host.querySelectorAll('[data-r5-filter]').forEach(el=>el.onchange=()=>{keepFilterPanel();jfjAuditFilters[el.dataset.r5Filter]=el.value;jfjRender();});
+ host.querySelector('[data-r5-clear]')?.addEventListener('click',()=>{keepFilterPanel();Object.assign(jfjAuditFilters,{partner:'',from:'',to:'',status:'all',tier:'all',query:''});jfjRender();});
+ const search=host.querySelector('[data-r5-search]');if(search)search.oninput=()=>{keepFilterPanel();jfjAuditFilters.query=search.value;const pos=search.selectionStart;jfjRender();const n=$('[data-r5-search]');n?.focus({preventScroll:true});if(pos!=null)try{n.setSelectionRange(pos,pos);}catch{}};
  host.querySelector('[data-r5-retry]')?.addEventListener('click',()=>{jfjAudits.error='';jfjAudits.readEpoch++;repairAuditContextStamp='';jfjAudits.stamp='';jfjEnsureAudits();jfjRender();});
  host.querySelectorAll('[data-jfj-nav]').forEach(b=>b.onclick=()=>jfjNavigate(b.dataset.jfjNav));
  repairPhotoFallbacks(host);
