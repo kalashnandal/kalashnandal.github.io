@@ -1,0 +1,44 @@
+name: Fix Summit report wheel scrolling R6.2
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fix-summit-scroll-r62.yml']
+permissions:
+  contents: write
+concurrency:
+  group: summit-preview-update
+  cancel-in-progress: false
+jobs:
+  patch-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply tested minimal patch
+        shell: bash
+        run: |
+          python3 - <<'PYCODE'
+          import base64, hashlib, json
+          from pathlib import Path
+          patch=json.loads(base64.b64decode('eyJiYXNlX3NoYTI1NiI6ImY3MTY4OGFlZjgyNDIzZjUxZGNlMTFhMmEwNGJkZGU3MGEzNmJjZTkzNzVlNWVjMDEyYzA0MjE0ODMzODk0MzIiLCJvdXRwdXRfc2hhMjU2IjoiOWIxN2RiMWZkZTAwZGJmNWNjMmIyYzZiODFjNWY3MmFiZDQ1MmMwNGNiNDVhYzUwMTViYzcwZDI3NzA3NzdlNyIsImJ5dGVzIjozMjU4MzUwLCJyZXBsYWNlbWVudHMiOltbIjxkaXYgY2xhc3M9XCJqZmotaGVyby1hY2Nlc3NcIj4nK3BJY29uKCdzaGllbGQnKSsnPGI+Vmlldy1vbmx5IGFjY2VzczwvYj48c21hbGw+SkZKIGFmZmlsaWF0ZXMgb25seTwvc21hbGw+PC9kaXY+IiwiIl0sWyJib2R5LnJlcG9ydC1yZWFkZXItYm9keXtmb250LWZhbWlseTpJbnRlcixcXFxcXFxcIlNlZ29lIFVJXFxcXFxcXCIsQXJpYWwsc2Fucy1zZXJpZiFpbXBvcnRhbnQ7Zm9udC1zaXplOjE0cHghaW1wb3J0YW50O2xpbmUtaGVpZ2h0OjEuNjUhaW1wb3J0YW50fSIsImJvZHkucmVwb3J0LXJlYWRlci1ib2R5e292ZXJmbG93OnZpc2libGUhaW1wb3J0YW50O292ZXJzY3JvbGwtYmVoYXZpb3I6YXV0byFpbXBvcnRhbnQ7Zm9udC1mYW1pbHk6SW50ZXIsXFxcXFxcXCJTZWdvZSBVSVxcXFxcXFwiLEFyaWFsLHNhbnMtc2VyaWYhaW1wb3J0YW50O2ZvbnQtc2l6ZToxNHB4IWltcG9ydGFudDtsaW5lLWhlaWdodDoxLjY1IWltcG9ydGFudH0iXSxbIkJ1aWxkIHI2LjEgwrcgUjUgbW9iaWxlIGRlc2lnbiArIFI2IGZpeGVzIiwiQnVpbGQgcjYuMiDCtyBSZXBvcnQgc2Nyb2xsIGZpeCJdXX0='))
+          path=Path('summit-affiliate-preview/index.html')
+          old=path.read_bytes()
+          assert hashlib.sha256(old).hexdigest()==patch['base_sha256'], 'Preview changed; reconcile first'
+          text=old.decode('utf-8')
+          for before,after in patch['replacements']:
+              assert text.count(before)==1, 'Missing or ambiguous patch target'
+              text=text.replace(before,after)
+          result=text.encode('utf-8')
+          assert len(result)==patch['bytes']
+          assert hashlib.sha256(result).hexdigest()==patch['output_sha256'], 'Output differs from tested build'
+          path.write_bytes(result)
+          Path('.github/workflows/fix-summit-scroll-r62.yml').unlink()
+          print('Verified R6.2. Banner markup and isolated report scroll CSS only; permissions unchanged.')
+          PYCODE
+      - name: Commit preview and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- summit-affiliate-preview/index.html .github/workflows/fix-summit-scroll-r62.yml
+          git commit -m 'Remove JFJ hero access badge and fix native report mouse-wheel scrolling'
+          git push origin HEAD:main
