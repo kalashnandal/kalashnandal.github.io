@@ -1,0 +1,69 @@
+name: Publish tested JFJ submissions R7
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-summit-r7.yml'
+      - '.github/summit-r7.transfer'
+permissions:
+  contents: write
+concurrency:
+  group: summit-preview-update
+  cancel-in-progress: false
+jobs:
+  publish-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply exact tested patch to sample preview
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib, json
+          transfer = Path('.github/summit-r7.transfer')
+          text = base64.b64encode(transfer.read_bytes()).decode('ascii')
+          fixes = [
+              ('Cy+LEpI79Kbc9', 'Cy+LEp79Kbc9'),
+              ('Jf6r35m', 'J6r35m'),
+              ('FCLZpp4j/IoiL+/R4J4J+Kb', 'FCLZpp4j/IoiL+/R4J+Kb'),
+              ('N7GNnHmip5b5r091', 'N7GNnHmip5r091'),
+              ('ISVqYYfSMvoqIritIL4yVUjg', 'ISVqYYfSMvoqI9IritIL4yVUjg'),
+          ]
+          for before, after in fixes:
+              assert text.count(before) == 1, 'Transport differs; aborting'
+              text = text.replace(before, after)
+          packed = base64.b64decode(text, validate=True)
+          assert hashlib.sha256(packed).hexdigest() == 'a479330a3ad20c66c1d44d227b054f9c1f12ad3bc5b4c4a8dbe4002ff94c8a58'
+          patch = json.loads(gzip.decompress(packed))
+          target = Path('summit-affiliate-preview/index.html')
+          original = target.read_bytes()
+          assert hashlib.sha256(original).hexdigest() == patch['base_sha256'], 'Preview changed; reconcile before retrying'
+          source = original.decode('utf-8')
+          prefix = 'const PORTAL_AUDIT_DOCUMENT='
+          pos = source.index(prefix) + len(prefix)
+          document, length = json.JSONDecoder().raw_decode(source[pos:])
+          for before, after in patch['nested']:
+              assert document.count(before) == 1, 'Ambiguous inner patch'
+              document = document.replace(before, after)
+          encoded = json.dumps(document, ensure_ascii=True, separators=(',', ':')).replace('<', '\\u003c').replace('>', '\\u003e')
+          source = source[:pos] + encoded + source[pos + length:]
+          for before, after in patch['replacements']:
+              assert source.count(before) == 1, 'Ambiguous outer patch'
+              source = source.replace(before, after)
+          output = source.encode('utf-8')
+          assert hashlib.sha256(output).hexdigest() == patch['output_sha256'] == '090f0e06de092684d99a0fae1692c24514484cae3df774d4068624144f5078b4'
+          assert len(output) == patch['bytes'] == 3284805
+          target.write_bytes(output)
+          transfer.unlink()
+          Path('.github/workflows/publish-summit-r7.yml').unlink()
+          print('Checksum-verified R7. Only the sample preview was modified.')
+          PY
+      - name: Commit preview and remove temporary publishing files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- summit-affiliate-preview/index.html .github/summit-r7.transfer .github/workflows/publish-summit-r7.yml
+          git commit -m 'Allow company-scoped JFJ audit and referral submissions in preview R7'
+          git push origin HEAD:main
