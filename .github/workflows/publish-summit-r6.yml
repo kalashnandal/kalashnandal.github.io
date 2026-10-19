@@ -1,0 +1,60 @@
+name: Publish tested Summit visual QA R6
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-summit-r6.yml'
+      - '.github/summit-r6.transfer'
+permissions:
+  contents: write
+concurrency:
+  group: summit-preview-update
+  cancel-in-progress: false
+jobs:
+  publish-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply exact tested R6 patch with before and after checksums
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import gzip, hashlib, json, re
+          transfer = Path('.github/summit-r6.transfer')
+          packed = transfer.read_bytes()
+          assert hashlib.sha1(b'blob ' + str(len(packed)).encode() + b'\0' + packed).hexdigest() == '9d1912d66a38883b05c28a16b69199f8cddef110'
+          data = json.loads(gzip.decompress(packed))
+          target = Path('summit-affiliate-preview/index.html')
+          original = target.read_bytes()
+          assert hashlib.sha256(original).hexdigest() == data['base'], 'Preview changed; reconcile before retrying'
+          s = original.decode('utf-8')
+          m = re.search(r'const PORTAL_AUDIT_DOCUMENT=("(?:\\.|[^"\\])*");', s)
+          assert m, 'Audit document missing'
+          audit = json.loads(m[1])
+          assert audit.count(data['auditOld']) == 1
+          audit = audit.replace(data['auditOld'], data['auditNew'])
+          audit = audit.replace('</head>', data['auditHead'] + '</head>', 1)
+          encoded = json.dumps(audit, ensure_ascii=True).replace('<', '\\u003c').replace('>', '\\u003e')
+          s = s[:m.start(1)] + encoded + s[m.end(1):]
+          js = data['js'].replace('R6_CSS_PLACEHOLDER', json.dumps(data['css']))
+          needle = '\n\nrefreshDemo();startWorkspaceQuotes();'
+          assert s.count(needle) == 1
+          s = s.replace(needle, '\n' + js + needle)
+          s = s.replace('Build r5 · JFJ reports & audit tracking', 'Build r6 · Visual QA')
+          output = s.encode('utf-8')
+          assert hashlib.sha256(output).hexdigest() == data['result'] == '047409c413ab65adc37ec45001f3ef2aaa9a7dc77b8570dd7040852731871103'
+          assert len(output) == 3264632
+          target.write_bytes(output)
+          transfer.unlink()
+          Path('.github/workflows/publish-summit-r6.yml').unlink()
+          print('Verified final R6 preview. No production services or data changed.')
+          PY
+      - name: Commit preview and remove temporary publishing files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- summit-affiliate-preview/index.html .github/summit-r6.transfer .github/workflows/publish-summit-r6.yml
+          git commit -m 'Apply tested five-role visual QA fixes to Summit preview R6'
+          git push origin HEAD:main
