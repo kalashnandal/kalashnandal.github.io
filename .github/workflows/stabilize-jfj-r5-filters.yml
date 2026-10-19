@@ -1,0 +1,48 @@
+name: Complete R5 mobile filter QA
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/stabilize-jfj-r5-filters.yml']
+permissions:
+  contents: write
+concurrency:
+  group: summit-preview-update
+  cancel-in-progress: false
+jobs:
+  stabilize-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply exact tested mobile interaction correction
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('summit-affiliate-preview/index.html')
+          raw=p.read_bytes()
+          assert hashlib.sha256(raw).hexdigest()=='f929411cf35fa724bc504310e287106f9df01b65738ae1c87c8d299f5145bb21', 'Preview changed; reconcile before retry'
+          s=raw.decode('utf-8')
+          fixes=[
+            ("const panel=host.querySelector('.r5-filter-panel');if(panel)panel.ontoggle=()=>{if(innerWidth<=760)jfjAuditFiltersOpen=panel.open;};", "const panel=host.querySelector('.r5-filter-panel');const keepFilterPanel=()=>{if(panel?.isConnected&&innerWidth<=760)jfjAuditFiltersOpen=panel.open;};if(panel){panel.ontoggle=keepFilterPanel;panel.querySelector('summary')?.addEventListener('click',event=>{if(innerWidth>760)return;event.preventDefault();panel.open=!panel.open;keepFilterPanel();});}"),
+            ("el.onchange=()=>{jfjAuditFilters[el.dataset.r5Filter]=el.value;jfjRender();}", "el.onchange=()=>{keepFilterPanel();jfjAuditFilters[el.dataset.r5Filter]=el.value;jfjRender();}"),
+            ("addEventListener('click',()=>{Object.assign(jfjAuditFilters,{partner:'',from:'',to:'',status:'all',tier:'all',query:''});jfjRender();}", "addEventListener('click',()=>{keepFilterPanel();Object.assign(jfjAuditFilters,{partner:'',from:'',to:'',status:'all',tier:'all',query:''});jfjRender();}"),
+            ("search.oninput=()=>{jfjAuditFilters.query=search.value;", "search.oninput=()=>{keepFilterPanel();jfjAuditFilters.query=search.value;")
+          ]
+          for before,after in fixes:
+              assert s.count(before)==1,'Ambiguous patch'
+              s=s.replace(before,after)
+          out=s.encode('utf-8')
+          assert len(out)==3238892
+          assert hashlib.sha256(out).hexdigest()=='b3a8f794a2bb3d9b4294aa0e26d29bd272001553e38419ca7440432aecd4e0f4'
+          p.write_bytes(out)
+          Path('.github/workflows/stabilize-jfj-r5-filters.yml').unlink()
+          PY
+      - name: Commit preview correction and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- summit-affiliate-preview/index.html .github/workflows/stabilize-jfj-r5-filters.yml
+          git commit -m 'Keep mobile JFJ audit filters open during rapid filtering R5'
+          git push origin HEAD:main
