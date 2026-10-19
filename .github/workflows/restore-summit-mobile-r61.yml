@@ -1,0 +1,65 @@
+name: Restore preferred Summit mobile design R6.1
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/restore-summit-mobile-r61.yml']
+permissions:
+  contents: write
+concurrency:
+  group: summit-preview-update
+  cancel-in-progress: false
+jobs:
+  restore-mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore only tested presentation overrides
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, re
+          target = Path('summit-affiliate-preview/index.html')
+          base = target.read_text()
+          assert hashlib.sha256(base.encode()).hexdigest() == '047409c413ab65adc37ec45001f3ef2aaa9a7dc77b8570dd7040852731871103', 'Preview changed; reconcile before retrying'
+          match = re.search(r'r6Style\.textContent=("(?:\\.|[^"\\])*");document.head.append\(r6Style\);', base)
+          assert match, 'R6 style not found'
+          css = json.loads(match[1])
+          kept = []
+          mobile = False
+          for line in css.splitlines():
+              if line.startswith('@media(max-width:'):
+                  mobile = True
+              restore = mobile and any(x in line for x in ['.r6-section-picker', '.summit-nav-shell', '.qa-inner-page .af-review-hero-head', '.jfj-controls:not(.r5-audit-controls)', '.partner-leaderboard', '.af-directory-row'])
+              restore = restore or (not mobile and any(x in line for x in [' .summit-area-count{', ' .qa-mobile-bar [aria-current=page]{']))
+              if not restore:
+                  kept.append(line)
+              if line == '}':
+                  mobile = False
+          newcss = '\n'.join(kept) + '\n'
+          anchor = base.index('/* R6 repairs hook')
+          oldnav = base[base.index('afAreaNavigation=function(pages){', anchor):base.index('\nfunction r6Decorate()', anchor)]
+          newnav = '''afAreaNavigation=function(pages){
+           // Preserve the R5 tab navigation on mobile; business actions stay on the R6 implementation.
+           return r6AreaBase(pages);
+          };'''
+          replacements = [(match[1], json.dumps(newcss, ensure_ascii=False)), (oldnav, newnav), ('Build r6 · Visual QA', 'Build r6.1 · R5 mobile design + R6 fixes')]
+          result = base
+          for before, after in replacements:
+              assert result.count(before) == 1, 'Ambiguous patch; no files changed'
+              result = result.replace(before, after)
+          output = result.encode()
+          assert hashlib.sha256(output).hexdigest() == 'f71688aef82423f51dce11a2a04bdde70a36bce9375e5ec012c0421483389432', 'Output differs from tested build'
+          assert len(output) == 3258409
+          target.write_bytes(output)
+          Path('.github/workflows/restore-summit-mobile-r61.yml').unlink()
+          print('Restored R5 mobile presentation. Retained R6 workflow, dialog, PDF and JFJ access fixes.')
+          PY
+      - name: Commit preview only and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- summit-affiliate-preview/index.html .github/workflows/restore-summit-mobile-r61.yml
+          git commit -m 'Restore R5 tabs and mobile podium without reverting R6 functional fixes'
+          git push origin HEAD:main
