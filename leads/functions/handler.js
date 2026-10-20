@@ -23,6 +23,8 @@
    Functions). See worker.js and firebase-function.js.
    ========================================================================== */
 
+import { setupPage } from "./setup-page.js";
+
 const GHL = "https://services.leadconnectorhq.com";
 const GHL_VERSION = "2021-04-15";
 
@@ -97,7 +99,7 @@ const addMinutes = (iso, minutes) => {
 /* ---------------------------------------------------------------------------
    GHL calls
 --------------------------------------------------------------------------- */
-async function ghl(env, path, { method = "GET", body, query } = {}) {
+async function ghl(env, path, { method = "GET", body, query, version } = {}) {
   const url = new URL(`${GHL}${path}`);
   for (const [k, v] of Object.entries(query || {})) {
     if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
@@ -107,7 +109,7 @@ async function ghl(env, path, { method = "GET", body, query } = {}) {
     method,
     headers: {
       Authorization: `Bearer ${env.GHL_TOKEN}`,
-      Version: GHL_VERSION,
+      Version: version || GHL_VERSION,
       Accept: "application/json",
       ...(body ? { "Content-Type": "application/json" } : {}),
     },
@@ -120,10 +122,37 @@ async function ghl(env, path, { method = "GET", body, query } = {}) {
 
   if (!res.ok) {
     const msg = data?.message || data?.error || `GHL returned ${res.status}`;
-    throw Object.assign(new Error(Array.isArray(msg) ? msg.join(", ") : msg), { status: res.status });
+    const text2 = redact(env, Array.isArray(msg) ? msg.join(", ") : msg);
+    throw Object.assign(new Error(text2), { status: res.status });
   }
   return data;
 }
+
+/* Try each known API version before giving up. If the documented one is stale
+   this is what finds that out, and the fix is one line here. */
+const GHL_VERSIONS = ["2021-04-15", "2021-07-28"];
+
+async function callAnyVersion(env, path, query) {
+  let last;
+  for (const version of GHL_VERSIONS) {
+    try {
+      const body = await ghl(env, path, { query, version });
+      return { ok: true, body, version };
+    } catch (ex) {
+      last = { ok: false, status: ex.status || 0, message: ex.message, version };
+      if ((ex.status || 0) >= 500) break;
+    }
+  }
+  return last || { ok: false, status: 0, message: "No response" };
+}
+
+/* GHL can quote the credential back inside an error body — an invalid-token
+   response is the obvious case. Nothing derived from a GHL response reaches a
+   browser without passing through here first. */
+const redact = (env, s) =>
+  env.GHL_TOKEN ? String(s ?? "").split(env.GHL_TOKEN).join("«token»") : String(s ?? "");
+
+const errText = (env, r) => redact(env, r.message || `HTTP ${r.status}`);
 
 /* The allowlist is what stops this being an open proxy into the GHL account
    for anyone who happens to hold a dashboard login. */
@@ -250,13 +279,53 @@ const json = (env, obj, status = 200) =>
 
 export async function handle(request, env) {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(env) });
-  if (request.method !== "POST") return json(env, { error: "POST only" }, 405);
 
-  const path = new URL(request.url).pathname.replace(/\/+$/, "");
+  const url = new URL(request.url);
+  const path = url.pathname.replace(/\/+$/, "");
+
+  /* The setup page: a browser-visitable stand-in for running a script, for
+     whoever is wiring this up. Off unless SETUP_KEY is set, and gated on it —
+     a page listing every calendar in a sub-account does not belong on an open
+     URL. Read-only, and it never renders the token. */
+  if (path.endsWith("/setup")) {
+    if (!env.SETUP_KEY) {
+      return new Response("Setup page is off. Set SETUP_KEY to switch it on.", {
+        status: 404, headers: { "Content-Type": "text/plain" },
+      });
+    }
+    if (url.searchParams.get("key") !== env.SETUP_KEY) {
+      return new Response("Wrong or missing ?key=", {
+        status: 401, headers: { "Content-Type": "text/plain" },
+      });
+    }
+    if (!env.GHL_TOKEN) {
+      return new Response("The service has no GHL_TOKEN yet.", {
+        status: 500, headers: { "Content-Type": "text/plain" },
+      });
+    }
+
+    /* Hand the page a bound caller rather than the token itself. */
+    const api = async (p, query) => {
+      const r = await callAnyVersion(env, p, query);
+      return { ...r, error: r.ok ? "" : errText(env, r) };
+    };
+    const html = await setupPage(env, api);
+    return new Response(html, {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex, nofollow" },
+    });
+  }
+
+  if (request.method !== "POST") return json(env, { error: "POST only" }, 405);
   const route = path.endsWith("/slots") ? "slots" : path.endsWith("/book") ? "book" : "";
   if (!route) return json(env, { error: "Unknown endpoint" }, 404);
 
-  for (const name of ["GHL_TOKEN", "GHL_LOCATION_ID", "FIREBASE_API_KEY", "CALENDAR_IDS"]) {
+  /* Only what this route actually uses. GHL_LOCATION_ID is needed to create a
+     contact, not to read availability — refusing /slots for want of it would
+     block the grid over a variable it never touches. */
+  const needed = ["GHL_TOKEN", "FIREBASE_API_KEY", "CALENDAR_IDS"];
+  if (route === "book") needed.push("GHL_LOCATION_ID");
+  for (const name of needed) {
     if (!env[name]) return json(env, { error: `The calendar service is missing ${name}` }, 500);
   }
 
